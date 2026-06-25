@@ -14,24 +14,27 @@
 
 | Campo | Valor |
 |---|---|
-| Projeto | Pacote de agents reutilizaveis (Agentes) |
-| Foco atual | Governanca de fluxo, documentacao e automacoes do pacote |
-| Estado | Ativo |
+| Projeto | compraMais |
+| Foco atual | Bootstrap do repositorio: pacote de agents, skills e instrucoes do Claude versionados |
+| Estado | Bootstrap (apenas `README.md` de codigo; stack ainda nao definida) |
 | Responsavel de consolidacao | Tech Lead |
 
 ## Decisoes ativas de projeto
 
 | ID | Decisao | Impacto no projeto | Dono | Status |
 |---|---|---|---|---|
-| PRJ-DEC-01 | O ciclo do developer deve integrar `documentation-writer.agent.md` antes do QA e `commit-writer.agent.md` apos aprovacao do QA. | Padroniza handoff documental e fechamento semantico de commit no fluxo de entrega. | Tech Lead | Ativa |
-| PRJ-DEC-02 | A memoria do pacote foi separada em memoria geral e memoria de projeto, com regra explicita de persistencia por escopo. | Reduz ambiguidade de rastreabilidade e melhora governanca de decisoes. | Tech Lead | Ativa |
+| PRJ-DEC-01 | Pacote de agents, skills e `CLAUDE.md` sincronizado a partir de `ai_team/.github` como baseline de governanca do compraMais. | Estabelece protocolo comum, ciclo do developer e tabela stack->skill desde o inicio do projeto. | Tech Lead | Ativa |
+| PRJ-DEC-02 | Stack do projeto ainda nao definida; deteccao e registro nesta memoria delegados ao primeiro agent que iniciar implementacao. | Evita premissas de stack incorretas e mantem a tabela stack->skill como referencia ate a definicao. | Tech Lead | Ativa |
 
 ## Backlog de projeto
 
 | Item | Estado |
 |---|---|
+| Definir a stack do projeto e registrar a skill de referencia correspondente | Pendente |
+| Revisar/atualizar `README.md` com o proposito e escopo real do compraMais | Pendente |
 | Revisar periodicamente se decisoes ativas ainda representam o estado real do projeto | Em andamento |
 
 ## Historico de referencia
 
 - Mudancas estruturais relevantes desta memoria devem gerar registro em `historico/`.
+- Bootstrap do projeto: `historico/2026-06-24-0001-bootstrap-compramais-agents-skills.md`.

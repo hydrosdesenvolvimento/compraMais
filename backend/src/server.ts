@@ -7,6 +7,9 @@ import { AuditRepositoryMemory } from './auditoria/adapters/audit-repository-mem
 import { AuditRepositoryPg } from './auditoria/adapters/audit-repository-pg.js';
 import type { AuditRepository } from './auditoria/infra/audit-repository.js';
 import { ReceitaMockGateway } from './shared/acl/receita/receita-mock.js';
+import { ReceitaBrasilApiGateway } from './shared/acl/receita/receita-brasilapi.js';
+import { CepBrasilApiGateway } from './shared/acl/cep/cep-brasilapi.js';
+import { CepMockGateway } from './shared/acl/cep/cep-mock.js';
 import { CadastrarFornecedor } from './catalogo/application/cadastrar-fornecedor.js';
 import { GerirConta } from './catalogo/application/gerir-conta.js';
 import { FornecedorRepositoryMemory } from './catalogo/adapters/fornecedor-repository-memory.js';
@@ -121,13 +124,16 @@ export async function buildServer(): Promise<FastifyInstance> {
     });
   }
 
-  // Módulo catálogo (US1)
+  // Módulo catálogo (US1). CNPJ/CEP via BrasilAPI em runtime; mock em teste ou RECEITA_PROVIDER=mock
+  // (sem rede). Os gateways degradam para 'indisponivel' em falha/timeout (fallback manual visível).
   const fornecedores = new FornecedorRepositoryMemory();
-  const receita = new ReceitaMockGateway();
+  const usarMockReceita = config.nodeEnv === 'test' || process.env.RECEITA_PROVIDER === 'mock';
+  const receita = usarMockReceita ? new ReceitaMockGateway() : new ReceitaBrasilApiGateway();
+  const cep = usarMockReceita ? new CepMockGateway() : new CepBrasilApiGateway();
   const consentimentosRepo = { salvar: async () => {} };
   const cadastrar = new CadastrarFornecedor(fornecedores, consentimentosRepo, contasRepo, receita, bus);
   const conta = new GerirConta(fornecedores, receita, bus);
-  registrarRotasCadastro(app, { cadastrar, conta, receita });
+  registrarRotasCadastro(app, { cadastrar, conta, receita, cep });
 
   // Módulo editais — vitrine filtrada por CNAE (002) + gestão/contestação de editais (003)
   const editaisRepo = new EditalRepositoryMemory();

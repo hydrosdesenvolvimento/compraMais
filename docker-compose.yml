@@ -76,6 +76,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-compramais}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      # CNPJ/CEP via BrasilAPI (sem chave); 'mock' para dev offline.
+      RECEITA_PROVIDER: ${RECEITA_PROVIDER:-brasilapi}
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
@@ -137,6 +139,7 @@ services:
       # PROD: senha via Docker secret (nunca em texto / nunca versionada).
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       CORS_ORIGIN: ${CORS_ORIGIN:-https://compramais.example}
+      RECEITA_PROVIDER: ${RECEITA_PROVIDER:-brasilapi}
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}

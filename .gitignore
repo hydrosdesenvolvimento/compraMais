@@ -30,6 +30,9 @@ yarn-error.log*
 Thumbs.db
 .idea/
 *.swp
+# VS Code: ignora config local; mantem mcp.json versionavel (Context7 — CLAUDE.md)
+.vscode/*
+!.vscode/mcp.json
 
 # Cache de ferramentas
 .eslintcache

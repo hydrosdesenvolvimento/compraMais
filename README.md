@@ -32,7 +32,7 @@ cp .env.example .env
 docker compose --profile dev up --build
 ```
 
-- Backend: http://localhost:3000 (health: `GET /health`).
+- Backend: http://localhost:3000 (health: `GET /health`; docs OpenAPI: `GET /docs`).
 - Frontend: http://localhost:5173 (proxy de `/api` para o backend).
 - O backend e o frontend rodam com bind mount e hot reload.
 
@@ -45,6 +45,31 @@ cd backend && npm install && npm run dev
 # Frontend
 cd frontend && npm install && npm run dev
 ```
+
+## Autenticacao
+
+Login **local** (e-mail + senha, JWT) e **Google OAuth** (vincular/login social), persistidos no
+PostgreSQL. Arquitetura: [`docs/auth/autenticacao.md`](docs/auth/autenticacao.md). Configurar o Google
+(passo a passo no Console): [`docs/auth/google-cloud-setup.md`](docs/auth/google-cloud-setup.md).
+
+```bash
+# Registro local
+curl -X POST localhost:3000/auth/registro -H 'content-type: application/json' \
+  -d '{"email":"fornecedor@empresa.com","senha":"segredo123","nome":"Fornecedor"}'
+
+# Login -> { token, expiraEm, usuario }
+curl -X POST localhost:3000/auth/login -H 'content-type: application/json' \
+  -d '{"email":"fornecedor@empresa.com","senha":"segredo123"}'
+
+# Rota protegida (identidade do token)
+curl localhost:3000/auth/me -H 'authorization: Bearer <JWT>'
+```
+
+- Variaveis: `JWT_SECRET`, `JWT_EXPIRES_IN_SECONDS`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+  `GOOGLE_CALLBACK_URL`, `AUTH_FRONTEND_REDIRECT` (ver `.env.example`).
+- O Google OAuth so e montado quando `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET` estao definidos; o login
+  local funciona sem ele.
+- Em producao, `JWT_SECRET` vem do Docker secret `jwt_secret`.
 
 ## Testes
 
@@ -86,8 +111,9 @@ GitHub Actions (`.github/workflows/ci.yml`):
 Producao **nao builda imagens** (PRJ-DEC-06): faz pull do GHCR e implanta por imagem.
 
 ```bash
-# Pre-requisito: criar o secret da senha do banco no Swarm.
+# Pre-requisitos: criar os secrets no Swarm (senha do banco e segredo do JWT).
 echo "<senha-forte>" | docker secret create db_password -
+openssl rand -base64 48 | docker secret create jwt_secret -
 
 # Definir o repositorio GHCR e a tag a implantar.
 export GHCR_REPOSITORY=<owner>/<repo>
@@ -103,5 +129,6 @@ No **Portainer**: criar a stack a partir deste `docker-compose.yml`, definir as 
 
 ## Seguranca de configuracao
 
-- Segredos nunca sao versionados (PRJ-DEC-07). Em dev, via `.env` local; em prod, via Docker secret (`POSTGRES_PASSWORD_FILE=/run/secrets/db_password`).
+- Segredos nunca sao versionados (PRJ-DEC-07). Em dev, via `.env` local; em prod, via Docker secret (`POSTGRES_PASSWORD_FILE=/run/secrets/db_password`, `JWT_SECRET_FILE=/run/secrets/jwt_secret`).
+- O `GOOGLE_CLIENT_SECRET` e injetado pelo gestor de segredos (Portainer) em producao; nunca versionado.
 - Os arquivos `*.env.example` contem apenas placeholders.

@@ -79,6 +79,14 @@ services:
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      # Autenticacao (FR-015 / AD-20). Em DEV o JWT_SECRET vem do .env; em prod via Docker secret.
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-inseguro-trocar-em-producao}
+      JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-3600}
+      # Google OAuth (vazio = login social desativado; preencha no .env para habilitar).
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-http://localhost:3000/auth/google/callback}
+      AUTH_FRONTEND_REDIRECT: ${AUTH_FRONTEND_REDIRECT:-http://localhost:5173/#/cadastro}
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
@@ -132,8 +140,17 @@ services:
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      # Autenticacao: segredo do JWT via Docker secret (nunca em texto). TTL e Google por env.
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-3600}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      # Em prod, prefira injetar GOOGLE_CLIENT_SECRET pelo gestor de segredos (Portainer), nao versionado.
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://compramais.example/auth/google/callback}
+      AUTH_FRONTEND_REDIRECT: ${AUTH_FRONTEND_REDIRECT:-https://compramais.example/#/cadastro}
     secrets:
       - db_password
+      - jwt_secret
     networks:
       - compramais
     deploy:
@@ -188,4 +205,8 @@ secrets:
     # Em producao, criar previamente:
     #   echo "<senha-forte>" | docker secret create db_password -
     # ou referenciar um arquivo externo gerenciado pelo Portainer.
+    external: true
+  jwt_secret:
+    # Segredo de assinatura do JWT (HS256). Criar previamente em prod:
+    #   openssl rand -base64 48 | docker secret create jwt_secret -
     external: true

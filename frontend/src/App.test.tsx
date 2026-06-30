@@ -3,24 +3,19 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 
 /**
- * Teste de fumaça do shell App: garante que o container raiz, o cabeçalho institucional e a
- * navegação das duas superfícies (público + admin) renderizam. A rota inicial ('/') redireciona
- * para '/cadastro' (AuthPanel), que não dispara fetch na montagem.
+ * Teste de fumaça do shell App. A rota inicial ('/') redireciona para '/cadastro' (AuthLayout +
+ * AuthPanel), que não dispara fetch na montagem. Verifica a marca institucional e o formulário de
+ * cadastro por CNPJ.
  */
-describe('App (shell compraMais)', () => {
-  it('renderiza o container raiz acessível por data-cy', () => {
-    const { container } = render(<App />);
-    expect(container.querySelector('[data-cy="app-root"]')).not.toBeNull();
-  });
-
-  it('renderiza o cabeçalho institucional compraMais', () => {
+describe('App (Portal do Fornecedor)', () => {
+  it('renderiza a marca institucional Compra Mais', () => {
     render(<App />);
-    expect(screen.getByText(/compraMais/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Compra Mais/i).length).toBeGreaterThan(0);
   });
 
-  it('expõe navegação para as superfícies pública e administrativa', () => {
+  it('renderiza o formulário de cadastro por CNPJ', () => {
     const { container } = render(<App />);
-    expect(container.querySelector('[data-cy="nav-cadastro"]')).not.toBeNull();
-    expect(container.querySelector('[data-cy="nav-admin"]')).not.toBeNull();
+    expect(container.querySelector('[data-cy="cnpj"]')).not.toBeNull();
+    expect(container.querySelector('[data-cy="aba-criar"]')).not.toBeNull();
   });
 });

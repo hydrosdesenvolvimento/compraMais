@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-print-defaults>
+@media print {
+  @page { margin: 0.5in; }
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
+  img, svg { max-width: 100%; }
+  p { orphans: 3; widows: 3; }
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ margin:0; background:#F5F7FA; font-family:'Poppins',system-ui,sans-serif; color:#2E2F30; -webkit-font-smoothing:antialiased; }
+  [data-fs="sm"]{ zoom:0.9; } [data-fs="lg"]{ zoom:1.16; } [data-fs="xl"]{ zoom:1.32; }
+  [data-noanim="on"] *{ animation:none !important; transition:none !important; }
+  [data-hllinks="on"] a{ background:#FFD34D !important; color:#003A68 !important; text-decoration:underline !important; border-radius:3px; box-shadow:0 0 0 2px #FFD34D; }
+  [data-focusring="on"] :focus{ outline:3px solid #FFB300 !important; outline-offset:3px !important; }
+  [data-w="conf"]{ max-width:1320px; } [data-w="compacto"]{ max-width:1080px; }
+  ::selection{ background:#CCE0F0; }
+</style>
+</helmet>
+
+<div style="font-family:'Poppins',system-ui,sans-serif;">
+
+  <header style="position:sticky;top:0;z-index:50;background:#0061AE;box-shadow:0 1px 0 rgba(255,255,255,0.06);">
+    <div style="max-width:1320px;margin:0 auto;padding:14px 40px;display:flex;flex-direction:column;gap:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:44px;height:44px;border-radius:11px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;">
+            <span style="font-family:'Poppins',sans-serif;font-weight:800;font-size:17px;color:#0061AE;letter-spacing:-0.02em;">RB</span>
+          </div>
+          <div style="line-height:1.15;">
+            <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;color:#fff;letter-spacing:0.01em;">PREFEITURA DE RIO BRANCO</div>
+            <div style="font-size:12px;color:#BFDAF0;font-weight:500;letter-spacing:0.03em;">Estado do Acre · Sistema de Design</div>
+          </div>
+        </div>
+        <nav style="display:flex;align-items:center;gap:22px;">
+          <a href="#cores" style="color:#E6F0F8;font-size:13px;font-weight:500;text-decoration:none;">Mapa do Site</a>
+          <a href="#acessibilidade" style="color:#E6F0F8;font-size:13px;font-weight:500;text-decoration:none;">Transparência</a>
+          <a href="#botoes" style="color:#E6F0F8;font-size:13px;font-weight:500;text-decoration:none;">Ouvidoria</a>
+        </nav>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:10px;border-top:1px solid rgba(255,255,255,0.16);">
+        <span style="font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#BFDAF0;margin-right:6px;">Acessibilidade</span>
+        <button type="button" onClick="{{ fsDown }}" style="min-width:36px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.10);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;cursor:pointer;">A−</button>
+        <button type="button" onClick="{{ fsReset }}" style="min-width:36px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.10);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;cursor:pointer;">A</button>
+        <button type="button" onClick="{{ fsUp }}" style="min-width:36px;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.28);background:rgba(255,255,255,0.10);color:#fff;font-family:'Poppins',sans-serif;font-weight:700;font-size:16px;cursor:pointer;">A+</button>
+        <span style="width:1px;height:22px;background:rgba(255,255,255,0.20);margin:0 4px;"></span>
+        <button type="button" onClick="{{ onContrast }}" style="{{ tb.contrast }}">Alto contraste</button>
+        <button type="button" onClick="{{ onGray }}" style="{{ tb.gray }}">Escala de cinza</button>
+        <button type="button" onClick="{{ onLinks }}" style="{{ tb.links }}">Destacar links</button>
+        <button type="button" onClick="{{ onFocus }}" style="{{ tb.focus }}">Contorno de foco</button>
+        <button type="button" onClick="{{ onMask }}" style="{{ tb.mask }}">Máscara de leitura</button>
+        <button type="button" onClick="{{ onNoanim }}" style="{{ tb.anim }}">Pausar animações</button>
+        <span style="width:1px;height:22px;background:rgba(255,255,255,0.20);margin:0 4px;"></span>
+        <button type="button" onClick="{{ reset }}" style="{{ tb.reset }}">Redefinir</button>
+      </div>
+    </div>
+  </header>
+
+  <div data-fs="{{ fs }}" data-noanim="{{ noanim }}" data-hllinks="{{ hllinks }}" data-focusring="{{ focusring }}" style="{{ wrapStyle }}" onMouseMove="{{ onMove }}">
+
+    <section style="background:linear-gradient(160deg,#003A68 0%,#004C87 55%,#0061AE 100%);color:#fff;">
+      <div data-w="{{ widthAttr }}" style="margin:0 auto;padding:80px 40px 72px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#9FCBEC;margin-bottom:20px;">Identidade Visual Municipal</div>
+        <h1 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:56px;line-height:1.06;letter-spacing:-0.022em;margin:0 0 22px;max-width:18ch;">Sistema de Design da Prefeitura de Rio Branco</h1>
+        <p style="font-size:19px;line-height:1.6;color:#DCEAF6;max-width:62ch;margin:0 0 32px;font-weight:400;">A linguagem visual única do portal municipal: cores, tipografia e componentes pensados para clareza institucional e acesso universal ao cidadão.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);font-size:13px;font-weight:600;">v1.0 · 2026</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:rgba(255,179,0,0.18);border:1px solid rgba(255,179,0,0.38);color:#FFE6A8;font-size:13px;font-weight:600;">Conformidade WCAG 2.1 AA / AAA</span>
+        </div>
+      </div>
+    </section>
+
+    <div data-w="{{ widthAttr }}" style="margin:0 auto;padding:56px 40px 96px;display:flex;gap:48px;align-items:flex-start;">
+
+      <aside style="position:sticky;top:148px;flex:0 0 208px;width:208px;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin:0 0 12px;">Fundamentos</div>
+        <nav style="display:flex;flex-direction:column;gap:2px;margin-bottom:24px;">
+          <sc-if value="{{ showPrinc }}" hint-placeholder-val="{{ true }}"><a href="#principios" style="display:block;padding:8px 12px;border-radius:8px;color:#4B4B4B;font-size:14px;font-weight:500;text-decoration:none;">Princípios</a></sc-if>
+          <a href="#cores" style="display:block;padding:8px 12px;border-radius:8px;color:#4B4B4B;font-size:14px;font-weight:500;text-decoration:none;">Cores</a>
+          <a href="#tipografia" style="display:block;padding:8px 12px;border-radius:8px;color:#4B4B4B;font-size:14px;font-weight:500;text-decoration:none;">Tipografia</a>
+          <a href="#espacamento" style="display:block;padding:8px 12px;border-radius:8px;color:#4B4B4B;font-size:14px;font-weight:500;text-decoration:none;">Espaçamento &amp; Raio</a>
+        </nav>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin:0 0 12px;">Componentes</div>
+        <nav style="display:flex;flex-direction:column;gap:2px;margin-bottom:24px;">
+          <a href="#botoes" style="display:block;padding:8px 12px;border-radius:8px;color:#4B4B4B;font-size:14px;font-weight:500;text-decoration:none;">Botões</a>
+          <a href="#cards" style="display:block;padding:8px 12px;border-radius:8px;color:#4B4B4B;font-size:14px;font-weight:500;text-decoration:none;">Cards</a>
+          <a href="#labels" style="display:block;padding:8px 12px;border-radius:8px;color:#4B4B4B;font-size:14px;font-weight:500;text-decoration:none;">Labels &amp; Tags</a>
+        </nav>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin:0 0 12px;">Inclusão</div>
+        <nav style="display:flex;flex-direction:column;gap:2px;">
+          <a href="#acessibilidade" style="display:block;padding:8px 12px;border-radius:8px;color:#4B4B4B;font-size:14px;font-weight:500;text-decoration:none;">Acessibilidade</a>
+        </nav>
+      </aside>
+
+      <main style="flex:1;min-width:0;display:flex;flex-direction:column;gap:80px;">
+
+        <sc-if value="{{ showPrinc }}" hint-placeholder-val="{{ true }}">
+        <section id="principios" style="scroll-margin-top:150px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:10px;">Fundamentos</div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#003A68;margin:0 0 14px;letter-spacing:-0.01em;">Princípios</h2>
+          <p style="font-size:16px;line-height:1.6;color:#4B4B4B;max-width:60ch;margin:0 0 28px;">Três compromissos orientam cada decisão de design do portal da Prefeitura.</p>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;">
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:26px;box-shadow:0 1px 3px rgba(0,97,174,0.06);">
+              <div style="width:40px;height:40px;border-radius:10px;background:#E9F2FA;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;color:#0061AE;margin-bottom:16px;">01</div>
+              <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:19px;color:#003A68;margin:0 0 8px;">Acessível por padrão</h3>
+              <p style="font-size:14px;line-height:1.6;color:#4B4B4B;margin:0;">Contraste AA/AAA, foco visível e navegação por teclado em todos os componentes — não como ajuste, mas como base.</p>
+            </div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:26px;box-shadow:0 1px 3px rgba(0,97,174,0.06);">
+              <div style="width:40px;height:40px;border-radius:10px;background:#E9F2FA;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;color:#0061AE;margin-bottom:16px;">02</div>
+              <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:19px;color:#003A68;margin:0 0 8px;">Clareza institucional</h3>
+              <p style="font-size:14px;line-height:1.6;color:#4B4B4B;margin:0;">O azul da Prefeitura sustenta a hierarquia. Linguagem direta, sem ruído visual, para que o serviço venha primeiro.</p>
+            </div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:26px;box-shadow:0 1px 3px rgba(0,97,174,0.06);">
+              <div style="width:40px;height:40px;border-radius:10px;background:#E9F2FA;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;font-weight:700;color:#0061AE;margin-bottom:16px;">03</div>
+              <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:19px;color:#003A68;margin:0 0 8px;">Consistência</h3>
+              <p style="font-size:14px;line-height:1.6;color:#4B4B4B;margin:0;">Mesmos tokens, mesmos padrões em todos os portais e secretarias. Um cidadão, uma experiência reconhecível.</p>
+            </div>
+          </div>
+        </section>
+        </sc-if>
+
+        <section id="cores" style="scroll-margin-top:150px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:10px;">Fundamentos</div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#003A68;margin:0 0 14px;letter-spacing:-0.01em;">Cores</h2>
+          <p style="font-size:16px;line-height:1.6;color:#4B4B4B;max-width:62ch;margin:0 0 36px;">O azul institucional <strong style="color:#0061AE;font-weight:600;">#0061AE</strong> é a cor da Prefeitura e domina a identidade. As tintas <strong style="color:#2E2F30;font-weight:600;">#2E2F30</strong> e <strong style="color:#4B4B4B;font-weight:600;">#4B4B4B</strong> compõem o texto. O âmbar entra apenas como acento; verde é reservado ao status de sucesso.</p>
+          <div style="display:flex;flex-direction:column;gap:36px;">
+            <sc-for list="{{ palette }}" as="group" hint-placeholder-count="4">
+              <div>
+                <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px;flex-wrap:wrap;">
+                  <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:20px;color:#003A68;margin:0;">{{ group.name }}</h3>
+                  <span style="font-size:14px;color:#8A8C8E;">{{ group.desc }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:12px;">
+                  <sc-for list="{{ group.colors }}" as="c" hint-placeholder-count="8">
+                    <div>
+                      <div style="{{ c.chip }}"></div>
+                      <div style="font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;color:#2E2F30;margin-top:9px;">{{ c.token }}</div>
+                      <div style="font-family:'Poppins',sans-serif;font-size:11px;color:#8A8C8E;letter-spacing:0.02em;text-transform:uppercase;">{{ c.hex }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section id="tipografia" style="scroll-margin-top:150px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:10px;">Fundamentos</div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#003A68;margin:0 0 14px;letter-spacing:-0.01em;">Tipografia</h2>
+          <p style="font-size:16px;line-height:1.6;color:#4B4B4B;max-width:62ch;margin:0 0 28px;">A família oficial é a <strong style="color:#0061AE;font-weight:600;">Poppins</strong> (com <em>sans-serif</em> como fallback do sistema). Títulos em pesos 600–800; corpo e interface em 400–500, garantindo legibilidade e unidade.</p>
+          <div style="display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:240px;background:#0061AE;border-radius:14px;padding:28px;color:#fff;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#9FCBEC;margin-bottom:14px;">Títulos</div>
+              <div style="font-family:'Poppins',sans-serif;font-weight:800;font-size:46px;line-height:1;letter-spacing:-0.02em;">Aa</div>
+              <div style="font-family:'Poppins',sans-serif;font-weight:600;font-size:18px;margin-top:12px;color:#DCEAF6;">Poppins · 600 / 700 / 800</div>
+              <div style="font-size:13px;color:#9FCBEC;margin-top:4px;">SemiBold · Bold · ExtraBold</div>
+            </div>
+            <div style="flex:1;min-width:240px;background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:28px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:14px;">Corpo &amp; Interface</div>
+              <div style="font-family:'Poppins',sans-serif;font-weight:500;font-size:46px;line-height:1;color:#2E2F30;">Aa</div>
+              <div style="font-family:'Poppins',sans-serif;font-weight:500;font-size:18px;margin-top:12px;color:#4B4B4B;">Poppins · 400 / 500</div>
+              <div style="font-size:13px;color:#8A8C8E;margin-top:4px;">Regular · Medium · itálico</div>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;overflow:hidden;">
+            <sc-for list="{{ type }}" as="t" hint-placeholder-count="8">
+              <div style="display:flex;align-items:baseline;gap:24px;padding:20px 26px;border-bottom:1px solid #F1F4F8;">
+                <div style="flex:0 0 160px;">
+                  <div style="font-size:13px;font-weight:600;color:#2E2F30;">{{ t.name }}</div>
+                  <div style="font-size:12px;color:#8A8C8E;margin-top:2px;">{{ t.meta }}</div>
+                </div>
+                <p style="{{ t.style }}">{{ t.sample }}</p>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section id="espacamento" style="scroll-margin-top:150px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:10px;">Fundamentos</div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#003A68;margin:0 0 14px;letter-spacing:-0.01em;">Espaçamento &amp; Raio</h2>
+          <p style="font-size:16px;line-height:1.6;color:#4B4B4B;max-width:62ch;margin:0 0 28px;">Escala base de 4 px para ritmo previsível. Raios suaves transmitem cordialidade sem perder a formalidade institucional.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:26px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin-bottom:18px;">Escala de espaçamento</div>
+              <div style="display:flex;flex-direction:column;gap:14px;">
+                <sc-for list="{{ spacing }}" as="s" hint-placeholder-count="8">
+                  <div style="display:flex;align-items:center;gap:16px;">
+                    <div style="flex:0 0 78px;font-size:13px;font-weight:600;color:#4B4B4B;">{{ s.token }}</div>
+                    <div style="{{ s.bar }}"></div>
+                    <div style="font-size:13px;color:#8A8C8E;">{{ s.px }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:26px;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin-bottom:18px;">Raio de canto</div>
+              <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;">
+                <div style="text-align:center;"><div style="width:72px;height:72px;background:#CCE0F0;border:1px solid #80B2DC;border-radius:8px;"></div><div style="font-size:12px;color:#4B4B4B;margin-top:8px;font-weight:600;">md · 8</div></div>
+                <div style="text-align:center;"><div style="width:72px;height:72px;background:#CCE0F0;border:1px solid #80B2DC;border-radius:12px;"></div><div style="font-size:12px;color:#4B4B4B;margin-top:8px;font-weight:600;">lg · 12</div></div>
+                <div style="text-align:center;"><div style="width:72px;height:72px;background:#CCE0F0;border:1px solid #80B2DC;border-radius:16px;"></div><div style="font-size:12px;color:#4B4B4B;margin-top:8px;font-weight:600;">xl · 16</div></div>
+                <div style="text-align:center;"><div style="width:72px;height:72px;background:#CCE0F0;border:1px solid #80B2DC;border-radius:999px;"></div><div style="font-size:12px;color:#4B4B4B;margin-top:8px;font-weight:600;">pill</div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="botoes" style="scroll-margin-top:150px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:10px;">Componentes</div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#003A68;margin:0 0 14px;letter-spacing:-0.01em;">Botões</h2>
+          <p style="font-size:16px;line-height:1.6;color:#4B4B4B;max-width:62ch;margin:0 0 28px;">O botão primário azul carrega a ação principal de cada tela. Acento âmbar somente em chamadas de alta visibilidade.</p>
+          <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:32px;display:flex;flex-direction:column;gap:28px;">
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin-bottom:16px;">Variantes</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+                <button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;border:none;background:#0061AE;color:#fff;cursor:pointer;" style-hover="background:#004C87;">Emitir IPTU</button>
+                <button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;border:1.5px solid #0061AE;background:transparent;color:#0061AE;cursor:pointer;" style-hover="background:#E9F2FA;">Secundário</button>
+                <button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 18px;border-radius:8px;border:none;background:transparent;color:#0061AE;cursor:pointer;" style-hover="background:#E9F2FA;">Terciário</button>
+                <button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;padding:12px 22px;border-radius:8px;border:none;background:#FFB300;color:#2E2F30;cursor:pointer;" style-hover="background:#E0A000;">Acento âmbar</button>
+                <button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;border:none;background:#C0362C;color:#fff;cursor:pointer;" style-hover="background:#9E2C24;">Cancelar</button>
+              </div>
+            </div>
+            <div style="height:1px;background:#F1F4F8;"></div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin-bottom:16px;">Tamanhos</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+                <button type="button" style="font-family:'Poppins',sans-serif;font-size:17px;font-weight:600;padding:15px 28px;border-radius:10px;border:none;background:#0061AE;color:#fff;cursor:pointer;">Grande</button>
+                <button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;border:none;background:#0061AE;color:#fff;cursor:pointer;">Médio</button>
+                <button type="button" style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;padding:9px 16px;border-radius:7px;border:none;background:#0061AE;color:#fff;cursor:pointer;">Pequeno</button>
+              </div>
+            </div>
+            <div style="height:1px;background:#F1F4F8;"></div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin-bottom:16px;">Estados</div>
+              <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+                <div style="text-align:center;"><button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;border:none;background:#0061AE;color:#fff;cursor:pointer;">Padrão</button><div style="font-size:12px;color:#8A8C8E;margin-top:8px;">Padrão</div></div>
+                <div style="text-align:center;"><button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;border:none;background:#004C87;color:#fff;cursor:pointer;">Hover</button><div style="font-size:12px;color:#8A8C8E;margin-top:8px;">Sobrepor</div></div>
+                <div style="text-align:center;"><button type="button" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;border:none;background:#0061AE;color:#fff;cursor:pointer;outline:3px solid #FFB300;outline-offset:3px;">Foco</button><div style="font-size:12px;color:#8A8C8E;margin-top:8px;">Foco visível</div></div>
+                <div style="text-align:center;"><button type="button" disabled="true" style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;padding:12px 22px;border-radius:8px;border:none;background:#E2E7EE;color:#8A8C8E;cursor:not-allowed;">Desabilitado</button><div style="font-size:12px;color:#8A8C8E;margin-top:8px;">Inativo</div></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="cards" style="scroll-margin-top:150px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:10px;">Componentes</div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#003A68;margin:0 0 14px;letter-spacing:-0.01em;">Cards</h2>
+          <p style="font-size:16px;line-height:1.6;color:#4B4B4B;max-width:62ch;margin:0 0 28px;">Três padrões cobrem o portal: acesso rápido a serviços, ficha de secretaria e item de publicação.</p>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:26px;box-shadow:0 2px 8px rgba(0,97,174,0.08);">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+                <div style="width:46px;height:46px;border-radius:11px;background:#E9F2FA;display:flex;align-items:center;justify-content:center;color:#0061AE;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/></svg>
+                </div>
+                <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#1E7A46;background:#E6F2EB;padding:4px 10px;border-radius:999px;">Disponível</span>
+              </div>
+              <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:20px;color:#003A68;margin:0 0 6px;">IPTU 2026</h3>
+              <p style="font-size:14px;line-height:1.6;color:#4B4B4B;margin:0 0 18px;">Emita a 2ª via, consulte parcelas e acompanhe o pagamento do seu imóvel.</p>
+              <a href="#cards" style="font-size:14px;font-weight:600;color:#0061AE;text-decoration:none;">Acessar serviço →</a>
+            </div>
+
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:26px;box-shadow:0 2px 8px rgba(0,97,174,0.08);">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+                <span style="font-family:'Poppins',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.04em;color:#fff;background:#0061AE;padding:6px 12px;border-radius:8px;">SEME</span>
+                <span style="font-size:12px;color:#8A8C8E;font-weight:600;">Secretaria Municipal</span>
+              </div>
+              <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:18px;color:#003A68;margin:0 0 14px;line-height:1.3;">Secretaria Municipal de Educação</h3>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:12px;color:#8A8C8E;font-weight:600;flex:0 0 78px;">Secretário</span><span style="font-size:14px;color:#4B4B4B;">Alysson Bestene Lins</span></div>
+                <div style="display:flex;gap:10px;align-items:flex-start;"><span style="font-size:12px;color:#8A8C8E;font-weight:600;flex:0 0 78px;">Endereço</span><span style="font-size:14px;color:#4B4B4B;">Av. Antônio da Rocha Viana, 1369 — Vila Ivonete</span></div>
+              </div>
+            </div>
+
+            <div style="grid-column:1 / -1;background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:6px;box-shadow:0 2px 8px rgba(0,97,174,0.08);">
+              <div style="display:flex;align-items:center;gap:20px;padding:18px 22px;">
+                <span style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#fff;background:#0061AE;padding:5px 11px;border-radius:6px;flex:0 0 auto;">Decreto</span>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-family:'Poppins',sans-serif;font-weight:500;font-size:16px;color:#2E2F30;">Decreto nº 1.234/2026 — Calendário de feriados municipais</div>
+                  <div style="font-size:13px;color:#8A8C8E;margin-top:2px;">Publicado em 12 de junho de 2026 · Diário Oficial</div>
+                </div>
+                <button type="button" style="display:inline-flex;align-items:center;gap:8px;font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;padding:10px 18px;border-radius:8px;border:1.5px solid #0061AE;background:#fff;color:#0061AE;cursor:pointer;flex:0 0 auto;" style-hover="background:#E9F2FA;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+                  Baixar PDF
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <section id="labels" style="scroll-margin-top:150px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:10px;">Componentes</div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#003A68;margin:0 0 14px;letter-spacing:-0.01em;">Labels &amp; Tags</h2>
+          <p style="font-size:16px;line-height:1.6;color:#4B4B4B;max-width:62ch;margin:0 0 28px;">Categorias classificam conteúdo; status comunicam a situação de um documento ou serviço. Cor nunca é o único indicador — sempre acompanha texto.</p>
+          <div style="background:#fff;border:1px solid #E2E7EE;border-radius:14px;padding:32px;display:flex;flex-direction:column;gap:28px;">
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin-bottom:16px;">Categorias</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0061AE;background:#CCE0F0;padding:7px 14px;border-radius:999px;">Transparência</span>
+                <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0061AE;background:#CCE0F0;padding:7px 14px;border-radius:999px;">Ouvidoria</span>
+                <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0061AE;background:#CCE0F0;padding:7px 14px;border-radius:999px;">Serviços</span>
+                <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#0061AE;background:#CCE0F0;padding:7px 14px;border-radius:999px;">Institucional</span>
+              </div>
+            </div>
+            <div style="height:1px;background:#F1F4F8;"></div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin-bottom:16px;">Status — preenchido</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:600;color:#fff;background:#1E7A46;padding:6px 14px;border-radius:999px;">Em vigor</span>
+                <span style="font-size:13px;font-weight:600;color:#fff;background:#B5701A;padding:6px 14px;border-radius:999px;">Em análise</span>
+                <span style="font-size:13px;font-weight:600;color:#fff;background:#0061AE;padding:6px 14px;border-radius:999px;">Novo</span>
+                <span style="font-size:13px;font-weight:600;color:#fff;background:#C0362C;padding:6px 14px;border-radius:999px;">Revogado</span>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#8A8C8E;margin-bottom:16px;">Status — contornado</div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <span style="font-size:13px;font-weight:600;color:#1E7A46;background:#E6F2EB;border:1px solid #1E7A46;padding:5px 13px;border-radius:999px;">Em vigor</span>
+                <span style="font-size:13px;font-weight:600;color:#8A5410;background:#FBEACB;border:1px solid #B5701A;padding:5px 13px;border-radius:999px;">Em análise</span>
+                <span style="font-size:13px;font-weight:600;color:#0061AE;background:#CCE0F0;border:1px solid #0061AE;padding:5px 13px;border-radius:999px;">Novo</span>
+                <span style="font-size:13px;font-weight:600;color:#9E2C24;background:#FBE7E5;border:1px solid #C0362C;padding:5px 13px;border-radius:999px;">Revogado</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="acessibilidade" style="scroll-margin-top:150px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#0061AE;margin-bottom:10px;">Inclusão</div>
+          <h2 style="font-family:'Poppins',sans-serif;font-weight:700;font-size:32px;color:#003A68;margin:0 0 14px;letter-spacing:-0.01em;">Acessibilidade</h2>
+          <p style="font-size:16px;line-height:1.6;color:#4B4B4B;max-width:64ch;margin:0 0 32px;">Conformidade com a WCAG 2.1 nível AA, buscando AAA em texto institucional. Todos os pares de cor abaixo foram medidos automaticamente. A barra de acessibilidade no topo é <strong style="color:#0061AE;font-weight:600;">funcional</strong> — experimente.</p>
+
+          <div style="margin-bottom:40px;">
+            <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:20px;color:#003A68;margin:0 0 18px;">Guia de contraste</h3>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+              <sc-for list="{{ cpairs }}" as="p" hint-placeholder-count="8">
+                <div>
+                  <div style="{{ p.sample }}">Aa</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:8px;">
+                    <span style="font-size:13px;font-weight:600;color:#4B4B4B;">{{ p.ratio }}</span>
+                    <span style="{{ p.badge }}">{{ p.level }}</span>
+                  </div>
+                  <div style="font-size:12px;color:#8A8C8E;margin-top:3px;">{{ p.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:18px;font-size:13px;color:#4B4B4B;">
+              <span><strong style="color:#0061AE;">AAA</strong> ≥ 7:1</span>
+              <span><strong style="color:#0061AE;">AA</strong> ≥ 4,5:1</span>
+              <span><strong style="color:#B5701A;">AA Grande</strong> ≥ 3:1</span>
+              <span><strong style="color:#C0362C;">Reprovado</strong> &lt; 3:1</span>
+            </div>
+          </div>
+
+          <h3 style="font-family:'Poppins',sans-serif;font-weight:600;font-size:20px;color:#003A68;margin:0 0 18px;">Recursos da barra de acessibilidade</h3>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:12px;padding:20px;"><div style="font-weight:600;color:#003A68;font-size:15px;margin-bottom:5px;">Ajuste de texto (A− A A+)</div><div style="font-size:14px;color:#4B4B4B;line-height:1.55;">Redimensiona toda a página em quatro níveis, preservando o layout.</div></div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:12px;padding:20px;"><div style="font-weight:600;color:#003A68;font-size:15px;margin-bottom:5px;">Alto contraste</div><div style="font-size:14px;color:#4B4B4B;line-height:1.55;">Intensifica o contraste para baixa visão.</div></div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:12px;padding:20px;"><div style="font-weight:600;color:#003A68;font-size:15px;margin-bottom:5px;">Escala de cinza</div><div style="font-size:14px;color:#4B4B4B;line-height:1.55;">Remove cor para usuários com acromatopsia.</div></div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:12px;padding:20px;"><div style="font-weight:600;color:#003A68;font-size:15px;margin-bottom:5px;">Destacar links</div><div style="font-size:14px;color:#4B4B4B;line-height:1.55;">Realça todos os links navegáveis da página.</div></div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:12px;padding:20px;"><div style="font-weight:600;color:#003A68;font-size:15px;margin-bottom:5px;">Contorno de foco</div><div style="font-size:14px;color:#4B4B4B;line-height:1.55;">Reforça o anel de foco visível na navegação por teclado.</div></div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:12px;padding:20px;"><div style="font-weight:600;color:#003A68;font-size:15px;margin-bottom:5px;">Máscara de leitura</div><div style="font-size:14px;color:#4B4B4B;line-height:1.55;">Faixa de foco que segue o cursor para auxiliar a concentração.</div></div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:12px;padding:20px;"><div style="font-weight:600;color:#003A68;font-size:15px;margin-bottom:5px;">Pausar animações</div><div style="font-size:14px;color:#4B4B4B;line-height:1.55;">Suspende transições para evitar gatilhos fotossensíveis.</div></div>
+            <div style="background:#fff;border:1px solid #E2E7EE;border-radius:12px;padding:20px;"><div style="font-weight:600;color:#003A68;font-size:15px;margin-bottom:5px;">Redefinir</div><div style="font-size:14px;color:#4B4B4B;line-height:1.55;">Restaura todas as preferências ao padrão.</div></div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <footer style="background:#003A68;color:#fff;">
+      <div data-w="{{ widthAttr }}" style="margin:0 auto;padding:48px 40px;display:flex;justify-content:space-between;gap:32px;flex-wrap:wrap;">
+        <div style="max-width:34ch;">
+          <div style="font-family:'Poppins',sans-serif;font-weight:700;font-size:15px;letter-spacing:0.01em;margin-bottom:10px;">PREFEITURA DE RIO BRANCO</div>
+          <div style="font-size:14px;color:#9FCBEC;line-height:1.6;">R. Rui Barbosa, 285 — Centro<br>Rio Branco — AC · CEP 69900-120</div>
+        </div>
+        <div style="display:flex;gap:48px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#9FCBEC;margin-bottom:12px;">Portal</div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><a href="#cores" style="color:#DCEAF6;font-size:14px;text-decoration:none;">Serviços</a><a href="#acessibilidade" style="color:#DCEAF6;font-size:14px;text-decoration:none;">Transparência</a><a href="#botoes" style="color:#DCEAF6;font-size:14px;text-decoration:none;">Ouvidoria</a></div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#9FCBEC;margin-bottom:12px;">Institucional</div>
+            <div style="display:flex;flex-direction:column;gap:8px;"><a href="#cards" style="color:#DCEAF6;font-size:14px;text-decoration:none;">Secretarias</a><a href="#acessibilidade" style="color:#DCEAF6;font-size:14px;text-decoration:none;">Declaração de Acessibilidade</a><a href="#cores" style="color:#DCEAF6;font-size:14px;text-decoration:none;">Mapa do Site</a></div>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.12);">
+        <div data-w="{{ widthAttr }}" style="margin:0 auto;padding:20px 40px;font-size:13px;color:#9FCBEC;">© 2025 Prefeitura de Rio Branco. Todos os direitos reservados.</div>
+      </div>
+    </footer>
+
+  </div>
+
+  <sc-if value="{{ mask }}" hint-placeholder-val="{{ false }}">
+    <div>
+      <div style="{{ maskTop }}"></div>
+      <div style="{{ maskBot }}"></div>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;larguraConteudo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Confortável&quot;,&quot;Compacto&quot;],&quot;default&quot;:&quot;Confortável&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;mostrarPrincipios&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { fs:'md', contrast:false, gray:false, hllinks:false, focusring:false, mask:false, noanim:false, maskY:340 };
+
+  hexToRgb(h){ const n=parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+  lum(h){ const c=this.hexToRgb(h).map(v=>{ v/=255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); }); return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]; }
+  contrast(a,b){ const L1=this.lum(a), L2=this.lum(b); const hi=Math.max(L1,L2), lo=Math.min(L1,L2); return (hi+0.05)/(lo+0.05); }
+  isLight(h){ return this.lum(h) > 0.42; }
+  step(d){ const o=['sm','md','lg','xl']; let i=o.indexOf(this.state.fs); i=Math.min(o.length-1,Math.max(0,i+d)); this.setState({fs:o[i]}); }
+
+  renderVals(){
+    const font="'Poppins',system-ui,sans-serif";
+    const mk=(token,hex)=>{ const light=this.isLight(hex); return { token, hex, chip:{ height:'78px', borderRadius:'10px', background:hex, border: light ? '1px solid #E2E7EE' : '1px solid rgba(0,0,0,0.05)' } }; };
+
+    const palette=[
+      { name:'Azul Institucional', desc:'A cor da Prefeitura — #0061AE. Base de toda a identidade visual.', colors:[ mk('azul-900','#003A68'), mk('azul-800','#004C87'), mk('azul-700','#0061AE'), mk('azul-600','#1F77BD'), mk('azul-500','#3385C4'), mk('azul-300','#80B2DC'), mk('azul-100','#CCE0F0'), mk('azul-50','#E9F2FA') ] },
+      { name:'Âmbar — Acento', desc:'Destaques e chamadas de ação. Usar com parcimônia.', colors:[ mk('ambar-700','#7A4E12'), mk('ambar-500','#B5701A'), mk('ambar-400','#E0A000'), mk('ambar-300','#FFB300'), mk('ambar-100','#FBEACB') ] },
+      { name:'Neutros', desc:'Tinta #2E2F30, texto secundário #4B4B4B, superfícies e divisórias.', colors:[ mk('preto','#2E2F30'), mk('cinza-700','#4B4B4B'), mk('cinza-500','#6E6F70'), mk('cinza-400','#8A8C8E'), mk('cinza-300','#C4C6C8'), mk('cinza-200','#E2E7EE'), mk('cinza-100','#F1F4F8'), mk('branco','#FFFFFF') ] },
+      { name:'Status — Funcional', desc:'Apenas para feedback de sistema. Nunca como cor de marca.', colors:[ mk('sucesso','#1E7A46'), mk('atencao','#B5701A'), mk('erro','#C0362C'), mk('info','#0061AE') ] },
+    ];
+
+    const type=[
+      { name:'Display', meta:'Poppins · 56 / 700', sample:'Cidade que cuida', style:{ fontFamily:font, fontSize:'56px', lineHeight:1.06, fontWeight:700, color:'#003A68', letterSpacing:'-0.022em', margin:0 } },
+      { name:'Título 1', meta:'Poppins · 40 / 700', sample:'Serviços ao cidadão', style:{ fontFamily:font, fontSize:'40px', lineHeight:1.1, fontWeight:700, color:'#003A68', letterSpacing:'-0.015em', margin:0 } },
+      { name:'Título 2', meta:'Poppins · 30 / 600', sample:'Transparência e gestão', style:{ fontFamily:font, fontSize:'30px', lineHeight:1.18, fontWeight:600, color:'#003A68', margin:0 } },
+      { name:'Título 3', meta:'Poppins · 22 / 600', sample:'Secretarias Municipais', style:{ fontFamily:font, fontSize:'22px', lineHeight:1.28, fontWeight:600, color:'#003A68', margin:0 } },
+      { name:'Corpo grande', meta:'Poppins · 18 / 400', sample:'A Prefeitura de Rio Branco oferece atendimento presencial e digital ao cidadão.', style:{ fontFamily:font, fontSize:'18px', lineHeight:1.6, fontWeight:400, color:'#4B4B4B', margin:0 } },
+      { name:'Corpo', meta:'Poppins · 16 / 400', sample:'Emita a 2ª via do IPTU, agende serviços e consulte processos administrativos.', style:{ fontFamily:font, fontSize:'16px', lineHeight:1.6, fontWeight:400, color:'#4B4B4B', margin:0 } },
+      { name:'Pequeno', meta:'Poppins · 14 / 500', sample:'Atualizado em 12 de junho de 2026.', style:{ fontFamily:font, fontSize:'14px', lineHeight:1.5, fontWeight:500, color:'#4B4B4B', margin:0 } },
+      { name:'Etiqueta', meta:'Poppins · 12 / 700 · caixa alta', sample:'TRANSPARÊNCIA', style:{ fontFamily:font, fontSize:'12px', lineHeight:1.4, fontWeight:700, color:'#0061AE', textTransform:'uppercase', letterSpacing:'0.14em', margin:0 } },
+    ];
+
+    const lvl=(r)=> r>=7 ? {t:'AAA',bg:'#0061AE'} : r>=4.5 ? {t:'AA',bg:'#1F77BD'} : r>=3 ? {t:'AA Grande',bg:'#B5701A'} : {t:'Reprovado',bg:'#C0362C'};
+    const cpairs=[
+      {fg:'#FFFFFF',bg:'#0061AE',label:'Branco · Azul-700'},
+      {fg:'#FFFFFF',bg:'#004C87',label:'Branco · Azul-800'},
+      {fg:'#2E2F30',bg:'#FFFFFF',label:'Tinta #2E2F30 · Branco'},
+      {fg:'#4B4B4B',bg:'#FFFFFF',label:'Cinza #4B4B4B · Branco'},
+      {fg:'#0061AE',bg:'#CCE0F0',label:'Azul-700 · Azul-100'},
+      {fg:'#2E2F30',bg:'#FFB300',label:'Tinta · Âmbar-300'},
+      {fg:'#FFFFFF',bg:'#C0362C',label:'Branco · Erro'},
+      {fg:'#8A8C8E',bg:'#FFFFFF',label:'Cinza-400 · Branco'},
+    ].map(p=>{ const r=this.contrast(p.fg,p.bg); const L=lvl(r); return { label:p.label, ratio:r.toFixed(2)+' : 1', level:L.t, sample:{ background:p.bg, color:p.fg, padding:'22px 20px', borderRadius:'10px', fontFamily:font, fontWeight:700, fontSize:'22px', border:'1px solid #E2E7EE' }, badge:{ background:L.bg, color:'#fff', fontFamily:font, fontSize:'11px', fontWeight:700, letterSpacing:'0.06em', padding:'4px 9px', borderRadius:'999px' } }; });
+
+    const spacing=[4,8,12,16,24,32,48,64].map((px,i)=>({ token:'space-'+(i+1), px:px+' px', bar:{ width:px+'px', height:'18px', background:'#0061AE', borderRadius:'3px' } }));
+
+    const tBtn=(on)=>({ display:'inline-flex', alignItems:'center', gap:'6px', padding:'7px 12px', borderRadius:'8px', border:'1px solid '+(on?'#3D9BE0':'rgba(255,255,255,0.28)'), background: on?'#1F77BD':'rgba(255,255,255,0.10)', color:'#fff', fontFamily:font, fontSize:'13px', fontWeight:600, cursor:'pointer', whiteSpace:'nowrap', lineHeight:1 });
+
+    const widthAttr = (this.props.larguraConteudo==='Compacto') ? 'compacto' : 'conf';
+    const showPrinc = this.props.mostrarPrincipios ?? true;
+
+    const fc=[]; if(this.state.contrast) fc.push('contrast(1.4)'); if(this.state.gray) fc.push('grayscale(1)');
+
+    return {
+      palette, type, cpairs, spacing, widthAttr, showPrinc,
+      fs:this.state.fs,
+      noanim:this.state.noanim?'on':null,
+      hllinks:this.state.hllinks?'on':null,
+      focusring:this.state.focusring?'on':null,
+      wrapStyle:{ filter: fc.length?fc.join(' '):'none' },
+      onMove:(e)=>{ if(this.state.mask) this.setState({maskY:e.clientY}); },
+      mask:this.state.mask,
+      maskTop:{ position:'fixed', left:0, right:0, top:0, height:Math.max(0,this.state.maskY-46)+'px', background:'rgba(0,30,60,0.55)', zIndex:80, pointerEvents:'none' },
+      maskBot:{ position:'fixed', left:0, right:0, top:(this.state.maskY+46)+'px', bottom:0, background:'rgba(0,30,60,0.55)', zIndex:80, pointerEvents:'none' },
+      fsUp:()=>this.step(1), fsDown:()=>this.step(-1), fsReset:()=>this.setState({fs:'md'}),
+      onContrast:()=>this.setState(s=>({contrast:!s.contrast})),
+      onGray:()=>this.setState(s=>({gray:!s.gray})),
+      onLinks:()=>this.setState(s=>({hllinks:!s.hllinks})),
+      onFocus:()=>this.setState(s=>({focusring:!s.focusring})),
+      onMask:()=>this.setState(s=>({mask:!s.mask})),
+      onNoanim:()=>this.setState(s=>({noanim:!s.noanim})),
+      reset:()=>this.setState({ fs:'md', contrast:false, gray:false, hllinks:false, focusring:false, mask:false, noanim:false }),
+      tb:{ contrast:tBtn(this.state.contrast), gray:tBtn(this.state.gray), links:tBtn(this.state.hllinks), focus:tBtn(this.state.focusring), mask:tBtn(this.state.mask), anim:tBtn(this.state.noanim), reset:tBtn(false) }
+    };
+  }
+}
+</script>
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "Sistema de Design - Prefeitura de Rio Branco";
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  // Project support.js may predate runtime default-seeding; push via bridge.
+  if (isDc && window.__dcSetProps && window.__dcRootName) {
+    try {
+      const dpEl = document.querySelector('script[data-dc-script]');
+      const meta = JSON.parse((dpEl && dpEl.getAttribute('data-props')) || '{}');
+      const bag = {};
+      for (const k in meta)
+        if (k[0] !== '$' && meta[k] && meta[k].default !== undefined)
+          bag[k] = meta[k].default;
+      if (Object.keys(bag).length) {
+        window.__dcSetProps(window.__dcRootName(), bag);
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    } catch (e) {}
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    for (let y = 0; y <= full; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  // Size the PDF page to the rendered design unless the file opted into
+  // standard paper via @page{size:letter|A4|…}. Decks own their own @page.
+  // Wrappers (body, …) lose padding+margin so the frame sits at (0,0); the
+  // frame itself loses only margin — its padding is INSIDE the measured
+  // rect and must stay, or content shifts and leaves a gap at bottom/right.
+  var __m = null;
+  try { __m = (() => {
+  var docEl = document.documentElement;
+  var doc = { width: docEl.scrollWidth, height: docEl.scrollHeight };
+
+  var ds = document.querySelector('deck-stage');
+  if (ds) {
+    var dw = Number(ds.getAttribute('width')) || 1920;
+    var dh = Number(ds.getAttribute('height')) || 1080;
+    var n = typeof ds.length === 'number' ? ds.length : ds.children.length;
+    var idx = typeof ds.index === 'number' ? ds.index : 0;
+    var frames = [];
+    for (var i = 0; i < n; i++) frames.push({ left: 0, top: 0, width: dw, height: dh });
+    return { kind: 'deck', doc: doc, frames: frames,
+      authored: frames.map(function(){return{width:true,height:true}}),
+      deck: { width: dw, height: dh, slideCount: n, index: idx },
+      signals: { paperPage: false, pxPage: false } };
+  }
+
+  var paperPage = false, pxPage = false;
+  var eachRule = function (fn) {
+    for (var s = 0; s < document.styleSheets.length; s++) {
+      var rs; try { rs = document.styleSheets[s].cssRules; } catch (e) { continue; }
+      for (var r = 0; r < rs.length; r++) {
+        fn(rs[r]);
+        if (rs[r].cssRules) for (var n = 0; n < rs[r].cssRules.length; n++) fn(rs[r].cssRules[n]);
+      }
+    }
+  };
+  eachRule(function (r) {
+    if (r.type !== 6) return;
+    var m = /\bsize\s*:\s*([^;}]+)/i.exec(r.cssText || '');
+    if (!m) return;
+    if (/\b(letter|a[3-5]|legal|ledger)\b/i.test(m[1])) paperPage = true;
+    if (/\d+(?:\.\d+)?px\b/i.test(m[1])) pxPage = true;
+  });
+  var signals = { paperPage: paperPage, pxPage: pxPage };
+
+  var pxVal = function (v) {
+    var m = /^(\d+(?:\.\d+)?)px$/.exec(v || ''); return m ? +m[1] : 0;
+  };
+  var authoredPx = function (el, prop) {
+    if (pxVal(el.style[prop])) return true;
+    var attr = el.getAttribute(prop);
+    if (attr && /^\d+$/.test(attr)) return true;
+    var hit = false;
+    eachRule(function (r) {
+      if (hit || r.type !== 1 || !r.style) return;
+      try { if (el.matches(r.selectorText) && pxVal(r.style[prop])) hit = true; } catch (e) {}
+    });
+    return hit;
+  };
+
+  var el = document.body, rootPxW = false;
+  for (;;) {
+    var kids = [];
+    for (var c = 0; c < el.children.length; c++) {
+      var t = el.children[c].tagName;
+      if (t !== 'SCRIPT' && t !== 'STYLE' && t !== 'TEMPLATE') kids.push(el.children[c]);
+    }
+    if (kids.length !== 1 || !(kids[0] instanceof HTMLElement)) break;
+    el.setAttribute('data-om-frame-wrap', '');
+    el = kids[0];
+    rootPxW = authoredPx(el, 'width');
+    if (rootPxW) break;
+  }
+  if (!rootPxW) rootPxW = authoredPx(el, 'width');
+
+  // @page{size:letter} alone is a flowing doc; with a px-width root it's a
+  // fixed sheet pretending to be paper — fall through and size to render.
+  if (paperPage && !rootPxW) {
+    return { kind: 'paper-doc', doc: doc, signals: signals,
+      frames: [{ left: 0, top: 0, width: doc.width, height: doc.height }],
+      authored: [{ width: false, height: false }] };
+  }
+
+  var sx = window.scrollX || 0, sy = window.scrollY || 0;
+  var rectOf = function (e) {
+    var r = e.getBoundingClientRect();
+    var oy; try { oy = getComputedStyle(e).overflowY; } catch (err) {}
+    var h = oy === 'visible' ? Math.max(r.height, e.scrollHeight || 0) : r.height;
+    return { left: r.left + sx, top: r.top + sy, width: r.width, height: h };
+  };
+
+  // Multi-frame: ≥2 visible non-fixed children, each with authored px width
+  // AND height, all within ±2px of each other. Off unless the page opts in
+  // via data-om-multi-frame on the stop element — guards against card grids
+  // and pricing tables that match the geometry but aren't separate canvases.
+  if (el.hasAttribute('data-om-multi-frame')) {
+    var cands = [];
+    for (var k = 0; k < el.children.length; k++) {
+      var ch = el.children[k];
+      var cs; try { cs = getComputedStyle(ch); } catch (e) { continue; }
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
+      var rc = rectOf(ch);
+      if (rc.width < 2 || rc.height < 2) continue;
+      if (!authoredPx(ch, 'width') || !authoredPx(ch, 'height')) continue;
+      cands.push(rc);
+    }
+    if (cands.length >= 2) {
+      var w0 = cands[0].width, h0 = cands[0].height, ok = true;
+      for (var q = 1; q < cands.length; q++)
+        if (Math.abs(cands[q].width - w0) > 2 || Math.abs(cands[q].height - h0) > 2) ok = false;
+      if (ok) return { kind: 'multi-frame', doc: doc, signals: signals,
+        frames: cands, authored: cands.map(function(){return{width:true,height:true}}) };
+    }
+  }
+
+  el.setAttribute('data-om-frame', '');
+  return { kind: 'single-canvas', doc: doc, signals: signals,
+    frames: [rectOf(el)],
+    authored: [{ width: rootPxW, height: authoredPx(el, 'height') }] };
+})(); } catch (e) {}
+  var frame = null;
+  if (__m && __m.kind === 'single-canvas') {
+    var f = __m.frames && __m.frames[0];
+    if (f && f.width >= 200 && f.height >= 200) {
+      frame = f;
+      var fst = document.createElement('style');
+      fst.textContent = '@media print{@page{size:' + Math.ceil(f.width) + 'px ' +
+        Math.ceil(f.height) + 'px;margin:0}' +
+        'html,body,[data-om-frame-wrap]{padding:0!important;margin:0!important;background:none!important}' +
+        '[data-om-frame]{margin:0!important}}';
+      document.body.appendChild(fst);
+    }
+  }
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks (slides
+  // are sized to the page) and for fixed-size canvases (frame set, or an author
+  // px-based @page) — runs as before for flowing docs on letter/A4.
+  try {
+    if (!ds && !frame && !(__m && __m.signals && __m.signals.pxPage)) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a real @page margin only when the source has
+      // no @page of its own; computed style can't tell us (it reports screen
+      // media), so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /@page\s*\{[^}]*margin/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>

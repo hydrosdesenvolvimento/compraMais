@@ -1,0 +1,45 @@
+/* ============================================================
+   TYPOGRAPHY — Prefeitura de Rio Branco
+   Libre Franklin: titles — firm and civic.
+   IBM Plex Sans: body & interface — high legibility.
+   ============================================================ */
+
+:root {
+  /* Families */
+  --font-display: "Libre Franklin", system-ui, -apple-system, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  /* "Fonte legível" accessibility alternative */
+  --font-readable: "Atkinson Hyperlegible", "IBM Plex Sans", system-ui, sans-serif;
+
+  /* Weights */
+  --fw-regular: 400; /* @kind other */
+  --fw-medium: 500; /* @kind other */
+  --fw-semibold: 600; /* @kind other */
+  --fw-bold: 700; /* @kind other */
+  --fw-extrabold: 800; /* @kind other */
+
+  /* Type scale — sizes */
+  --fs-display: 56px;
+  --fs-h1: 40px;
+  --fs-h2: 30px;
+  --fs-h3: 22px;
+  --fs-body-lg: 18px;
+  --fs-body: 16px;
+  --fs-small: 14px;
+  --fs-label: 12px;
+
+  /* Line heights & letter-spacing */
+  --lh-display: 1.04; /* @kind other */
+  --ls-display: -0.022em; /* @kind other */
+  --lh-h1: 1.1; /* @kind other */
+  --ls-h1: -0.015em; /* @kind other */
+  --lh-h2: 1.15; /* @kind other */
+  --ls-h2: -0.01em; /* @kind other */
+  --lh-h3: 1.25; /* @kind other */
+  --ls-h3: 0; /* @kind other */
+  --lh-body-lg: 1.6; /* @kind other */
+  --lh-body: 1.6; /* @kind other */
+  --lh-small: 1.5; /* @kind other */
+  --lh-label: 1.4; /* @kind other */
+  --ls-label: 0.14em; /* @kind other */
+}

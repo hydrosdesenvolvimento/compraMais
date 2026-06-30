@@ -1,0 +1,83 @@
+/* ============================================================
+   COLORS — Prefeitura de Rio Branco
+   Institutional blue is THE brand color. Amber is accent only,
+   used sparingly. Green is reserved for the success status —
+   never as a brand color.
+   ============================================================ */
+
+:root {
+  /* ---- Azul Institucional (brand) ---- */
+  --azul-900: #0A2A52; /* deepest — headers, footer, hero */
+  --azul-800: #0E3A6E; /* headings on light */
+  --azul-700: #14467F; /* primary action, links */
+  --azul-600: #1E5AA0;
+  --azul-500: #2C72C4;
+  --azul-300: #8FB8E6;
+  --azul-100: #DCE9F8;
+  --azul-50:  #EEF4FC; /* tint surface */
+
+  /* ---- Âmbar (accent — use sparingly) ---- */
+  --ambar-700: #7A4E12;
+  --ambar-500: #B5701A;
+  --ambar-400: #D99425;
+  --ambar-300: #F2B705; /* signature accent */
+  --ambar-100: #FBEACB;
+
+  /* ---- Neutros ---- */
+  --cinza-900: #14181D; /* primary text */
+  --cinza-700: #3D434C; /* body text */
+  --cinza-500: #6B7280;
+  --cinza-400: #9AA3AE; /* muted / meta */
+  --cinza-300: #CBD2DA;
+  --cinza-200: #E2E7EE; /* borders */
+  --cinza-100: #F1F4F8; /* dividers */
+  --branco:    #FFFFFF;
+
+  /* ---- Status — functional only ---- */
+  --sucesso: #1E7A46;
+  --sucesso-bg: #E6F2EB;
+  --atencao: #B5701A;
+  --atencao-bg: #FBEACB;
+  --erro: #C0362C;
+  --erro-bg: #FBE7E5;
+  --erro-700: #9E2C24;
+  --info: #14467F;
+  --info-bg: #DCE9F8;
+
+  /* ============================================================
+     SEMANTIC ALIASES — prefer these in components
+     ============================================================ */
+
+  /* Page / surfaces */
+  --bg-page: #F6F8FB;
+  --surface-card: var(--branco);
+  --surface-tint: var(--azul-50);
+  --surface-invert: var(--azul-900);
+
+  /* Text */
+  --text-strong: var(--azul-900);
+  --text-heading: var(--azul-800);
+  --text-title: var(--cinza-900);
+  --text-body: var(--cinza-700);
+  --text-muted: var(--cinza-400);
+  --text-on-invert: var(--branco);
+  --text-on-invert-muted: var(--azul-300);
+  --text-link: var(--azul-700);
+  --text-accent: var(--ambar-500);
+
+  /* Brand / action */
+  --brand: var(--azul-700);
+  --brand-hover: var(--azul-800);
+  --brand-active: var(--azul-900);
+  --accent: var(--ambar-300);
+  --accent-hover: var(--ambar-400);
+  --accent-text: var(--azul-900);
+
+  /* Borders / lines */
+  --border: var(--cinza-200);
+  --border-strong: var(--cinza-300);
+  --divider: var(--cinza-100);
+
+  /* Focus */
+  --focus-ring: var(--ambar-300);
+}

@@ -11,7 +11,7 @@
 | Documento | Para quê |
 |---|---|
 | [prd.md](prd.md) | Requisitos (RF001–RF018, RNF001–RNF008, RN001–RN009), escopo, métricas — **v2.2** |
-| [architecture/ARCHITECTURE-SPINE.md](architecture/ARCHITECTURE-SPINE.md) | Espinha de arquitetura: **31 ADs** (invariantes), stack, diagramas, conventions — `final` |
+| [architecture/ARCHITECTURE-SPINE.md](architecture/ARCHITECTURE-SPINE.md) | Espinha de arquitetura: **33 ADs** (invariantes), stack, diagramas, conventions — `final` |
 | [ux/DESIGN.md](ux/DESIGN.md) | Identidade visual e tokens (Poppins, azul-700 #0061AE, acessibilidade) |
 | [ux/EXPERIENCE.md](ux/EXPERIENCE.md) | IA de navegação, telas, estados, jornadas |
 | [epics.md](epics.md) | 9 épicos / 31 histórias com critérios de aceite (Given/When/Then) |

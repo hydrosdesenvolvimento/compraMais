@@ -15,7 +15,7 @@ inputDocuments:
 
 ## Overview
 
-Decomposição de épicos e histórias do Compra Mais a partir do PRD (v2.2), da Espinha de Arquitetura (31 ADs), do **contrato de UX** (DESIGN/EXPERIENCE, ratificado) e do plano de releases (3 ondas). Run regenerada do zero com o contrato de UX presente — UX-DRs são requisitos de primeira classe.
+Decomposição de épicos e histórias do Compra Mais a partir do PRD (v2.2), da Espinha de Arquitetura (33 ADs), do **contrato de UX** (DESIGN/EXPERIENCE, ratificado) e do plano de releases (3 ondas). Run regenerada do zero com o contrato de UX presente — UX-DRs são requisitos de primeira classe.
 
 ## Requirements Inventory
 
@@ -57,7 +57,7 @@ NFR008 (RNF008): Determinismo/reprodutibilidade do motor.
 
 ### Additional Requirements
 
-Da Espinha de Arquitetura (31 ADs):
+Da Espinha de Arquitetura (33 ADs):
 
 ```
 - STARTER/GREENFIELD (Épico 1, História 1): sem template único; Node.js 24 LTS + Express/Fastify (sem NestJS), React 19 + Vite + TS, PostgreSQL 18, object storage S3-compatível; monólito modular DDD (DI/fronteiras por convenção do time).

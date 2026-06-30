@@ -212,6 +212,16 @@ graph TD
 - **Prevents:** vazamento de framework/infra para o domínio; modelos anêmicos
 - **Rule:** cada módulo organiza-se em camadas (Domínio → Casos de Uso → Adaptadores → Infra) com **regra de dependência para dentro**; Domínio e Casos de Uso são puros (sem import de framework/ORM/HTTP). **Modelos de domínio são classes TypeScript ricas** (comportamento + invariantes encapsulados), não interfaces/tipos anêmicos nem objetos planos. Persistência via repositórios na camada de Adaptadores.
 
+### AD-33 — Superclasse base de entidade (`EntidadeBase`)
+- **Binds:** all (Constituição v3.2.0, Princípio IV)
+- **Prevents:** entidades sem metadados de auditoria/identidade consistentes; duplicação desses campos
+- **Rule:** toda **entidade** (com identidade) estende `EntidadeBase` (em `shared/domain`) com `id: UUID`,
+  `registerDate: DateTime`, `updateDate: DateTime`, `lastUserUpdate: User.userName`. `registerDate`/
+  `updateDate`/`lastUserUpdate` são mantidos na persistência. **Value Objects** (ex.: `Cnpj`) NÃO estendem.
+  Complementa, não substitui, a trilha append-only (AD-18). **Registros append-only** (ex.: `AuditRecord`,
+  AD-18) têm `id` mas, por serem imutáveis, não expõem `updateDate`/`lastUserUpdate` — a superclasse de
+  mutação não se aplica a eles.
+
 ## Consistency Conventions
 
 | Concern | Convention |

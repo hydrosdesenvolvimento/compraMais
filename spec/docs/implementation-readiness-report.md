@@ -2,7 +2,7 @@
 stepsCompleted: ["step-01-document-discovery", "step-02-prd-analysis", "step-03-epic-coverage-validation", "step-04-ux-alignment", "step-05-epic-quality-review", "step-06-final-assessment"]
 filesIncluded:
   - prd.md (v2.2)
-  - architecture/architecture-comparMaisSpec-2026-06-29/ARCHITECTURE-SPINE.md (31 ADs)
+  - architecture/architecture-comparMaisSpec-2026-06-29/ARCHITECTURE-SPINE.md (33 ADs)
   - ux-designs/ux-compra-mais-2026-06-29/DESIGN.md
   - ux-designs/ux-compra-mais-2026-06-29/EXPERIENCE.md
   - epics.md (9 épicos, 31 histórias)
@@ -20,7 +20,7 @@ filesExcluded:
 | Tipo | Arquivo | Estado |
 |---|---|---|
 | PRD | `prd.md` | v2.2 |
-| Arquitetura | `architecture/architecture-comparMaisSpec-2026-06-29/ARCHITECTURE-SPINE.md` | 31 ADs, lint 0 |
+| Arquitetura | `architecture/architecture-comparMaisSpec-2026-06-29/ARCHITECTURE-SPINE.md` | 33 ADs, lint 0 |
 | UX | `ux-designs/ux-compra-mais-2026-06-29/DESIGN.md` + `EXPERIENCE.md` | par ratificado |
 | Épicos & Histórias | `epics.md` | 9 épicos, 31 histórias |
 | Apoio | `matriz-lacunas.md`, `plano-releases.md`, `roteiro-demo-fieac.md` | contexto |
@@ -40,7 +40,7 @@ RNF001 Integrações ACL+circuit breaker+Pact · RNF002 Compressão/fragmentaç�
 **Total NFRs: 8**
 
 ### Additional Requirements
-Regras de negócio RN001–RN009 (incl. RN009 dados Receita read-only). 31 ADs de arquitetura. Restrições: cronograma FIEAC (30/06, demo sintética), licença BI, limite SEI a obter.
+Regras de negócio RN001–RN009 (incl. RN009 dados Receita read-only). 33 ADs de arquitetura. Restrições: cronograma FIEAC (30/06, demo sintética), licença BI, limite SEI a obter.
 
 ### PRD Completeness Assessment
 PRD v2.2 completo e coerente; validado anteriormente (grade Fair → forte como baseline). Lacunas conhecidas isoladas como parâmetros/decisões; nenhuma ausência de requisito.

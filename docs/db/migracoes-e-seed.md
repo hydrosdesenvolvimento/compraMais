@@ -16,6 +16,16 @@ As migrações ficam em [`backend/migrations/`](../../backend/migrations/) como 
 
 Reexecutar é seguro (idempotente): migrações já registradas não reaplicam. No log: `migrações verificadas`.
 
+**Execução manual (CI/deploy).** As mesmas migrações pendentes podem ser aplicadas como passo
+explícito, sem subir o servidor — útil para rodar antes de iniciar a app em produção:
+
+```bash
+npm run migrate                                  # dev/tsx  (node dist/... em prod: migrate:prod)
+docker compose run --rm backend npm run migrate
+```
+
+Aplica só as novas; se nada estiver pendente: `nada pendente — banco já atualizado`.
+
 | Migração | Conteúdo |
 |---|---|
 | `0001_init_audit.sql` | tabela `auditoria` (append-only) + trigger anti-mutação (AD-18) |

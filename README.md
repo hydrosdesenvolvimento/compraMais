@@ -74,10 +74,12 @@ curl localhost:3000/auth/me -H 'authorization: Bearer <JWT>'
 ## Banco de dados (migrações e seed)
 
 As migrações em `backend/migrations/*.sql` são aplicadas **automaticamente no startup** por um runner
-idempotente (registradas em `schema_migrations`). Seed de dados sintéticos de dev:
+idempotente que aplica **apenas as novas** (controle em `schema_migrations`). Também dá para rodá-las
+como passo explícito (CI/deploy) e semear dados de dev:
 
 ```bash
-docker compose run --rm backend npm run seed   # ou: cd backend && npm run seed
+docker compose run --rm backend npm run migrate   # aplica só as migrações pendentes (sem subir o app)
+docker compose run --rm backend npm run seed      # dados sintéticos de dev (idempotente)
 ```
 
 Detalhes (adicionar migração, estado de persistência por domínio): [`docs/db/migracoes-e-seed.md`](docs/db/migracoes-e-seed.md).

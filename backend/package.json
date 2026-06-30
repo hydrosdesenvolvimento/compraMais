@@ -12,6 +12,8 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
+    "migrate": "tsx src/shared/db/migrate.ts",
+    "migrate:prod": "node dist/shared/db/migrate.js",
     "seed": "tsx src/shared/db/seed.ts",
     "seed:prod": "node dist/shared/db/seed.js",
     "test": "vitest run",

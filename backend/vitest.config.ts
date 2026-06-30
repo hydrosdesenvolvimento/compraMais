@@ -11,7 +11,7 @@ export default defineConfig({
       include: ['src/**/*.ts'],
       // Bootstrap (composition root) e adaptadores em memória ficam cobertos
       // pela suíte de integração; não contam para o gate de cobertura unitária.
-      exclude: ['src/server.ts', 'src/**/*-memory.ts', 'src/shared/db/seed.ts'],
+      exclude: ['src/server.ts', 'src/**/*-memory.ts', 'src/shared/db/seed.ts', 'src/shared/db/migrate.ts'],
     },
   },
 });

@@ -76,6 +76,9 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-compramais}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
+      INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
+      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
     volumes:
       - ./backend:/app
       - backend_node_modules:/app/node_modules
@@ -126,6 +129,9 @@ services:
       # PROD: senha via Docker secret (nunca em texto / nunca versionada).
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       CORS_ORIGIN: ${CORS_ORIGIN:-https://compramais.example}
+      # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
+      INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
+      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
     secrets:
       - db_password
     networks:

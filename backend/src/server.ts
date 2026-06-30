@@ -10,9 +10,17 @@ import { GerirConta } from './catalogo/application/gerir-conta.js';
 import { FornecedorRepositoryMemory } from './catalogo/adapters/fornecedor-repository-memory.js';
 import { registrarRotasCadastro } from './catalogo/adapters/cadastro-controller.js';
 import { ContaRepositoryMemory } from './shared/identity/conta-repository.js';
-import { LocalIdentityProvider } from './shared/identity/local-identity-provider.js';
 import { GerirProcuradores } from './shared/identity/gerir-procuradores.js';
 import { registrarRotasIdentidade } from './shared/identity/identity-controller.js';
+import { loadConfig, temPostgresConfigurado } from './shared/config/env.js';
+import { criarPool } from './shared/db/pool.js';
+import { SCHEMA_AUTH_SQL } from './shared/db/schema-auth.js';
+import { UsuarioRepositoryMemory, type UsuarioRepository } from './shared/identity/usuario-repository.js';
+import { UsuarioRepositoryPg } from './shared/identity/usuario-repository-pg.js';
+import { JwtTokenService } from './shared/identity/token-service.js';
+import { RegistrarUsuario, AutenticarLocal, VincularGoogle, AutenticarGoogle } from './shared/identity/autenticacao.js';
+import { registrarRotasAuth } from './shared/identity/auth-controller.js';
+import { registrarGoogleOAuth } from './shared/http/google-oauth.js';
 import { EditalRepositoryMemory } from './editais/adapters/edital-repository-memory.js';
 import { ListarEditaisCompativeis } from './editais/application/listar-editais-compativeis.js';
 import { registrarRotasEditais } from './editais/adapters/editais-controller.js';
@@ -74,13 +82,40 @@ export async function buildServer(): Promise<FastifyInstance> {
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
     'MaloteGerado', 'MaloteExportado',
     'DireitoTitularSolicitado', 'DireitoTitularAtendido',
+    'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
   ]);
 
-  // Identidade (US1): provedor local + contas
+  // Identidade (US1): contas + procuradores
   const contasRepo = new ContaRepositoryMemory();
-  const idp = new LocalIdentityProvider();
   const procuradores = new GerirProcuradores(contasRepo, bus);
-  registrarRotasIdentidade(app, { idp, procuradores });
+  registrarRotasIdentidade(app, { procuradores });
+
+  // Autenticação (FR-015 / AD-20): registro/login local com JWT + vínculo/login Google.
+  // Persistência em Postgres quando configurado (fora de teste); senão, memória — mantém os testes
+  // que constroem o app via buildServer sem depender de banco.
+  const config = loadConfig();
+  let usuarioRepo: UsuarioRepository;
+  if (config.nodeEnv !== 'test' && temPostgresConfigurado()) {
+    const pool = criarPool(config.database);
+    await pool.query(SCHEMA_AUTH_SQL); // garante o schema (idempotente — AD-28)
+    app.addHook('onClose', async () => { await pool.end(); });
+    usuarioRepo = new UsuarioRepositoryPg(pool);
+  } else {
+    usuarioRepo = new UsuarioRepositoryMemory();
+  }
+  const tokens = new JwtTokenService(config.auth.jwtSecret, config.auth.jwtExpiraEmSeg);
+  registrarRotasAuth(app, {
+    registrar: new RegistrarUsuario(usuarioRepo, bus),
+    login: new AutenticarLocal(usuarioRepo, tokens, bus),
+    vincularGoogle: new VincularGoogle(usuarioRepo, bus),
+    tokens,
+  });
+  if (config.auth.google) {
+    registrarGoogleOAuth(app, config.auth.google, {
+      autenticarGoogle: new AutenticarGoogle(usuarioRepo, tokens, bus),
+      frontendRedirect: config.auth.frontendRedirect,
+    });
+  }
 
   // Módulo catálogo (US1)
   const fornecedores = new FornecedorRepositoryMemory();

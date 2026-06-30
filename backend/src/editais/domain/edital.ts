@@ -1,0 +1,113 @@
+import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-base.js';
+
+export type SituacaoEdital = 'rascunho' | 'publicado' | 'encerrado';
+export interface CampoDiff { campo: string; antes: unknown; depois: unknown }
+
+/**
+ * Edital — entidade rica que estende EntidadeBase (AD-33). Invariante RN007/AD-11: UMA secretaria,
+ * UMA demanda (inacumulável). Ciclo de vida: rascunho → publicado → encerrado (research D2; o estado
+ * legado `aberto`/`distribuido` foi reconciliado — `distribuido` fica reservado ao Épico 5/motor).
+ */
+export class Edital extends EntidadeBase {
+  private constructor(
+    meta: MetadadosBase,
+    readonly secretariaId: string,
+    private _objeto: string,
+    private _cnaesAlvo: string[], // CNAE subclasse 7 dígitos (D2)
+    private _quantitativos: number, // agregado no MVP; Item×Lote diferido ao Épico 5
+    private _prazoVigencia: string | null,
+    private _situacao: SituacaoEdital,
+  ) {
+    super(meta);
+  }
+
+  static criar(input: {
+    id: string; secretariaId: string; objeto: string;
+    cnaesAlvo?: string[]; subclassesExigidas?: string[]; // alias legado aceito
+    quantitativos?: number; prazoVigencia?: string | null; userName?: string;
+  }): Edital {
+    if (!input.secretariaId) throw new EditalSemSecretaria();
+    const cnaes = input.cnaesAlvo ?? input.subclassesExigidas ?? [];
+    return new Edital(
+      EntidadeBase.metaNova(input.id, input.userName),
+      input.secretariaId, input.objeto, [...cnaes], input.quantitativos ?? 0,
+      input.prazoVigencia ?? null, 'rascunho',
+    );
+  }
+
+  get objeto(): string { return this._objeto; }
+  get cnaesAlvo(): readonly string[] { return this._cnaesAlvo; }
+  /** Alias consumido pela vitrine (002, `ListarEditaisCompativeis`) e por `Fornecedor.compativelCom`. */
+  get subclassesExigidas(): readonly string[] { return this._cnaesAlvo; }
+  get quantitativos(): number { return this._quantitativos; }
+  get prazoVigencia(): string | null { return this._prazoVigencia; }
+  get situacao(): SituacaoEdital { return this._situacao; }
+
+  /** Completude obrigatória para publicar (FR-004). */
+  private validarParaPublicacao(): void {
+    const faltas: string[] = [];
+    if (!this._objeto?.trim()) faltas.push('objeto');
+    if (this._cnaesAlvo.length === 0) faltas.push('cnaesAlvo');
+    if (!(this._quantitativos > 0)) faltas.push('quantitativos');
+    if (!this._prazoVigencia) faltas.push('prazoVigencia');
+    if (faltas.length) throw new EditalIncompleto(faltas);
+  }
+
+  publicar(userName = 'sistema'): void {
+    if (this._situacao === 'encerrado') throw new TransicaoInvalida(this._situacao, 'publicado');
+    this.validarParaPublicacao();
+    this._situacao = 'publicado';
+    this.marcarAtualizacao(userName);
+  }
+
+  encerrar(userName = 'sistema'): void {
+    if (this._situacao !== 'publicado') throw new TransicaoInvalida(this._situacao, 'encerrado');
+    this._situacao = 'encerrado';
+    this.marcarAtualizacao(userName);
+  }
+
+  /**
+   * Edição auditada (FR-013): aplica os campos e devolve o diff antes/depois para a trilha.
+   * `ampliouPublico` = adicionou CNAE alvo (FR-014 — vitrine reavaliada, prazo mantido).
+   */
+  editar(
+    campos: Partial<{ objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }>,
+    userName: string,
+  ): { diff: CampoDiff[]; ampliouPublico: boolean } {
+    const diff: CampoDiff[] = [];
+    let ampliouPublico = false;
+    if (campos.objeto !== undefined && campos.objeto !== this._objeto) {
+      diff.push({ campo: 'objeto', antes: this._objeto, depois: campos.objeto });
+      this._objeto = campos.objeto;
+    }
+    if (campos.cnaesAlvo !== undefined) {
+      const antes = [...this._cnaesAlvo];
+      const depois = [...campos.cnaesAlvo];
+      if (JSON.stringify(antes) !== JSON.stringify(depois)) {
+        ampliouPublico = depois.some((c) => !antes.includes(c));
+        diff.push({ campo: 'cnaesAlvo', antes, depois });
+        this._cnaesAlvo = depois;
+      }
+    }
+    if (campos.quantitativos !== undefined && campos.quantitativos !== this._quantitativos) {
+      diff.push({ campo: 'quantitativos', antes: this._quantitativos, depois: campos.quantitativos });
+      this._quantitativos = campos.quantitativos;
+    }
+    if (campos.prazoVigencia !== undefined && campos.prazoVigencia !== this._prazoVigencia) {
+      diff.push({ campo: 'prazoVigencia', antes: this._prazoVigencia, depois: campos.prazoVigencia });
+      this._prazoVigencia = campos.prazoVigencia;
+    }
+    if (diff.length) this.marcarAtualizacao(userName);
+    return { diff, ampliouPublico };
+  }
+}
+
+export class EditalSemSecretaria extends Error {
+  constructor() { super('Edital deve referenciar exatamente uma secretaria (RN007/AD-11).'); this.name = 'EditalSemSecretaria'; }
+}
+export class EditalIncompleto extends Error {
+  constructor(faltas: string[]) { super(`Edital incompleto para publicação: faltam ${faltas.join(', ')}.`); this.name = 'EditalIncompleto'; }
+}
+export class TransicaoInvalida extends Error {
+  constructor(de: string, para: string) { super(`Transição inválida de '${de}' para '${para}'.`); this.name = 'TransicaoInvalida'; }
+}

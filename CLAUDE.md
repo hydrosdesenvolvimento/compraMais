@@ -1,117 +1,138 @@
-# Instrucoes do projeto para o Claude
+# CLAUDE.md — Instruções do projeto compraMais
 
-Estas instrucoes derivam do protocolo comum do pacote de agents versionado em
-`.github/agents/AGENTS.md`. Esse arquivo e a fonte canonica; em caso de divergencia,
-`.github/agents/AGENTS.md` prevalece e este `CLAUDE.md` deve ser realinhado a ele.
+Este arquivo orienta o Claude Code (e qualquer agent) ao operar neste repositório.
+Ele deriva do protocolo comum em [.github/agents/AGENTS.md](.github/agents/AGENTS.md), que continua sendo a **fonte de verdade** do pacote de agents.
 
-## Bootstrap obrigatorio (antes de iniciar qualquer tarefa)
+## Catálogo de agents
 
-1. Ler `.github/agents/AGENTS.md` como protocolo comum obrigatorio.
-2. Ler `.github/agents/memoria/MEMORIA-COMPARTILHADA.md` (memoria geral) e
-   `.github/agents/memoria/MEMORIA-PROJETO.md` (memoria de projeto), recuperando
-   contexto, decisoes ativas e backlog relevante para a demanda.
-3. Detectar a stack (ver tabela abaixo) e consultar a skill correspondente em
-   `.github/skills/`, registrando o resultado na memoria de projeto.
+Os 8 agents do pacote estão em [.github/agents/](.github/agents/):
 
-## Protocolo comum obrigatorio
+- [tech-lead.agent.md](.github/agents/tech-lead.agent.md)
+- [senior-developer.agent.md](.github/agents/senior-developer.agent.md)
+- [qa-expert.agent.md](.github/agents/qa-expert.agent.md)
+- [ux-expert.agent.md](.github/agents/ux-expert.agent.md)
+- [dba.agent.md](.github/agents/dba.agent.md)
+- [business-analyst.agent.md](.github/agents/business-analyst.agent.md)
+- [documentation-writer.agent.md](.github/agents/documentation-writer.agent.md) — subagent utilitário de documentação formal
+- [commit-writer.agent.md](.github/agents/commit-writer.agent.md) — subagent utilitário de geração de commits
 
-- **prompt-logger**: acionar `.github/skills/prompt-logger/` para cada solicitacao,
-  criando/atualizando o log em `docs/prompts/`. Sanitizar segredos, credenciais,
-  tokens, cookies, chaves e dados pessoais antes de persistir; havendo risco de
-  exposicao, registrar apenas versao sanitizada com a justificativa.
-- **TDD**: sempre que a tarefa envolver desenvolvimento, refatoracao ou correcao de
-  codigo, usar `.github/skills/protocolo-tdd/` como referencia operacional obrigatoria
-  (integracao real via Testcontainers e E2E real com Cypress sem mocks de rede quando
-  aplicavel).
-- **Registro tecnico**: sempre que houver desenvolvimento, refatoracao ou correcao de
-  codigo, usar `.github/skills/review-documentation/` para produzir o registro tecnico
-  da entrega e o commit exigido pela skill.
-- **Documentacao formal**: documentacao de governanca, handoffs, reviews tecnicos,
-  changelogs e sync documental devem ser delegados ao subagent
-  `.github/agents/documentation-writer.agent.md` (opera com `GPT-5 mini (copilot)`); o
-  agent originador revisa antes de fechar.
-- **Commits**: mensagens e preparo de commit semantico devem ser delegados ao subagent
-  `.github/agents/commit-writer.agent.md` (opera com `GPT-5 mini (copilot)`); o agent
-  originador valida diff, escopo e seguranca. Seguir Conventional Commits + Gitflow.
-- **Memoria**: decisoes sobre agents, skills, workflow, governanca, templates e regras
-  transversais vao para `.github/agents/memoria/MEMORIA-COMPARTILHADA.md` (geral);
-  decisoes sobre escopo, arquitetura, implementacao, validacao, riscos e aceite de uma
-  demanda concreta vao para `.github/agents/memoria/MEMORIA-PROJETO.md` (projeto), com
-  referencia cruzada quando houver impacto nos dois escopos. Manter ambas sucintas e
-  orientadas a decisao; detalhamento extenso em `.github/agents/memoria/historico/`.
-  Registrar aprovacoes/reaprovacoes explicitas do solicitante sobre testes do QA.
-  Manter a memoria versionada com o projeto.
-- **Testes E2E**: Cypress como padrao. O Senior Developer prepara prerequisitos de
-  projeto/container; o QA Expert valida a execucao real e registra evidencias ou
-  bloqueios.
-- **Idioma**: salvo indicacao explicita em contrario, elaborar documentos formais de
-  governanca em portugues do Brasil, independentemente do idioma do prompt. Comandos,
-  identificadores tecnicos, schemas, payloads e codigo permanecem no idioma original.
-  Logs do `prompt-logger` seguem o idioma do prompt.
-- **Comunicacao enxuta**: reduzir feedbacks visuais e nao narrar microacoes;
-  atualizacoes intermediarias breves e limitadas a marco relevante, bloqueio, mudanca
-  de decisao ou proximo passo. Concentrar o detalhamento completo no encerramento ou no
-  handoff formal.
+Todos são agnósticos a linguagem e adaptam a execução com base nos arquivos do projeto.
 
-## Ciclo do developer com subagents utilitarios
+## Protocolo comum obrigatório
 
-1. O Senior Developer implementa e valida tecnicamente o incremento.
-2. Antes do handoff para QA, delega ao `documentation-writer.agent.md` o registro
-   tecnico da entrega, handoff e evidencias iniciais.
-3. O QA Expert valida a implementacao com base no incremento e no registro documental.
-4. Em reprovacao, retorna ao Senior Developer e o registro e atualizado novamente.
-5. Em aprovacao, o Senior Developer consolida a entrega e delega ao
-   `commit-writer.agent.md` a mensagem de commit semantica com base no diff real.
-6. O Tech Lead revisa diff, escopo, seguranca e rastreabilidade antes de aprovar o
-   fechamento tecnico e encaminhar o PR.
+Antes de iniciar qualquer tarefa, todo agent deve:
 
-## Deteccao de stack -> skill de referencia
+1. Carregar [.github/agents/AGENTS.md](.github/agents/AGENTS.md) como protocolo comum obrigatório e ler [.github/agents/memoria/MEMORIA-COMPARTILHADA.md](.github/agents/memoria/MEMORIA-COMPARTILHADA.md) (memória geral) e [.github/agents/memoria/MEMORIA-PROJETO.md](.github/agents/memoria/MEMORIA-PROJETO.md) (memória de projeto), recuperando contexto, decisões ativas e backlog relevante.
+2. Acionar obrigatoriamente a skill [.github/skills/prompt-logger/](.github/skills/prompt-logger/) para cada solicitação, registrando o log em `docs/prompts/`. Sanitizar/mascarar segredos, credenciais, tokens, cookies, chaves e dados pessoais desnecessários antes de persistir; em caso de risco, registrar apenas versão sanitizada com justificativa.
+3. Detectar a stack do projeto e registrá-la na memória (ver "Detecção de stack").
+4. Delegar redação de documentação formal, handoffs, reviews técnicos, changelogs e sync documental ao subagent [documentation-writer.agent.md](.github/agents/documentation-writer.agent.md); o agent originador revisa antes do fechamento.
+5. Delegar geração de mensagens de commit e preparo de commit semântico ao subagent [commit-writer.agent.md](.github/agents/commit-writer.agent.md); o agent originador valida diff, escopo e segurança.
+6. Executar respeitando o handoff entre agents e atualizar as memórias geral e de projeto conforme o escopo da decisão, mantendo ambas sucintas; detalhes extensos vão para [.github/agents/memoria/historico/](.github/agents/memoria/historico/).
+7. Produzir documentação em Markdown com diagramas Mermaid e manter rastreabilidade (links para arquivos alterados, testes e revisões).
+8. Garantir que os arquivos de memória sejam versionados junto com o projeto.
 
-| Stack detectada | Skill |
-|---|---|
-| Python / Django | `.github/skills/django-expert/`, `django-patterns/`, `django-tdd/` |
-| Python / FastAPI | `.github/skills/fastapi-expert/`, `fastapi-templates/`, `fastapi-async-patterns/` |
-| Python generico | `.github/skills/python-best-practices/` |
-| Node.js / NestJS | `.github/skills/nestjs-best-practices/` |
-| Node.js generico | `.github/skills/nodejs-best-practices/` |
-| PHP / Laravel | `.github/skills/laravel-best-practices/` |
-| PHP generico | `.github/skills/php-best-practices/` |
-| React / Next.js | `.github/skills/vercel-react-best-practices/` |
-| React generico | `.github/skills/frontend-react-best-practices/` |
-| Cloudflare Workers | `.github/skills/workers-best-practices/` |
-| Autenticacao | `.github/skills/better-auth-best-practices/`, `api-security-best-practices/` |
-| Qualquer stack | `.github/skills/clean-architecture/`, `security-best-practices/`, `best-practices/` |
+### Desenvolvimento de código (obrigatório)
 
-> Stack atual do projeto (compraMais): ainda nao definida — o repositorio esta em
-> bootstrap (apenas `README.md`). O primeiro agent que iniciar implementacao deve
-> detectar a stack pelos arquivos do projeto (ver baseline em `.github/agents/AGENTS.md`,
-> secao "Deteccao de stack") e registra-la em
-> `.github/agents/memoria/MEMORIA-PROJETO.md`.
+Sempre que a tarefa envolver desenvolvimento, refatoração ou correção de código:
 
-## Templates operacionais
+- Usar [.github/skills/protocolo-tdd/](.github/skills/protocolo-tdd/) como referência operacional obrigatória (ciclo TDD, integração real via Testcontainers, E2E real com Cypress quando aplicável).
+- Usar [.github/skills/review-documentation/](.github/skills/review-documentation/) para produzir o registro técnico da entrega e o commit exigido pela skill.
+- Testes E2E usam **Cypress** como padrão: o Senior Developer prepara os pré-requisitos do projeto/container; o QA Expert valida a execução real e registra evidências ou bloqueios.
 
-Usar os templates em `.github/agents/templates/` quando o fluxo correspondente for
-acionado: System Design, Design System, validacao QA frontend, aprovacao final e
-revisao consolidada do Tech Lead, reprovacao/ciclos de QA, aprovacao do solicitante,
-dimensionamento de banco e setup/checklist de Cypress. A lista completa com o uso de
-cada template esta em `.github/agents/AGENTS.md` (secao "Templates operacionais").
+### Ciclo do developer com subagents utilitários
 
-## Governanca de entrega
+1. Senior Developer implementa e valida tecnicamente o incremento.
+2. Antes do handoff ao QA, delega ao `documentation-writer` o registro técnico, handoff e evidências iniciais.
+3. QA Expert valida com base no incremento e no registro documental.
+4. Reprovado → retorna ao Senior Developer; registro é atualizado novamente via `documentation-writer`.
+5. Aprovado → Senior Developer consolida e delega ao `commit-writer` a mensagem de commit semântica baseada no diff real.
+6. Tech Lead revisa diff, escopo, segurança e rastreabilidade antes de aprovar o fechamento técnico e encaminhar PR.
 
-- Branch aderente ao Gitflow (`feature/`, `bugfix/`, `release/`, `hotfix/`, `support/`),
-  commits semanticos e Pull Request com label de review e review request ativos.
-- Governanca de PRs centralizada em um unico workflow (validacoes semanticas,
-  transicoes de labels, comentarios automaticos e sincronizacao com issues vinculadas).
-- Em fluxos frontend, o System Design deve referenciar o Design System do UX Expert
-  (precondicao de validacao do QA e criterio de aceite do Tech Lead).
-- O Tech Lead consolida o registro das atividades de todos os agents e registra
-  divergencias entre requisitos, arquitetura, implementacao e evidencias antes do
-  fechamento final.
+## Governança de frontend e fechamento
+
+- Em fluxos frontend, o System Design deve referenciar explicitamente o Design System do UX Expert (precondição de validação do QA e critério de aceite do Tech Lead).
+- Validação QA de frontend usa preferencialmente [templates/qa-validacao-frontend-template.md](.github/agents/templates/qa-validacao-frontend-template.md); desvios devem ser justificados.
+- A aprovação final do Tech Lead usa [templates/aprovacao-final-tech-lead-template.md](.github/agents/templates/aprovacao-final-tech-lead-template.md) e referencia a [templates/revisao-consolidada-tech-lead-template.md](.github/agents/templates/revisao-consolidada-tech-lead-template.md).
+- A validação frontend deve alimentar explicitamente a aprovação final.
+- Quando existirem PRD, ARD, implementação e evidências, o Tech Lead registra divergências, resoluções, impactos residuais e bloqueios antes do fechamento.
+- Todos os agents sinalizam divergências relevantes do seu domínio (requisitos, arquitetura, implementação, validações, UX, dados, evidências) com impacto e recomendação.
+- UX Expert define e mantém a estrutura funcional do Storybook.js alinhada ao Design System; Senior Developer implementa e sustenta a configuração técnica.
+- DBA formaliza o handoff do plano de dimensionamento/expansão do banco ao Business Analyst, rastreável no System Design.
+
+## Commits, branches e Pull Requests
+
+- Commits para entrega formal seguem convenção semântica (Conventional Commits) — ver [.github/skills/git-commit/](.github/skills/git-commit/).
+- Branch naming aderente ao **Gitflow** — ver [.github/skills/gitflow/](.github/skills/gitflow/).
+- Entregas são encaminhadas por Pull Request marcado para review com label dedicada e atributos nativos de review do GitHub.
+- A governança de PRs permanece centralizada em um único workflow (validações semânticas, transições de labels, comentários automáticos e sincronização do estado nas issues vinculadas).
 
 ## Context7 MCP
 
-Quando operado em VS Code com MCP e sem Context7 no workspace, configurar
-`.vscode/mcp.json` versionado (preservando servidores existentes; nao versionar
-segredos). Com `context7` disponivel e habilitado, usa-lo como fonte preferencial de
-documentacao tecnica atualizada. Sem suporte a MCP de workspace, registrar a restricao
-em memoria e seguir sem torna-lo precondicao bloqueante.
+Quando o projeto for operado em VS Code com suporte a MCP e ainda não houver Context7 no workspace, instalar em `.vscode/mcp.json` versionado:
+
+```json
+{
+  "servers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp.context7.com/mcp"
+    }
+  }
+}
+```
+
+- Se `.vscode/mcp.json` já existir, preservar servidores existentes e adicionar apenas `context7`.
+- Nunca versionar `CONTEXT7_API_KEY`, `Authorization` ou qualquer segredo; autenticação é configurada localmente.
+- Quando disponível e habilitado, o Context7 é a **fonte preferencial** de documentação técnica atualizada para frameworks, libs, SDKs e contratos.
+- Se o ambiente não suportar MCP de workspace, registrar a restrição em memória e seguir sem torná-lo precondição bloqueante.
+
+## Idioma dos documentos de governança
+
+- O idioma padrão dos documentos formais de governança é **português do Brasil**, mesmo quando o prompt estiver em outro idioma.
+- Exceção: quando o solicitante indicar explicitamente outro idioma ou o artefato exigir formalmente.
+- Aplica-se a System Design, Design System, PRD, user stories formais, validações QA, pareceres, aprovações finais, revisões consolidadas, planos operacionais e registros técnicos.
+- Não altera o idioma dos logs do `prompt-logger`, que seguem o idioma do prompt.
+- Comandos, identificadores técnicos, schemas, payloads e código podem permanecer no idioma original.
+
+## Detecção de stack (baseline)
+
+Verificar, no mínimo: `package.json`/`pnpm-lock.yaml`/`yarn.lock`, `pyproject.toml`/`requirements*.txt`, `pom.xml`/`build.gradle*`, `go.mod`, `Cargo.toml`, `composer.json`, `Gemfile`, `*.csproj`/`global.json`.
+
+Registrar o resultado na memória de projeto (e na memória geral quando houver impacto transversal). Após detectar a stack, consultar a skill correspondente em [.github/skills/](.github/skills/):
+
+| Stack detectada | Skill de referência |
+|---|---|
+| Python / Django | `.github/skills/django-expert/`, `.github/skills/django-patterns/`, `.github/skills/django-tdd/` |
+| Python / FastAPI | `.github/skills/fastapi-expert/`, `.github/skills/fastapi-templates/`, `.github/skills/fastapi-async-patterns/` |
+| Python genérico | `.github/skills/python-best-practices/` |
+| Node.js / NestJS | `.github/skills/nestjs-best-practices/` |
+| Node.js genérico | `.github/skills/nodejs-best-practices/` |
+| PHP / Laravel | `.github/skills/laravel-best-practices/` |
+| PHP genérico | `.github/skills/php-best-practices/` |
+| React / Next.js | `.github/skills/vercel-react-best-practices/` |
+| React genérico | `.github/skills/frontend-react-best-practices/` |
+| Cloudflare Workers | `.github/skills/workers-best-practices/` |
+| Autenticação (any) | `.github/skills/better-auth-best-practices/` |
+| Dev / refatoração / correção de código | `.github/skills/protocolo-tdd/` |
+
+Para desambiguar skills sobrepostas, consultar [.github/skills/SKILL_HIERARCHY.md](.github/skills/SKILL_HIERARCHY.md).
+
+## Comunicação durante a execução
+
+- Reduzir feedbacks visuais e evitar narrar microações; atualizações intermediárias devem ser breves e limitadas a marco relevante, bloqueio, mudança de decisão ou próximo passo imediato.
+- Concentrar o detalhamento completo (decisões, arquivos alterados, evidências, riscos, pendências) no encerramento da tarefa ou no handoff formal.
+
+## Fluxo de colaboração
+
+```mermaid
+flowchart TD
+  A[Tech Lead recebe demanda] --> B[Business Analyst detalha requisitos]
+  B --> C[Senior Developer implementa + testes TDD iniciais]
+  C --> D[QA Expert valida com suite independente]
+  C --> E[UX Expert modela/valida UI e interacoes]
+  C --> F[DBA modela persistencia segura e performatica]
+  D --> A
+  E --> A
+  F --> A
+  A --> G[Consolidacao, aprovacao e commit]
+```

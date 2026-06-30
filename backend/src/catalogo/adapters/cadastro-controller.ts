@@ -1,0 +1,60 @@
+import type { FastifyInstance } from 'fastify';
+import type { CadastrarFornecedor } from '../application/cadastrar-fornecedor.js';
+import type { GerirConta } from '../application/gerir-conta.js';
+import type { ReceitaGateway } from '../../shared/acl/receita/receita-gateway.js';
+
+/**
+ * Controller (camada de Adaptadores). Traduz HTTP ↔ casos de uso. Sem regra de negócio aqui.
+ * Erros de domínio viram envelope { codigo, mensagem }.
+ */
+export function registrarRotasCadastro(app: FastifyInstance, deps: {
+  cadastrar: CadastrarFornecedor;
+  conta: GerirConta;
+  receita: ReceitaGateway;
+}): void {
+  app.post('/fornecedores/consulta-cnpj', async (req, reply) => {
+    const { cnpj } = req.body as { cnpj: string };
+    const r = await deps.receita.consultarCnpj(cnpj);
+    if (r.frescor === 'indisponivel') {
+      return reply.code(503).send({ codigo: 'RECEITA_INDISPONIVEL', mensagem: 'Receita indisponível — preencha manualmente', frescor: r.frescor });
+    }
+    return reply.send(r);
+  });
+
+  app.post('/fornecedores', async (req, reply) => {
+    try {
+      const out = await deps.cadastrar.executar({ ...(req.body as object), ip: req.ip } as never);
+      return reply.code(201).send(out);
+    } catch (e) {
+      return reply.code(mapStatus(e)).send({ codigo: nome(e), mensagem: (e as Error).message });
+    }
+  });
+
+  app.patch('/fornecedores/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    try {
+      await deps.conta.editarPerfil(id, req.body as Record<string, unknown>, { userId: actor(req) });
+      return reply.code(204).send();
+    } catch (e) {
+      return reply.code(422).send({ codigo: nome(e), mensagem: (e as Error).message });
+    }
+  });
+
+  app.post('/fornecedores/:id/sincronizar', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const r = await deps.conta.reSincronizar(id, { userId: actor(req) });
+    return reply.send(r);
+  });
+}
+
+function mapStatus(e: unknown): number {
+  const n = nome(e);
+  if (n === 'CnpjJaCadastrado') return 409;
+  if (n === 'CnpjInvalido' || n === 'SituacaoNaoApta' || n === 'ConsentimentoInvalido') return 422;
+  if (n === 'ReceitaIndisponivelSemManual') return 503;
+  return 400;
+}
+function nome(e: unknown): string { return (e as Error)?.name ?? 'Erro'; }
+function actor(req: { headers: Record<string, unknown> }): string {
+  return String(req.headers['x-user-id'] ?? 'anon');
+}

@@ -24,4 +24,9 @@ export class AuditRecord {
       { aggregateId: e.aggregateId, eventVersion: e.eventVersion, empresa: e.actor?.empresaId, ...((e.payload as object) ?? {}) },
     );
   }
+
+  /** Reidratação a partir de uma linha persistida (sem regra — registro imutável). */
+  static deLinha(r: { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null; payload: Record<string, unknown> }): AuditRecord {
+    return new AuditRecord(r.id, r.usuario, r.evento, r.timestamp, r.ip, r.payload);
+  }
 }

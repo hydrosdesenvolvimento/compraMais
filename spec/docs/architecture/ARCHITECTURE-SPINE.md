@@ -151,6 +151,13 @@ graph TD
 - **Binds:** shared/identity; RF015
 - **Prevents:** acoplamento a um provedor de auth
 - **Rule:** login atrás de provedor plugável. Default Onda 1/MVP: credenciais locais. gov.br como evolução para o fornecedor sem reescrita; CPL/SMGA via SSO da Prefeitura quando disponível.
+- **Implementação:** credencial local = `Usuario` (e-mail + senha **scrypt+salt**), persistido em
+  PostgreSQL (`usuarios`); sessão = **JWT HS256** (`sub`, `papel`, `empresaId`, TTL configurável),
+  segredo via `JWT_SECRET`/Docker secret. **Google OAuth 2.0/OIDC** (`@fastify/oauth2`) é uma 2ª via:
+  vincula/auto-provisiona e emite o **mesmo** JWT. Emite eventos `UsuarioRegistrado` /
+  `UsuarioAutenticado` / `GoogleVinculado` (AD-18). Detalhe: `spec/008-autenticacao/`,
+  `docs/auth/autenticacao.md` e `docs/auth/google-cloud-setup.md`. Pendente (Onda 2/3): MFA, refresh
+  token + revogação, reset por mensageria, gov.br.
 
 ### AD-21 — Malote determinístico e fragmentável
 - **Binds:** Malote; RF007, RNF002, RN008

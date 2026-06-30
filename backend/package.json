@@ -12,6 +12,8 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
+    "seed": "tsx src/shared/db/seed.ts",
+    "seed:prod": "node dist/shared/db/seed.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",

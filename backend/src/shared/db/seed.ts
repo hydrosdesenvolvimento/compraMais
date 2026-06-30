@@ -34,17 +34,24 @@ async function seed(): Promise<void> {
 
     const repo = new UsuarioRepositoryPg(pool);
     let criados = 0;
+    let falhas = 0;
     for (const s of USUARIOS_SEED) {
-      if (await repo.porEmail(s.email)) {
-        console.log(`[seed] já existe: ${s.email}`);
-        continue;
+      try {
+        if (await repo.porEmail(s.email)) {
+          console.log(`[seed] já existe: ${s.email}`);
+          continue;
+        }
+        const u = Usuario.criarLocal({ id: randomUUID(), email: s.email, senha: s.senha, nome: s.nome, papel: s.papel, fornecedorId: s.fornecedorId });
+        await repo.salvar(u);
+        criados++;
+        console.log(`[seed] criado: ${s.email} (${s.papel})`);
+      } catch (e) {
+        falhas++;
+        console.error(`[seed] FALHA em ${s.email}: ${(e as Error).message}`);
       }
-      const u = Usuario.criarLocal({ id: randomUUID(), email: s.email, senha: s.senha, nome: s.nome, papel: s.papel, fornecedorId: s.fornecedorId });
-      await repo.salvar(u);
-      criados++;
-      console.log(`[seed] criado: ${s.email} (${s.papel})`);
     }
-    console.log(`[seed] concluído — ${criados} usuário(s) novo(s) de ${USUARIOS_SEED.length}.`);
+    console.log(`[seed] concluído — ${criados} novo(s), ${falhas} falha(s) de ${USUARIOS_SEED.length}.`);
+    if (falhas) process.exitCode = 1; // visível em CI sem abortar os demais
   } finally {
     await pool.end();
   }

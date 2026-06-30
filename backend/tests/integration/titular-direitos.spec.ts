@@ -24,7 +24,7 @@ describe('Direitos do titular (Épico 7) — use case', () => {
 
 describe('Direitos do titular — RBAC FR-009 (CPL não atende)', () => {
   it('CPL → 403 ao atender solicitação', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     const res = await app.inject({ method: 'POST', url: '/titular/solicitacoes/qualquer/atender', headers: { 'x-user-id': 'cpl1', 'x-papel': 'cpl' }, payload: { resultado: 'x' } });
     expect(res.statusCode).toBe(403);
     await app.close();
@@ -33,14 +33,14 @@ describe('Direitos do titular — RBAC FR-009 (CPL não atende)', () => {
 
 describe('Direitos do titular — RBAC §V (procurador não exerce)', () => {
   it('procurador → 403 ao solicitar direito', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     const res = await app.inject({ method: 'POST', url: '/titular/solicitacoes', headers: { 'x-user-id': 'p1', 'x-papel': 'procurador' }, payload: { tipo: 'acesso' } });
     expect(res.statusCode).toBe(403);
     await app.close();
   });
 
   it('próprio titular → 201', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     const res = await app.inject({ method: 'POST', url: '/titular/solicitacoes', headers: { 'x-user-id': 't1', 'x-papel': 'fornecedor' }, payload: { tipo: 'acesso' } });
     expect(res.statusCode).toBe(201);
     await app.close();

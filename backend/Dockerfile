@@ -14,11 +14,17 @@ COPY tsconfig.json tsconfig.build.json ./
 COPY src ./src
 RUN npm run build
 
-# Remove devDependencies, mantendo apenas runtime deps em node_modules.
+###############################################
+# Stage 2: prod-deps (node_modules so runtime)#
+###############################################
+# Stage dedicado ao prune. O stage `build` (alvo do profile dev no compose)
+# PRESERVA as devDependencies — ex.: tsx — necessarias ao hot-reload (npm run dev).
+# Aqui derivamos node_modules apenas com deps de runtime para a imagem de producao.
+FROM build AS prod-deps
 RUN npm prune --omit=dev
 
 ###############################################
-# Stage 2: runtime (node slim, non-root)      #
+# Stage 3: runtime (node slim, non-root)      #
 ###############################################
 FROM node:22-slim AS runtime
 WORKDIR /app
@@ -27,7 +33,7 @@ ENV NODE_ENV=production \
     PORT=3000
 
 # Usuario non-root (imagem node ja traz o usuario "node").
-COPY --from=build --chown=node:node /app/node_modules ./node_modules
+COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node package.json ./
 

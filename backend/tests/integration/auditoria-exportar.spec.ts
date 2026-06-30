@@ -10,7 +10,7 @@ async function criarEdital(app: ReturnType<typeof buildServer>) {
 
 describe('Auditoria — exportação (US2)', () => {
   it('exporta CSV com cabeçalho e Content-Disposition', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     await criarEdital(app);
     const res = await app.inject({ method: 'GET', url: '/auditoria/exportar?formato=csv&evento=EditalCriado', headers: { 'x-papel': 'auditor' } });
     expect(res.statusCode).toBe(200);
@@ -21,7 +21,7 @@ describe('Auditoria — exportação (US2)', () => {
   });
 
   it('exporta JSON com o conjunto filtrado', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     await criarEdital(app);
     const res = await app.inject({ method: 'GET', url: '/auditoria/exportar?formato=json&evento=EditalCriado', headers: { 'x-papel': 'cpl' } });
     expect(res.statusCode).toBe(200);

@@ -4,6 +4,8 @@ import { registrarDocsApi } from './shared/http/openapi.js';
 import { InMemoryEventBus } from './shared/events/event-bus.js';
 import { AuditConsumer } from './auditoria/application/audit-consumer.js';
 import { AuditRepositoryMemory } from './auditoria/adapters/audit-repository-memory.js';
+import { AuditRepositoryPg } from './auditoria/adapters/audit-repository-pg.js';
+import type { AuditRepository } from './auditoria/infra/audit-repository.js';
 import { ReceitaMockGateway } from './shared/acl/receita/receita-mock.js';
 import { CadastrarFornecedor } from './catalogo/application/cadastrar-fornecedor.js';
 import { GerirConta } from './catalogo/application/gerir-conta.js';
@@ -14,7 +16,8 @@ import { GerirProcuradores } from './shared/identity/gerir-procuradores.js';
 import { registrarRotasIdentidade } from './shared/identity/identity-controller.js';
 import { loadConfig, temPostgresConfigurado } from './shared/config/env.js';
 import { criarPool } from './shared/db/pool.js';
-import { SCHEMA_AUTH_SQL } from './shared/db/schema-auth.js';
+import { aplicarMigracoes } from './shared/db/migracoes.js';
+import type { Pool } from 'pg';
 import { UsuarioRepositoryMemory, type UsuarioRepository } from './shared/identity/usuario-repository.js';
 import { UsuarioRepositoryPg } from './shared/identity/usuario-repository-pg.js';
 import { JwtTokenService } from './shared/identity/token-service.js';
@@ -70,9 +73,20 @@ export async function buildServer(): Promise<FastifyInstance> {
   await registrarDocsApi(app);
   app.get('/health', async () => ({ status: 'ok', service: 'compra-mais-backend' }));
 
-  // Barramento + auditoria (escritor único — AD-18). Repo extraído p/ a leitura (004) ler a MESMA trilha.
+  // Persistência: cria o pool e aplica as migrações (todas, em ordem) quando há Postgres (fora de teste).
+  const config = loadConfig();
+  let pool: Pool | undefined;
+  if (config.nodeEnv !== 'test' && temPostgresConfigurado()) {
+    pool = criarPool(config.database);
+    const novas = await aplicarMigracoes(pool, (m) => app.log.info(m));
+    app.log.info({ migracoesNovas: novas.length }, 'migrações verificadas');
+    app.addHook('onClose', async () => { await pool!.end(); });
+  }
+
+  // Barramento + auditoria (escritor único — AD-18). Trilha durável em Postgres quando disponível;
+  // a leitura (004) usa o MESMO repositório do escritor.
   const bus = new InMemoryEventBus();
-  const auditRepo = new AuditRepositoryMemory();
+  const auditRepo: AuditRepository = pool ? new AuditRepositoryPg(pool) : new AuditRepositoryMemory();
   new AuditConsumer(bus, auditRepo).register([
     'FornecedorCadastrado', 'FornecedorSincronizado', 'PerfilEditado',
     'ProcuradorConvidado', 'ProcuradorRemovido',
@@ -91,18 +105,8 @@ export async function buildServer(): Promise<FastifyInstance> {
   registrarRotasIdentidade(app, { procuradores });
 
   // Autenticação (FR-015 / AD-20): registro/login local com JWT + vínculo/login Google.
-  // Persistência em Postgres quando configurado (fora de teste); senão, memória — mantém os testes
-  // que constroem o app via buildServer sem depender de banco.
-  const config = loadConfig();
-  let usuarioRepo: UsuarioRepository;
-  if (config.nodeEnv !== 'test' && temPostgresConfigurado()) {
-    const pool = criarPool(config.database);
-    await pool.query(SCHEMA_AUTH_SQL); // garante o schema (idempotente — AD-28)
-    app.addHook('onClose', async () => { await pool.end(); });
-    usuarioRepo = new UsuarioRepositoryPg(pool);
-  } else {
-    usuarioRepo = new UsuarioRepositoryMemory();
-  }
+  // Reaproveita o mesmo pool: Postgres quando configurado; senão memória (testes sem banco).
+  const usuarioRepo: UsuarioRepository = pool ? new UsuarioRepositoryPg(pool) : new UsuarioRepositoryMemory();
   const tokens = new JwtTokenService(config.auth.jwtSecret, config.auth.jwtExpiraEmSeg);
   registrarRotasAuth(app, {
     registrar: new RegistrarUsuario(usuarioRepo, bus),

@@ -23,6 +23,7 @@ export async function registrarDocsApi(app: FastifyInstance): Promise<void> {
       },
       tags: [
         { name: 'saude', description: 'Liveness e métricas operacionais' },
+        { name: 'autenticacao', description: 'Login local (e-mail/senha + JWT) e Google OAuth (008)' },
         { name: 'catalogo', description: 'Onboarding e conta do fornecedor (001)' },
         { name: 'credenciamento', description: 'Documentos, covalidação e elegibilidade (002)' },
         { name: 'editais', description: 'Editais individualizados e contestação de CNAE (003)' },
@@ -31,6 +32,11 @@ export async function registrarDocsApi(app: FastifyInstance): Promise<void> {
         { name: 'titular', description: 'Direitos do titular / LGPD (006)' },
         { name: 'paineis', description: 'Dashboards e transparência (007)' },
       ],
+      components: {
+        securitySchemes: {
+          bearerAuth: { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+        },
+      },
     },
   });
   await app.register(swaggerUi, {

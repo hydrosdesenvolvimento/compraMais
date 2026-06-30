@@ -71,6 +71,17 @@ curl localhost:3000/auth/me -H 'authorization: Bearer <JWT>'
   local funciona sem ele.
 - Em producao, `JWT_SECRET` vem do Docker secret `jwt_secret`.
 
+## Banco de dados (migrações e seed)
+
+As migrações em `backend/migrations/*.sql` são aplicadas **automaticamente no startup** por um runner
+idempotente (registradas em `schema_migrations`). Seed de dados sintéticos de dev:
+
+```bash
+docker compose run --rm backend npm run seed   # ou: cd backend && npm run seed
+```
+
+Detalhes (adicionar migração, estado de persistência por domínio): [`docs/db/migracoes-e-seed.md`](docs/db/migracoes-e-seed.md).
+
 ## Testes
 
 ```bash

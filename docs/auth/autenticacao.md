@@ -95,8 +95,9 @@ procurador carregam ator + empresa na trilha (AD-30).
 ## Persistência
 
 - Migração [`backend/migrations/0002_init_auth.sql`](../../backend/migrations/0002_init_auth.sql)
-  (forward-only — AD-28). O backend também aplica o schema idempotente no startup quando há Postgres
-  (`src/shared/db/schema-auth.ts`), garantindo a tabela sem runner externo no MVP.
+  (forward-only — AD-28). No startup, o **migration runner** (`src/shared/db/migracoes.ts`) aplica todas
+  as migrações pendentes em ordem e as registra em `schema_migrations` (idempotente). Ver
+  [migrações e seed](../db/migracoes-e-seed.md).
 - Seleção do adaptador: **Postgres** quando `POSTGRES_HOST`/`DATABASE_URL` configurados e
   `NODE_ENV !== test`; senão **memória** (mantém os testes sem depender de banco).
 

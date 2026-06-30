@@ -1,5 +1,6 @@
-import Fastify from 'fastify';
+import Fastify, { type FastifyInstance } from 'fastify';
 import { registrarSegurancaHttp } from './shared/http/security.js';
+import { registrarDocsApi } from './shared/http/openapi.js';
 import { InMemoryEventBus } from './shared/events/event-bus.js';
 import { AuditConsumer } from './auditoria/application/audit-consumer.js';
 import { AuditRepositoryMemory } from './auditoria/adapters/audit-repository-memory.js';
@@ -52,10 +53,13 @@ import { registrarRotasPaineis } from './paineis/adapters/paineis-controller.js'
  * casos de uso não o conhecem (Clean Architecture / AD-32). Aqui ligamos as dependências.
  * MVP usa adaptadores em memória; os adaptadores pg/S3 implementam as mesmas portas.
  */
-export function buildServer() {
+export async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({ logger: true });
   // Hardening transversal (helmet + CORS) antes das rotas — AD-19/AD-29.
   registrarSegurancaHttp(app);
+  // Documentação OpenAPI/Swagger UI em /docs — AGUARDADA antes das rotas para que o hook
+  // onRoute do swagger capture todas as rotas registradas a seguir.
+  await registrarDocsApi(app);
   app.get('/health', async () => ({ status: 'ok', service: 'compra-mais-backend' }));
 
   // Barramento + auditoria (escritor único — AD-18). Repo extraído p/ a leitura (004) ler a MESMA trilha.
@@ -162,7 +166,7 @@ export function buildServer() {
 
 const isMain = import.meta.url === `file://${process.argv[1]}`;
 if (isMain) {
-  const app = buildServer();
+  const app = await buildServer();
   const port = Number(process.env.PORT ?? 3000);
   app.listen({ port, host: '0.0.0.0' }).catch((err) => {
     app.log.error(err);

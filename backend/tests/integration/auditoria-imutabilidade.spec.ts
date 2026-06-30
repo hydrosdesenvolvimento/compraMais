@@ -11,7 +11,7 @@ async function criarEdital(app: ReturnType<typeof buildServer>) {
 /** FR-003 / SC-003: nenhuma rota desta feature altera a trilha (consultar/exportar não escrevem). */
 describe('Auditoria — imutabilidade (FR-003)', () => {
   it('consultar e exportar não criam nem removem registros', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     await criarEdital(app);
     const antes = (await app.inject({ method: 'GET', url: '/auditoria', headers: { 'x-papel': 'cpl' } })).json().length;
 

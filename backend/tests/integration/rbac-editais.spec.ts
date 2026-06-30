@@ -4,7 +4,7 @@ import { buildServer } from '../../src/server.js';
 /** RBAC (FR-010): fornecedor NÃO cria/edita edital; não-fornecedor NÃO contesta. */
 describe('RBAC editais', () => {
   it('criar edital sem papel de gestão → 403', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     const res = await app.inject({
       method: 'POST', url: '/editais',
       headers: { 'x-user-id': 'forn1', 'x-papel': 'fornecedor' },
@@ -15,7 +15,7 @@ describe('RBAC editais', () => {
   });
 
   it('gestor cria edital → não é 403', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     const res = await app.inject({
       method: 'POST', url: '/editais',
       headers: { 'x-user-id': 'sec1', 'x-papel': 'secretaria' },
@@ -26,7 +26,7 @@ describe('RBAC editais', () => {
   });
 
   it('acatar contestação sem papel de resolução → 403', async () => {
-    const app = buildServer();
+    const app = await buildServer();
     const res = await app.inject({
       method: 'POST', url: '/contestacoes-cnae/qualquer/acatar',
       headers: { 'x-user-id': 'forn1', 'x-papel': 'fornecedor' },

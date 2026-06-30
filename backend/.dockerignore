@@ -9,7 +9,9 @@ coverage
 .gitignore
 Dockerfile
 .dockerignore
-test
+tests
+**/*.spec.ts
 **/*.test.ts
 vitest.config.ts
 eslint.config.js
+ARCHITECTURE.md

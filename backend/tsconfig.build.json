@@ -1,8 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "moduleResolution": "Node",
     "sourceMap": false
   },
-  "exclude": ["node_modules", "dist", "**/*.test.ts", "test/**"]
+  "exclude": ["node_modules", "dist", "tests", "**/*.spec.ts", "**/*.test.ts"]
 }

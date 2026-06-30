@@ -14,6 +14,9 @@ export default tseslint.config(
     },
     rules: {
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      // Permite o padrão de inicialização circular (ex.: fila ↔ caso de uso no composition root),
+      // em que a variável é lida por um closure antes de receber seu valor.
+      'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
     },
   },
 );

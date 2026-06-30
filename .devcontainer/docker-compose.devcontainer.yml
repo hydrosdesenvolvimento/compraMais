@@ -1,0 +1,13 @@
+# Override SOMENTE para o devcontainer (VS Code Dev Containers).
+#
+# Monta o monorepo inteiro em /workspaces/compraMais para que o editor
+# enxergue backend/ e frontend/ juntos, sem alterar o docker-compose.yml
+# raiz (que mantem o profile dev com bind mount por servico).
+#
+# Mantem o container do backend vivo enquanto o VS Code estiver conectado.
+services:
+  backend:
+    volumes:
+      - ..:/workspaces/compraMais:cached
+    working_dir: /workspaces/compraMais/backend
+    command: sleep infinity

@@ -1,0 +1,185 @@
+# docker-compose.yml UNICO do compraMais (PRJ-DEC-05).
+#
+# Profiles:
+#   - dev  : build local, bind mount e hot reload (docker compose --profile dev up)
+#   - prod : referencia imagem do GHCR + bloco deploy: para Docker Swarm
+#            (docker stack deploy -c docker-compose.yml compramais)
+#
+# IMPORTANTE sobre `deploy:`:
+#   O bloco `deploy:` (replicas, update_config, restart_policy, secrets) e
+#   IGNORADO por `docker compose up` e lido APENAS por `docker stack deploy`
+#   (Swarm). Por isso os servicos de prod servem de referencia de stack para
+#   o Portainer/Swarm fazerem pull do GHCR (PRJ-DEC-06), sem build em producao.
+#
+# Segredos (PRJ-DEC-07):
+#   - DEV : valores sensiveis vem do arquivo .env local (NAO versionado).
+#   - PROD: senha do banco via Docker secret (db_password) exposta como
+#           POSTGRES_PASSWORD_FILE=/run/secrets/db_password. Nunca em texto.
+
+x-db-env: &db-env
+  POSTGRES_DB: ${POSTGRES_DB:-compramais}
+  POSTGRES_USER: ${POSTGRES_USER:-compramais}
+
+services:
+  # ----------------------------------------------------------------------- #
+  # Banco PostgreSQL + PostGIS (baseline do DBA: PRJ-DEC-08)                 #
+  # Usado por ambos os profiles (dev e prod).                               #
+  # ----------------------------------------------------------------------- #
+  db:
+    image: postgis/postgis:16-3.4
+    profiles: ["dev", "prod"]
+    environment:
+      <<: *db-env
+      # DEV: senha vem do .env. PROD: usar *_FILE (ver bloco prod / secrets).
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-compramais} -d ${POSTGRES_DB:-compramais}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - compramais
+    deploy:
+      # Lido por `docker stack deploy` (Swarm). Banco e stateful: 1 replica.
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+    # Em PROD (Swarm), substituir POSTGRES_PASSWORD por *_FILE via secret:
+    # environment:
+    #   <<: *db-env
+    #   POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    # secrets:
+    #   - db_password
+
+  # ----------------------------------------------------------------------- #
+  # Backend Fastify (DEV): build local + bind mount + hot reload            #
+  # ----------------------------------------------------------------------- #
+  backend:
+    profiles: ["dev"]
+    build:
+      context: ./backend
+      target: build
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      HOST: 0.0.0.0
+      PORT: 3000
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-compramais}
+      POSTGRES_USER: ${POSTGRES_USER:-compramais}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+    volumes:
+      - ./backend:/app
+      - backend_node_modules:/app/node_modules
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - compramais
+
+  # ----------------------------------------------------------------------- #
+  # Frontend Vite (DEV): build local + bind mount + hot reload (HMR)        #
+  # ----------------------------------------------------------------------- #
+  frontend:
+    profiles: ["dev"]
+    build:
+      context: ./frontend
+      target: build
+    command: npm run dev
+    environment:
+      VITE_API_PROXY_TARGET: http://backend:3000
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - backend
+    networks:
+      - compramais
+
+  # ----------------------------------------------------------------------- #
+  # Backend Fastify (PROD): imagem do GHCR + deploy Swarm                   #
+  # Sem build em producao (PRJ-DEC-06): apenas pull da imagem publicada.    #
+  # ----------------------------------------------------------------------- #
+  backend-prod:
+    profiles: ["prod"]
+    image: ghcr.io/${GHCR_REPOSITORY:-OWNER/REPO}/backend:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-compramais}
+      POSTGRES_USER: ${POSTGRES_USER:-compramais}
+      # PROD: senha via Docker secret (nunca em texto / nunca versionada).
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://compramais.example}
+    secrets:
+      - db_password
+    networks:
+      - compramais
+    deploy:
+      # Lido por `docker stack deploy`. Servico stateless: replicas + rolling update.
+      replicas: 2
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  # ----------------------------------------------------------------------- #
+  # Frontend nginx (PROD): imagem do GHCR + deploy Swarm                    #
+  # ----------------------------------------------------------------------- #
+  frontend-prod:
+    profiles: ["prod"]
+    image: ghcr.io/${GHCR_REPOSITORY:-OWNER/REPO}/frontend:${IMAGE_TAG:-latest}
+    ports:
+      - "${FRONTEND_PUBLIC_PORT:-80}:8080"
+    depends_on:
+      - backend-prod
+    networks:
+      - compramais
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+volumes:
+  db_data:
+  backend_node_modules:
+  frontend_node_modules:
+
+networks:
+  compramais:
+    # Driver omitido de proposito: `docker compose up` (dev) cria como bridge;
+    # `docker stack deploy` (Swarm/prod) cria como overlay automaticamente.
+    # Definir driver fixo quebraria um dos dois ambientes.
+    attachable: true
+
+# Docker secrets (lidos por `docker stack deploy` em PROD).
+# Em dev, NAO use secrets: a senha vem do .env.
+secrets:
+  db_password:
+    # Em producao, criar previamente:
+    #   echo "<senha-forte>" | docker secret create db_password -
+    # ou referenciar um arquivo externo gerenciado pelo Portainer.
+    external: true

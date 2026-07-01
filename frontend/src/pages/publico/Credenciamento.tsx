@@ -438,7 +438,7 @@ function PassoDocumentos() {
                   <IconeUpload width={22} height={22} />
                 </div>
                 <div style={{ font: '600 14px var(--font-body)', color: 'var(--azul-800)' }}>
-                  Arraste o PDF aqui ou clique para selecionar
+                  Arraste o PDF aqui (upload será integrado posteriormente)
                 </div>
                 <div style={{ fontSize: 12.5, color: 'var(--cinza-400)', marginTop: 3 }}>
                   PDF até 10 MB · será comprimido para o SEI

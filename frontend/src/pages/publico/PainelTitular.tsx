@@ -20,8 +20,8 @@ export function PainelTitular({ fornecedorId }: { fornecedorId: string }) {
         <h2 style={{ fontSize: 16, marginBottom: 10 }}>Pendências</h2>
         {loadingPendencias ? <p data-cy="carregando-pendencias">Carregando…</p> : pendencias.length === 0 && <p data-cy="sem-pendencias">Nenhuma pendência.</p>}
         <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {pendencias.map((p) => (
-            <li key={`${p.tipo}-${p.referenciaId ?? ''}`} data-cy="pendencia" style={{ borderLeft: `3px solid var(--navy-700)`, paddingLeft: 12 }}>
+          {pendencias.map((p, i) => (
+            <li key={`${p.tipo}-${p.referenciaId ?? i}`} data-cy="pendencia" style={{ borderLeft: `3px solid var(--navy-700)`, paddingLeft: 12 }}>
               <strong>{p.tipo}</strong> — {p.motivo ?? '—'} <em>→ {p.proximoPasso}</em>
             </li>
           ))}

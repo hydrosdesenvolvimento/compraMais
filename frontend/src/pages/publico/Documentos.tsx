@@ -108,7 +108,7 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                   <button
                     type="button"
-                    title="Baixar"
+                    aria-label={`Baixar ${d.tipo}`}
                     style={{
                       width: 36, height: 36, border: '1px solid var(--border)', borderRadius: 8, background: '#fff',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cinza-700)',

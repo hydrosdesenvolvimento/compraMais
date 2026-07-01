@@ -42,6 +42,7 @@ export function AuthPanel() {
                 <div className="cnpj-row">
                   <input id="cnpj" data-cy="cnpj" className="input" inputMode="numeric" value={f.state.value} onChange={(e) => { cnpjMut.reset(); f.handleChange(mascaraCnpj(e.target.value)); }} placeholder="12.345.678/0001-90" />
                   <Botao data-cy="consultar" type="button" onClick={() => cnpjMut.mutate(f.state.value)} disabled={cnpjMut.isPending}>Consultar</Botao>
+                </div>
               </>
             )}
           </cadastro.Field>
@@ -78,6 +79,7 @@ export function AuthPanel() {
                     {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>Buscando endereço…</small>}
                     {cepMut.isSuccess && cepMut.data && <small data-cy="endereco" style={{ color: 'var(--sucesso)' }}>{cepMut.data.rua}, {cepMut.data.bairro} — {cepMut.data.cidade}/{cepMut.data.estado}</small>}
                     {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>CEP não encontrado</small>}
+                  </>
                 )}
               </cadastro.Field>
             </div>

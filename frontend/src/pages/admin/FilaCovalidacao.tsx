@@ -43,7 +43,7 @@ export function FilaCovalidacao({ fornecedorId }: { fornecedorId: string }) {
             <strong style={{ flex: 1 }}>{d.tipo}</strong>
             <Botao data-cy="aprovar" onClick={() => decidir.mutate({ docId: d.id, resultado: 'aprovado' })}>Aprovar</Botao>
             <input data-cy="motivo" className="input" style={{ maxWidth: 240 }} placeholder="Motivo (obrigatório p/ reprovar)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-            <Botao data-cy="reprovar" variante="secundario" onClick={() => decidir.mutate({ docId: d.id, resultado: 'reprovado' })}>Reprovar</Botao>
+            <Botao data-cy="reprovar" variante="secundario" onClick={() => decidir.mutate({ docId: d.id, resultado: 'reprovado' })} disabled={!motivo.trim() || decidir.isPending}>Reprovar</Botao>
           </li>
         ))}
       </ul>

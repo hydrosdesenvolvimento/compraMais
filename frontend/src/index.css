@@ -252,9 +252,14 @@ input[type="date"], input[type="number"], input[type="tel"], select, textarea {
    ========================================================================== */
 .auth { min-height: 100vh; display: flex; }
 .auth-aside { flex: 1; background: #fff; color: var(--azul-900); padding: 48px 56px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
-.auth-aside-inner { max-width: 560px; width: 100%; position: relative; z-index: 1; }
-.auth-brand-lockup { display: flex; align-items: center; gap: 16px; }
-.auth-brand-lockup .cm-brand-icon { width: 56px; height: 56px; border-radius: 14px; }
+/* Lockup institucional centralizado (mockup: mark + nome + subtítulo + tagline) */
+.auth-lockup { max-width: 560px; width: 100%; position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.auth-lockup-mark { width: 76px; height: 76px; border-radius: 18px; background: linear-gradient(135deg, var(--azul-700), var(--azul-900)); color: #fff; display: grid; place-items: center; box-shadow: var(--shadow-md); }
+.auth-lockup-name { margin-top: 22px; font-weight: 700; font-size: 42px; line-height: 1; letter-spacing: -0.022em; color: var(--azul-900); }
+.auth-lockup-eyebrow { margin-top: 10px; font-weight: 700; font-size: 13px; letter-spacing: 0.2em; color: var(--azul-600); }
+.auth-lockup-sub { margin-top: 14px; font-size: 16px; color: var(--cinza-700); }
+.auth-lockup-tags { margin-top: 22px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: center; font-weight: 600; font-size: 13px; letter-spacing: 0.02em; color: var(--azul-700); }
+.auth-lockup-tags i { color: var(--ambar-400); font-style: normal; }
 .auth-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 40px; background: linear-gradient(157deg, #0a2a52 0%, #0e3a6e 52%, #14467f 100%); position: relative; overflow: hidden; }
 .auth-card { width: 100%; max-width: 452px; position: relative; z-index: 1; background: #fff; color: var(--text-body); border-radius: 18px; box-shadow: 0 20px 48px rgba(8, 20, 42, .35); padding: 36px 34px; }
 .auth-tabs { display: flex; gap: 4px; background: var(--cinza-100); padding: 4px; border-radius: 10px; margin-bottom: 22px; }

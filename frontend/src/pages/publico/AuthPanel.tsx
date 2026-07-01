@@ -172,13 +172,15 @@ export function AuthPanel() {
               <label className="label" htmlFor="senha" style={{ marginBottom: 7 }}>Senha</label>
               <div style={{ position: 'relative', marginBottom: 16 }}>
                 <input id="senha" data-cy="senha" type={verSenha ? 'text' : 'password'} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="••••••••" style={{ ...inputEstilo, paddingRight: 44 }} />
-                <button type="button" onClick={() => setVerSenha((v) => !v)} aria-label={verSenha ? 'OCULTAR senha' : 'VER senha'}
+                <button type="button" onClick={() => setVerSenha((v) => !v)} aria-label={verSenha ? 'OCULTAR senha' : 'VER senha'} />
               </div>
             </>
           )}</formLogin.Field>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <button type="button" role="checkbox" aria-checked={manter} onClick={() => setManter((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: '500 13px var(--font-body)', color: 'var(--cinza-700)' }}>
+              Manter conectado
+            </button>
             <a href="#recuperar" style={{ font: '500 12.5px var(--font-body)', color: 'var(--azul-700)', textDecoration: 'none' }}>Esqueci minha senha</a>
           </div>
 

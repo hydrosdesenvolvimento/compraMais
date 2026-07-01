@@ -98,7 +98,6 @@ export function AppShell({
                 <div className="cm-menu-pop" style={{ width: 340 }} role="region" aria-label="Notificações">
                     <span style={{ font: '600 14px var(--font-body)', color: 'var(--azul-900)' }}>Notificações</span>
                     <span style={{ fontSize: 11, color: 'var(--cinza-400)' }}>Varredura diária</span>
-                  </div>
                   <div style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {notificacoes.length === 0 && (
                       <div style={{ padding: '16px 12px', fontSize: 13, color: 'var(--cinza-500)' }}>Nenhuma notificação no momento.</div>
@@ -139,7 +138,6 @@ export function AppShell({
                       <div style={{ font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>{usuario.nome}</div>
                       <div style={{ fontSize: 12, color: 'var(--cinza-500)', marginTop: 2 }}>{usuario.papel}{usuario.fantasia ? ` · ${usuario.fantasia}` : ''}</div>
                     </div>
-                  </div>
                   <div style={{ padding: 8 }}>
                     <button className="cm-menu-item" onClick={() => { setProfileOpen(false); navigate({ to: contaHref }); }}>
                       <IconeUsuario width={18} height={18} />Minha conta

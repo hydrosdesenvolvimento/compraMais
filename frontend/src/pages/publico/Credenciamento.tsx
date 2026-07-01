@@ -419,7 +419,7 @@ function PassoDocumentos() {
                   textAlign: 'center',
                   background: 'var(--bg-page)',
                   cursor: 'default',
-                }
+                }}
               >
                 <div
                   style={{

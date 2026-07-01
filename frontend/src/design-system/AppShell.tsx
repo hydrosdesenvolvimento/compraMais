@@ -132,9 +132,7 @@ export function AppShell({
             </button>
             {profileOpen && (
               <>
-                <div className="cm-menu-scrim" onClick={() => setProfileOpen(false)} />
-                <div className="cm-menu-pop" style={{ width: 272 }} role="menu">
-                  <div style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--divider)' }}>
+                <div className="cm-menu-pop" style={{ width: 272 }} role="region" aria-label="Menu do usuário">
                     <span className="cm-avatar-sm" style={{ width: 44, height: 44, fontSize: 16 }}>{usuario.iniciais}</span>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>{usuario.nome}</div>

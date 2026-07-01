@@ -46,6 +46,7 @@ export function Editais() {
           />
           <input
             className="input"
+            aria-label="Buscar editais"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
             placeholder="Buscar editais por número e nome…"

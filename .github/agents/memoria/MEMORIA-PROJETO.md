@@ -56,6 +56,7 @@
 | Registro tecnico do scaffolding | `docs/dev/registro-scaffolding.md` | Entregue 2026-06-27 | Senior Developer | Decisoes, ciclo TDD, como rodar dev/prod e handoff para QA |
 | Refresh de UI do Portal do Fornecedor | `frontend/src/index.css`, `frontend/src/design-system/*`, `frontend/src/pages/publico/*` (+ `Inicio.tsx`, `Credenciamento.tsx` novos), `frontend/src/router.tsx` | Implementado e validado (tsc/lint/vitest/build) 2026-07-01 (PRJ-DEC-10) | Tech Lead (orquestrando) | Fiel ao mockup AI-UI-Design; `data-cy` preservados; E2E Cypress pendente de execucao real |
 | Mockup de referencia (fonte da verdade visual) | `spec/AI-UI-Design/Compra Mais - Portal do Fornecedor .html` | Recebido do solicitante | Solicitante/UX | Design compilado navy/ambar; base do PRJ-DEC-10 |
+| Validacao QA-frontend do refresh de UI | `docs/qa/2026-07-01-validacao-frontend-refresh-portal-fornecedor.md` | Emitida 2026-07-01: **Aprovado com ressalvas** | QA Expert | Gates estaticos verdes + contrato data-cy preservado; ressalvas: E2E Cypress real (CI) e Design System formal (UX). Alimenta a aprovacao final do Tech Lead (PR #12) |
 
 ## Backlog de projeto
 

@@ -1,22 +1,37 @@
 import { useState } from 'react';
-import { Botao } from '../../design-system/components';
+import { Botao, Campo } from '../../design-system/components';
+import { consultarCnpj, consultarCep, mascaraCnpj, mascaraCep, type DadosCnpj } from '../../lib/br';
 
 /**
- * AuthPanel (UX-DR2) — conteúdo do formulário (entra dentro do AuthLayout). Abas Entrar/Criar conta;
- * cadastro por CNPJ com "Consultar" e fallback manual VISÍVEL quando a Receita cai.
+ * AuthPanel (UX-DR2) — conteúdo do formulário (dentro do AuthLayout). Abas Entrar/Criar conta.
+ * Cadastro por CNPJ (BrasilAPI): autofill de razão social, porte, situação e QSA (sócios), com
+ * autofill de endereço por CEP; fallback manual VISÍVEL quando a Receita cai.
  */
 export function AuthPanel() {
   const [aba, setAba] = useState<'entrar' | 'criar'>('criar');
   const [cnpj, setCnpj] = useState('');
   const [indisponivel, setIndisponivel] = useState(false);
-  const [dados, setDados] = useState<{ razaoSocial?: string } | null>(null);
+  const [dados, setDados] = useState<DadosCnpj | null>(null);
+
+  const [cep, setCep] = useState('');
+  const [endereco, setEndereco] = useState({ rua: '', bairro: '', cidade: '', uf: '' });
+  const [cepStatus, setCepStatus] = useState<'idle' | 'buscando' | 'ok' | 'erro'>('idle');
 
   async function consultar() {
-    const res = await fetch('/fornecedores/consulta-cnpj', {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ cnpj }),
-    });
-    if (res.status === 503) { setIndisponivel(true); return; }
-    setDados(await res.json());
+    setIndisponivel(false);
+    const d = await consultarCnpj(cnpj);
+    if (!d) { setIndisponivel(true); setDados(null); return; }
+    setDados(d);
+  }
+
+  async function buscarCep(valor: string) {
+    if (valor.replace(/\D/g, '').length !== 8) return;
+    setCepStatus('buscando');
+    try {
+      const e = await consultarCep(valor);
+      if (e) { setEndereco({ rua: e.rua, bairro: e.bairro, cidade: e.cidade, uf: e.estado }); setCepStatus('ok'); }
+      else setCepStatus('erro');
+    } catch { setCepStatus('erro'); }
   }
 
   return (
@@ -32,15 +47,44 @@ export function AuthPanel() {
           <p style={{ color: 'var(--texto-suave)', margin: '0 0 22px' }}>Informe o CNPJ da empresa. Os dados são validados na Receita Federal automaticamente.</p>
           <label className="label" htmlFor="cnpj">CNPJ da empresa</label>
           <div className="cnpj-row">
-            <input id="cnpj" data-cy="cnpj" className="input" value={cnpj} onChange={(e) => setCnpj(e.target.value)} placeholder="12.345.678/0001-90" />
+            <input id="cnpj" data-cy="cnpj" className="input" inputMode="numeric" value={cnpj} onChange={(e) => setCnpj(mascaraCnpj(e.target.value))} placeholder="12.345.678/0001-90" />
             <Botao data-cy="consultar" onClick={consultar}>Consultar</Botao>
           </div>
-          {dados?.razaoSocial && (
-            <div style={{ marginTop: 14 }}>
-              <label className="label">Razão social</label>
-              <input data-cy="razao-social" className="input" readOnly value={dados.razaoSocial} />
+
+          {dados && (
+            <div style={{ marginTop: 16 }}>
+              <Campo label="Razão social"><input data-cy="razao-social" className="input" readOnly value={dados.razaoSocial} /></Campo>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <Campo label="Porte"><input className="input" readOnly value={dados.porte} /></Campo>
+                <Campo label="Situação"><input className="input" readOnly value={dados.situacaoCadastral} /></Campo>
+              </div>
+
+              {dados.socios && dados.socios.length > 0 && (
+                <div style={{ marginBottom: 14 }}>
+                  <label className="label">Quadro societário (QSA)</label>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {dados.socios.map((s, i) => (
+                      <li key={i} data-cy="socio" style={{ background: 'var(--divisor)', border: '1px solid var(--borda)', borderRadius: 8, padding: '8px 12px', fontSize: 13 }}>
+                        <strong>{s.nome}</strong>
+                        <span style={{ color: 'var(--texto-suave)' }}> — {s.qualificacao}{s.documento ? ` · ${s.documento}` : ''}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <label className="label" htmlFor="cep">CEP</label>
+              <input
+                id="cep" data-cy="cep" className="input" inputMode="numeric" placeholder="00000-000" value={cep}
+                onChange={(e) => { const m = mascaraCep(e.target.value); setCep(m); setCepStatus('idle'); if (m.replace(/\D/g, '').length === 8) void buscarCep(m); }}
+                onBlur={(e) => void buscarCep(e.target.value)}
+              />
+              {cepStatus === 'buscando' && <small style={{ color: 'var(--texto-suave)' }}>Buscando endereço…</small>}
+              {cepStatus === 'ok' && <small data-cy="endereco" style={{ color: 'var(--sucesso)' }}>{endereco.rua}, {endereco.bairro} — {endereco.cidade}/{endereco.uf}</small>}
+              {cepStatus === 'erro' && <small style={{ color: 'var(--erro)' }}>CEP não encontrado</small>}
             </div>
           )}
+
           {indisponivel && (
             <p style={{ marginTop: 14 }}>
               <a data-cy="preencher-manual" className="link-amber" href="#manual">Receita Federal indisponível? Preencher manualmente</a>

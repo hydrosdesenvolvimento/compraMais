@@ -9,6 +9,7 @@ interface CnpjBrasilApi {
   descricao_situacao_cadastral?: string;
   cnae_fiscal?: number;
   cnaes_secundarios?: Array<{ codigo?: number }>;
+  qsa?: Array<{ nome_socio?: string; qualificacao_socio?: string; cnpj_cpf_do_socio?: string }>;
 }
 
 /**
@@ -53,11 +54,15 @@ export function mapearCnpj(r: CnpjBrasilApi): DadosCnpj {
   const secundarios = (r.cnaes_secundarios ?? [])
     .filter((c) => c.codigo)
     .map((c) => ({ codigoSubclasse: subclasse(c.codigo), tipo: 'secundario' as const }));
+  const socios = (r.qsa ?? [])
+    .filter((s) => s.nome_socio)
+    .map((s) => ({ nome: s.nome_socio ?? '', qualificacao: s.qualificacao_socio ?? '', documento: s.cnpj_cpf_do_socio ?? '' }));
   return {
     razaoSocial: r.razao_social ?? '',
     porte: mapearPorte(r.porte),
     cnaes: [principal, ...secundarios],
     situacaoCadastral: mapearSituacao(r.descricao_situacao_cadastral),
+    ...(socios.length ? { socios } : {}),
   };
 }
 

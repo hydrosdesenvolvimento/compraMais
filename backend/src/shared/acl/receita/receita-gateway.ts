@@ -4,11 +4,18 @@
  */
 export type Frescor = 'verificado' | 'stale' | 'indisponivel';
 
+export interface Socio {
+  readonly nome: string;
+  readonly qualificacao: string;
+  readonly documento: string; // CPF/CNPJ do sócio (mascarado pela fonte, ex.: ***550179**)
+}
+
 export interface DadosCnpj {
   readonly razaoSocial: string;
   readonly porte: string;
   readonly cnaes: ReadonlyArray<{ codigoSubclasse: string; tipo: 'principal' | 'secundario' }>;
   readonly situacaoCadastral: 'ativa' | 'baixada' | 'inapta' | 'suspensa';
+  readonly socios?: ReadonlyArray<Socio>; // quadro societário (QSA), quando a fonte fornece
 }
 
 export interface ResultadoProveniente<T> {

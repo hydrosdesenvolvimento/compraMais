@@ -67,7 +67,7 @@ services:
       target: build
     # Reconcilia node_modules (volume nomeado) com o package.json a cada subida — evita erro quando
     # novas deps entram sem recriar o volume (ex.: tsx, swagger). Rápido quando já está atualizado.
-    command: sh -c "npm install --no-package-lock --no-audit --no-fund && npm run dev"
+    command: sh -c "npm ci --no-audit --no-fund && exec npm run dev"
     environment:
       NODE_ENV: development
       HOST: 0.0.0.0

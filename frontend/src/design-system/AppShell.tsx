@@ -1,19 +1,21 @@
-import type { ReactNode } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import type { ComponentProps, ReactNode } from 'react';
+import { Link, useRouterState } from '@tanstack/react-router';
 import { IconePredio, IconeBusca, IconeSino, IconeChevron, IconeMenu } from './icons';
 import { Avatar } from './components';
 
-export interface ItemMenu { rotulo: string; href: string; icone: ReactNode; cy?: string }
+type MenuLinkTo = ComponentProps<typeof Link>['to'];
+
+export interface ItemMenu { rotulo: string; href: MenuLinkTo; icone: ReactNode; cy?: string }
 export interface UsuarioChip { nome: string; papel: string; iniciais: string }
 
 /**
  * Shell do portal (design de referência): sidebar branca com marca + menu + rodapé, e topbar com
- * busca, notificações e chip do usuário. O conteúdo da rota entra na área principal.
+ * busca, notificações e chip do usuário. Navegação via TanStack Router (Link + estado da rota).
  */
 export function AppShell({ menu, usuario, children, rodape = 'Versão 2.0 · MVP FIEAC' }: {
   menu: ItemMenu[]; usuario: UsuarioChip; children: ReactNode; rodape?: string;
 }) {
-  const { pathname } = useLocation();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <div className="shell" data-cy="app-shell">
       <aside className="sidebar">

@@ -1,55 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { api } from '../../lib/api';
+import { Botao } from '../../design-system/components';
 
 /**
- * Fila de contestações de CNAE de um edital (US2 / Painel Admin). Secretaria/CPL acata (corrige) ou
- * recusa (com motivo). Acatar reavalia a vitrine; recusar exige justificativa (FR-008/009).
+ * Fila de contestações de CNAE de um edital (US2 / Painel Admin). Query da lista; acatar (corrige) e
+ * recusar (com motivo) via Mutations com invalidação. Recusar exige justificativa (FR-008/009).
  */
-interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
-
 export function FilaContestacoes({ editalId }: { editalId: string }) {
-  const [itens, setItens] = useState<ContestacaoView[]>([]);
   const [novoCnae, setNovoCnae] = useState('');
   const [motivo, setMotivo] = useState('');
+  const qc = useQueryClient();
+  const chave = ['contestacoes', editalId] as const;
 
-  async function carregar() {
-    const r = await fetch(`/editais/${editalId}/contestacoes-cnae`);
-    setItens(await r.json());
-  }
-  useEffect(() => { void carregar(); }, [editalId]);
-
-  async function acatar(id: string) {
-    await fetch(`/contestacoes-cnae/${id}/acatar`, {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ novoCnaes: novoCnae.split(',').map((c) => c.trim()).filter(Boolean) }),
-    });
-    setNovoCnae(''); await carregar();
-  }
-  async function recusar(id: string) {
-    await fetch(`/contestacoes-cnae/${id}/recusar`, {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ motivo }),
-    });
-    setMotivo(''); await carregar();
-  }
+  const { data: itens = [] } = useQuery({ queryKey: chave, queryFn: () => api.contestacoesDoEdital(editalId) });
+  const invalidar = () => qc.invalidateQueries({ queryKey: chave });
+  const acatar = useMutation({ mutationFn: (id: string) => api.acatarContestacao(id, novoCnae.split(',').map((c) => c.trim()).filter(Boolean)), onSuccess: () => { setNovoCnae(''); void invalidar(); } });
+  const recusar = useMutation({ mutationFn: (id: string) => api.recusarContestacao(id, motivo), onSuccess: () => { setMotivo(''); void invalidar(); } });
 
   return (
-    <section style={{ padding: 24 }}>
-      <h2>Contestações de CNAE</h2>
+    <div className="stack">
+      <div><h1 className="page-title">Contestações de CNAE</h1><p className="page-sub">Acate (corrige o edital) ou recuse (com motivo) as contestações.</p></div>
       {itens.length === 0 && <p data-cy="sem-contestacoes">Sem contestações.</p>}
-      <ul>
+      <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {itens.map((c) => (
-          <li key={c.id} data-cy="contestacao">
-            {c.cnae} — <em>{c.situacao}</em> — {c.justificativa}
+          <li key={c.id} data-cy="contestacao" className="card">
+            <div>{c.cnae} — <em style={{ color: 'var(--texto-suave)' }}>{c.situacao}</em> — {c.justificativa}</div>
             {c.situacao === 'pendente' && (
-              <span>
-                <input data-cy="novo-cnae" placeholder="Novo(s) CNAE(s)" value={novoCnae} onChange={(e) => setNovoCnae(e.target.value)} />
-                <button data-cy="acatar" onClick={() => acatar(c.id)}>Acatar</button>
-                <input data-cy="motivo-recusa" placeholder="Motivo (obrigatório p/ recusar)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-                <button data-cy="recusar" onClick={() => recusar(c.id)}>Recusar</button>
-              </span>
+              <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                <input data-cy="novo-cnae" className="input" style={{ maxWidth: 200 }} placeholder="Novo(s) CNAE(s)" value={novoCnae} onChange={(e) => setNovoCnae(e.target.value)} />
+                <Botao data-cy="acatar" onClick={() => acatar.mutate(c.id)}>Acatar</Botao>
+                <input data-cy="motivo-recusa" className="input" style={{ maxWidth: 240 }} placeholder="Motivo (obrigatório p/ recusar)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+                <Botao data-cy="recusar" variante="secundario" onClick={() => recusar.mutate(c.id)} disabled={!motivo.trim() || recusar.isPending}>Recusar</Botao>
             )}
           </li>
         ))}
       </ul>
-    </section>
+    </div>
   );
 }

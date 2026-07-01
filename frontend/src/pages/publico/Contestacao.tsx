@@ -1,25 +1,23 @@
-import { useEffect, useState } from 'react';
-import { cores } from '../../design-system/tokens';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../lib/api';
 
-/** Contestação/regularização (US3 / FR-012) — pendências num só lugar, com próximo passo. */
-interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; documentoId?: string; bloqueioId?: string }
-
+/** Contestação/regularização (US3 / FR-012) — pendências num só lugar, com próximo passo. Query. */
 export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
-  const [pendencias, setPendencias] = useState<Pendencia[]>([]);
-  useEffect(() => { fetch(`/fornecedores/${fornecedorId}/pendencias`).then((r) => r.json()).then(setPendencias); }, [fornecedorId]);
+  const { data: pendencias = [], isLoading } = useQuery({ queryKey: ['pendencias', fornecedorId], queryFn: () => api.pendencias(fornecedorId) });
 
+  if (isLoading) return <p data-cy="carregando">Carregando…</p>;
   if (pendencias.length === 0) return <p data-cy="sem-pendencias">Nenhuma pendência. Tudo certo!</p>;
   return (
-    <main style={{ padding: 32 }}>
-      <h1>Minhas pendências</h1>
-      <ul>
+    <div className="stack">
+      <div><h1 className="page-title">Meus credenciamentos</h1><p className="page-sub">Pendências e próximos passos para regularizar seu credenciamento.</p></div>
+      <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
         {pendencias.map((p, i) => (
-          <li key={i} data-cy="pendencia" style={{ borderLeft: `3px solid ${cores.erro}`, paddingLeft: 12 }}>
+          <li key={i} data-cy="pendencia" className="card" style={{ borderLeft: `3px solid var(--erro)` }}>
             <strong>{p.tipo}</strong> — {p.motivo ?? '—'}
-            <div style={{ color: cores.azul700 }}>{p.proximoPasso}</div>
+            <div style={{ color: 'var(--navy-700)', marginTop: 4 }}>{p.proximoPasso}</div>
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

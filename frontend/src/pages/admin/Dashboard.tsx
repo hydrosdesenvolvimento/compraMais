@@ -1,27 +1,26 @@
-import { useEffect, useState } from 'react';
-import { cores } from '../../design-system/tokens';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '../../lib/api';
 
-/** Dashboard administrativo — funil de pendentes (Épico 9 / US1). Reusa o Design System. */
-interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
-
+/** Dashboard administrativo — funil de pendentes (Épico 9 / US1). Dados via TanStack Query. */
 export function Dashboard() {
-  const [f, setF] = useState<Funil | null>(null);
-  useEffect(() => { fetch('/admin/dashboard').then((r) => r.json()).then(setF); }, []);
-  if (!f) return <p data-cy="carregando">Carregando…</p>;
-  const Card = ({ titulo, valor }: { titulo: string; valor: number }) => (
-    <div data-cy="card" style={{ border: `1px solid ${cores.azul700}`, borderRadius: 8, padding: 16, minWidth: 160 }}>
-      <div style={{ fontSize: 28, color: cores.azul700 }}>{valor}</div><div>{titulo}</div>
+  const { data: f, isLoading } = useQuery({ queryKey: ['admin-dashboard'], queryFn: api.dashboardAdmin });
+  if (isLoading || !f) return <p data-cy="carregando">Carregando…</p>;
+
+  const CardKpi = ({ titulo, valor }: { titulo: string; valor: number }) => (
+    <div data-cy="card" className="card" style={{ minWidth: 170 }}>
+      <div style={{ fontSize: 30, color: 'var(--navy-700)', fontWeight: 700 }}>{valor}</div>
+      <div style={{ color: 'var(--texto-suave)' }}>{titulo}</div>
     </div>
   );
   return (
-    <main style={{ padding: 32 }}>
-      <h1>Painel administrativo</h1>
+    <div className="stack">
+      <div><h1 className="page-title">Painel administrativo</h1><p className="page-sub">Funil de pendências da CPL / SMGA.</p></div>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-        <Card titulo="Documentos pendentes" valor={f.documentosPendentes} />
-        <Card titulo="Editais publicados" valor={f.editaisPorSituacao.publicado} />
-        <Card titulo="Editais em rascunho" valor={f.editaisPorSituacao.rascunho} />
-        <Card titulo="Bloqueios ativos" valor={f.bloqueiosAtivos} />
+        <CardKpi titulo="Documentos pendentes" valor={f.documentosPendentes} />
+        <CardKpi titulo="Editais publicados" valor={f.editaisPorSituacao.publicado} />
+        <CardKpi titulo="Editais em rascunho" valor={f.editaisPorSituacao.rascunho} />
+        <CardKpi titulo="Bloqueios ativos" valor={f.bloqueiosAtivos} />
       </div>
-    </main>
+    </div>
   );
 }

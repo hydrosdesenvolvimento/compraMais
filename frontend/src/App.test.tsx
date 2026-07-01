@@ -3,19 +3,14 @@ import { render, screen } from '@testing-library/react';
 import App from './App';
 
 /**
- * Teste de fumaça do shell App. A rota inicial ('/') redireciona para '/cadastro' (AuthLayout +
- * AuthPanel), que não dispara fetch na montagem. Verifica a marca institucional e o formulário de
- * cadastro por CNPJ.
+ * Teste de fumaça: TanStack Router (hash) redireciona a rota inicial ('/') para '/cadastro'
+ * (AuthLayout + AuthPanel). O redirect/render é assíncrono → findBy. QueryClientProvider já embutido
+ * em App. O AuthPanel não dispara fetch na montagem.
  */
 describe('App (Portal do Fornecedor)', () => {
-  it('renderiza a marca institucional Compra Mais', () => {
+  it('redireciona para /cadastro e renderiza a marca + o formulário de CNPJ', async () => {
     render(<App />);
-    expect(screen.getAllByText(/Compra Mais/i).length).toBeGreaterThan(0);
-  });
-
-  it('renderiza o formulário de cadastro por CNPJ', () => {
-    const { container } = render(<App />);
-    expect(container.querySelector('[data-cy="cnpj"]')).not.toBeNull();
-    expect(container.querySelector('[data-cy="aba-criar"]')).not.toBeNull();
+    expect((await screen.findAllByText(/Compra Mais/i)).length).toBeGreaterThan(0);
+    expect(await screen.findByPlaceholderText('12.345.678/0001-90')).toBeInTheDocument();
   });
 });

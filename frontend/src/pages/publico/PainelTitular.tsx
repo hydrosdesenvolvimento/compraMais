@@ -1,52 +1,45 @@
-import { useEffect, useState } from 'react';
-import { cores } from '../../design-system/tokens';
+import { useState } from 'react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { api } from '../../lib/api';
+import { Card, Botao } from '../../design-system/components';
 
 /**
- * Painel do titular (Épico 7): tela única de pendências consolidadas + solicitação de direitos LGPD.
+ * Painel do titular (Épico 7): pendências consolidadas (Query) + solicitação de direitos LGPD (Mutation).
  * Direitos exigem o próprio titular (§V) — o backend bloqueia procurador (403).
  */
-interface Pendencia { tipo: string; referenciaId: string; motivo: string | null; proximoPasso: string }
-
 export function PainelTitular({ fornecedorId }: { fornecedorId: string }) {
-  const [pendencias, setPendencias] = useState<Pendencia[]>([]);
+  const { data: pendencias = [] } = useQuery({ queryKey: ['pendencias-consolidadas', fornecedorId], queryFn: () => api.pendenciasConsolidadas(fornecedorId) });
   const [tipo, setTipo] = useState<'acesso' | 'correcao' | 'exclusao'>('acesso');
-  const [ok, setOk] = useState(false);
-
-  useEffect(() => {
-    fetch(`/fornecedores/${fornecedorId}/pendencias-consolidadas`).then((r) => r.json()).then(setPendencias);
-  }, [fornecedorId]);
-
-  async function solicitar() {
-    const r = await fetch('/titular/solicitacoes', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ tipo }) });
-    setOk(r.ok);
-  }
+  const solicitar = useMutation({ mutationFn: () => api.solicitarDireito(tipo) });
 
   return (
-    <main style={{ padding: 32 }}>
-      <h1>Meu painel</h1>
+    <div className="stack">
+      <div><h1 className="page-title">Meu painel</h1><p className="page-sub">Pendências consolidadas e seus direitos de titular (LGPD).</p></div>
 
-      <section>
-        <h2>Pendências</h2>
+      <Card>
+        <h2 style={{ fontSize: 16, marginBottom: 10 }}>Pendências</h2>
         {pendencias.length === 0 && <p data-cy="sem-pendencias">Nenhuma pendência.</p>}
-        <ul>
+        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {pendencias.map((p) => (
-            <li key={`${p.tipo}-${p.referenciaId}`} data-cy="pendencia" style={{ borderLeft: `3px solid ${cores.azul700}`, paddingLeft: 12 }}>
+            <li key={`${p.tipo}-${p.referenciaId ?? ''}`} data-cy="pendencia" style={{ borderLeft: `3px solid var(--navy-700)`, paddingLeft: 12 }}>
               <strong>{p.tipo}</strong> — {p.motivo ?? '—'} <em>→ {p.proximoPasso}</em>
             </li>
           ))}
         </ul>
-      </section>
+      </Card>
 
-      <section>
-        <h2>Meus direitos (LGPD)</h2>
-        <select data-cy="tipo-direito" value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)}>
-          <option value="acesso">Acesso aos meus dados</option>
-          <option value="correcao">Correção de dado</option>
-          <option value="exclusao">Exclusão</option>
-        </select>
-        <button data-cy="solicitar-direito" onClick={solicitar}>Solicitar</button>
-        {ok && <p data-cy="direito-ok">Solicitação registrada.</p>}
-      </section>
-    </main>
+      <Card>
+        <h2 style={{ fontSize: 16, marginBottom: 10 }}>Meus direitos (LGPD)</h2>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <select data-cy="tipo-direito" value={tipo} onChange={(e) => setTipo(e.target.value as typeof tipo)}>
+            <option value="acesso">Acesso aos meus dados</option>
+            <option value="correcao">Correção de dado</option>
+            <option value="exclusao">Exclusão</option>
+          </select>
+          <Botao data-cy="solicitar-direito" onClick={() => solicitar.mutate()} disabled={solicitar.isPending}>Solicitar</Botao>
+        </div>
+        {solicitar.isSuccess && <p data-cy="direito-ok" style={{ color: 'var(--sucesso)' }}>Solicitação registrada.</p>}
+      </Card>
+    </div>
   );
 }

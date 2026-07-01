@@ -8,7 +8,7 @@ import { Card, Botao } from '../../design-system/components';
  * Direitos exigem o próprio titular (§V) — o backend bloqueia procurador (403).
  */
 export function PainelTitular({ fornecedorId }: { fornecedorId: string }) {
-  const { data: pendencias = [] } = useQuery({ queryKey: ['pendencias-consolidadas', fornecedorId], queryFn: () => api.pendenciasConsolidadas(fornecedorId) });
+  const { data: pendencias = [], isLoading: loadingPendencias } = useQuery({ queryKey: ['pendencias-consolidadas', fornecedorId], queryFn: () => api.pendenciasConsolidadas(fornecedorId) });
   const [tipo, setTipo] = useState<'acesso' | 'correcao' | 'exclusao'>('acesso');
   const solicitar = useMutation({ mutationFn: () => api.solicitarDireito(tipo) });
 
@@ -18,7 +18,7 @@ export function PainelTitular({ fornecedorId }: { fornecedorId: string }) {
 
       <Card>
         <h2 style={{ fontSize: 16, marginBottom: 10 }}>Pendências</h2>
-        {pendencias.length === 0 && <p data-cy="sem-pendencias">Nenhuma pendência.</p>}
+        {loadingPendencias ? <p data-cy="carregando-pendencias">Carregando…</p> : pendencias.length === 0 && <p data-cy="sem-pendencias">Nenhuma pendência.</p>}
         <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
           {pendencias.map((p) => (
             <li key={`${p.tipo}-${p.referenciaId ?? ''}`} data-cy="pendencia" style={{ borderLeft: `3px solid var(--navy-700)`, paddingLeft: 12 }}>

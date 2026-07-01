@@ -4,6 +4,8 @@ import { AuthLayout } from './design-system/AuthLayout';
 import { IconeInicio, IconeEditais, IconeCredenciamentos, IconeDocumentos, IconeDemandas } from './design-system/icons';
 
 import { AuthPanel } from './pages/publico/AuthPanel';
+import { Inicio } from './pages/publico/Inicio';
+import { Credenciamento } from './pages/publico/Credenciamento';
 import { Editais } from './pages/publico/Editais';
 import { ContestarCnae } from './pages/publico/ContestarCnae';
 import { Documentos } from './pages/publico/Documentos';
@@ -31,7 +33,7 @@ const MENU_FORNECEDOR: ItemMenu[] = [
   { rotulo: 'Documentos', href: '/documentos', cy: 'nav-documentos', icone: <IconeDocumentos {...ico} /> },
   { rotulo: 'Demandas distribuídas', href: '/transparencia', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
 ];
-const USUARIO_FORNECEDOR: UsuarioChip = { nome: 'Vale do Acre Uniformes', papel: 'Procurador', iniciais: 'VA' };
+const USUARIO_FORNECEDOR: UsuarioChip = { nome: 'Marcos Albuquerque', papel: 'Procurador', iniciais: 'VA', fantasia: 'Vale do Acre Uniformes' };
 
 const MENU_ADMIN: ItemMenu[] = [
   { rotulo: 'Painel', href: '/admin/dashboard', cy: 'nav-admin', icone: <IconeInicio {...ico} /> },
@@ -48,16 +50,17 @@ const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', bef
 const cadastroRoute = createRoute({ getParentRoute: () => rootRoute, path: '/cadastro', component: () => <AuthLayout><AuthPanel /></AuthLayout> });
 
 const fornecedorLayout = createRoute({ getParentRoute: () => rootRoute, id: 'fornecedor', component: () => <AppShell menu={MENU_FORNECEDOR} usuario={USUARIO_FORNECEDOR}><Outlet /></AppShell> });
-const rInicio = createRoute({ getParentRoute: () => fornecedorLayout, path: '/inicio', component: () => <MinhaConta fornecedor={demoFornecedor} fornecedorId={DEMO_FORNECEDOR_ID} ultimaSync={demoSync} /> });
+const rInicio = createRoute({ getParentRoute: () => fornecedorLayout, path: '/inicio', component: Inicio });
 const rMinhaConta = createRoute({ getParentRoute: () => fornecedorLayout, path: '/minha-conta', component: () => <MinhaConta fornecedor={demoFornecedor} fornecedorId={DEMO_FORNECEDOR_ID} ultimaSync={demoSync} /> });
 const rEditais = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais', component: Editais });
+const rCredenciamento = createRoute({ getParentRoute: () => fornecedorLayout, path: '/credenciamento', component: Credenciamento });
 const rContestarCnae = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais/contestar', component: () => <ContestarCnae editalId={DEMO_EDITAL_ID} /> });
 const rContestacao = createRoute({ getParentRoute: () => fornecedorLayout, path: '/contestacao', component: () => <Contestacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
 const rDocumentos = createRoute({ getParentRoute: () => fornecedorLayout, path: '/documentos', component: () => <Documentos fornecedorId={DEMO_FORNECEDOR_ID} /> });
 const rTransparencia = createRoute({ getParentRoute: () => fornecedorLayout, path: '/transparencia', component: Transparencia });
 const rTitular = createRoute({ getParentRoute: () => fornecedorLayout, path: '/titular', component: () => <PainelTitular fornecedorId={DEMO_FORNECEDOR_ID} /> });
 
-const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <AppShell menu={MENU_ADMIN} usuario={USUARIO_ADMIN} rodape="Painel administrativo · CPL / SMGA"><Outlet /></AppShell> });
+const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <AppShell menu={MENU_ADMIN} usuario={USUARIO_ADMIN} rodape="Painel administrativo · CPL / SMGA" notificacoes={[]} contaHref="/admin/dashboard"><Outlet /></AppShell> });
 const rAdminIndex = createRoute({ getParentRoute: () => adminLayout, path: '/admin', beforeLoad: () => { throw redirect({ to: '/admin/dashboard' }); } });
 const rAdminDash = createRoute({ getParentRoute: () => adminLayout, path: '/admin/dashboard', component: Dashboard });
 const rAdminCoval = createRoute({ getParentRoute: () => adminLayout, path: '/admin/covalidacao', component: () => <FilaCovalidacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
@@ -70,7 +73,7 @@ const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '*', 
 const routeTree = rootRoute.addChildren([
   indexRoute,
   cadastroRoute,
-  fornecedorLayout.addChildren([rInicio, rMinhaConta, rEditais, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
+  fornecedorLayout.addChildren([rInicio, rMinhaConta, rEditais, rCredenciamento, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
   adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminAudit]),
   naoEncontrada,
 ]);

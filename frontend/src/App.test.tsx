@@ -11,6 +11,6 @@ describe('App (Portal do Fornecedor)', () => {
   it('redireciona para /cadastro e renderiza a marca + o formulário de CNPJ', async () => {
     render(<App />);
     expect((await screen.findAllByText(/Compra Mais/i)).length).toBeGreaterThan(0);
-    expect(await screen.findByPlaceholderText('12.345.678/0001-90')).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText('00.000.000/0000-00')).toBeInTheDocument();
   });
 });

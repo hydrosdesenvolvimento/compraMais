@@ -13,6 +13,7 @@ const CNPJ_BRASILAPI = {
   cnae_fiscal: 1412601,
   cnaes_secundarios: [{ codigo: 4781400 }],
   qsa: [{ nome_socio: 'ALAN CARLOS GUEDES DE OLIVEIRA', qualificacao_socio: 'Sócio-Administrador', cnpj_cpf_do_socio: '***550179**' }],
+  logradouro: 'SAUN QUADRA 5', numero: 'SN', complemento: '', bairro: 'Asa Norte', municipio: 'Brasília', uf: 'DF', cep: '70040-912',
 };
 const CEP_BRASILAPI = {
   cep: '69900-062', state: 'AC', city: 'Rio Branco', neighborhood: 'Centro', street: 'Rua Benjamin Constant',
@@ -29,6 +30,7 @@ describe('BrasilAPI — CNPJ (Receita)', () => {
     expect(d.cnaes[1]).toEqual({ codigoSubclasse: '4781400', tipo: 'secundario' });
     expect(d.cnaes[0]?.codigoSubclasse).toMatch(/^\d{7}$/);
     expect(d.socios?.[0]).toEqual({ nome: 'ALAN CARLOS GUEDES DE OLIVEIRA', qualificacao: 'Sócio-Administrador', documento: '***550179**' });
+    expect(d.endereco).toEqual({ logradouro: 'SAUN QUADRA 5', numero: 'SN', complemento: '', bairro: 'Asa Norte', cidade: 'Brasília', uf: 'DF', cep: '70040912' });
   });
 
   it('consulta verificada quando a BrasilAPI responde 200', async () => {

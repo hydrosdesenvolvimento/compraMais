@@ -1,5 +1,5 @@
 import CircuitBreaker from 'opossum';
-import type { DadosCnpj, ReceitaGateway, ResultadoProveniente } from './receita-gateway.js';
+import type { DadosCnpj, EnderecoEmpresa, ReceitaGateway, ResultadoProveniente } from './receita-gateway.js';
 import { obterJson, type Fetcher } from '../http.js';
 
 /** Resposta crua da BrasilAPI (GET /api/cnpj/v1/{cnpj}) — só os campos que mapeamos. */
@@ -10,6 +10,13 @@ interface CnpjBrasilApi {
   cnae_fiscal?: number;
   cnaes_secundarios?: Array<{ codigo?: number }>;
   qsa?: Array<{ nome_socio?: string; qualificacao_socio?: string; cnpj_cpf_do_socio?: string }>;
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  municipio?: string;
+  uf?: string;
+  cep?: string;
 }
 
 /**
@@ -57,12 +64,27 @@ export function mapearCnpj(r: CnpjBrasilApi): DadosCnpj {
   const socios = (r.qsa ?? [])
     .filter((s) => s.nome_socio)
     .map((s) => ({ nome: s.nome_socio ?? '', qualificacao: s.qualificacao_socio ?? '', documento: s.cnpj_cpf_do_socio ?? '' }));
+  const endereco = mapearEndereco(r);
   return {
     razaoSocial: r.razao_social ?? '',
     porte: mapearPorte(r.porte),
     cnaes: [principal, ...secundarios],
     situacaoCadastral: mapearSituacao(r.descricao_situacao_cadastral),
     ...(socios.length ? { socios } : {}),
+    ...(endereco ? { endereco } : {}),
+  };
+}
+
+function mapearEndereco(r: CnpjBrasilApi): EnderecoEmpresa | undefined {
+  if (!r.logradouro && !r.municipio && !r.cep) return undefined;
+  return {
+    logradouro: r.logradouro ?? '',
+    numero: r.numero ?? '',
+    complemento: r.complemento ?? '',
+    bairro: r.bairro ?? '',
+    cidade: r.municipio ?? '',
+    uf: r.uf ?? '',
+    cep: (r.cep ?? '').replace(/\D/g, ''),
   };
 }
 

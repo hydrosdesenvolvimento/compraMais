@@ -10,12 +10,23 @@ export interface Socio {
   readonly documento: string; // CPF/CNPJ do sócio (mascarado pela fonte, ex.: ***550179**)
 }
 
+export interface EnderecoEmpresa {
+  readonly logradouro: string;
+  readonly numero: string;
+  readonly complemento: string;
+  readonly bairro: string;
+  readonly cidade: string;
+  readonly uf: string;
+  readonly cep: string;
+}
+
 export interface DadosCnpj {
   readonly razaoSocial: string;
   readonly porte: string;
   readonly cnaes: ReadonlyArray<{ codigoSubclasse: string; tipo: 'principal' | 'secundario' }>;
   readonly situacaoCadastral: 'ativa' | 'baixada' | 'inapta' | 'suspensa';
   readonly socios?: ReadonlyArray<Socio>; // quadro societário (QSA), quando a fonte fornece
+  readonly endereco?: EnderecoEmpresa; // endereço oficial da Receita, quando a fonte fornece
 }
 
 export interface ResultadoProveniente<T> {

@@ -43,6 +43,7 @@ function demoSeed(): Map<string, DadosCnpj> {
       cnaes: [{ codigoSubclasse: '1412601', tipo: 'principal' }],
       situacaoCadastral: 'ativa',
       socios: [{ nome: 'Marcos Albuquerque', qualificacao: 'Sócio-Administrador', documento: '***550179**' }],
+      endereco: { logradouro: 'Rua Benjamin Constant', numero: '100', complemento: '', bairro: 'Centro', cidade: 'Rio Branco', uf: 'AC', cep: '69900062' },
     }],
   ]);
 }

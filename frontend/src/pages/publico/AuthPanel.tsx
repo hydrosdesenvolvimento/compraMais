@@ -1,27 +1,42 @@
 import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
 import { Botao, Campo } from '../../design-system/components';
-import { consultarCnpj, consultarCep, mascaraCnpj, mascaraCep } from '../../lib/br';
+import { consultarCnpj, consultarCep, login, mascaraCnpj, mascaraCep, type EnderecoEmpresa } from '../../lib/br';
+import { salvarToken } from '../../lib/auth';
 
 /**
  * AuthPanel (UX-DR2) — formulário do AuthLayout. Abas Entrar/Criar conta (TanStack Form).
- * Cadastro por CNPJ (Query mutation): autofill de razão social, porte, situação e QSA (sócios),
- * com autofill de endereço por CEP; fallback manual VISÍVEL quando a Receita cai.
+ * Cadastro por CNPJ (Query mutation): autofill de razão social, porte, situação, QSA (sócios) e
+ * ENDEREÇO oficial da Receita; autofill de endereço por CEP; fallback manual quando a Receita cai.
+ * Login local (POST /auth/login → JWT): guarda o token e navega para /inicio.
  */
+function formatarEndereco(e: EnderecoEmpresa): string {
+  const linha1 = [e.logradouro, e.numero].filter(Boolean).join(', ') + (e.complemento ? ` — ${e.complemento}` : '');
+  const linha2 = [e.bairro, [e.cidade, e.uf].filter(Boolean).join('/')].filter(Boolean).join(', ');
+  const cep = e.cep ? ` · CEP ${e.cep}` : '';
+  return `${linha1} — ${linha2}${cep}`;
+}
+
 export function AuthPanel() {
+  const navigate = useNavigate();
   const [aba, setAba] = useState<'entrar' | 'criar'>('criar');
+
   const cnpjMut = useMutation({ mutationFn: (cnpj: string) => consultarCnpj(cnpj) });
   const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
   const dados = cnpjMut.data ?? null;
   const indisponivel = (cnpjMut.isSuccess && !cnpjMut.data) || cnpjMut.isError;
 
-  const cadastro = useForm({ defaultValues: { cnpj: '', cep: '' }, onSubmit: async () => { /* criar conta — próxima fase */ } });
-  const login = useForm({ defaultValues: { email: '', senha: '' }, onSubmit: async () => { /* POST /auth/login — próxima fase */ } });
+  const loginMut = useMutation({
+    mutationFn: (v: { email: string; senha: string }) => login(v.email, v.senha),
+    onSuccess: (r) => { salvarToken(r.token); void navigate({ to: '/inicio' }); },
+  });
 
-  function buscarCep(valor: string) {
-    if (valor.replace(/\D/g, '').length === 8) cepMut.mutate(valor);
-  }
+  const cadastro = useForm({ defaultValues: { cnpj: '', cep: '' }, onSubmit: async () => { /* criar conta — próxima fase */ } });
+  const formLogin = useForm({ defaultValues: { email: '', senha: '' }, onSubmit: async ({ value }) => { await loginMut.mutateAsync(value).catch(() => { /* erro exibido via loginMut.isError */ }); } });
+
+  function buscarCep(valor: string) { if (valor.replace(/\D/g, '').length === 8) cepMut.mutate(valor); }
 
   return (
     <>
@@ -55,6 +70,12 @@ export function AuthPanel() {
                 <Campo label="Situação"><input className="input" readOnly value={dados.situacaoCadastral} /></Campo>
               </div>
 
+              {dados.endereco && (
+                <Campo label="Endereço (Receita Federal)">
+                  <input data-cy="endereco-empresa" className="input" readOnly value={formatarEndereco(dados.endereco)} />
+                </Campo>
+              )}
+
               {dados.socios && dados.socios.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   <label className="label">Quadro societário (QSA)</label>
@@ -72,7 +93,7 @@ export function AuthPanel() {
               <cadastro.Field name="cep">
                 {(f) => (
                   <>
-                    <label className="label" htmlFor="cep">CEP</label>
+                    <label className="label" htmlFor="cep">CEP (buscar outro endereço)</label>
                     <input id="cep" data-cy="cep" className="input" inputMode="numeric" placeholder="00000-000" value={f.state.value}
                       onChange={(e) => { const m = mascaraCep(e.target.value); cepMut.reset(); f.handleChange(m); buscarCep(m); }}
                       onBlur={(e) => buscarCep(e.target.value)} />
@@ -93,12 +114,13 @@ export function AuthPanel() {
           <Botao data-cy="criar-conta" variante="primario" className="btn-block" type="submit" style={{ marginTop: 24 }}>Criar conta de fornecedor</Botao>
         </form>
       ) : (
-        <form onSubmit={(e) => { e.preventDefault(); void login.handleSubmit(); }}>
+        <form onSubmit={(e) => { e.preventDefault(); void formLogin.handleSubmit(); }}>
           <h2 style={{ fontSize: 24, marginBottom: 6 }}>Entrar</h2>
           <p style={{ color: 'var(--texto-suave)', margin: '0 0 22px' }}>Acesse com seu e-mail e senha.</p>
-          <login.Field name="email">{(f) => <><label className="label" htmlFor="email">E-mail</label><input id="email" data-cy="email" className="input" type="email" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="voce@empresa.com" style={{ marginBottom: 14 }} /></>}</login.Field>
-          <login.Field name="senha">{(f) => <><label className="label" htmlFor="senha">Senha</label><input id="senha" data-cy="senha" className="input" type="password" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="••••••••" /></>}</login.Field>
-          <Botao data-cy="entrar" variante="primario" className="btn-block" type="submit" style={{ marginTop: 24 }}>Entrar</Botao>
+          <formLogin.Field name="email">{(f) => <><label className="label" htmlFor="email">E-mail</label><input id="email" data-cy="email" className="input" type="email" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="voce@empresa.com" style={{ marginBottom: 14 }} /></>}</formLogin.Field>
+          <formLogin.Field name="senha">{(f) => <><label className="label" htmlFor="senha">Senha</label><input id="senha" data-cy="senha" className="input" type="password" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="••••••••" /></>}</formLogin.Field>
+          {loginMut.isError && <p data-cy="login-erro" style={{ color: 'var(--erro)', marginTop: 12 }}>Credenciais inválidas.</p>}
+          <Botao data-cy="entrar" variante="primario" className="btn-block" type="submit" style={{ marginTop: 24 }} disabled={loginMut.isPending}>{loginMut.isPending ? 'Entrando…' : 'Entrar'}</Botao>
         </form>
       )}
     </>

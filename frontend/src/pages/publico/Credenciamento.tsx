@@ -418,8 +418,8 @@ function PassoDocumentos() {
                   padding: 24,
                   textAlign: 'center',
                   background: 'var(--bg-page)',
-                  cursor: 'pointer',
-                }}
+                  cursor: 'default',
+                }
               >
                 <div
                   style={{

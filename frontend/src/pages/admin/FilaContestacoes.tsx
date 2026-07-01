@@ -31,8 +31,7 @@ export function FilaContestacoes({ editalId }: { editalId: string }) {
                 <input data-cy="novo-cnae" className="input" style={{ maxWidth: 200 }} placeholder="Novo(s) CNAE(s)" value={novoCnae} onChange={(e) => setNovoCnae(e.target.value)} />
                 <Botao data-cy="acatar" onClick={() => acatar.mutate(c.id)}>Acatar</Botao>
                 <input data-cy="motivo-recusa" className="input" style={{ maxWidth: 240 }} placeholder="Motivo (obrigatório p/ recusar)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-                <Botao data-cy="recusar" variante="secundario" onClick={() => recusar.mutate(c.id)}>Recusar</Botao>
-              </div>
+                <Botao data-cy="recusar" variante="secundario" onClick={() => recusar.mutate(c.id)} disabled={!motivo.trim() || recusar.isPending}>Recusar</Botao>
             )}
           </li>
         ))}

@@ -1,9 +1,11 @@
-import type { ReactNode } from 'react';
+import type { ComponentProps, ReactNode } from 'react';
 import { Link, useRouterState } from '@tanstack/react-router';
 import { IconePredio, IconeBusca, IconeSino, IconeChevron, IconeMenu } from './icons';
 import { Avatar } from './components';
 
-export interface ItemMenu { rotulo: string; href: string; icone: ReactNode; cy?: string }
+type MenuLinkTo = ComponentProps<typeof Link>['to'];
+
+export interface ItemMenu { rotulo: string; href: MenuLinkTo; icone: ReactNode; cy?: string }
 export interface UsuarioChip { nome: string; papel: string; iniciais: string }
 
 /**
@@ -29,7 +31,7 @@ export function AppShell({ menu, usuario, children, rodape = 'Versão 2.0 · MVP
           {menu.map((m) => {
             const ativo = pathname === m.href || pathname.startsWith(m.href + '/');
             return (
-              <Link key={m.href} to={m.href as never} data-cy={m.cy} className={`nav-item ${ativo ? 'active' : ''}`} aria-current={ativo ? 'page' : undefined}>
+              <Link key={m.href} to={m.href} data-cy={m.cy} className={`nav-item ${ativo ? 'active' : ''}`} aria-current={ativo ? 'page' : undefined}>
                 <span className="nav-icon">{m.icone}</span>{m.rotulo}
               </Link>
             );

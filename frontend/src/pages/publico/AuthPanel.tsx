@@ -3,28 +3,55 @@ import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { Botao, Campo } from '../../design-system/components';
-import { consultarCnpj, consultarCep, login, mascaraCnpj, mascaraCep, type EnderecoEmpresa } from '../../lib/br';
+import { consultarCnpj, consultarCep, login, mascaraCnpj, mascaraCep, type DadosCnpj, type EnderecoCep } from '../../lib/br';
 import { salvarToken } from '../../lib/auth';
 
 /**
  * AuthPanel (UX-DR2) — formulário do AuthLayout. Abas Entrar/Criar conta (TanStack Form).
  * Cadastro por CNPJ (Query mutation): autofill de razão social, porte, situação, QSA (sócios) e
- * ENDEREÇO oficial da Receita; autofill de endereço por CEP; fallback manual quando a Receita cai.
+ * ENDEREÇO oficial da Receita — o CEP é preenchido automaticamente e a empresa completa o NÚMERO e
+ * o COMPLEMENTO; autofill de logradouro por CEP; fallback manual quando a Receita cai.
  * Login local (POST /auth/login → JWT): guarda o token e navega para /inicio.
  */
-function formatarEndereco(e: EnderecoEmpresa): string {
-  const linha1 = [e.logradouro, e.numero].filter(Boolean).join(', ') + (e.complemento ? ` — ${e.complemento}` : '');
-  const linha2 = [e.bairro, [e.cidade, e.uf].filter(Boolean).join('/')].filter(Boolean).join(', ');
-  const cep = e.cep ? ` · CEP ${e.cep}` : '';
-  return `${linha1} — ${linha2}${cep}`;
+
+/** Logradouro exibido (read-only): usa o CEP consultado se houver, senão o endereço da Receita. */
+function linhaLogradouro(dados: DadosCnpj | null, cep: EnderecoCep | null): string {
+  const src = cep
+    ? { logradouro: cep.rua, bairro: cep.bairro, cidade: cep.cidade, uf: cep.estado }
+    : dados?.endereco ?? null;
+  if (!src) return '';
+  const via = [src.logradouro, src.bairro].filter(Boolean).join(' — ');
+  const cidade = [src.cidade, src.uf].filter(Boolean).join('/');
+  return [via, cidade].filter(Boolean).join(', ');
+}
+
+/** Número "S/N" da Receita não é um número real que a empresa registraria — trata como vazio. */
+function numeroInicial(numero: string): string {
+  return /^\s*s\/?n\s*$/i.test(numero) ? '' : numero;
 }
 
 export function AuthPanel() {
   const navigate = useNavigate();
   const [aba, setAba] = useState<'entrar' | 'criar'>('criar');
 
-  const cnpjMut = useMutation({ mutationFn: (cnpj: string) => consultarCnpj(cnpj) });
   const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
+
+  const cadastro = useForm({
+    defaultValues: { cnpj: '', cep: '', numero: '', complemento: '' },
+    onSubmit: async () => { /* criar conta — próxima fase */ },
+  });
+
+  const cnpjMut = useMutation({
+    mutationFn: (cnpj: string) => consultarCnpj(cnpj),
+    onSuccess: (d) => {
+      cepMut.reset();
+      if (d?.endereco) {
+        cadastro.setFieldValue('cep', mascaraCep(d.endereco.cep));
+        cadastro.setFieldValue('numero', numeroInicial(d.endereco.numero));
+        cadastro.setFieldValue('complemento', d.endereco.complemento);
+      }
+    },
+  });
   const dados = cnpjMut.data ?? null;
   const indisponivel = (cnpjMut.isSuccess && !cnpjMut.data) || cnpjMut.isError;
 
@@ -33,7 +60,6 @@ export function AuthPanel() {
     onSuccess: (r) => { salvarToken(r.token); void navigate({ to: '/inicio' }); },
   });
 
-  const cadastro = useForm({ defaultValues: { cnpj: '', cep: '' }, onSubmit: async () => { /* criar conta — próxima fase */ } });
   const formLogin = useForm({ defaultValues: { email: '', senha: '' }, onSubmit: async ({ value }) => { await loginMut.mutateAsync(value).catch(() => { /* erro exibido via loginMut.isError */ }); } });
 
   function buscarCep(valor: string) { if (valor.replace(/\D/g, '').length === 8) cepMut.mutate(valor); }
@@ -70,10 +96,32 @@ export function AuthPanel() {
                 <Campo label="Situação"><input className="input" readOnly value={dados.situacaoCadastral} /></Campo>
               </div>
 
-              {dados.endereco && (
-                <Campo label="Endereço (Receita Federal)">
-                  <input data-cy="endereco-empresa" className="input" readOnly value={formatarEndereco(dados.endereco)} />
-                </Campo>
+              {(dados.endereco || cepMut.data) && (
+                <div style={{ marginBottom: 14 }}>
+                  <label className="label">Endereço</label>
+                  <cadastro.Field name="cep">
+                    {(f) => (
+                      <>
+                        <input id="cep" data-cy="cep" className="input" inputMode="numeric" placeholder="00000-000" value={f.state.value}
+                          onChange={(e) => { const m = mascaraCep(e.target.value); cepMut.reset(); f.handleChange(m); buscarCep(m); }}
+                          onBlur={(e) => buscarCep(e.target.value)} style={{ marginBottom: 8 }} />
+                        {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>Buscando endereço…</small>}
+                        {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>CEP não encontrado</small>}
+                      </>
+                    )}
+                  </cadastro.Field>
+
+                  <input data-cy="endereco-empresa" className="input" readOnly value={linhaLogradouro(dados, cepMut.data ?? null)} style={{ marginBottom: 8 }} />
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
+                    <cadastro.Field name="numero">
+                      {(f) => <Campo label="Número"><input data-cy="numero" className="input" inputMode="numeric" placeholder="Nº" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} /></Campo>}
+                    </cadastro.Field>
+                    <cadastro.Field name="complemento">
+                      {(f) => <Campo label="Complemento"><input data-cy="complemento" className="input" placeholder="Sala, andar, bloco… (opcional)" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} /></Campo>}
+                    </cadastro.Field>
+                  </div>
+                </div>
               )}
 
               {dados.socios && dados.socios.length > 0 && (
@@ -89,20 +137,6 @@ export function AuthPanel() {
                   </ul>
                 </div>
               )}
-
-              <cadastro.Field name="cep">
-                {(f) => (
-                  <>
-                    <label className="label" htmlFor="cep">CEP (buscar outro endereço)</label>
-                    <input id="cep" data-cy="cep" className="input" inputMode="numeric" placeholder="00000-000" value={f.state.value}
-                      onChange={(e) => { const m = mascaraCep(e.target.value); cepMut.reset(); f.handleChange(m); buscarCep(m); }}
-                      onBlur={(e) => buscarCep(e.target.value)} />
-                    {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>Buscando endereço…</small>}
-                    {cepMut.isSuccess && cepMut.data && <small data-cy="endereco" style={{ color: 'var(--sucesso)' }}>{cepMut.data.rua}, {cepMut.data.bairro} — {cepMut.data.cidade}/{cepMut.data.estado}</small>}
-                    {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>CEP não encontrado</small>}
-                  </>
-                )}
-              </cadastro.Field>
             </div>
           )}
 

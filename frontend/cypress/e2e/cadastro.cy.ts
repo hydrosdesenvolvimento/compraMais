@@ -17,7 +17,7 @@ const CNPJ_OK = {
   fonte: 'Receita', timestamp: '2026-06-30T00:00:00Z', frescor: 'verificado',
 };
 const CEP_OK = {
-  valor: { cep: '69900062', estado: 'AC', cidade: 'Rio Branco', bairro: 'Centro', rua: 'Rua Benjamin Constant' },
+  valor: { cep: '01001000', estado: 'SP', cidade: 'São Paulo', bairro: 'Sé', rua: 'Praça da Sé' },
   fonte: 'BrasilAPI', timestamp: '2026-06-30T00:00:00Z', frescor: 'verificado',
 };
 const CNPJ_TESTE = '12345678000190';
@@ -33,17 +33,21 @@ describe('Cadastro do fornecedor (US1) — CNPJ → QSA → endereço → CEP', 
     cy.get('[data-cy=razao-social]').should('have.value', 'Confecções Vale do Acre Ltda');
     cy.get('[data-cy=socio]').should('have.length', 2);
     cy.get('[data-cy=endereco-empresa]').invoke('val').should('include', 'Rio Branco').and('include', 'AC');
+    // CEP preenchido a partir do CNPJ; número/complemento editáveis pela empresa
+    cy.get('[data-cy=cep]').should('have.value', '69900-062');
+    cy.get('[data-cy=numero]').should('not.be.disabled').clear().type('250').should('have.value', '250');
+    cy.get('[data-cy=complemento]').should('not.be.disabled').type('Sala 3').should('have.value', 'Sala 3');
   });
 
-  it('autopreenche o endereço pelo CEP (BrasilAPI)', () => {
+  it('substitui o logradouro ao consultar outro CEP (BrasilAPI)', () => {
     cy.intercept('POST', '/fornecedores/consulta-cnpj', { statusCode: 200, body: CNPJ_OK });
     cy.intercept('GET', '/fornecedores/consulta-cep/*', { statusCode: 200, body: CEP_OK }).as('cep');
     cy.visit('/#/cadastro');
     cy.get('[data-cy=cnpj]').type(CNPJ_TESTE);
     cy.get('[data-cy=consultar]').click();
-    cy.get('[data-cy=cep]').type('69900062');
+    cy.get('[data-cy=cep]').clear().type('01001000');
     cy.wait('@cep');
-    cy.get('[data-cy=endereco]').should('contain', 'Rio Branco').and('contain', 'AC');
+    cy.get('[data-cy=endereco-empresa]').invoke('val').should('include', 'São Paulo').and('include', 'SP');
   });
 
   it('exibe fallback manual quando a Receita está indisponível (503)', () => {

@@ -73,12 +73,11 @@ export function AuthPanel() {
                   <>
                     <label className="label" htmlFor="cep">CEP</label>
                     <input id="cep" data-cy="cep" className="input" inputMode="numeric" placeholder="00000-000" value={f.state.value}
-                      onChange={(e) => { const m = mascaraCep(e.target.value); f.handleChange(m); buscarCep(m); }}
+                      onChange={(e) => { const m = mascaraCep(e.target.value); cepMut.reset(); f.handleChange(m); buscarCep(m); }}
                       onBlur={(e) => buscarCep(e.target.value)} />
                     {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>Buscando endereço…</small>}
                     {cepMut.isSuccess && cepMut.data && <small data-cy="endereco" style={{ color: 'var(--sucesso)' }}>{cepMut.data.rua}, {cepMut.data.bairro} — {cepMut.data.cidade}/{cepMut.data.estado}</small>}
                     {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>CEP não encontrado</small>}
-                  </>
                 )}
               </cadastro.Field>
             </div>

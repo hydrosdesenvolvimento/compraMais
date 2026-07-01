@@ -181,10 +181,7 @@ export function AuthPanel() {
           )}</formLogin.Field>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <button type="button" onClick={() => setManter((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: '500 13px var(--font-body)', color: 'var(--cinza-700)' }}>
-              <span style={{ width: 18, height: 18, borderRadius: 5, border: '1.5px solid var(--border-strong)', background: manter ? 'var(--azul-700)' : '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700 }}>{manter ? '✓' : ''}</span>
-              Manter conectado
-            </button>
+            <button type="button" role="checkbox" aria-checked={manter} onClick={() => setManter((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: '500 13px var(--font-body)', color: 'var(--cinza-700)' }}>
             <a href="#recuperar" style={{ font: '500 12.5px var(--font-body)', color: 'var(--azul-700)', textDecoration: 'none' }}>Esqueci minha senha</a>
           </div>
 

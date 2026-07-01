@@ -1,5 +1,6 @@
 import { useState, type ComponentProps, type ReactNode } from 'react';
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
+import { limparToken } from '../lib/auth';
 import {
   IconePredio, IconeBusca, IconeSino, IconeChevron, IconeMenu,
   IconeUsuario, IconeSair, IconeRelogio, IconeEditais,
@@ -143,7 +144,7 @@ export function AppShell({
                     <button className="cm-menu-item" onClick={() => { setProfileOpen(false); navigate({ to: contaHref }); }}>
                       <IconeUsuario width={18} height={18} />Minha conta
                     </button>
-                    <button className="cm-menu-item danger" data-cy="sair" onClick={() => { setProfileOpen(false); navigate({ to: '/cadastro' }); }}>
+                    <button className="cm-menu-item danger" data-cy="sair" onClick={() => { setProfileOpen(false); limparToken(); navigate({ to: '/cadastro' }); }}>
                       <IconeSair width={18} height={18} />Sair
                     </button>
                   </div>

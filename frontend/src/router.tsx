@@ -65,7 +65,7 @@ const rAdminEditais = createRoute({ getParentRoute: () => adminLayout, path: '/a
 const rAdminContest = createRoute({ getParentRoute: () => adminLayout, path: '/admin/contestacoes', component: () => <FilaContestacoes editalId={DEMO_EDITAL_ID} /> });
 const rAdminAudit = createRoute({ getParentRoute: () => adminLayout, path: '/admin/auditoria', component: ConsultaAuditoria });
 
-const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '$', beforeLoad: () => { throw redirect({ to: '/cadastro' }); } });
+const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '*', beforeLoad: () => { throw redirect({ to: '/cadastro' }); } });
 
 const routeTree = rootRoute.addChildren([
   indexRoute,

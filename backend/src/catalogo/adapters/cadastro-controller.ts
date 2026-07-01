@@ -2,21 +2,33 @@ import type { FastifyInstance } from 'fastify';
 import type { CadastrarFornecedor } from '../application/cadastrar-fornecedor.js';
 import type { GerirConta } from '../application/gerir-conta.js';
 import type { ReceitaGateway } from '../../shared/acl/receita/receita-gateway.js';
+import type { CepGateway } from '../../shared/acl/cep/cep-gateway.js';
 
 /**
  * Controller (camada de Adaptadores). Traduz HTTP ↔ casos de uso. Sem regra de negócio aqui.
- * Erros de domínio viram envelope { codigo, mensagem }.
+ * Erros de domínio viram envelope { codigo, mensagem }. CNPJ e CEP consultam a BrasilAPI (via ACL).
  */
 export function registrarRotasCadastro(app: FastifyInstance, deps: {
   cadastrar: CadastrarFornecedor;
   conta: GerirConta;
   receita: ReceitaGateway;
+  cep: CepGateway;
 }): void {
   app.post('/fornecedores/consulta-cnpj', async (req, reply) => {
     const { cnpj } = req.body as { cnpj: string };
     const r = await deps.receita.consultarCnpj(cnpj);
     if (r.frescor === 'indisponivel') {
       return reply.code(503).send({ codigo: 'RECEITA_INDISPONIVEL', mensagem: 'Receita indisponível — preencha manualmente', frescor: r.frescor });
+    }
+    return reply.send(r);
+  });
+
+  // Consulta de CEP (BrasilAPI) — autofill de endereço no cadastro/conta.
+  app.get('/fornecedores/consulta-cep/:cep', async (req, reply) => {
+    const { cep } = req.params as { cep: string };
+    const r = await deps.cep.consultarCep(cep);
+    if (!r.valor) {
+      return reply.code(404).send({ codigo: 'CEP_NAO_ENCONTRADO', mensagem: 'CEP não encontrado', frescor: r.frescor });
     }
     return reply.send(r);
   });

@@ -94,9 +94,7 @@ export function AppShell({
             </button>
             {notifOpen && (
               <>
-                <div className="cm-menu-scrim" onClick={() => setNotifOpen(false)} />
-                <div className="cm-menu-pop" style={{ width: 340 }} role="menu">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 16px', borderBottom: '1px solid var(--divider)' }}>
+                <div className="cm-menu-pop" style={{ width: 340 }} role="region" aria-label="Notificações">
                     <span style={{ font: '600 14px var(--font-body)', color: 'var(--azul-900)' }}>Notificações</span>
                     <span style={{ fontSize: 11, color: 'var(--cinza-400)' }}>Varredura diária</span>
                   </div>

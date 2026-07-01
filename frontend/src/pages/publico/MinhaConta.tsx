@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Card, Pill, Avatar, Botao, Campo } from '../../design-system/components';
 import { IconeSync, IconeCadeado } from '../../design-system/icons';
+import { mascaraCpf, mascaraCep, validarCpf, consultarCep } from '../../lib/br';
 
 /**
  * "Minha conta" (UX-DR4 / RN009 / RF018) — dashboard do fornecedor conforme o design de referência.
- * Dados oficiais da Receita em SOMENTE LEITURA; só Nome Fantasia/Endereço/Telefone editáveis.
+ * Dados oficiais da Receita em SOMENTE LEITURA; editáveis com autofill de CEP (BrasilAPI) e CPF do
+ * responsável (máscara + validação de dígitos — CPF não tem consulta pública).
  */
 export interface MinhaContaProps {
   fornecedor: { razaoSocial: string; cnpj: string; porte: string };
@@ -49,15 +52,67 @@ export function MinhaConta({ fornecedor, ultimaSync, onSincronizar }: MinhaConta
         </div>
       </Card>
 
-      <Card>
-        <h3 style={{ fontSize: 16, marginBottom: 14 }}>Dados editáveis</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14 }}>
-          <Campo label="Nome Fantasia"><input className="input" name="nomeFantasia" placeholder="Nome Fantasia" /></Campo>
-          <Campo label="Endereço"><input className="input" name="endereco" placeholder="Endereço" /></Campo>
-          <Campo label="Telefone"><input className="input" name="telefone" placeholder="(68) 0000-0000" /></Campo>
-        </div>
-        <Botao variante="primario" style={{ marginTop: 8 }}>Salvar alterações</Botao>
-      </Card>
+      <DadosEditaveis />
     </div>
+  );
+}
+
+/** Formulário editável com autofill de CEP (BrasilAPI) e CPF do responsável (máscara + validação). */
+function DadosEditaveis() {
+  const [cep, setCep] = useState('');
+  const [endereco, setEndereco] = useState({ rua: '', bairro: '', cidade: '', uf: '' });
+  const [cepStatus, setCepStatus] = useState<'idle' | 'buscando' | 'ok' | 'erro'>('idle');
+  const [cpf, setCpf] = useState('');
+
+  const cpfDigitos = cpf.replace(/\D/g, '');
+  const cpfValido = cpfDigitos.length === 11 ? validarCpf(cpf) : null;
+
+  async function buscarCep(valor: string) {
+    if (valor.replace(/\D/g, '').length !== 8) return;
+    setCepStatus('buscando');
+    try {
+      const e = await consultarCep(valor);
+      if (e) { setEndereco({ rua: e.rua, bairro: e.bairro, cidade: e.cidade, uf: e.estado }); setCepStatus('ok'); }
+      else setCepStatus('erro');
+    } catch { setCepStatus('erro'); }
+  }
+
+  return (
+    <Card>
+      <h3 style={{ fontSize: 16, marginBottom: 14 }}>Dados editáveis</h3>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14 }}>
+        <Campo label="Nome Fantasia"><input className="input" name="nomeFantasia" placeholder="Nome Fantasia" /></Campo>
+
+        <Campo label="CEP">
+          <input
+            className="input" data-cy="cep" inputMode="numeric" placeholder="00000-000" value={cep}
+            onChange={(e) => { const m = mascaraCep(e.target.value); setCep(m); setCepStatus('idle'); if (m.replace(/\D/g, '').length === 8) void buscarCep(m); }}
+            onBlur={(e) => void buscarCep(e.target.value)}
+          />
+          {cepStatus === 'buscando' && <small style={{ color: 'var(--texto-suave)' }}>Buscando endereço…</small>}
+          {cepStatus === 'ok' && <small style={{ color: 'var(--sucesso)' }}>Endereço preenchido pela BrasilAPI</small>}
+          {cepStatus === 'erro' && <small style={{ color: 'var(--erro)' }}>CEP não encontrado</small>}
+        </Campo>
+
+        <Campo label="Logradouro"><input className="input" data-cy="rua" placeholder="Rua / Avenida" value={endereco.rua} onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })} /></Campo>
+        <Campo label="Bairro"><input className="input" data-cy="bairro" placeholder="Bairro" value={endereco.bairro} onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })} /></Campo>
+        <Campo label="Cidade"><input className="input" data-cy="cidade" placeholder="Cidade" value={endereco.cidade} onChange={(e) => setEndereco({ ...endereco, cidade: e.target.value })} /></Campo>
+        <Campo label="UF"><input className="input" data-cy="uf" placeholder="UF" maxLength={2} value={endereco.uf} onChange={(e) => setEndereco({ ...endereco, uf: e.target.value.toUpperCase() })} /></Campo>
+
+        <Campo label="Telefone"><input className="input" name="telefone" placeholder="(68) 0000-0000" /></Campo>
+
+        <Campo label="CPF do responsável">
+          <input
+            className="input" data-cy="cpf" inputMode="numeric" placeholder="000.000.000-00" value={cpf}
+            onChange={(e) => setCpf(mascaraCpf(e.target.value))}
+            aria-invalid={cpfValido === false}
+            style={cpfValido === false ? { borderColor: 'var(--erro)' } : cpfValido ? { borderColor: 'var(--sucesso)' } : undefined}
+          />
+          {cpfValido === true && <small data-cy="cpf-ok" style={{ color: 'var(--sucesso)' }}>CPF válido</small>}
+          {cpfValido === false && <small data-cy="cpf-erro" style={{ color: 'var(--erro)' }}>CPF inválido</small>}
+        </Campo>
+      </div>
+      <Botao variante="primario" style={{ marginTop: 8 }}>Salvar alterações</Botao>
+    </Card>
   );
 }

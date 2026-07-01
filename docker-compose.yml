@@ -65,7 +65,9 @@ services:
     build:
       context: ./backend
       target: build
-    command: npm run dev
+    # Reconcilia node_modules (volume nomeado) com o package.json a cada subida — evita erro quando
+    # novas deps entram sem recriar o volume (ex.: tsx, swagger). Rápido quando já está atualizado.
+    command: sh -c "npm install --no-package-lock --no-audit --no-fund && npm run dev"
     environment:
       NODE_ENV: development
       HOST: 0.0.0.0
@@ -108,7 +110,9 @@ services:
     build:
       context: ./frontend
       target: build
-    command: npm run dev
+    # Reconcilia node_modules (volume nomeado) com o package.json a cada subida — evita erro quando
+    # novas deps entram sem recriar o volume (ex.: @tanstack/*). Rápido quando já está atualizado.
+    command: sh -c "npm install --no-package-lock --no-audit --no-fund && npm run dev"
     environment:
       VITE_API_PROXY_TARGET: http://backend:3000
     volumes:

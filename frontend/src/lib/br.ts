@@ -56,12 +56,14 @@ export async function consultarCep(cep: string): Promise<EnderecoCep | null> {
 }
 
 export interface SocioCnpj { nome: string; qualificacao: string; documento: string }
+export interface EnderecoEmpresa { logradouro: string; numero: string; complemento: string; bairro: string; cidade: string; uf: string; cep: string }
 export interface DadosCnpj {
   razaoSocial: string;
   porte: string;
   situacaoCadastral: string;
   cnaes: Array<{ codigoSubclasse: string; tipo: string }>;
   socios?: SocioCnpj[];
+  endereco?: EnderecoEmpresa;
 }
 
 /** Consulta o CNPJ no backend (POST /fornecedores/consulta-cnpj → BrasilAPI). null = indisponível (503). */
@@ -72,4 +74,13 @@ export async function consultarCnpj(cnpj: string): Promise<DadosCnpj | null> {
   if (!r.ok) return null; // 503 = indisponível → fallback manual
   const j = (await r.json()) as { valor?: DadosCnpj };
   return j.valor ?? null;
+}
+
+export interface ResultadoLogin { token: string; expiraEm: number; usuario: { userId: string; papel: string; empresaId?: string } }
+
+/** Login local (POST /auth/login → JWT). Lança CredenciaisInvalidas em 401. */
+export async function login(email: string, senha: string): Promise<ResultadoLogin> {
+  const r = await fetch('/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, senha }) });
+  if (!r.ok) throw new Error('Credenciais inválidas.');
+  return (await r.json()) as ResultadoLogin;
 }

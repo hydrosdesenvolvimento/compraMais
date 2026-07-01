@@ -34,6 +34,7 @@ export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
           </span>
           <input
             className="input"
+            aria-label="Buscar credenciamentos"
             placeholder="Buscar por número ou título do edital…"
             style={{ width: '100%', paddingLeft: 38 }}
           />

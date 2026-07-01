@@ -2,19 +2,16 @@ import { useState } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
-import { Botao, Campo } from '../../design-system/components';
 import { consultarCnpj, consultarCep, login, mascaraCnpj, mascaraCep, type DadosCnpj, type EnderecoCep } from '../../lib/br';
 import { salvarToken } from '../../lib/auth';
 
 /**
- * AuthPanel (UX-DR2) — formulário do AuthLayout. Abas Entrar/Criar conta (TanStack Form).
- * Cadastro por CNPJ (Query mutation): autofill de razão social, porte, situação, QSA (sócios) e
- * ENDEREÇO oficial da Receita — o CEP é preenchido automaticamente e a empresa completa o NÚMERO e
- * o COMPLEMENTO; autofill de logradouro por CEP; fallback manual quando a Receita cai.
- * Login local (POST /auth/login → JWT): guarda o token e navega para /inicio.
+ * AuthPanel — cartão de acesso do AuthLayout (mockup Compra Mais). Abas Entrar / Criar conta.
+ * Cadastro por CNPJ (autofill Receita: razão social, porte, situação, QSA e endereço; autofill de
+ * logradouro por CEP; fallback manual). Login local (POST /auth/login → JWT) navega para /inicio.
+ * Toda a lógica e os hooks data-cy do contrato de teste são preservados.
  */
 
-/** Logradouro exibido (read-only): usa o CEP consultado se houver, senão o endereço da Receita. */
 function linhaLogradouro(dados: DadosCnpj | null, cep: EnderecoCep | null): string {
   const src = cep
     ? { logradouro: cep.rua, bairro: cep.bairro, cidade: cep.cidade, uf: cep.estado }
@@ -25,14 +22,25 @@ function linhaLogradouro(dados: DadosCnpj | null, cep: EnderecoCep | null): stri
   return [via, cidade].filter(Boolean).join(', ');
 }
 
-/** Número "S/N" da Receita não é um número real que a empresa registraria — trata como vazio. */
 function numeroInicial(numero: string): string {
   return /^\s*s\/?n\s*$/i.test(numero) ? '' : numero;
 }
 
+/** Rótulo maiúsculo (mockup) para campos de leitura/edição. */
+function Rotulo({ children }: { children: React.ReactNode }) {
+  return <div style={{ font: '600 11.5px var(--font-body)', color: 'var(--cinza-500)', marginBottom: 5, letterSpacing: '.02em' }}>{children}</div>;
+}
+/** Caixa de leitura (read-only) no tom azul-50 do mockup. */
+function Leitura({ children, ...p }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div {...p} style={{ padding: '11px 13px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--azul-50)', font: '14px var(--font-body)', color: 'var(--text-title)' }}>{children}</div>;
+}
+const inputEstilo: React.CSSProperties = { width: '100%', padding: '12px 14px', border: '1px solid var(--border)', borderRadius: 8, font: '15px var(--font-body)', background: '#fff', outline: 'none', color: 'var(--text-title)' };
+
 export function AuthPanel() {
   const navigate = useNavigate();
   const [aba, setAba] = useState<'entrar' | 'criar'>('criar');
+  const [verSenha, setVerSenha] = useState(false);
+  const [manter, setManter] = useState(true);
 
   const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
 
@@ -59,8 +67,7 @@ export function AuthPanel() {
     mutationFn: (v: { email: string; senha: string }) => login(v.email, v.senha),
     onSuccess: (r) => { salvarToken(r.token); void navigate({ to: '/inicio' }); },
   });
-
-  const formLogin = useForm({ defaultValues: { email: '', senha: '' }, onSubmit: async ({ value }) => { await loginMut.mutateAsync(value).catch(() => { /* erro exibido via loginMut.isError */ }); } });
+  const formLogin = useForm({ defaultValues: { email: '', senha: '' }, onSubmit: async ({ value }) => { await loginMut.mutateAsync(value).catch(() => { /* erro via loginMut.isError */ }); } });
 
   function buscarCep(valor: string) { if (valor.replace(/\D/g, '').length === 8) cepMut.mutate(valor); }
 
@@ -73,65 +80,69 @@ export function AuthPanel() {
 
       {aba === 'criar' ? (
         <form onSubmit={(e) => { e.preventDefault(); void cadastro.handleSubmit(); }}>
-          <h2 style={{ fontSize: 24, marginBottom: 6 }}>Cadastro de fornecedor</h2>
-          <p style={{ color: 'var(--texto-suave)', margin: '0 0 22px' }}>Informe o CNPJ da empresa. Os dados são validados na Receita Federal automaticamente.</p>
+          <h2 style={{ fontSize: 21, margin: '0 0 4px', letterSpacing: '-0.01em' }}>Cadastro de fornecedor</h2>
+          <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--cinza-500)', lineHeight: 1.5 }}>Informe o CNPJ da empresa. Os dados são validados na Receita Federal automaticamente.</p>
 
           <cadastro.Field name="cnpj">
             {(f) => (
               <>
-                <label className="label" htmlFor="cnpj">CNPJ da empresa</label>
-                <div className="cnpj-row">
-                  <input id="cnpj" data-cy="cnpj" className="input" inputMode="numeric" value={f.state.value} onChange={(e) => { cnpjMut.reset(); f.handleChange(mascaraCnpj(e.target.value)); }} placeholder="12.345.678/0001-90" />
-                  <Botao data-cy="consultar" type="button" onClick={() => cnpjMut.mutate(f.state.value)} disabled={cnpjMut.isPending}>Consultar</Botao>
+                <label className="label" htmlFor="cnpj" style={{ marginBottom: 7 }}>CNPJ da empresa</label>
+                <div style={{ position: 'relative', marginBottom: 4 }}>
+                  <input id="cnpj" data-cy="cnpj" inputMode="numeric" value={f.state.value} placeholder="00.000.000/0000-00"
+                    onChange={(e) => { cnpjMut.reset(); f.handleChange(mascaraCnpj(e.target.value)); }}
+                    style={{ ...inputEstilo, paddingRight: 108 }} />
+                  <button data-cy="consultar" type="button" onClick={() => cnpjMut.mutate(f.state.value)} disabled={cnpjMut.isPending}
+                    style={{ position: 'absolute', right: 6, top: 6, bottom: 6, padding: '0 16px', border: 'none', borderRadius: 6, background: 'var(--azul-700)', color: '#fff', font: '600 13px var(--font-body)', cursor: 'pointer', opacity: cnpjMut.isPending ? 0.6 : 1 }}>Consultar</button>
                 </div>
               </>
             )}
           </cadastro.Field>
 
+          {cnpjMut.isPending && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginTop: 16, padding: '13px 15px', background: 'var(--azul-50)', borderRadius: 10, color: 'var(--azul-800)', fontSize: 14, fontWeight: 500 }}>
+              <span style={{ width: 18, height: 18, border: '2.5px solid var(--azul-100)', borderTopColor: 'var(--azul-700)', borderRadius: '50%', display: 'inline-block', animation: 'cmspin .7s linear infinite' }} />
+              Consultando dados na Receita Federal…
+            </div>
+          )}
+
           {dados && (
-            <div style={{ marginTop: 16 }}>
-              <Campo label="Razão social"><input data-cy="razao-social" className="input" readOnly value={dados.razaoSocial} /></Campo>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                <Campo label="Porte"><input className="input" readOnly value={dados.porte} /></Campo>
-                <Campo label="Situação"><input className="input" readOnly value={dados.situacaoCadastral} /></Campo>
+            <div style={{ marginTop: 18, display: 'grid', gap: 13, animation: 'cmfade .35s' }}>
+              <div><Rotulo>RAZÃO SOCIAL</Rotulo><Leitura><input data-cy="razao-social" readOnly value={dados.razaoSocial} style={{ all: 'unset', width: '100%', font: '14px var(--font-body)', color: 'var(--text-title)' }} /></Leitura></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
+                <div><Rotulo>PORTE</Rotulo><Leitura>{dados.porte}</Leitura></div>
+                <div><Rotulo>SITUAÇÃO</Rotulo><Leitura>{dados.situacaoCadastral}</Leitura></div>
               </div>
 
               {(dados.endereco || cepMut.data) && (
-                <div style={{ marginBottom: 14 }}>
-                  <label className="label">Endereço</label>
+                <div>
+                  <Rotulo>ENDEREÇO</Rotulo>
                   <cadastro.Field name="cep">
                     {(f) => (
                       <>
-                        <input id="cep" data-cy="cep" className="input" inputMode="numeric" placeholder="00000-000" value={f.state.value}
+                        <input id="cep" data-cy="cep" inputMode="numeric" placeholder="00000-000" value={f.state.value}
                           onChange={(e) => { const m = mascaraCep(e.target.value); cepMut.reset(); f.handleChange(m); buscarCep(m); }}
-                          onBlur={(e) => buscarCep(e.target.value)} style={{ marginBottom: 8 }} />
-                        {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>Buscando endereço…</small>}
+                          onBlur={(e) => buscarCep(e.target.value)} style={{ ...inputEstilo, marginBottom: 8 }} />
+                        {cepMut.isPending && <small style={{ color: 'var(--cinza-500)' }}>Buscando endereço…</small>}
                         {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>CEP não encontrado</small>}
                       </>
                     )}
                   </cadastro.Field>
-
-                  <input data-cy="endereco-empresa" className="input" readOnly value={linhaLogradouro(dados, cepMut.data ?? null)} style={{ marginBottom: 8 }} />
-
+                  <Leitura style={{ marginBottom: 8 }}><input data-cy="endereco-empresa" readOnly value={linhaLogradouro(dados, cepMut.data ?? null)} style={{ all: 'unset', width: '100%', font: '13.5px var(--font-body)', color: 'var(--text-title)' }} /></Leitura>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
-                    <cadastro.Field name="numero">
-                      {(f) => <Campo label="Número"><input data-cy="numero" className="input" inputMode="numeric" placeholder="Nº" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} /></Campo>}
-                    </cadastro.Field>
-                    <cadastro.Field name="complemento">
-                      {(f) => <Campo label="Complemento"><input data-cy="complemento" className="input" placeholder="Sala, andar, bloco… (opcional)" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} /></Campo>}
-                    </cadastro.Field>
+                    <cadastro.Field name="numero">{(f) => <div><Rotulo>NÚMERO</Rotulo><input data-cy="numero" inputMode="numeric" placeholder="Nº" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} style={inputEstilo} /></div>}</cadastro.Field>
+                    <cadastro.Field name="complemento">{(f) => <div><Rotulo>COMPLEMENTO</Rotulo><input data-cy="complemento" placeholder="Sala, andar, bloco… (opcional)" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} style={inputEstilo} /></div>}</cadastro.Field>
                   </div>
                 </div>
               )}
 
               {dados.socios && dados.socios.length > 0 && (
-                <div style={{ marginBottom: 14 }}>
-                  <label className="label">Quadro societário (QSA)</label>
+                <div>
+                  <Rotulo>QUADRO SOCIETÁRIO (QSA)</Rotulo>
                   <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {dados.socios.map((s, i) => (
-                      <li key={i} data-cy="socio" style={{ background: 'var(--divisor)', border: '1px solid var(--borda)', borderRadius: 8, padding: '8px 12px', fontSize: 13 }}>
+                      <li key={i} data-cy="socio" style={{ background: 'var(--azul-50)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 13 }}>
                         <strong>{s.nome}</strong>
-                        <span style={{ color: 'var(--texto-suave)' }}> — {s.qualificacao}{s.documento ? ` · ${s.documento}` : ''}</span>
+                        <span style={{ color: 'var(--cinza-500)' }}> — {s.qualificacao}{s.documento ? ` · ${s.documento}` : ''}</span>
                       </li>
                     ))}
                   </ul>
@@ -141,20 +152,40 @@ export function AuthPanel() {
           )}
 
           {indisponivel && (
-            <p style={{ marginTop: 14 }}>
-              <a data-cy="preencher-manual" className="link-amber" href="#manual">Receita Federal indisponível? Preencher manualmente</a>
-            </p>
+            <div style={{ marginTop: 16, textAlign: 'center' }}>
+              <a data-cy="preencher-manual" href="#manual" style={{ font: '500 13px var(--font-body)', color: 'var(--azul-700)', textDecoration: 'underline' }}>Receita Federal indisponível? Preencher manualmente</a>
+            </div>
           )}
-          <Botao data-cy="criar-conta" variante="primario" className="btn-block" type="submit" style={{ marginTop: 24 }}>Criar conta de fornecedor</Botao>
+
+          <button data-cy="criar-conta" type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24, padding: 13, fontSize: 15 }}>Criar conta de fornecedor</button>
+          {dados && <p style={{ margin: '12px 0 0', textAlign: 'center', fontSize: 12.5, color: 'var(--cinza-400)' }}>Sua conta iniciará com o status <strong style={{ color: 'var(--azul-700)' }}>Requerente</strong>.</p>}
         </form>
       ) : (
         <form onSubmit={(e) => { e.preventDefault(); void formLogin.handleSubmit(); }}>
-          <h2 style={{ fontSize: 24, marginBottom: 6 }}>Entrar</h2>
-          <p style={{ color: 'var(--texto-suave)', margin: '0 0 22px' }}>Acesse com seu e-mail e senha.</p>
-          <formLogin.Field name="email">{(f) => <><label className="label" htmlFor="email">E-mail</label><input id="email" data-cy="email" className="input" type="email" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="voce@empresa.com" style={{ marginBottom: 14 }} /></>}</formLogin.Field>
-          <formLogin.Field name="senha">{(f) => <><label className="label" htmlFor="senha">Senha</label><input id="senha" data-cy="senha" className="input" type="password" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="••••••••" /></>}</formLogin.Field>
-          {loginMut.isError && <p data-cy="login-erro" style={{ color: 'var(--erro)', marginTop: 12 }}>Credenciais inválidas.</p>}
-          <Botao data-cy="entrar" variante="primario" className="btn-block" type="submit" style={{ marginTop: 24 }} disabled={loginMut.isPending}>{loginMut.isPending ? 'Entrando…' : 'Entrar'}</Botao>
+          <h2 style={{ fontSize: 21, margin: '0 0 4px', letterSpacing: '-0.01em' }}>Acessar plataforma</h2>
+          <p style={{ margin: '0 0 22px', fontSize: 14, color: 'var(--cinza-500)', lineHeight: 1.5 }}>Entre com o e-mail e a senha cadastrados.</p>
+
+          <formLogin.Field name="email">{(f) => <><label className="label" htmlFor="email" style={{ marginBottom: 7 }}>E-mail</label><input id="email" data-cy="email" type="email" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="voce@empresa.com" style={{ ...inputEstilo, marginBottom: 16 }} /></>}</formLogin.Field>
+
+          <formLogin.Field name="senha">{(f) => (
+            <>
+              <label className="label" htmlFor="senha" style={{ marginBottom: 7 }}>Senha</label>
+              <div style={{ position: 'relative', marginBottom: 16 }}>
+                <input id="senha" data-cy="senha" type={verSenha ? 'text' : 'password'} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="••••••••" style={{ ...inputEstilo, paddingRight: 44 }} />
+                <button type="button" onClick={() => setVerSenha((v) => !v)} aria-label={verSenha ? 'OCULTAR senha' : 'VER senha'} />
+              </div>
+            </>
+          )}</formLogin.Field>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <button type="button" role="checkbox" aria-checked={manter} onClick={() => setManter((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: '500 13px var(--font-body)', color: 'var(--cinza-700)' }}>
+              Manter conectado
+            </button>
+            <a href="#recuperar" style={{ font: '500 12.5px var(--font-body)', color: 'var(--azul-700)', textDecoration: 'none' }}>Esqueci minha senha</a>
+          </div>
+
+          {loginMut.isError && <p data-cy="login-erro" style={{ color: 'var(--erro)', marginBottom: 12, fontSize: 13 }}>Credenciais inválidas.</p>}
+          <button data-cy="entrar" type="submit" className="btn btn-primary btn-block" style={{ padding: 13, fontSize: 15 }} disabled={loginMut.isPending}>{loginMut.isPending ? 'Entrando…' : 'Entrar'}</button>
         </form>
       )}
     </>

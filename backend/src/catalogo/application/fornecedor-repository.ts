@@ -10,7 +10,7 @@ export interface FornecedorRepository {
 
 export class CnpjJaCadastrado extends Error {
   constructor() {
-    super('CNPJ já cadastrado. Use a recuperação de acesso.');
+    super('CNPJ already registered. Use account recovery.');
     this.name = 'CnpjJaCadastrado';
   }
 }

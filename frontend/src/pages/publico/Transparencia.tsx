@@ -1,20 +1,21 @@
 import type { CSSProperties } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { IconeDemandas, IconeEditais, IconePredio } from '../../design-system/icons';
 
 /** Portal público de transparência (Épico 9 / US2). Sem login; só agregados públicos (§VI). */
 export function Transparencia() {
+  const { t } = useTranslation();
   const { data, isLoading } = useQuery({ queryKey: ['transparencia'], queryFn: api.transparencia });
-  if (isLoading || !data) return <p data-cy="carregando">Carregando…</p>;
+  if (isLoading || !data) return <p data-cy="carregando">{t('transparencia.carregando')}</p>;
 
   return (
     <div className="stack" style={{ animation: 'cmfade .3s' }}>
       <div>
-        <h1 className="cm-page-title">Demandas distribuídas</h1>
+        <h1 className="cm-page-title">{t('transparencia.tituloPagina')}</h1>
         <p className="cm-page-sub" style={{ maxWidth: 620 }}>
-          O rateio é igualitário entre os fornecedores aptos e sempre limitado à sua
-          capacidade declarada (teto). Veja abaixo os agregados públicos do programa Compra Mais.
+          {t('transparencia.subtituloPagina')}
         </p>
       </div>
 
@@ -31,7 +32,7 @@ export function Transparencia() {
             >
               {data.editaisVigentes}
             </div>
-            <div style={kpiLabel}>Editais vigentes</div>
+            <div style={kpiLabel}>{t('transparencia.kpiEditaisVigentes')}</div>
           </div>
         </div>
 
@@ -43,7 +44,7 @@ export function Transparencia() {
             <div style={{ font: '600 26px var(--font-body)', color: 'var(--azul-900)', lineHeight: 1.1 }}>
               {data.secretarias.length}
             </div>
-            <div style={kpiLabel}>Secretarias atendidas</div>
+            <div style={kpiLabel}>{t('transparencia.kpiSecretarias')}</div>
           </div>
         </div>
 
@@ -55,7 +56,7 @@ export function Transparencia() {
             <div style={{ font: '600 26px var(--font-body)', color: 'var(--azul-900)', lineHeight: 1.1 }}>
               {data.segmentos.length}
             </div>
-            <div style={kpiLabel}>Segmentos (CNAE) atendidos</div>
+            <div style={kpiLabel}>{t('transparencia.kpiSegmentos')}</div>
           </div>
         </div>
       </div>
@@ -66,7 +67,7 @@ export function Transparencia() {
           <span style={panelIcon('var(--azul-100)', 'var(--azul-700)')}>
             <IconePredio width={17} height={17} />
           </span>
-          <h2 style={panelTitle}>Secretarias atendidas</h2>
+          <h2 style={panelTitle}>{t('transparencia.painelSecretarias')}</h2>
           <span className="tag" style={{ marginLeft: 'auto' }}>{data.secretarias.length}</span>
         </div>
         <div style={panelBody}>
@@ -84,7 +85,7 @@ export function Transparencia() {
           <span style={panelIcon('var(--atencao-bg)', '#8A5410')}>
             <IconeDemandas width={17} height={17} />
           </span>
-          <h2 style={panelTitle}>Segmentos (CNAE) atendidos</h2>
+          <h2 style={panelTitle}>{t('transparencia.painelSegmentos')}</h2>
           <span className="tag" style={{ marginLeft: 'auto' }}>{data.segmentos.length}</span>
         </div>
         <div style={panelBody}>

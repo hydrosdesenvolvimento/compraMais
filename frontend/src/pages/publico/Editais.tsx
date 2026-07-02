@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { IconeBusca, IconeFiltro, IconeSeta } from '../../design-system/icons';
 
@@ -16,6 +17,7 @@ type EditalExtra = {
  * Estado vazio orientado. Dados via TanStack Query. Busca client-side pelo objeto.
  */
 export function Editais() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: editais = [], isLoading } = useQuery({ queryKey: ['editais'], queryFn: api.editaisCompativeis });
   const [busca, setBusca] = useState('');
@@ -30,10 +32,10 @@ export function Editais() {
     <div className="stack">
       <div className="cm-page-head">
         <h1 className="cm-page-title" style={{ fontSize: 22, color: 'var(--azul-900)', margin: 0 }}>
-          Vitrine de Editais
+          {t('editais.vitrine.titulo')}
         </h1>
         <p className="cm-page-sub" style={{ margin: '6px 0 0', fontSize: 14.5, color: 'var(--cinza-500)' }}>
-          Apenas editais compatíveis com os CNAEs da sua empresa. 1 edital = 1 demanda.
+          {t('editais.vitrine.subtitulo')}
         </p>
       </div>
 
@@ -46,10 +48,10 @@ export function Editais() {
           />
           <input
             className="input"
-            aria-label="Buscar editais"
+            aria-label={t('editais.vitrine.buscaAriaLabel')}
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar editais por número e nome…"
+            placeholder={t('editais.vitrine.buscaPlaceholder')}
             style={{ width: '100%', paddingLeft: 38 }}
           />
         </div>
@@ -59,12 +61,12 @@ export function Editais() {
           style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}
         >
           <IconeFiltro width={16} height={16} />
-          Filtros
+          {t('editais.vitrine.filtros')}
         </button>
       </div>
 
       {isLoading ? (
-        <p data-cy="carregando">Carregando…</p>
+        <p data-cy="carregando">{t('editais.vitrine.carregando')}</p>
       ) : filtrados.length === 0 ? (
         <div
           data-cy="estado-vazio"
@@ -73,11 +75,11 @@ export function Editais() {
         >
           <div style={{ font: '600 15px var(--font-body)', color: 'var(--azul-900)', marginBottom: 4 }}>
             {busca.trim()
-              ? 'Nenhum edital encontrado para esta busca.'
-              : 'Nenhum edital compatível com seu ramo no momento.'}
+              ? t('editais.vitrine.vazioBuscaTitulo')
+              : t('editais.vitrine.vazioTitulo')}
           </div>
           <div style={{ fontSize: 13.5 }}>
-            {busca.trim() ? 'Ajuste os termos da busca.' : 'Avisaremos quando surgir um edital compatível.'}
+            {busca.trim() ? t('editais.vitrine.vazioBuscaDica') : t('editais.vitrine.vazioDica')}
           </div>
         </div>
       ) : (
@@ -136,7 +138,7 @@ export function Editais() {
                   onClick={() => navigate({ to: '/credenciamento' })}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' }}
                 >
-                  Iniciar
+                  {t('editais.vitrine.iniciar')}
                   <IconeSeta width={15} height={15} />
                 </button>
               </li>

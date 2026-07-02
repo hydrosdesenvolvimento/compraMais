@@ -23,14 +23,14 @@ const USUARIOS_SEED: Array<{ email: string; senha: string; nome: string; papel: 
 
 async function seed(): Promise<void> {
   if (!temPostgresConfigurado()) {
-    console.error('[seed] Postgres não configurado (defina POSTGRES_HOST ou DATABASE_URL). Abortando.');
+    console.error('[seed] Postgres not configured (set POSTGRES_HOST or DATABASE_URL). Aborting.');
     process.exit(1);
   }
   const config = loadConfig();
   const pool = criarPool(config.database);
   try {
     const novas = await aplicarMigracoes(pool, (m) => console.log(`[seed] ${m}`));
-    if (novas.length) console.log(`[seed] ${novas.length} migração(ões) aplicada(s).`);
+    if (novas.length) console.log(`[seed] ${novas.length} migration(s) applied.`);
 
     const repo = new UsuarioRepositoryPg(pool);
     let criados = 0;
@@ -38,23 +38,23 @@ async function seed(): Promise<void> {
     for (const s of USUARIOS_SEED) {
       try {
         if (await repo.porEmail(s.email)) {
-          console.log(`[seed] já existe: ${s.email}`);
+          console.log(`[seed] already exists: ${s.email}`);
           continue;
         }
         const u = Usuario.criarLocal({ id: randomUUID(), email: s.email, senha: s.senha, nome: s.nome, papel: s.papel, fornecedorId: s.fornecedorId });
         await repo.salvar(u);
         criados++;
-        console.log(`[seed] criado: ${s.email} (${s.papel})`);
+        console.log(`[seed] created: ${s.email} (${s.papel})`);
       } catch (e) {
         falhas++;
-        console.error(`[seed] FALHA em ${s.email}: ${(e as Error).message}`);
+        console.error(`[seed] FAILURE for ${s.email}: ${(e as Error).message}`);
       }
     }
-    console.log(`[seed] concluído — ${criados} novo(s), ${falhas} falha(s) de ${USUARIOS_SEED.length}.`);
+    console.log(`[seed] completed — ${criados} new, ${falhas} failure(s) of ${USUARIOS_SEED.length}.`);
     if (falhas) process.exitCode = 1; // visível em CI sem abortar os demais
   } finally {
     await pool.end();
   }
 }
 
-seed().catch((e) => { console.error('[seed] falha:', e); process.exit(1); });
+seed().catch((e) => { console.error('[seed] failure:', e); process.exit(1); });

@@ -28,7 +28,7 @@ export function registrarRotasContestacao(app: FastifyInstance, deps: {
   });
 
   app.post('/contestacoes-cnae/:id/acatar', async (req, reply) => {
-    if (!resolve(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas Secretaria/CPL resolve contestações.' });
+    if (!resolve(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only Department/CPL can resolve challenges.' });
     const { id } = req.params as { id: string };
     const { novoCnaes } = req.body as { novoCnaes: string[] };
     try { await deps.resolver.acatar(id, novoCnaes, { userId: actor(req) }); return reply.send({ situacao: 'acatada' }); }
@@ -36,7 +36,7 @@ export function registrarRotasContestacao(app: FastifyInstance, deps: {
   });
 
   app.post('/contestacoes-cnae/:id/recusar', async (req, reply) => {
-    if (!resolve(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas Secretaria/CPL resolve contestações.' });
+    if (!resolve(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only Department/CPL can resolve challenges.' });
     const { id } = req.params as { id: string };
     const { motivo } = req.body as { motivo: string };
     try { await deps.resolver.recusar(id, motivo ?? '', { userId: actor(req) }); return reply.send({ situacao: 'recusada' }); }

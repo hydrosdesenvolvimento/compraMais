@@ -28,5 +28,5 @@ export class AnaliseCovalidacao extends EntidadeBase {
 }
 
 export class JustificativaObrigatoriaAnalise extends Error {
-  constructor() { super('Reprovação exige justificativa (RN003/FR-002).'); this.name = 'JustificativaObrigatoriaAnalise'; }
+  constructor() { super('Rejection requires a justification (RN003/FR-002).'); this.name = 'JustificativaObrigatoriaAnalise'; }
 }

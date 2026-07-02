@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { Card, Pill, Botao, Campo } from '../../design-system/components';
@@ -39,6 +40,7 @@ function CampoOficial({ rotulo, valor }: { rotulo: string; valor: string }) {
 }
 
 export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaProps) {
+  const { t } = useTranslation();
   const iniciais = fornecedor.razaoSocial.split(' ').filter(Boolean).slice(0, 2).map((s) => s[0]).join('').toUpperCase();
   const sincronizar = useMutation({ mutationFn: () => api.sincronizar(fornecedorId) });
   const syncStatus = sincronizar.isSuccess ? 'sucesso' : sincronizar.isError ? 'erro' : ultimaSync?.status;
@@ -46,8 +48,8 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
   return (
     <div className="stack">
       <div style={{ marginBottom: 4 }}>
-        <h1 className="page-title" style={{ fontWeight: 600 }}>Minha conta</h1>
-        <p className="page-sub">Dados oficiais da empresa obtidos pela Receita Federal (API do CNPJ). Apenas Nome Fantasia, Endereço e Telefone podem ser editados.</p>
+        <h1 className="page-title" style={{ fontWeight: 600 }}>{t('minhaConta.titulo')}</h1>
+        <p className="page-sub">{t('minhaConta.subtitulo')}</p>
       </div>
 
       {/* Barra de sincronização do CNPJ (navy) */}
@@ -63,19 +65,19 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
           <IconeSync width={24} height={24} />
         </span>
         <div style={{ flex: 1, minWidth: 220 }}>
-          <div style={{ font: '600 16px var(--font-body)' }}>Sincronizar dados do CNPJ</div>
+          <div style={{ font: '600 16px var(--font-body)' }}>{t('minhaConta.sync.titulo')}</div>
           {ultimaSync && (
             <div style={{ fontSize: 13, color: 'var(--azul-100)', marginTop: 3 }}>
-              Última sincronização: <strong style={{ color: '#fff' }}>{ultimaSync.quando}</strong>
+              <Trans i18nKey="minhaConta.sync.ultima" values={{ quando: ultimaSync.quando }} components={{ b: <strong style={{ color: '#fff' }} /> }} />
             </div>
           )}
           {syncStatus === 'sucesso' && (
             <div style={{ fontSize: 12.5, color: 'var(--ambar-300)', marginTop: 7, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <IconeCheck width={14} height={14} strokeWidth={2.4} /> Dados oficiais atualizados. Nome Fantasia, Endereço e Telefone foram preservados.
+              <IconeCheck width={14} height={14} strokeWidth={2.4} /> {t('minhaConta.sync.sucesso')}
             </div>
           )}
           {syncStatus === 'erro' && (
-            <div style={{ marginTop: 8 }}><Pill tom="error">Erro na sincronização</Pill></div>
+            <div style={{ marginTop: 8 }}><Pill tom="error">{t('minhaConta.sync.erro')}</Pill></div>
           )}
         </div>
         <Botao
@@ -85,7 +87,7 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
           disabled={sincronizar.isPending}
           style={{ padding: '12px 22px', borderRadius: 10, flexShrink: 0, whiteSpace: 'nowrap' }}
         >
-          <IconeSync width={17} height={17} /> {sincronizar.isPending ? 'Sincronizando…' : 'Sincronizar agora'}
+          <IconeSync width={17} height={17} /> {sincronizar.isPending ? t('minhaConta.sync.sincronizando') : t('minhaConta.sync.sincronizarAgora')}
         </Botao>
       </div>
 
@@ -103,20 +105,20 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
           </span>
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ font: '600 18px var(--font-body)', color: 'var(--azul-900)' }}>{fornecedor.razaoSocial}</div>
-            <div style={{ fontSize: 13.5, color: 'var(--cinza-500)', marginTop: 2 }}>CNPJ {fornecedor.cnpj}</div>
+            <div style={{ fontSize: 13.5, color: 'var(--cinza-500)', marginTop: 2 }}>{t('minhaConta.empresa.cnpjPrefixo')} {fornecedor.cnpj}</div>
           </div>
-          <Pill tom="success">Ativa</Pill>
+          <Pill tom="success">{t('minhaConta.empresa.ativa')}</Pill>
         </div>
 
         <div style={{ paddingTop: 24 }}>
           <SecaoLabel cor="var(--cinza-500)" icone={<IconeCadeado width={15} height={15} strokeWidth={1.9} style={{ color: 'var(--cinza-400)' }} />}>
-            DADOS OFICIAIS · RECEITA FEDERAL (SOMENTE LEITURA)
+            {t('minhaConta.empresa.dadosOficiaisLabel')}
           </SecaoLabel>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '14px 18px' }}>
-            <CampoOficial rotulo="Razão Social" valor={fornecedor.razaoSocial} />
-            <CampoOficial rotulo="CNPJ" valor={fornecedor.cnpj} />
-            <CampoOficial rotulo="Situação Cadastral" valor="Ativa" />
-            <CampoOficial rotulo="Porte da Empresa" valor={fornecedor.porte} />
+            <CampoOficial rotulo={t('minhaConta.empresa.razaoSocial')} valor={fornecedor.razaoSocial} />
+            <CampoOficial rotulo={t('minhaConta.empresa.cnpj')} valor={fornecedor.cnpj} />
+            <CampoOficial rotulo={t('minhaConta.empresa.situacaoCadastral')} valor={t('minhaConta.empresa.ativa')} />
+            <CampoOficial rotulo={t('minhaConta.empresa.porteEmpresa')} valor={fornecedor.porte} />
           </div>
 
           <DadosEditaveis />
@@ -128,43 +130,44 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
 
 /** Cartão "Dados do responsável": avatar, nome/sobrenome, foto e alteração de senha. */
 function ResponsavelCard({ iniciais, fantasia }: { iniciais: string; fantasia: string }) {
+  const { t } = useTranslation();
   const [editSenha, setEditSenha] = useState(false);
 
   return (
     <Card>
-      <SecaoLabel>DADOS DO RESPONSÁVEL</SecaoLabel>
+      <SecaoLabel>{t('minhaConta.responsavel.secaoLabel')}</SecaoLabel>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingBottom: 22, borderBottom: '1px solid var(--divider)' }}>
         <span className="avatar" style={{ width: 80, height: 80, fontSize: 28, flexShrink: 0 }}>{iniciais}</span>
         <div>
-          <div style={{ font: '600 17px var(--font-body)', color: 'var(--azul-900)' }}>Responsável legal</div>
-          <div style={{ fontSize: 13.5, color: 'var(--cinza-500)', margin: '2px 0 12px' }}>Procurador · {fantasia}</div>
+          <div style={{ font: '600 17px var(--font-body)', color: 'var(--azul-900)' }}>{t('minhaConta.responsavel.responsavelLegal')}</div>
+          <div style={{ fontSize: 13.5, color: 'var(--cinza-500)', margin: '2px 0 12px' }}>{t('minhaConta.responsavel.procurador')} · {fantasia}</div>
           <button className="btn btn-ghost" style={{ padding: '9px 16px', fontSize: 13.5 }} type="button">
-            <IconeCamera width={16} height={16} /> Alterar foto
+            <IconeCamera width={16} height={16} /> {t('minhaConta.responsavel.alterarFoto')}
           </button>
         </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16, marginTop: 22 }}>
-        <Campo label="Nome"><input className="input" placeholder="Nome" /></Campo>
-        <Campo label="Sobrenome"><input className="input" placeholder="Sobrenome" /></Campo>
+        <Campo label={t('minhaConta.responsavel.nome')}><input className="input" placeholder={t('minhaConta.responsavel.nome')} /></Campo>
+        <Campo label={t('minhaConta.responsavel.sobrenome')}><input className="input" placeholder={t('minhaConta.responsavel.sobrenome')} /></Campo>
       </div>
 
       <div style={{ marginTop: 16 }}>
-        <label className="label">Senha</label>
+        <label className="label">{t('minhaConta.responsavel.senha')}</label>
         {!editSenha ? (
           <button className="btn btn-ghost" style={{ padding: '11px 18px' }} type="button" onClick={() => setEditSenha(true)}>
-            <IconeCadeado width={16} height={16} /> Alterar minha senha
+            <IconeCadeado width={16} height={16} /> {t('minhaConta.responsavel.alterarSenha')}
           </button>
         ) : (
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            <input className="input" type="password" placeholder="Nova senha (mín. 8 caracteres)" style={{ flex: 1, minWidth: 240 }} />
+            <input className="input" type="password" placeholder={t('minhaConta.responsavel.novaSenhaPlaceholder')} style={{ flex: 1, minWidth: 240 }} />
             <button
               type="button"
               onClick={() => setEditSenha(false)}
               style={{ padding: '11px 16px', border: 'none', background: 'none', color: 'var(--cinza-500)', font: '600 13.5px var(--font-body)', cursor: 'pointer', textDecoration: 'underline' }}
             >
-              Cancelar
+              {t('minhaConta.responsavel.cancelar')}
             </button>
           </div>
         )}
@@ -175,6 +178,7 @@ function ResponsavelCard({ iniciais, fantasia }: { iniciais: string; fantasia: s
 
 /** Formulário editável (TanStack Form): autofill de CEP (Query) e CPF do responsável (validação). */
 function DadosEditaveis() {
+  const { t } = useTranslation();
   const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
   const form = useForm({
     defaultValues: { nomeFantasia: '', cep: '', rua: '', bairro: '', cidade: '', uf: '', telefone: '', cpf: '' },
@@ -203,54 +207,54 @@ function DadosEditaveis() {
             <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
           </svg>
         }>
-          DADOS COMPLEMENTARES · EDITÁVEIS
+          {t('minhaConta.editaveis.secaoLabel')}
         </SecaoLabel>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 16 }}>
-        <form.Field name="nomeFantasia">{(f) => <Campo label="Nome Fantasia"><input className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="Nome Fantasia" /></Campo>}</form.Field>
-        <form.Field name="telefone">{(f) => <Campo label="Telefone"><input className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="(68) 0000-0000" /></Campo>}</form.Field>
+        <form.Field name="nomeFantasia">{(f) => <Campo label={t('minhaConta.editaveis.nomeFantasia')}><input className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.nomeFantasia')} /></Campo>}</form.Field>
+        <form.Field name="telefone">{(f) => <Campo label={t('minhaConta.editaveis.telefone')}><input className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="(68) 0000-0000" /></Campo>}</form.Field>
       </div>
 
-      <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.08em', color: 'var(--azul-700)', margin: '24px 0 14px' }}>ENDEREÇO</div>
+      <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.08em', color: 'var(--azul-700)', margin: '24px 0 14px' }}>{t('minhaConta.editaveis.endereco')}</div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
-        <form.Field name="rua">{(f) => <Campo label="Logradouro"><input data-cy="rua" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="Rua / Avenida" /></Campo>}</form.Field>
-        <form.Field name="bairro">{(f) => <Campo label="Bairro"><input data-cy="bairro" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="Bairro" /></Campo>}</form.Field>
-        <form.Field name="cidade">{(f) => <Campo label="Cidade"><input data-cy="cidade" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="Cidade" /></Campo>}</form.Field>
-        <form.Field name="uf">{(f) => <Campo label="UF"><input data-cy="uf" className="input" maxLength={2} value={f.state.value} onChange={(e) => f.handleChange(e.target.value.toUpperCase())} placeholder="UF" /></Campo>}</form.Field>
+        <form.Field name="rua">{(f) => <Campo label={t('minhaConta.editaveis.logradouro')}><input data-cy="rua" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.ruaAvenida')} /></Campo>}</form.Field>
+        <form.Field name="bairro">{(f) => <Campo label={t('minhaConta.editaveis.bairro')}><input data-cy="bairro" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.bairro')} /></Campo>}</form.Field>
+        <form.Field name="cidade">{(f) => <Campo label={t('minhaConta.editaveis.cidade')}><input data-cy="cidade" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.cidade')} /></Campo>}</form.Field>
+        <form.Field name="uf">{(f) => <Campo label={t('minhaConta.editaveis.uf')}><input data-cy="uf" className="input" maxLength={2} value={f.state.value} onChange={(e) => f.handleChange(e.target.value.toUpperCase())} placeholder={t('minhaConta.editaveis.uf')} /></Campo>}</form.Field>
 
         <form.Field name="cep">
           {(f) => (
-            <Campo label="CEP">
+            <Campo label={t('minhaConta.editaveis.cep')}>
               <input data-cy="cep" className="input" inputMode="numeric" placeholder="00000-000" value={f.state.value}
                 onChange={(e) => { const m = mascaraCep(e.target.value); cepMut.reset(); f.handleChange(m); if (m.replace(/\D/g, '').length === 8) buscarCep(m); }}
                 onBlur={(e) => buscarCep(e.target.value)} />
-              {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>Buscando endereço…</small>}
-              {cepMut.isSuccess && cepMut.data && <small style={{ color: 'var(--sucesso)' }}>Endereço preenchido pela BrasilAPI</small>}
-              {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>CEP não encontrado</small>}
+              {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>{t('minhaConta.editaveis.cepBuscando')}</small>}
+              {cepMut.isSuccess && cepMut.data && <small style={{ color: 'var(--sucesso)' }}>{t('minhaConta.editaveis.cepPreenchido')}</small>}
+              {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>{t('minhaConta.editaveis.cepNaoEncontrado')}</small>}
             </Campo>
           )}
         </form.Field>
 
-        <form.Field name="cpf" validators={{ onChange: ({ value }: { value: string }) => (value.replace(/\D/g, '').length === 11 && !validarCpf(value) ? 'CPF inválido' : undefined) }}>
+        <form.Field name="cpf" validators={{ onChange: ({ value }: { value: string }) => (value.replace(/\D/g, '').length === 11 && !validarCpf(value) ? t('minhaConta.editaveis.cpfInvalido') : undefined) }}>
           {(f) => (
-            <Campo label="CPF do responsável">
+            <Campo label={t('minhaConta.editaveis.cpfResponsavel')}>
               <input data-cy="cpf" className="input" inputMode="numeric" placeholder="000.000.000-00" value={f.state.value}
                 onChange={(e) => f.handleChange(mascaraCpf(e.target.value))}
                 aria-invalid={f.state.meta.errors.length > 0}
                 style={f.state.meta.errors.length > 0 ? { borderColor: 'var(--erro)' } : f.state.value.replace(/\D/g, '').length === 11 ? { borderColor: 'var(--sucesso)' } : undefined} />
               {f.state.meta.errors[0] ? <small data-cy="cpf-erro" style={{ color: 'var(--erro)' }}>{String(f.state.meta.errors[0])}</small>
-                : f.state.value.replace(/\D/g, '').length === 11 && <small data-cy="cpf-ok" style={{ color: 'var(--sucesso)' }}>CPF válido</small>}
+                : f.state.value.replace(/\D/g, '').length === 11 && <small data-cy="cpf-ok" style={{ color: 'var(--sucesso)' }}>{t('minhaConta.editaveis.cpfValido')}</small>}
             </Campo>
           )}
         </form.Field>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 26, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-        <button type="button" className="btn btn-ghost" style={{ padding: '11px 20px' }}>Cancelar</button>
+        <button type="button" className="btn btn-ghost" style={{ padding: '11px 20px' }}>{t('minhaConta.editaveis.cancelar')}</button>
         <Botao variante="primario" type="submit" style={{ padding: '12px 24px' }}>
-          <IconeCheck width={16} height={16} strokeWidth={2} /> Salvar alterações
+          <IconeCheck width={16} height={16} strokeWidth={2} /> {t('minhaConta.editaveis.salvar')}
         </Botao>
       </div>
     </form>

@@ -13,7 +13,7 @@ const PERFIS_DPO = ['administrador', 'dpo'];
 export function registrarRotasTitular(app: FastifyInstance, deps: { direitos: GerirDireitosTitular; pendencias: ConsolidarPendencias }): void {
   // Solicitar direito (acesso/correção/exclusão) — somente o próprio titular (não procurador) — FR-002/003/004/005
   app.post('/titular/solicitacoes', async (req, reply) => {
-    if (papel(req) === 'procurador') return reply.code(403).send({ codigo: 'LGPDTitular', mensagem: 'Direito exige o próprio titular; procurador não pode exercê-lo (§V).' });
+    if (papel(req) === 'procurador') return reply.code(403).send({ codigo: 'LGPDTitular', mensagem: 'This right requires the data subject themselves; an attorney cannot exercise it (§V).' });
     const { tipo, detalhe, categoria } = req.body as { tipo: TipoDireito; detalhe?: string; categoria?: 'cadastral' | 'fiscal' | 'contratual' };
     const out = await deps.direitos.solicitar(actor(req), tipo, detalhe, categoria);
     return reply.code(201).send({ ...out, status: 'pendente' });
@@ -22,14 +22,14 @@ export function registrarRotasTitular(app: FastifyInstance, deps: { direitos: Ge
   // Consulta QBE de solicitações — DPO/Admin (ou o próprio titular)
   app.get('/titular/solicitacoes', async (req, reply) => {
     const { titularId, tipo, status } = req.query as { titularId?: string; tipo?: TipoDireito; status?: StatusSolicitacao };
-    if (!dpo(req) && titularId !== actor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Acesso restrito.' });
+    if (!dpo(req) && titularId !== actor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Access restricted.' });
     const probe: SolicitacaoProbe = { titularId: dpo(req) ? titularId : actor(req), tipo, status };
     const r = await deps.direitos.consultar(probe);
     return reply.send(r.map((s) => ({ id: s.id, titularId: s.titularId, tipo: s.tipo, status: s.status, resultado: s.resultado })));
   });
 
   app.post('/titular/solicitacoes/:id/atender', async (req, reply) => {
-    if (!dpo(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas DPO/Administrador atende.' });
+    if (!dpo(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only DPO/Administrator can fulfill.' });
     const { id } = req.params as { id: string };
     const { resultado } = req.body as { resultado: string };
     try { await deps.direitos.atender(id, resultado ?? 'atendida', { userId: actor(req) }); return reply.send({ status: 'atendida' }); }
@@ -37,7 +37,7 @@ export function registrarRotasTitular(app: FastifyInstance, deps: { direitos: Ge
   });
 
   app.post('/titular/solicitacoes/:id/descartar', async (req, reply) => {
-    if (!dpo(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas DPO/Administrador descarta.' });
+    if (!dpo(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only DPO/Administrator can dispose.' });
     const { id } = req.params as { id: string };
     const { dataRegistro } = req.body as { dataRegistro: string };
     try { const r = await deps.direitos.avaliarDescarte(id, dataRegistro, { userId: actor(req) }); return reply.send(r); }
@@ -51,7 +51,7 @@ export function registrarRotasTitular(app: FastifyInstance, deps: { direitos: Ge
   // Tela única consolidada (FR-001) — o próprio titular ou DPO/Admin
   app.get('/fornecedores/:id/pendencias-consolidadas', async (req, reply) => {
     const { id } = req.params as { id: string };
-    if (!dpo(req) && id !== actor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Acesso restrito.' });
+    if (!dpo(req) && id !== actor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Access restricted.' });
     return reply.send(await deps.pendencias.listar(id));
   });
 }

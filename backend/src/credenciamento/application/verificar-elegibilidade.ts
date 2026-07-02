@@ -69,7 +69,7 @@ export class VerificarElegibilidade {
 
   async registrarTermino(bloqueioId: string, dataTermino: string, actor: { userId: string }): Promise<void> {
     const b = await this.bloqueios.porId(bloqueioId);
-    if (!b) throw new Error('Bloqueio não encontrado');
+    if (!b) throw new Error('Block not found');
     b.registrarTermino(dataTermino, actor.userId);
     await this.bloqueios.salvar(b);
   }

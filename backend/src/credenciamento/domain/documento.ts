@@ -52,20 +52,20 @@ export class Documento extends EntidadeBase {
 
   /** Reenvio pelo fornecedor após reprovação (US3/FR-010) — volta a pendente. */
   reenviar(fornecedor: string): void {
-    if (this._status !== 'reprovado') throw new Error('Só documentos reprovados podem ser reenviados.');
+    if (this._status !== 'reprovado') throw new Error('Only rejected documents can be resubmitted.');
     this._status = 'pendente';
     this._motivoReprovacao = null;
     this.marcarAtualizacao(fornecedor);
   }
 
   private exigirPendente(): void {
-    if (this._status !== 'pendente') throw new Error(`Documento não está pendente (status: ${this._status}).`);
+    if (this._status !== 'pendente') throw new Error(`Document is not pending (status: ${this._status}).`);
   }
 }
 
 export class FormatoInvalido extends Error {
-  constructor(f: string) { super(`Formato não suportado: ${f}. Aceitos: pdf, jpg, png.`); this.name = 'FormatoInvalido'; }
+  constructor(f: string) { super(`Unsupported format: ${f}. Accepted: pdf, jpg, png.`); this.name = 'FormatoInvalido'; }
 }
 export class JustificativaObrigatoria extends Error {
-  constructor() { super('Reprovação exige justificativa textual (RN003/FR-002).'); this.name = 'JustificativaObrigatoria'; }
+  constructor() { super('Rejection requires a textual justification (RN003/FR-002).'); this.name = 'JustificativaObrigatoria'; }
 }

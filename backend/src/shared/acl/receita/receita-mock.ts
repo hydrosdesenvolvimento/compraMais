@@ -30,7 +30,7 @@ export class ReceitaMockGateway implements ReceitaGateway {
 
   private async fetchRaw(cnpj: string): Promise<DadosCnpj> {
     const d = this.seed.get(cnpj);
-    if (!d) throw new Error('CNPJ não encontrado no mock');
+    if (!d) throw new Error('CNPJ not found in mock');
     return d;
   }
 }

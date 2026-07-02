@@ -16,7 +16,7 @@ export interface EditalRepository {
 }
 
 export class EditalIncompativel extends Error {
-  constructor() { super('Edital incompatível com seus CNAEs.'); this.name = 'EditalIncompativel'; }
+  constructor() { super('Edital incompatible with your CNAEs.'); this.name = 'EditalIncompativel'; }
 }
 
 /**
@@ -43,7 +43,7 @@ export class ListarEditaisCompativeis {
 
   private async fornecedor(id: string): Promise<Fornecedor> {
     const f = await this.fornecedores.porId(id);
-    if (!f) throw new Error('Fornecedor não encontrado');
+    if (!f) throw new Error('Supplier not found');
     return f;
   }
 }

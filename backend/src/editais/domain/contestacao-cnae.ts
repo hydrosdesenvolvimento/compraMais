@@ -49,13 +49,13 @@ export class ContestacaoCnae extends EntidadeBase {
   }
 
   private exigirPendente(): void {
-    if (this._situacao !== 'pendente') throw new Error(`Contestação já resolvida (situação: ${this._situacao}).`);
+    if (this._situacao !== 'pendente') throw new Error(`Challenge already resolved (status: ${this._situacao}).`);
   }
 }
 
 export class JustificativaContestacaoObrigatoria extends Error {
-  constructor() { super('Contestação de CNAE exige justificativa textual (FR-007).'); this.name = 'JustificativaContestacaoObrigatoria'; }
+  constructor() { super('CNAE challenge requires a textual justification (FR-007).'); this.name = 'JustificativaContestacaoObrigatoria'; }
 }
 export class MotivoRecusaObrigatorio extends Error {
-  constructor() { super('Recusa de contestação exige justificativa (FR-009).'); this.name = 'MotivoRecusaObrigatorio'; }
+  constructor() { super('Rejecting a challenge requires a justification (FR-009).'); this.name = 'MotivoRecusaObrigatorio'; }
 }

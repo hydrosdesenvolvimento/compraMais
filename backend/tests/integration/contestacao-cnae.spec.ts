@@ -38,6 +38,6 @@ describe('Contestação de CNAE (US2)', () => {
 
   it('encerrar bloqueia com contestação pendente (409 na borda)', async () => {
     await contestar.abrir(editalId, 'f1', '1092900', 'x');
-    await expect(gerir.encerrar(editalId, { userId: 'gestor1' })).rejects.toThrow(/pendente/i);
+    await expect(gerir.encerrar(editalId, { userId: 'gestor1' })).rejects.toThrow(/pending/i);
   });
 });

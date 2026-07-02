@@ -18,7 +18,7 @@ export async function obterJson(fetcher: Fetcher, url: string, timeoutMs: number
   const t = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const resp = await fetcher(url, { signal: ctrl.signal, headers: HEADERS_PADRAO });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status} em ${url}`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status} at ${url}`);
     return await resp.json();
   } finally {
     clearTimeout(t);

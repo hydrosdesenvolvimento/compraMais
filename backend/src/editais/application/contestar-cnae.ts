@@ -19,10 +19,10 @@ export interface ContestacaoRepository extends ContestacoesPendentesQuery {
 export interface FornecedorAtivoQuery { estaAtivo(fornecedorId: string): Promise<boolean>; }
 
 export class FornecedorNaoLegitimo extends Error {
-  constructor() { super('Apenas fornecedor cadastrado e ativo pode contestar.'); this.name = 'FornecedorNaoLegitimo'; }
+  constructor() { super('Only a registered and active supplier can file a challenge.'); this.name = 'FornecedorNaoLegitimo'; }
 }
 export class ContestacaoNaoEncontrada extends Error {
-  constructor() { super('Contestação não encontrada.'); this.name = 'ContestacaoNaoEncontrada'; }
+  constructor() { super('Challenge not found.'); this.name = 'ContestacaoNaoEncontrada'; }
 }
 
 /** US2 — abertura de contestação de CNAE (FR-007). Qualquer fornecedor cadastrado/ativo (clarify Q3). */

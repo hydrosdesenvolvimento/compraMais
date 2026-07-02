@@ -12,7 +12,7 @@ const PERFIS_GESTAO = ['secretaria', 'gestor', 'cpl', 'smga'];
  */
 export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir: GerirEditais; buscar: BuscarEditais }): void {
   app.post('/editais', async (req, reply) => {
-    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas Secretaria/Gestor cria editais.' });
+    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only Department/Manager can create editais.' });
     const body = req.body as { secretariaId: string; objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string };
     try {
       const out = await deps.gerir.criar(body, actor(req));
@@ -23,21 +23,21 @@ export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir:
   });
 
   app.post('/editais/:id/publicar', async (req, reply) => {
-    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas Secretaria/Gestor publica.' });
+    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only Department/Manager can publish.' });
     const { id } = req.params as { id: string };
     try { await deps.gerir.publicar(id, actor(req)); return reply.send({ situacao: 'publicado' }); }
     catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
   });
 
   app.patch('/editais/:id', async (req, reply) => {
-    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas Secretaria/Gestor edita.' });
+    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only Department/Manager can edit.' });
     const { id } = req.params as { id: string };
     try { await deps.gerir.editar(id, req.body as Record<string, unknown>, actor(req)); return reply.send({ ok: true }); }
     catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
   });
 
   app.post('/editais/:id/encerrar', async (req, reply) => {
-    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas Secretaria/Gestor encerra.' });
+    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only Department/Manager can close.' });
     const { id } = req.params as { id: string };
     try { await deps.gerir.encerrar(id, actor(req)); return reply.send({ situacao: 'encerrado' }); }
     catch (e) {
@@ -48,7 +48,7 @@ export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir:
 
   // Busca por instância parcial (QBE — FR-011): probe `secretariaId`/`situacao`/`cnae`; page/size fora do probe.
   app.get('/gestao/editais', async (req, reply) => {
-    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas Secretaria/Gestor/CPL consulta a gestão.' });
+    if (!gestor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only Department/Manager/CPL can access management.' });
     const { secretariaId, situacao, cnae, page, size } = req.query as {
       secretariaId?: string; situacao?: SituacaoEdital; cnae?: string; page?: string; size?: string;
     };

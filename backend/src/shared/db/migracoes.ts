@@ -51,10 +51,10 @@ export async function aplicarMigracoes(pool: Pool, log?: (m: string) => void): P
       await client.query('INSERT INTO schema_migrations (versao) VALUES ($1)', [arquivo]);
       await client.query('COMMIT');
       novas.push(arquivo);
-      log?.(`migração aplicada: ${arquivo}`);
+      log?.(`migration applied: ${arquivo}`);
     } catch (e) {
       await client.query('ROLLBACK');
-      throw new Error(`Falha na migração ${arquivo}: ${(e as Error).message}`);
+      throw new Error(`Migration ${arquivo} failed: ${(e as Error).message}`);
     } finally {
       client.release();
     }

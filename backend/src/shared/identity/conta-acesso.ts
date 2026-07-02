@@ -42,7 +42,7 @@ export class ContaAcesso extends EntidadeBase {
 
 export class ApenasTitularConvida extends Error {
   constructor() {
-    super('Apenas o titular pode convidar/remover procuradores (AD-30/D3).');
+    super('Only the data subject can invite/remove attorneys (AD-30/D3).');
     this.name = 'ApenasTitularConvida';
   }
 }

@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import logoCompraMais from './image/logoCompraMais.png';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 /**
  * Layout de autenticação (mockup Compra Mais): à esquerda o painel institucional CLARO (branco)
@@ -7,16 +9,16 @@ import logoCompraMais from './image/logoCompraMais.png';
  * gradiente com o cartão de acesso (children). Fiel ao mockup, o painel esquerdo é limpo (só o logo).
  */
 export function AuthLayout({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   return (
     <div className="auth">
+      {/* Seletor de idioma flutuante (canto superior direito) */}
+      <div className="auth-lang"><LanguageSwitcher variante="escuro" /></div>
+
       {/* Painel institucional (claro) — logotipo oficial centralizado */}
       <aside className="auth-aside cm-hide-sm">
         <div className="auth-lockup">
-          <img
-            className="auth-logo"
-            src={logoCompraMais}
-            alt="Compra Mais — Rio Branco · Sistema Digital de Compras Públicas · Transparência, Confiança, Eficiência, Parceria"
-          />
+          <img className="auth-logo" src={logoCompraMais} alt={t('auth.logoAlt')} />
         </div>
       </aside>
 

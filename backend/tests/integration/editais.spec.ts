@@ -17,12 +17,12 @@ describe('Gestão de editais (US1)', () => {
   });
 
   it('CNAE inválido recusa a criação (FR-012)', async () => {
-    await expect(uc.criar({ ...base, cnaesAlvo: ['ABC'] }, actor)).rejects.toThrow(/CNAE inválido/);
+    await expect(uc.criar({ ...base, cnaesAlvo: ['ABC'] }, actor)).rejects.toThrow(/Invalid CNAE/);
   });
 
   it('publicar incompleto → erro com o que falta (FR-004)', async () => {
     const { editalId } = await uc.criar({ ...base, quantitativos: 0 }, actor);
-    await expect(uc.publicar(editalId, actor)).rejects.toThrow(/Incompleto|incompleto/);
+    await expect(uc.publicar(editalId, actor)).rejects.toThrow(/incomplete/i);
   });
 
   it('editar publicado emite EditalEditado (antes/depois) — FR-013', async () => {

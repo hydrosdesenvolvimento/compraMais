@@ -81,7 +81,7 @@ export class CadastrarFornecedor {
 
 export class ReceitaIndisponivelSemManual extends Error {
   constructor() {
-    super('Receita indisponível: preencha manualmente para concluir o cadastro.');
+    super('Receita unavailable: fill in manually to complete the registration.');
     this.name = 'ReceitaIndisponivelSemManual';
   }
 }

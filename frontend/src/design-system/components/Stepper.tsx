@@ -3,7 +3,7 @@ export function Stepper({ passos, ativo }: { passos: string[]; ativo: number }) 
   return (
     <div className="stepper" role="list">
       {passos.map((p, i) => (
-        <span key={p} style={{ display: 'contents' }}>
+        <span key={`${i}-${p}`} style={{ display: 'contents' }}>
           <span className={`step ${i === ativo ? 'active' : ''}`} role="listitem">
             <span className="step-num">{i + 1}</span>{p}
           </span>

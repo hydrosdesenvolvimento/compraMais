@@ -59,7 +59,9 @@
 | Registro tecnico do scaffolding | `docs/dev/registro-scaffolding.md` | Entregue 2026-06-27 | Senior Developer | Decisoes, ciclo TDD, como rodar dev/prod e handoff para QA |
 | Refresh de UI do Portal do Fornecedor | `frontend/src/index.css`, `frontend/src/design-system/*`, `frontend/src/pages/publico/*` (+ `Inicio.tsx`, `Credenciamento.tsx` novos), `frontend/src/router.tsx` | Implementado e validado (tsc/lint/vitest/build) 2026-07-01 (PRJ-DEC-10) | Tech Lead (orquestrando) | Fiel ao mockup AI-UI-Design; `data-cy` preservados; E2E Cypress pendente de execucao real |
 | Mockup de referencia (fonte da verdade visual) | `spec/AI-UI-Design/Compra Mais - Portal do Fornecedor .html` | Recebido do solicitante | Solicitante/UX | Design compilado navy/ambar; base do PRJ-DEC-10 |
-| Validacao QA-frontend do refresh de UI | `docs/qa/2026-07-01-validacao-frontend-refresh-portal-fornecedor.md` | Emitida 2026-07-01: **Aprovado com ressalvas** | QA Expert | Gates estaticos verdes + contrato data-cy preservado; ressalvas: E2E Cypress real (CI) e Design System formal (UX). Alimenta a aprovacao final do Tech Lead (PR #12) |
+| Validacao QA-frontend do refresh de UI | `docs/qa/2026-07-01-validacao-frontend-refresh-portal-fornecedor.md` | Emitida 2026-07-01; adendo 2026-07-02 (Design System resolvido; gate container verde) | QA Expert | Ressalva de Design System resolvida; abertas E2E Cypress (CI) e Storybook |
+| Design System formal | `docs/ux/design-system.md` | Produzido 2026-07-02 (UX) | UX Expert | Tokens/componentes/a11y da implementacao real; template do pacote; divergencias D1/D2 sinalizadas; Storybook e capturas reais pendentes |
+| System Design (consolidado) | `docs/system-design.md` | Atualizado 2026-07-02 (BA) | Business Analyst | Referencia PRD v2.2/epicos/feature-specs 001-008/spine; secao Design System (link p/ `docs/ux/design-system.md`) e dimensionamento DBA preenchidas; handoff DBA->BA consolidado |
 
 ## Backlog de projeto
 
@@ -68,8 +70,12 @@
 | Revisar periodicamente se decisoes ativas ainda representam o estado real do projeto | Em andamento |
 | Especificar escopo funcional de negocio do compraMais (PRD/historias) e atualizar o System Design | Pendente (solicitante) |
 | Receber handoff do DBA com plano de dimensionamento/expansao do banco e preencher secao no System Design | Pendente (DBA) |
-| Produzir Design System (UX Expert) — precondicao bloqueante do fluxo frontend e da validacao QA frontend | Parcial: linguagem visual materializada no app via mockup AI-UI-Design (PRJ-DEC-10); formalizacao do Design System e validacao QA frontend ainda pendentes (UX/QA) |
-| Executar suite Cypress E2E do refresh de UI em ambiente com backend/stubs (QA/CI) | Pendente (QA) |
+| Produzir Design System (UX Expert) — precondicao bloqueante do fluxo frontend e da validacao QA frontend | **Concluido (2026-07-02):** Design System formal em `docs/ux/design-system.md` (tokens/componentes/a11y verificados no codigo) e referenciado no System Design (DEC-STR-09). Storybook segue pendente (DEC-STR-10) |
+| Especificar escopo funcional + atualizar System Design | **Concluido (2026-07-02):** System Design consolidado referenciando PRD v2.2, epicos, feature-specs 001-008 e architecture-spine; restam apenas sign-offs do solicitante (PRD, volumetria, integracoes externas) |
+| Receber handoff do DBA e preencher secao no System Design | **Concluido (2026-07-02):** secao de dimensionamento preenchida a partir de `docs/dba/plano-dimensionamento-banco.md`; handoff DBA->BA registrado como consolidado |
+| Executar suite Cypress E2E do refresh de UI em ambiente com backend/stubs (QA/CI) | Pendente (QA) — gate estatico re-executado no container verde (2026-07-02); E2E Cypress ainda depende de app+backend no CI |
+| Resolver divergencia D1 (paleta navy `#0A2A52` implementada vs `#003A68` do contrato antigo `spec/docs/ux/DESIGN.md`) | Pendente (UX/Tech Lead/solicitante) — ratificar navy ou reconciliar com brandbook da Prefeitura |
+| Resolver divergencia D2 (`tokens.ts` vs `index.css`; `tokens.ts` nao e importado) | Pendente (Senior Dev/UX) — eleger `index.css` como fonte unica de tokens |
 | Atualizar dimensionamento/plano de expansao com base em testes de exaustao do QA | Pendente (QA) |
 
 ## Historico de referencia

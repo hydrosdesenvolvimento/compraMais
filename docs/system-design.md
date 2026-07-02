@@ -5,25 +5,28 @@
 - Projeto ou produto: compraMais — aplicacao web com dados georreferenciados
 - Responsavel Business Analyst: Business Analyst
 - Responsavel tecnico principal: Tech Lead
-- Data da versao: 2026-06-27
+- Data da versao: 2026-07-02
 - Status: Em validacao
 
-> Documento elaborado a partir de `.github/agents/templates/system-design-template.md`, consolidando as decisoes fechadas pelo Tech Lead em `.github/agents/memoria/MEMORIA-PROJETO.md` (PRJ-DEC-03..07 e resolucoes Q-01..Q-03). As decisoes citadas sao base factual e nao sao reabertas aqui.
+> Documento elaborado a partir de `.github/agents/templates/system-design-template.md`, consolidando as decisoes fechadas pelo Tech Lead em `.github/agents/memoria/MEMORIA-PROJETO.md` (PRJ-DEC-03..08 e resolucoes Q-01..Q-03). As decisoes citadas sao base factual e nao sao reabertas aqui.
+>
+> **Atualizacao 2026-07-02 (Business Analyst):** consolidados o escopo funcional ([PRD v2.2](../spec/docs/prd.md), [epicos](../spec/docs/epics.md), feature specs `spec/001..008`), a referencia ao [Design System](ux/design-system.md) (DEC-STR-09) e o handoff do [plano de dimensionamento do banco](dba/plano-dimensionamento-banco.md) do DBA (DEC-STR-04). Itens que permanecem em aberto: sign-off final do solicitante, volumetria real e confirmacao das integracoes externas.
 
 ## Objetivo do documento
 
-- Problema de negocio enderecado: **A definir com o solicitante.** O escopo funcional de negocio do compraMais (o que e comprado/ofertado, atores de negocio, regras de transacao e papel exato dos dados georreferenciados no fluxo de usuario) ainda nao foi especificado. Esta versao do System Design consolida a arquitetura e a infraestrutura ja decididas; os requisitos funcionais de negocio serao incorporados quando definidos com o solicitante e formalizados (PRD/historias).
+- Problema de negocio enderecado: **definido e ratificado** no [PRD v2.2 (2026-06-29)](../spec/docs/prd.md). O compraMais e uma plataforma B2G de gestao de compras publicas municipalizadas na modalidade de credenciamento (Lei 14.133/21, art. 79; Lei Municipal 2.027) para a Prefeitura de Rio Branco — um "marketplace reverso" auditavel que conecta demandas de secretarias a fornecedores locais, com distribuicao matematicamente justa atrelada a capacidade produtiva. Enderecca o retrabalho da CPL na conferencia de certidoes, a "caca a editais" pelos fornecedores e as fraudes/suspeitas de favorecimento na distribuicao manual de cotas. O escopo funcional esta detalhado em [`spec/docs/epics.md`](../spec/docs/epics.md) (9 epicos, 31 historias) e nas feature specs `spec/001..008`. Esta versao do System Design consolida a arquitetura e a infraestrutura ja decididas e passa a referenciar o escopo funcional ja formalizado; permanecem em aberto apenas o sign-off final do solicitante, a volumetria real e a confirmacao de integracoes externas (ver "Escopo fora" e "Proximos passos").
 - Escopo contemplado:
   - Arquitetura logica e de implantacao de uma aplicacao web com backend Node.js (Fastify, TypeScript), frontend React SPA (Vite, TypeScript) e persistencia PostgreSQL + PostGIS.
   - Monorepo unico com `backend/` e `frontend/`, orquestracao local por `docker-compose.yml` unico com `profiles` dev/prod e ambiente de desenvolvimento via devcontainer.
   - Pipeline de build/publicacao de imagens no GHCR via GitHub Actions e deploy em producao por imagem em Docker Swarm orquestrado por Portainer.
   - Estrategia de variaveis de ambiente e segredos sem versionamento.
   - Capacidade de consultas geoespaciais (PostGIS, indices GiST).
+  - Escopo funcional de negocio ja formalizado (referenciado, nao reespecificado aqui): onboarding de fornecedor por CNAE (`spec/001`), covalidacao de elegibilidade (`spec/002`), editais individualizados (`spec/003`), auditoria/consulta/exportacao (`spec/004`), malote SEI (`spec/005`), contestacao e direitos LGPD (`spec/006`), paineis de transparencia (`spec/007`) e autenticacao (`spec/008`) — motor de distribuicao justa (water-filling + maiores restos) descrito no PRD/epicos.
 - Escopo fora:
-  - Requisitos funcionais de negocio especificos do compraMais (a serem definidos com o solicitante e formalizados em PRD/historias).
-  - Design System e telas do frontend (frontend ainda nao desenhado — ver secao obrigatoria de Design System).
-  - Integracoes externas de negocio (pagamento, terceiros, mapas externos) nao confirmadas — **A definir com o solicitante.**
-  - Modelo de dados detalhado e plano de capacidade do banco (dependem do handoff do DBA — ver secao do banco).
+  - Detalhamento de fluxos que ja possuem PRD/feature spec — este documento referencia esses artefatos, nao os reespecifica.
+  - Sign-off final do solicitante sobre o PRD v2.2 e a volumetria real de producao (em aberto).
+  - Confirmacao final das integracoes externas de negocio (ex.: Receita/autopreenchimento CNPJ, PGM/SICAF para inadimplencia, SEI, notificacoes e-mail/SMS) — os contratos existem nas feature specs, mas a disponibilidade/credenciais de cada integracao externa permanecem **a confirmar com o solicitante**.
+  - Design System (existe — ver secao obrigatoria) permanece em evolucao continua; Storybook e capturas reais ainda pendentes.
 - Premissas:
   - As decisoes PRJ-DEC-03..07 e Q-01..Q-03 estao vigentes e sao tratadas como verdade de projeto.
   - O projeto e greenfield: `backend/`, `frontend/` e `spec/source/` estao vazios na data desta versao.
@@ -47,19 +50,21 @@
   - Operar de forma reproduzivel em desenvolvimento (devcontainer + compose) e em producao (Swarm/Portainer + GHCR).
   - Gerir configuracao e segredos por ambiente sem versiona-los.
   - Releases automatizados por pipeline de build/publish de imagens.
+- Escopo funcional consolidado: o produto esta definido no [PRD v2.2](../spec/docs/prd.md), decomposto em [epicos/historias](../spec/docs/epics.md) e detalhado nas feature specs `spec/001..008`, com a espinha de arquitetura (monolito modular + DDD + Clean Architecture, 33 ADs) em [`spec/docs/architecture/ARCHITECTURE-SPINE.md`](../spec/docs/architecture/ARCHITECTURE-SPINE.md). O Design System esta implementado (ver secao obrigatoria) e o plano de dimensionamento do banco foi consolidado (ver secao do banco).
 - Principais riscos arquiteturais:
-  - Escopo funcional de negocio ainda nao definido, o que impede dimensionamento de carga preciso e modelagem de dados final.
+  - Volumetria real ainda nao estimada, o que mantem o dimensionamento de carga como baseline conservador a validar (nao mais bloqueado pela ausencia de escopo).
   - Custo de consultas geoespaciais sob crescimento de dados sem indices/particionamento adequados.
   - Vazamento de segredos por configuracao incorreta de env/secrets entre dev e prod.
-  - Divergencia entre o frontend e um Design System ainda inexistente (precondicao pendente).
+  - Divergencia de paleta entre o contrato UX antigo (`#003A68`) e a implementacao navy (`#0A2A52`) — divergencia D1, ainda em ratificacao (ver "Divergencias").
+  - Dependencia de integracoes externas (Receita, PGM/SICAF, SEI, notificacoes) cujas credenciais/disponibilidade seguem a confirmar.
   - Drift entre imagem publicada no GHCR e a stack definida em producao (Swarm/Portainer).
 
 ## Componentes e responsabilidades
 
 | Componente | Responsabilidade | Entradas | Saidas | Dependencias | Observacoes |
 |---|---|---|---|---|---|
-| Frontend SPA (`frontend/`, React + Vite + TS) | Interface web do usuario; consome a API; renderiza dados (incl. geoespaciais) | Interacoes do usuario, respostas da API | Requisicoes HTTP, UI renderizada | Backend API, Design System (pendente) | Build estatico servido em producao; telas/Design System ainda nao desenhados |
-| Backend API (`backend/`, Node.js + Fastify + TS) | Regras de negocio, validacao, autenticacao (a definir) e acesso a dados | Requisicoes HTTP do frontend | Respostas HTTP/JSON, escritas/leituras no banco | PostgreSQL + PostGIS, configuracao/segredos | Framework Fastify (Q-02); contratos de API **a definir com o solicitante** |
+| Frontend SPA (`frontend/`, React + Vite + TS) | Interface web do usuario (Portal do Fornecedor); consome a API; renderiza dados (incl. geoespaciais) | Interacoes do usuario, respostas da API | Requisicoes HTTP, UI renderizada | Backend API, [Design System](ux/design-system.md) | Build estatico servido em producao; telas e Design System implementados (navy/ambar/Poppins) — ver secao obrigatoria |
+| Backend API (`backend/`, Node.js + Fastify + TS) | Regras de negocio (monolito modular + DDD/Clean Architecture), validacao, autenticacao e acesso a dados | Requisicoes HTTP do frontend | Respostas HTTP/JSON, escritas/leituras no banco | PostgreSQL + PostGIS, configuracao/segredos | Framework Fastify (Q-02); contratos de API por feature em `spec/001..008/contracts/` e specs (ver "Integracoes e contratos") |
 | PostgreSQL + PostGIS | Persistencia transacional e consultas geoespaciais | Escritas/leituras do backend | Dados consistentes e resultados espaciais | Infra de banco, extensao PostGIS | Indices GiST para consultas espaciais (PRJ-DEC-04); modelo de dados a cargo do DBA |
 | Orquestracao local (`docker-compose.yml` + devcontainer) | Subir/parametrizar servicos em dev e prod via `profiles` | Variaveis de ambiente, `.env` (dev) | Servicos em execucao | Docker, VS Code (devcontainer) | Compose unico com `profiles` dev/prod (PRJ-DEC-05) |
 | Pipeline CI (GitHub Actions) | Build, teste e publicacao de imagens no GHCR | Push/PR no repositorio | Imagens versionadas no GHCR | GHCR, segredos de CI | Sem build em producao (PRJ-DEC-06) |
@@ -68,13 +73,15 @@
 
 ## Integracoes e contratos
 
+Os contratos de API por feature ja existem no repositorio, versionados junto de cada feature spec. Contratos formais em `contracts/`: [onboarding](../spec/001-onboarding-fornecedor-cnae/contracts/onboarding-api.md), [credenciamento/covalidacao](../spec/002-covalidacao-elegibilidade/contracts/credenciamento-api.md), [editais](../spec/003-editais-individualizados/contracts/editais-api.md) e [auditoria](../spec/004-auditoria-consulta-exportacao/contracts/auditoria-api.md); as features 005 (malote SEI), 006 (contestacao/LGPD), 007 (transparencia) e 008 (autenticacao) definem seus contratos/entidades em `spec.md`/`data-model.md`. O detalhamento dos endpoints e schemas e responsabilidade dessas specs; este documento apenas os referencia.
+
 | Integracao | Tipo | Origem | Destino | Contrato ou protocolo | Risco principal |
 |---|---|---|---|---|---|
-| Frontend -> Backend | Sincrona | Frontend SPA | Backend API | HTTP/JSON (REST; especificacao **a definir com o solicitante**) | Contrato indefinido ate especificacao funcional |
+| Frontend -> Backend | Sincrona | Frontend SPA | Backend API | HTTP/JSON (REST); contratos por feature em `spec/001..008` (`contracts/` para 001-004; `spec.md`/`data-model.md` para 005-008) | Evolucao dos contratos a manter sincronizada entre spec e implementacao |
 | Backend -> Banco | Sincrona | Backend API | PostgreSQL + PostGIS | Protocolo PostgreSQL; SQL/consultas espaciais | Custo de consultas geoespaciais sob escala |
 | CI -> GHCR | Sincrona (pipeline) | GitHub Actions | GHCR | Push de imagem OCI autenticado | Falha/credencial de publicacao |
 | Swarm/Portainer -> GHCR | Sincrona (pull) | Cluster de producao | GHCR | Pull de imagem OCI autenticado | Indisponibilidade do registry / tag incorreta |
-| Integracoes externas de negocio (mapas, pagamento, terceiros) | A definir | A definir | A definir | **A definir com o solicitante** | Escopo nao confirmado |
+| Backend -> Integracoes externas de negocio (Receita/CNPJ, PGM/SICAF, SEI, notificacoes e-mail/SMS) | Sincrona/assincrona | Backend API (via Anti-Corruption Layer) | Servicos externos | Descritos nas feature specs (ex.: onboarding/Receita, covalidacao/inadimplencia, malote/SEI); politica de indisponibilidade **fail-open + flag** (AD-12 / RN002) | Credenciais e disponibilidade reais **a confirmar com o solicitante** |
 
 ## Arquitetura de desenvolvimento
 
@@ -122,40 +129,48 @@
 
 ## Plano de dimensionamento e expansao do banco
 
-- Fonte do handoff do DBA: **Pendente.** O handoff formal do plano de dimensionamento e expansao do banco (conforme `templates/plano-dimensionamento-expansao-banco-template.md` e o protocolo item 24) ainda nao foi recebido. Esta secao sera preenchida quando o DBA entregar o plano.
-- Premissas de crescimento: **A definir** no handoff do DBA (dependem do volume de negocio, ainda nao especificado).
-- Estrategia de capacidade: baseline esperado — indices GiST para colunas geometricas/geograficas (PostGIS), indices de apoio por atributos consultados, e avaliacao de particionamento conforme crescimento; detalhamento a cargo do DBA.
-- Riscos de persistencia: crescimento de dados espaciais impactando custo de consulta; locks em migracoes de tabelas grandes; ponto stateful unico do banco.
-- Acoes recomendadas: receber e incorporar o handoff do DBA; definir backup/recuperacao e estrategia de HA do banco; validar consultas espaciais criticas com dados representativos; revisar capacidade apos os testes de exaustao do QA.
+- Fonte do handoff do DBA: **consolidado.** O handoff formal do plano de dimensionamento e expansao do banco (protocolo item 24 / regra 24 e DEC-STR-04, referenciando `templates/plano-dimensionamento-expansao-banco-template.md`) foi recebido e esta consolidado neste System Design a partir de [`docs/dba/plano-dimensionamento-banco.md`](dba/plano-dimensionamento-banco.md) (data do handoff: 2026-06-27). O plano marca `Necessita revisao do Tech Lead: Sim` para aceite do baseline de dados e do gate de PostGIS antes da primeira migration.
+- Persistencia e imagem: **PostgreSQL 16 + PostGIS 3.4**, imagem com tag fixada `postgis/postgis:16-3.4` (nunca `latest`, para deploy reproduzivel por imagem — PRJ-DEC-06); volume persistente obrigatorio em qualquer ambiente.
+- Modelagem geoespacial: dados em **SRID 4326 (WGS84)**; `geography(Point,4326)` para distancias em metros (`ST_DWithin`/`ST_Distance`) e `geometry(...,4326)` para areas/poligonos (`ST_Contains`/`ST_Intersects`); reprojecao metrica apenas sob demanda na query, nunca no storage.
+- Indexacao e extensoes: **GiST** obrigatorio em toda coluna geo consultada (KNN `<->`, `ST_DWithin`, `ST_Contains`), **B-tree** em FKs/filtros; extensoes `postgis` (obrigatoria) e `btree_gist` (recomendada quando aplicavel), `postgis_topology`/`pg_trgm` condicionais/opcionais. Regra operacional: nenhuma coluna geo vai a producao sem GiST validado por `EXPLAIN (ANALYZE, BUFFERS)`.
+- Capacidade MVP e gatilhos de expansao (PRJ-DEC-08): instancia unica **2 vCPU / 4 GB RAM / 20 GB** para o MVP; expansao vertical primeiro; **replica de leitura** quando a leitura sustentada passar de ~70% da primaria; particionamento de `eventos` por tempo; gatilhos de CPU > 70% por 15 min, uso de volume > 75% e latencia p95 geo acima da meta.
+- Operacao e seguranca: senha via `.env` (dev) e **Docker secret** (`POSTGRES_PASSWORD_FILE`, prod), nunca versionada (PRJ-DEC-07); backend conecta por **pool de conexoes** (PgBouncer como gatilho de expansao); backup `pg_dump` diario (`-Fc`) com retencao 7-30 dias, evoluindo a PITR; migrations versionadas e idempotentes com plano de rollback.
+- Riscos de persistencia: crescimento de dados espaciais impactando custo de consulta; exaustao de conexoes sob carga do Fastify; locks em migracoes de tabelas grandes; ponto stateful unico do banco; divergencia da volumetria real frente as premissas.
+- **Item aberto:** a **volumetria real** (entidades, crescimento, janela de retencao) permanece marcada como "A estimar com o solicitante" no plano do DBA, com revisao trimestral dos gatilhos. Este e o unico item em aberto desta secao apos a consolidacao do handoff.
 
 ## Secao obrigatoria - Referencia ao Design System
 
-> **PENDENCIA / PRECONDICAO FUTURA.** O frontend do compraMais ainda nao foi desenhado e nao existe Design System nesta data. Conforme o protocolo (AGENTS.md item 16) e a persona do Business Analyst, em fluxos frontend o System Design deve referenciar explicitamente o documento de Design System do UX Expert, e essa vinculacao e precondicao de validacao do QA e criterio de aceite do Tech Lead. Enquanto o Design System nao existir, esta vinculacao permanece como pendencia bloqueante para o fechamento formal de qualquer entrega de frontend.
+> **VINCULACAO SATISFEITA (DEC-STR-09).** O Design System do compraMais existe e esta formalizado em [`docs/ux/design-system.md`](ux/design-system.md), mantido pelo UX Expert. Conforme o protocolo (AGENTS.md item 16), esta referencia explicita satisfaz a precondicao bloqueante de validacao de QA e criterio de aceite do Tech Lead para fluxos de frontend. O codigo (`frontend/src/index.css`, `frontend/src/design-system/`) e a fonte da verdade; o mockup `spec/AI-UI-Design/` e a referencia visual de origem.
 
-- Existe frontend ou interface relevante?: Sim (SPA React/Vite), porem ainda nao desenhado.
-- Documento de Design System referenciado: **Inexistente nesta data (precondicao futura).** Quando criado, deve seguir `.github/agents/templates/design-system-completo-template.md`, mantido pelo UX Expert.
-- Responsavel UX: UX Expert (a designar para a fase de desenho do frontend).
-- Link ou referencia de Figma: **A definir** (ainda nao produzido).
-- Link ou referencia de Storybook.js: **A definir** (Storybook ainda nao configurado; UX define a estrutura funcional e o Senior Developer a configuracao tecnica — AGENTS.md item 23).
-- Evidencias visuais disponiveis: Nenhuma (frontend nao desenhado).
-- Divergencias conhecidas entre System Design e Design System: Nao aplicavel ainda, por ausencia de Design System.
-- Plano de tratamento das divergencias / precondicao: acionar o UX Expert para produzir o Design System antes do desenvolvimento das telas; vincular o documento neste System Design; tratar a vinculacao como gate de QA frontend (`templates/qa-validacao-frontend-template.md`) e criterio de aceite do Tech Lead (`templates/aprovacao-final-tech-lead-template.md`). Ate la, entregas de frontend nao devem ser fechadas formalmente.
+- Existe frontend ou interface relevante?: Sim (SPA React/Vite — Portal do Fornecedor), implementado.
+- Documento de Design System referenciado: [`docs/ux/design-system.md`](ux/design-system.md) — status **Implementado (evolucao continua)**.
+- Tokens e identidade: **navy institucional `#0A2A52`** (base estrutural) + **ambar de acao `#F2B705`** (acento assinatura), tipografia **Poppins** (400-700); tokens de cor/tipografia/espacamento (base-4)/raio/sombra definidos em `index.css` (`:root`).
+- Componentes: 9 componentes React um-por-arquivo (Avatar, BarraAcessibilidade, Botao, Campo, Card, Etiqueta, Pill, Stepper, Tag) + shell aplicacional (AppShell, AuthLayout, LanguageSwitcher) sobre primitivas CSS (`.btn`, `.card`, `.pill`, `.tag`, `.input`).
+- Acessibilidade: meta **WCAG 2.1 AA / e-MAG** — foco visivel ambar de 3px, status por texto + icone + cor, navegacao por teclado; auditoria formal de contraste AA ainda pendente.
+- Responsividade: breakpoints **`max-width: 920px`** (sidebar vira drawer, grids em 1 coluna) e **`min-width: 921px`** (sidebar recolhivel 78px).
+- i18n: nenhum texto fixado no design; toda string vem do i18n (react-i18next; pt-BR padrao/fallback, en, es).
+- Responsavel UX: UX Expert; sustentacao tecnica do Storybook/tokens: Senior Developer (DEC-STR-10).
+- Link ou referencia de Figma: **N/A** — nao ha arquivo Figma; a origem de design e o mockup HTML de IA (`spec/AI-UI-Design/`).
+- Link ou referencia de Storybook.js: **Pendente** (nao configurado; estrutura de categorias Fundamentos/Componentes/Telas ja proposta no Design System — DEC-STR-10).
+- Evidencias visuais disponiveis: mockups em `spec/AI-UI-Design/` (PNGs de referencia por tela); capturas reais via Cypress ainda **pendentes** (gerar no CI — falta `libnss3.so` no ambiente local).
+- Divergencias conhecidas entre System Design e Design System: **D1** — paleta do contrato UX antigo (`spec/docs/ux/DESIGN.md`, `#003A68`) diverge da navy implementada (`#0A2A52`); em ratificacao (ver "Divergencias identificadas"). Divergencia secundaria interna **D2** (`tokens.ts` vs `index.css`) registrada no proprio Design System.
+- Plano de tratamento das divergencias / precondicao: ratificar a navy implementada como oficial OU reconciliar com o brandbook da Prefeitura (`spec/AI-UI-Design/Design system prefeitura Rio Branco/`), atualizando `DESIGN.md` apos a decisao; a vinculacao ao Design System ja habilita o gate de QA frontend (`templates/qa-validacao-frontend-template.md`) e o criterio de aceite do Tech Lead (`templates/aprovacao-final-tech-lead-template.md`).
 
 ## Criterios de aceite e rastreabilidade
 
-- Requisitos cobertos nesta versao: requisitos de arquitetura e infraestrutura derivados de PRJ-DEC-03..07 e Q-01..Q-03. Requisitos funcionais de negocio: **A definir com o solicitante.**
+- Requisitos cobertos nesta versao: requisitos de arquitetura e infraestrutura derivados de PRJ-DEC-03..08 e Q-01..Q-03. Requisitos funcionais de negocio: **formalizados** no [PRD v2.2](../spec/docs/prd.md), [epicos](../spec/docs/epics.md) e feature specs `spec/001..008` (criterios de aceite por historia nas proprias specs); pendente apenas o sign-off final do solicitante.
 - Criterios de aceite por capacidade:
   - Monorepo unico com `backend/` (Fastify+TS) e `frontend/` (React+Vite+TS) — verificavel pela estrutura do repositorio apos scaffolding.
   - `docker-compose.yml` unico sobe o ambiente nos `profiles` dev e prod com variaveis centralizadas e segredos via `.env`/secrets — verificavel por execucao em cada profile sem segredos versionados.
   - Persistencia PostgreSQL com PostGIS habilitado e ao menos uma consulta geoespacial usando indice GiST — verificavel por teste de fumaca.
   - CI publica imagens no GHCR e producao implanta por pull (sem build em producao) — verificavel pelo pipeline e pela stack do Swarm/Portainer.
   - Nenhum segredo versionado no repositorio — verificavel por inspecao do compose e do controle de versao.
-  - Criterios de aceite funcionais de negocio: **A definir com o solicitante.**
-- Evidencias de validacao esperadas: testes (TDD/integracao com Testcontainers e E2E com Cypress quando aplicavel), parecer do DBA sobre o plano de banco, validacao frontend via `templates/qa-validacao-frontend-template.md` (apos existir Design System), e resultados de testes de exaustao do QA para revisar dimensionamento.
+  - Criterios de aceite funcionais de negocio: definidos por historia nas feature specs `spec/001..008`; verificaveis contra os contratos de API (`contracts/`) e data-models correspondentes.
+- Evidencias de validacao esperadas: testes (TDD/integracao com Testcontainers e E2E com Cypress quando aplicavel), parecer do DBA sobre o plano de banco (consolidado — ver secao do banco), validacao frontend via `templates/qa-validacao-frontend-template.md` contra o [Design System](ux/design-system.md), e resultados de testes de exaustao do QA para revisar dimensionamento.
 - Dependencias de QA, UX e DBA:
-  - QA: validar fluxos e executar testes de exaustao (pendente); validacao frontend depende do Design System.
-  - UX: produzir o Design System (precondicao do frontend) — pendente.
-  - DBA: entregar o handoff de dimensionamento/expansao do banco — pendente.
+  - QA: validar fluxos e executar testes de exaustao (pendente); validacao frontend contra o [Design System](ux/design-system.md) — precondicao ja satisfeita.
+  - UX: Design System entregue ([`docs/ux/design-system.md`](ux/design-system.md)); pendentes Storybook, capturas reais e resolucao da divergencia D1.
+  - DBA: handoff de dimensionamento/expansao do banco **entregue e consolidado** ([`docs/dba/plano-dimensionamento-banco.md`](dba/plano-dimensionamento-banco.md)); pendente aceite do baseline pelo Tech Lead e volumetria real.
 
 ## Decisoes e trade-offs
 
@@ -173,11 +188,12 @@
 
 | Risco | Impacto | Probabilidade | Mitigacao | Owner |
 |---|---|---|---|---|
-| Escopo funcional de negocio indefinido | Alto | Alta | Especificar com o solicitante e formalizar PRD/historias antes de implementar fluxos | Business Analyst |
+| Sign-off final do solicitante sobre o PRD v2.2 pendente | Medio | Media | Escopo ja formalizado (PRD/epicos/specs); obter aprovacao formal antes do fechamento | Business Analyst |
+| Volumetria real ainda nao estimada | Medio | Alta | Baseline conservador no plano do DBA; revisao trimestral dos gatilhos com carga real | DBA |
 | Custo de consultas geoespaciais sob escala | Alto | Media | Indices GiST, otimizacao de consultas, particionamento e cache; validar com testes de carga | DBA |
 | Vazamento de segredos por config incorreta | Alto | Media | `.env`/Docker secrets, revisao de PR, sem segredos no compose versionado | Tech Lead |
-| Ausencia de Design System bloqueando frontend | Medio | Alta | Acionar UX Expert para produzir o Design System antes das telas | UX Expert |
-| Plano de banco do DBA ainda nao recebido | Medio | Alta | Solicitar handoff formal e incorporar ao System Design | DBA |
+| Divergencia D1 de paleta (navy vs `#003A68`) nao ratificada | Medio | Media | Ratificar navy ou reconciliar com brandbook; atualizar `DESIGN.md` | UX Expert / Tech Lead |
+| Integracoes externas (Receita, PGM/SICAF, SEI, notificacoes) nao confirmadas | Medio | Media | Confirmar disponibilidade/credenciais; ACL + politica fail-open + flag (AD-12) | Tech Lead / Business Analyst |
 | Dimensionamento sem dados de carga reais | Medio | Media | Atualizar plano apos testes de exaustao do QA | QA Expert |
 | Drift entre imagem do GHCR e stack de producao | Medio | Baixa | Versionamento de tags, pipeline unico e revisao da stack no Portainer | Tech Lead |
 
@@ -192,7 +208,7 @@ flowchart TD
   B -->|SQL / consultas espaciais| DB[(PostgreSQL + PostGIS - indices GiST)]
   CFG[Config e segredos: .env dev / Docker secrets prod] -.-> B
   CFG -.-> DB
-  EXT[Integracoes externas de negocio - a definir] -.-> B
+  EXT[Integracoes externas via ACL: Receita, PGM/SICAF, SEI, notificacoes - a confirmar] -.-> B
 ```
 
 ### Implantacao: dev, CI e producao
@@ -221,25 +237,31 @@ flowchart LR
   CI --> Prod
 ```
 
-### Vinculacao com Design System (precondicao futura)
+### Vinculacao System Design ↔ Design System ↔ DBA (consolidada)
 
 ```mermaid
 flowchart LR
-  BA[Business Analyst] --> SD[System Design - este documento]
-  UX[UX Expert - a designar] -.pendente.-> DS[Design System - inexistente]
-  DS -.precondicao.-> SD
-  SD --> QA[Validacao QA - frontend depende do Design System]
-  SD --> TL[Aceite do Tech Lead]
+  PRD[PRD v2.2 + epicos + feature specs 001-008] --> SD[System Design - este documento]
+  UX[UX Expert] --> DS[Design System - docs/ux/design-system.md - Implementado]
+  DS -->|DEC-STR-09: precondicao satisfeita| SD
+  DBA[DBA] -->|handoff consolidado DEC-STR-04| PLB[Plano de banco - docs/dba/plano-dimensionamento-banco.md]
+  PLB --> SD
+  SD --> QA[Validacao QA frontend - gate habilitado]
+  SD --> TL[Aceite do Tech Lead + revisao consolidada]
+  DS -.divergencia D1 navy vs #003A68.-> TL
 ```
 
 ## Proximos passos
 
-1. Especificar com o solicitante o escopo funcional de negocio do compraMais e formalizar PRD/historias; atualizar este System Design com requisitos e criterios de aceite funcionais.
-2. Receber o handoff do DBA com o plano de dimensionamento e expansao do banco e preencher a secao correspondente.
-3. Acionar o UX Expert para produzir o Design System (precondicao do frontend) e vincula-lo nesta secao obrigatoria.
-4. Apos scaffolding do Senior Developer, detalhar os passos exatos de implantacao em dev e o gatilho de release do CI.
-5. Atualizar dimensionamento e plano de expansao com base nos testes de exaustao do QA quando executados.
-6. Manter este documento sincronizado com mudancas de arquitetura, implantacao, capacidade ou integracao, e registrar decisoes relevantes na memoria de projeto.
+> **Consolidados:** o escopo funcional esta formalizado (PRD v2.2 + epicos + feature specs `spec/001..008`); o Design System esta implementado e vinculado (DEC-STR-09); o handoff do plano de banco do DBA esta consolidado (DEC-STR-04). Os itens abaixo sao o que permanece em aberto.
+
+1. Obter o **sign-off final do solicitante** sobre o PRD v2.2 e os criterios de aceite funcionais.
+2. Estimar a **volumetria real** (usuarios, entidades geo, ofertas, retencao de `eventos`) e revisar o dimensionamento da aplicacao e do banco (revisao trimestral dos gatilhos do plano do DBA).
+3. Confirmar as **integracoes externas** (Receita/CNPJ, PGM/SICAF para inadimplencia, SEI, notificacoes e-mail/SMS): disponibilidade, credenciais e ambientes.
+4. Resolver a divergencia **D1** de paleta (ratificar navy `#0A2A52` ou reconciliar com o brandbook da Prefeitura) e atualizar `spec/docs/ux/DESIGN.md`.
+5. Concluir pendencias de frontend do Design System: configurar Storybook (DEC-STR-10), gerar capturas reais no CI e concluir a auditoria de contraste AA.
+6. Executar os testes de exaustao do QA e atualizar dimensionamento/plano de expansao com carga real.
+7. Manter este documento sincronizado com mudancas de arquitetura, implantacao, capacidade ou integracao, e registrar decisoes relevantes na memoria de projeto.
 
 ## Divergencias identificadas (para a revisao consolidada do Tech Lead)
 
@@ -247,6 +269,8 @@ flowchart LR
 |---|---|---|
 | Prompt original citava "multi repo" | Log `2026-06-27_001` | Resolvido: Q-01 fixou monorepo unico. Sem acao. |
 | Prompt original citava NestJS/Express e build frontend nao definido | Log `2026-06-27_001` | Resolvido: Q-02 fixou Fastify+TS e React SPA/Vite+TS. Sem acao. |
-| Requisitos funcionais de negocio ausentes | Material de apoio | Pendente: especificar com o solicitante antes de implementar fluxos. |
-| Plano de dimensionamento do banco nao recebido | Protocolo item 24 | Pendente: solicitar handoff formal do DBA. |
-| Design System inexistente para fluxo frontend | AGENTS.md item 16 | Precondicao bloqueante: acionar UX Expert antes do fechamento de frontend. |
+| Requisitos funcionais de negocio ausentes | Material de apoio | Resolvido: escopo formalizado no PRD v2.2, epicos e feature specs `spec/001..008`. Aberto apenas o sign-off final do solicitante. |
+| Plano de dimensionamento do banco nao recebido | Protocolo item 24 / DEC-STR-04 | Resolvido: handoff do DBA consolidado a partir de [`docs/dba/plano-dimensionamento-banco.md`](dba/plano-dimensionamento-banco.md). Aberto apenas a volumetria real (revisao trimestral). |
+| Design System inexistente para fluxo frontend | AGENTS.md item 16 / DEC-STR-09 | Resolvido: Design System implementado e vinculado ([`docs/ux/design-system.md`](ux/design-system.md)); precondicao de frontend satisfeita. Storybook e capturas reais pendentes. |
+| **D1 — paleta azul: contrato antigo vs implementacao** | [`docs/ux/design-system.md`](ux/design-system.md) (D1) / `spec/docs/ux/DESIGN.md` | **Aberto (bloqueante de ratificacao).** Contrato antigo usa `azul-900 #003A68`; implementacao usa navy `#0A2A52` (`azul-700 #14467F`). **Impacto:** governanca/brandbook divergem do produto real, risco de inconsistencia de marca com a Prefeitura e retrabalho. **Recomendacao:** ratificar a navy implementada como oficial OU reconciliar formalmente com o brandbook (`spec/AI-UI-Design/Design system prefeitura Rio Branco/`) e atualizar `DESIGN.md`. **Owner:** UX Expert (proposta) + Tech Lead / Business Analyst (validacao com a Prefeitura). |
+| D2 — inconsistencia interna de tokens (`tokens.ts` vs `index.css`) | [`docs/ux/design-system.md`](ux/design-system.md) (D2) | Aberto (nao bloqueante): eleger `index.css` como fonte unica de tokens e derivar `tokens.ts`. Owner: Senior Developer + UX Expert. |

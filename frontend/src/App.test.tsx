@@ -10,7 +10,8 @@ import App from './App';
 describe('App (Portal do Fornecedor)', () => {
   it('redireciona para /cadastro e renderiza a marca + o formulário de CNPJ', async () => {
     render(<App />);
-    expect((await screen.findAllByText(/Compra Mais/i)).length).toBeGreaterThan(0);
+    // A marca é o logotipo oficial (imagem) no painel institucional — assertido pelo nome acessível.
+    expect(await screen.findByRole('img', { name: /Compra Mais/i })).toBeInTheDocument();
     expect(await screen.findByPlaceholderText('00.000.000/0000-00')).toBeInTheDocument();
   });
 });

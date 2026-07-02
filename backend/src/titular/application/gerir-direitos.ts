@@ -15,10 +15,10 @@ export interface SolicitacaoRepository {
 }
 
 export class SolicitacaoNaoEncontrada extends Error {
-  constructor() { super('Solicitação não encontrada.'); this.name = 'SolicitacaoNaoEncontrada'; }
+  constructor() { super('Request not found.'); this.name = 'SolicitacaoNaoEncontrada'; }
 }
 export class DescarteRetido extends Error {
-  constructor() { super('Dado sob obrigação legal de guarda; descarte negado até o fim do prazo de retenção.'); this.name = 'DescarteRetido'; }
+  constructor() { super('Data under legal retention obligation; disposal denied until the end of the retention period.'); this.name = 'DescarteRetido'; }
 }
 
 /** Direitos do titular LGPD (FR-002/003/004/008). A regra "só o próprio titular" é aplicada na borda (RBAC). */

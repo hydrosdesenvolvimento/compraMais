@@ -44,7 +44,7 @@ export class SolicitacaoTitular extends EntidadeBase {
   }
 
   private exigirPendente(): void {
-    if (this._status !== 'pendente') throw new Error(`Solicitação já resolvida (status: ${this._status}).`);
+    if (this._status !== 'pendente') throw new Error(`Request already resolved (status: ${this._status}).`);
   }
 }
 
@@ -69,5 +69,5 @@ export class PoliticaRetencao {
 }
 
 export class MotivoRecusaObrigatorio extends Error {
-  constructor() { super('Recusa de solicitação exige justificativa.'); this.name = 'MotivoRecusaObrigatorio'; }
+  constructor() { super('Rejecting a request requires a justification.'); this.name = 'MotivoRecusaObrigatorio'; }
 }

@@ -40,7 +40,7 @@ export function registrarGoogleOAuth(
       headers: { Authorization: `Bearer ${token.access_token}` },
     });
     if (!resp.ok) {
-      return reply.code(502).send({ codigo: 'GOOGLE_USERINFO_FALHOU', mensagem: 'Não foi possível obter o perfil do Google.' });
+      return reply.code(502).send({ codigo: 'GOOGLE_USERINFO_FALHOU', mensagem: 'Could not retrieve the Google profile.' });
     }
     const perfil = (await resp.json()) as PerfilGoogle;
     const out = await deps.autenticarGoogle.executar({ googleId: perfil.sub, email: perfil.email, nome: perfil.name ?? perfil.email });

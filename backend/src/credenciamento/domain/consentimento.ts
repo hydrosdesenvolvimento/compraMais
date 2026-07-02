@@ -32,7 +32,7 @@ export class Consentimento extends EntidadeBase {
 
 export class ConsentimentoInvalido extends Error {
   constructor() {
-    super('Consentimento exige finalidade e versão do termo (LGPD, FR-015).');
+    super('Consent requires a purpose and the term version (LGPD, FR-015).');
     this.name = 'ConsentimentoInvalido';
   }
 }

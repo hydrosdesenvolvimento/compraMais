@@ -6,7 +6,7 @@ const PERFIS_ADMIN = ['cpl', 'administrador', 'smga'];
 /** Painéis (Épico 9). Dashboard restrito (FR-002); transparência pública sem auth (FR-003). Somente leitura. */
 export function registrarRotasPaineis(app: FastifyInstance, deps: { dashboard: DashboardAdmin; transparencia: Transparencia }): void {
   app.get('/admin/dashboard', async (req, reply) => {
-    if (!admin(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Dashboard restrito a CPL/Administrador.' });
+    if (!admin(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Dashboard restricted to CPL/Administrator.' });
     return reply.send(await deps.dashboard.funil());
   });
 

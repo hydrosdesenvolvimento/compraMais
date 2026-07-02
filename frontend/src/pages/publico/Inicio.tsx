@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { Trans, useTranslation } from 'react-i18next';
 import { IconeAlerta, IconeRelogio, IconeSeta } from '../../design-system/icons';
 
 /* ---- Dados de demonstração (do mockup) ---- */
@@ -76,6 +77,7 @@ const secTagStyle: CSSProperties = {
 };
 
 export function Inicio() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const goDocs = () => navigate({ to: '/documentos' });
   const goEditais = () => navigate({ to: '/editais' });
@@ -89,10 +91,10 @@ export function Inicio() {
         <div>
           <div style={{ fontSize: '12.5px', color: 'var(--cinza-400)' }}>Quinta-feira, 25 de junho de 2026</div>
           <h1 style={{ fontWeight: 600, fontSize: 22, color: 'var(--azul-900)', margin: '6px 0 3px' }}>
-            Bem-vindo, {empresa.nome}
+            {t('inicio.cabecalho.bemVindo', { nome: empresa.nome })}
           </h1>
           <div style={{ fontSize: '13.5px', color: 'var(--cinza-500)' }}>
-            CNPJ {empresa.cnpj} · {empresa.cidade}
+            {t('inicio.cabecalho.cnpjCidade', { cnpj: empresa.cnpj, cidade: empresa.cidade })}
           </div>
         </div>
         <div
@@ -109,7 +111,7 @@ export function Inicio() {
           }}
         >
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'var(--azul-600)' }} />
-          Status: Credenciado
+          {t('inicio.cabecalho.statusCredenciado')}
         </div>
       </div>
 
@@ -146,12 +148,11 @@ export function Inicio() {
           </div>
           <div style={{ flex: 1, minWidth: 200 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
-              <span style={{ font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>2 documentos vencidos</span>
+              <span style={{ font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>{t('inicio.alertaErro.titulo', { count: 2 })}</span>
               <span style={{ font: '600 11px var(--font-body)', color: '#fff', background: 'var(--erro)', padding: '2px 9px', borderRadius: 999 }}>2</span>
             </div>
             <div style={{ fontSize: 13, color: 'var(--cinza-500)', marginTop: 2 }}>
-              A <strong style={{ color: 'var(--erro-700)' }}>Certidão Municipal (PGM)</strong> e o{' '}
-              <strong style={{ color: 'var(--erro-700)' }}>Alvará de Funcionamento</strong> estão vencidos. Editais que exigem esses documentos ficam bloqueados até a regularização.
+              <Trans i18nKey="inicio.alertaErro.descricao" components={{ b: <strong style={{ color: 'var(--erro-700)' }} /> }} />
             </div>
           </div>
           <button
@@ -170,7 +171,7 @@ export function Inicio() {
               flexShrink: 0,
             }}
           >
-            Regularizar agora
+            {t('inicio.alertaErro.botao')}
             <IconeSeta width={15} height={15} />
           </button>
         </div>
@@ -205,9 +206,13 @@ export function Inicio() {
             <IconeRelogio width={20} height={20} />
           </div>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>Uma certidão vence em breve</div>
+            <div style={{ font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>{t('inicio.alertaAtencao.titulo')}</div>
             <div style={{ fontSize: 13, color: 'var(--cinza-500)', marginTop: 2 }}>
-              Certidão Negativa de Débitos Federais vence em <strong style={{ color: '#8A5410' }}>5 dias</strong> (30/06/2026). A varredura diária do sistema já enviou aviso por <strong>SMS e e-mail</strong>. Atualize para não perder editais.
+              <Trans
+                i18nKey="inicio.alertaAtencao.descricao"
+                values={{ dias: 5, data: '30/06/2026' }}
+                components={{ b: <strong style={{ color: '#8A5410' }} />, c: <strong /> }}
+              />
             </div>
           </div>
           <button
@@ -226,7 +231,7 @@ export function Inicio() {
               flexShrink: 0,
             }}
           >
-            Atualizar documento
+            {t('inicio.alertaAtencao.botao')}
             <IconeSeta width={15} height={15} />
           </button>
         </div>
@@ -235,24 +240,24 @@ export function Inicio() {
       {/* KPIs */}
       <div className="cm-grid-4" style={{ marginTop: 18, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 16 }}>
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, padding: '20px 22px' }}>
-          <div style={{ fontSize: 13, color: 'var(--cinza-500)' }}>Editais compatíveis abertos</div>
+          <div style={{ fontSize: 13, color: 'var(--cinza-500)' }}>{t('inicio.kpis.editaisCompativeis')}</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginTop: 10 }}>
             <span style={{ fontWeight: 600, fontSize: 26, color: 'var(--azul-900)', lineHeight: 1 }}>3</span>
-            <span style={{ font: '600 11px var(--font-body)', color: 'var(--sucesso)', background: 'var(--sucesso-bg)', padding: '3px 8px', borderRadius: 999 }}>novos</span>
+            <span style={{ font: '600 11px var(--font-body)', color: 'var(--sucesso)', background: 'var(--sucesso-bg)', padding: '3px 8px', borderRadius: 999 }}>{t('inicio.kpis.novos')}</span>
           </div>
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, padding: '20px 22px' }}>
-          <div style={{ fontSize: 13, color: 'var(--cinza-500)' }}>Credenciamentos em andamento</div>
+          <div style={{ fontSize: 13, color: 'var(--cinza-500)' }}>{t('inicio.kpis.credenciamentosAndamento')}</div>
           <div style={{ fontWeight: 600, fontSize: 26, color: 'var(--azul-900)', lineHeight: 1, marginTop: 10 }}>2</div>
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, padding: '20px 22px' }}>
-          <div style={{ fontSize: 13, color: 'var(--cinza-500)' }}>Documentos aprovados</div>
+          <div style={{ fontSize: 13, color: 'var(--cinza-500)' }}>{t('inicio.kpis.documentosAprovados')}</div>
           <div style={{ fontWeight: 600, fontSize: 26, color: 'var(--azul-900)', lineHeight: 1, marginTop: 10 }}>
             4<span style={{ fontSize: 16, color: 'var(--cinza-400)', fontWeight: 500 }}>/6</span>
           </div>
         </div>
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 12, padding: '20px 22px' }}>
-          <div style={{ fontSize: 13, color: 'var(--cinza-500)' }}>Demanda distribuída ativa</div>
+          <div style={{ fontSize: 13, color: 'var(--cinza-500)' }}>{t('inicio.kpis.demandaDistribuida')}</div>
           <div style={{ fontWeight: 600, fontSize: 26, color: 'var(--azul-900)', lineHeight: 1, marginTop: 10 }}>1</div>
         </div>
       </div>
@@ -262,7 +267,7 @@ export function Inicio() {
         {/* Editais abertos compatíveis */}
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 14, boxShadow: 'var(--shadow-xs)', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid var(--divider)' }}>
-            <div style={{ font: '600 16px var(--font-display)', color: 'var(--azul-900)' }}>Editais abertos compatíveis</div>
+            <div style={{ font: '600 16px var(--font-display)', color: 'var(--azul-900)' }}>{t('inicio.painelEditais.titulo')}</div>
             <button
               onClick={goEditais}
               style={{
@@ -276,7 +281,7 @@ export function Inicio() {
                 gap: 5,
               }}
             >
-              Ver todos
+              {t('inicio.painelEditais.verTodos')}
               <IconeSeta width={15} height={15} />
             </button>
           </div>
@@ -306,19 +311,19 @@ export function Inicio() {
                   transition: 'background .12s,color .12s',
                 }}
               >
-                Iniciar
+                {t('inicio.painelEditais.iniciar')}
               </button>
             </div>
           ))}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '12px 20px', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: '12.5px', color: 'var(--cinza-500)' }}>Mostrando 3 de 3 editais compatíveis</span>
+            <span style={{ fontSize: '12.5px', color: 'var(--cinza-500)' }}>{t('inicio.painelEditais.mostrando', { atual: 3, total: 3 })}</span>
           </div>
         </div>
 
         {/* Credenciamentos em andamento */}
         <div style={{ background: '#fff', border: '1px solid var(--border)', borderRadius: 14, boxShadow: 'var(--shadow-xs)', overflow: 'hidden' }}>
           <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--divider)', font: '600 16px var(--font-display)', color: 'var(--azul-900)' }}>
-            Credenciamentos em andamento
+            {t('inicio.painelCredenciamentos.titulo')}
           </div>
           {credAndamento.map((c) => (
             <div key={c.num} style={{ padding: '15px 20px', borderBottom: '1px solid var(--divider)' }}>
@@ -347,7 +352,7 @@ export function Inicio() {
                 transition: 'background .12s,color .12s',
               }}
             >
-              Ver meus credenciamentos
+              {t('inicio.painelCredenciamentos.verMeus')}
             </button>
           </div>
         </div>

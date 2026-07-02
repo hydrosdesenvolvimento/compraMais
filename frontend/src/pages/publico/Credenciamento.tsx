@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useTranslation, Trans } from 'react-i18next';
 import { Stepper } from '../../design-system/components';
 import { IconeSeta, IconeVoltar, IconeFechar, IconeCheck, IconeCamera, IconeUpload } from '../../design-system/icons';
 
@@ -19,22 +20,28 @@ const REQ_DOCS: DocReq[] = [
   { nome: 'Balanço patrimonial do último exercício', reuse: true },
 ];
 
-const PASSOS = ['Capacidade', 'Documentos', 'Prova de vida', 'Concluído'];
-
 const varAzul50 = 'var(--azul-50)';
 const varAzul100 = 'var(--azul-100)';
 
 export function Credenciamento() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [step, setStep] = useState(0); // 0..3
   const [cap, setCap] = useState('');
   const [facial, setFacial] = useState<FacialEstado>('idle');
 
+  const PASSOS = [
+    t('credenciamento.passos.capacidade'),
+    t('credenciamento.passos.documentos'),
+    t('credenciamento.passos.provaVida'),
+    t('credenciamento.passos.concluido'),
+  ];
+
   const isSucesso = step === 3;
   const showFooter = !isSucesso;
   const showBack = step > 0;
 
-  const nextLabel = step === 2 ? 'Enviar credenciamento' : 'Continuar';
+  const nextLabel = step === 2 ? t('credenciamento.acoes.enviar') : t('credenciamento.acoes.continuar');
 
   const wNext = () => setStep((s) => Math.min(3, s + 1));
   const wPrev = () => setStep((s) => Math.max(0, s - 1));
@@ -71,7 +78,7 @@ export function Credenciamento() {
           }}
         >
           <IconeVoltar width={16} height={16} />
-          Voltar à vitrine
+          {t('credenciamento.voltarVitrine')}
         </button>
         <div style={{ font: '600 13px var(--font-body)', color: 'var(--cinza-500)' }}>{EDITAL.num}</div>
       </div>
@@ -108,7 +115,7 @@ export function Credenciamento() {
                   style={footerGhostStyle}
                 >
                   <IconeVoltar width={16} height={16} />
-                  Voltar
+                  {t('credenciamento.acoes.voltar')}
                 </button>
               ) : (
                 <button
@@ -118,7 +125,7 @@ export function Credenciamento() {
                   style={footerGhostStyle}
                 >
                   <IconeFechar width={16} height={16} />
-                  Cancelar
+                  {t('credenciamento.acoes.cancelar')}
                 </button>
               )}
 
@@ -137,7 +144,7 @@ export function Credenciamento() {
                     textDecoration: 'underline',
                   }}
                 >
-                  Pular esta etapa
+                  {t('credenciamento.acoes.pular')}
                 </button>
               )}
 
@@ -184,10 +191,11 @@ const footerGhostStyle = {
 
 /* ---------- Passo 1: Capacidade produtiva ---------- */
 function PassoCapacidade({ cap, setCap }: { cap: string; setCap: (v: string) => void }) {
+  const { t } = useTranslation();
   return (
     <div>
       <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.1em', color: 'var(--azul-700)', marginBottom: 6 }}>
-        PASSO 1
+        {t('credenciamento.capacidade.passo')}
       </div>
       <h2
         style={{
@@ -198,25 +206,24 @@ function PassoCapacidade({ cap, setCap }: { cap: string; setCap: (v: string) => 
           margin: '0 0 22px',
         }}
       >
-        Declaração de capacidade produtiva
+        {t('credenciamento.capacidade.titulo')}
       </h2>
       <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 30, alignItems: 'start' }}>
         <div>
           <p style={{ fontSize: 14.5, color: 'var(--cinza-500)', lineHeight: 1.6, margin: '0 0 20px' }}>
-            Informe a quantidade máxima que sua empresa consegue entregar. O sistema usa esse número como{' '}
-            <strong>teto</strong> no rateio matemático — você nunca recebe demanda acima da sua capacidade.
+            <Trans i18nKey="credenciamento.capacidade.descricao" components={{ b: <strong /> }} />
           </p>
           <label
             style={{ font: '600 12.5px var(--font-body)', color: 'var(--cinza-700)', marginBottom: 8, display: 'block' }}
           >
-            Capacidade máxima (conjuntos)
+            {t('credenciamento.capacidade.label')}
           </label>
           <input
             data-cy="capacidade"
             value={cap}
             onChange={(e) => setCap(e.target.value)}
             type="number"
-            placeholder="Ex.: 4000"
+            placeholder={t('credenciamento.capacidade.placeholder')}
             style={{
               width: '100%',
               padding: '14px 16px',
@@ -254,8 +261,7 @@ function PassoCapacidade({ cap, setCap }: { cap: string; setCap: (v: string) => 
               <line x1="12" y1="16" x2="12" y2="12" />
               <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
-            Você pode declarar qualquer valor até a demanda total do edital. Empresas com capacidade menor concorrem
-            normalmente no rateio.
+            {t('credenciamento.capacidade.dica')}
           </div>
         </div>
 
@@ -269,18 +275,17 @@ function PassoCapacidade({ cap, setCap }: { cap: string; setCap: (v: string) => 
               marginBottom: 14,
             }}
           >
-            Como o teto é aplicado
+            {t('credenciamento.capacidade.tetoTitulo')}
           </div>
           <div style={{ display: 'grid', gap: 14 }}>
             <PassoNumerado n={1}>
-              Sua capacidade declarada vira o <strong>limite máximo</strong> de itens que podem ser alocados à sua
-              empresa.
+              <Trans i18nKey="credenciamento.capacidade.teto1" components={{ b: <strong /> }} />
             </PassoNumerado>
             <PassoNumerado n={2}>
-              A demanda do edital é dividida entre os fornecedores aptos, respeitando o teto de cada um.
+              <Trans i18nKey="credenciamento.capacidade.teto2" components={{ b: <strong /> }} />
             </PassoNumerado>
             <PassoNumerado n={3}>
-              O saldo não atendido vai para o <strong>Cadastro de Reserva</strong>, acionado em uma 2ª demanda.
+              <Trans i18nKey="credenciamento.capacidade.teto3" components={{ b: <strong /> }} />
             </PassoNumerado>
           </div>
         </div>
@@ -315,10 +320,11 @@ function PassoNumerado({ n, children }: { n: number; children: React.ReactNode }
 
 /* ---------- Passo 2: Documentos exigidos ---------- */
 function PassoDocumentos() {
+  const { t } = useTranslation();
   return (
     <div>
       <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.1em', color: 'var(--azul-700)', marginBottom: 6 }}>
-        PASSO 2
+        {t('credenciamento.documentos.passo')}
       </div>
       <h2
         style={{
@@ -329,11 +335,10 @@ function PassoDocumentos() {
           margin: '0 0 8px',
         }}
       >
-        Documentos exigidos
+        {t('credenciamento.documentos.titulo')}
       </h2>
       <p style={{ fontSize: 14.5, color: 'var(--cinza-500)', lineHeight: 1.55, margin: '0 0 22px' }}>
-        Documentos válidos enviados em editais anteriores são <strong>reaproveitados automaticamente</strong>. Você só
-        precisa anexar o que falta.
+        <Trans i18nKey="credenciamento.documentos.descricao" components={{ b: <strong /> }} />
       </p>
       <div style={{ display: 'grid', gap: 10 }}>
         {REQ_DOCS.map((d) => (
@@ -388,10 +393,10 @@ function PassoDocumentos() {
             <div style={{ flex: 1, font: '600 14.5px var(--font-body)', color: 'var(--cinza-900)' }}>{d.nome}</div>
             {d.reuse ? (
               <span style={{ font: '600 12px var(--font-body)', color: 'var(--sucesso)' }}>
-                Importado de edital anterior
+                {t('credenciamento.documentos.importado')}
               </span>
             ) : (
-              <span style={{ font: '600 12px var(--font-body)', color: '#8A5410' }}>Necessário enviar</span>
+              <span style={{ font: '600 12px var(--font-body)', color: '#8A5410' }}>{t('credenciamento.documentos.necessarioEnviar')}</span>
             )}
           </div>
         ))}
@@ -402,7 +407,7 @@ function PassoDocumentos() {
         <div
           style={{ font: '600 13.5px var(--font-body)', color: 'var(--azul-900)', margin: '0 0 12px' }}
         >
-          Enviar documentos pendentes
+          {t('credenciamento.documentos.enviarPendentes')}
         </div>
         <div style={{ display: 'grid', gap: 14 }}>
           {REQ_DOCS.filter((d) => !d.reuse).map((d) => (
@@ -438,10 +443,10 @@ function PassoDocumentos() {
                   <IconeUpload width={22} height={22} />
                 </div>
                 <div style={{ font: '600 14px var(--font-body)', color: 'var(--azul-800)' }}>
-                  Arraste o PDF aqui (upload será integrado posteriormente)
+                  {t('credenciamento.documentos.arraste')}
                 </div>
                 <div style={{ fontSize: 12.5, color: 'var(--cinza-400)', marginTop: 3 }}>
-                  PDF até 10 MB · será comprimido para o SEI
+                  {t('credenciamento.documentos.limite')}
                 </div>
               </div>
             </div>
@@ -454,10 +459,11 @@ function PassoDocumentos() {
 
 /* ---------- Passo 3: Autenticação facial ---------- */
 function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => void }) {
+  const { t } = useTranslation();
   return (
     <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center' }}>
       <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.1em', color: 'var(--azul-700)', marginBottom: 6 }}>
-        PASSO 3 · OPCIONAL
+        {t('credenciamento.provaVida.passo')}
       </div>
       <h2
         style={{
@@ -468,11 +474,10 @@ function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => voi
           margin: '0 0 8px',
         }}
       >
-        Autenticação facial do procurador
+        {t('credenciamento.provaVida.titulo')}
       </h2>
       <p style={{ fontSize: 14.5, color: 'var(--cinza-500)', lineHeight: 1.55, margin: '0 0 24px' }}>
-        Prova de vida (liveness) para validar a assinatura, cruzando o rosto com o documento de identidade. Esta etapa é
-        opcional.
+        {t('credenciamento.provaVida.descricao')}
       </p>
 
       <div
@@ -518,7 +523,7 @@ function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => voi
                 animation: 'cmspin .7s linear infinite',
               }}
             />
-            <span style={{ font: '600 12px var(--font-body)', color: 'var(--azul-700)' }}>Verificando…</span>
+            <span style={{ font: '600 12px var(--font-body)', color: 'var(--azul-700)' }}>{t('credenciamento.provaVida.verificando')}</span>
           </div>
         )}
         {estado === 'done' && (
@@ -548,7 +553,7 @@ function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => voi
             >
               <IconeCheck width={28} height={28} strokeWidth={2.4} />
             </span>
-            <span style={{ font: '600 13px var(--font-body)', color: 'var(--sucesso)' }}>Prova de vida validada</span>
+            <span style={{ font: '600 13px var(--font-body)', color: 'var(--sucesso)' }}>{t('credenciamento.provaVida.validada')}</span>
           </div>
         )}
       </div>
@@ -572,7 +577,7 @@ function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => voi
           }}
         >
           <IconeCamera width={18} height={18} />
-          Realizar prova de vida
+          {t('credenciamento.provaVida.realizar')}
         </button>
       )}
     </div>
@@ -581,6 +586,7 @@ function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => voi
 
 /* ---------- Passo 4: Sucesso ---------- */
 function PassoSucesso({ onPainel }: { onPainel: () => void }) {
+  const { t } = useTranslation();
   return (
     <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center', padding: '14px 0' }}>
       <div
@@ -607,10 +613,14 @@ function PassoSucesso({ onPainel }: { onPainel: () => void }) {
           margin: '0 0 10px',
         }}
       >
-        Credenciamento enviado!
+        {t('credenciamento.enviado.titulo')}
       </h2>
       <p style={{ fontSize: 15, color: 'var(--cinza-500)', lineHeight: 1.6, margin: '0 0 8px' }}>
-        Sua proposta para <strong>{EDITAL.num}</strong> foi submetida à Comissão de Licitação.
+        <Trans
+          i18nKey="credenciamento.enviado.descricao"
+          components={{ b: <strong /> }}
+          values={{ edital: EDITAL.num }}
+        />
       </p>
       <div
         style={{
@@ -626,7 +636,7 @@ function PassoSucesso({ onPainel }: { onPainel: () => void }) {
         }}
       >
         <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--atencao)' }} />
-        Status: Pendente de Análise
+        {t('credenciamento.enviado.status')}
       </div>
       <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
         <button
@@ -645,7 +655,7 @@ function PassoSucesso({ onPainel }: { onPainel: () => void }) {
             cursor: 'pointer',
           }}
         >
-          Baixar PDF
+          {t('credenciamento.enviado.baixarPdf')}
         </button>
         <button
           type="button"
@@ -661,7 +671,7 @@ function PassoSucesso({ onPainel }: { onPainel: () => void }) {
             cursor: 'pointer',
           }}
         >
-          Voltar ao painel
+          {t('credenciamento.enviado.voltarPainel')}
         </button>
       </div>
     </div>

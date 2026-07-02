@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 /** Componentes base do design system (Compra Mais). Estilos em index.css. Foco visível âmbar (e-MAG/WCAG 2.1 AA). */
 
@@ -59,11 +60,12 @@ export function Stepper({ passos, ativo }: { passos: string[]; ativo: number }) 
 
 /** Barra de acessibilidade (e-MAG): alto contraste, ajuste de fonte (lógica de toggle no app). */
 export function BarraAcessibilidade() {
+  const { t } = useTranslation();
   return (
-    <div role="region" aria-label="Acessibilidade" style={{ display: 'inline-flex', gap: 4 }}>
-      <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label="Alto contraste">A</button>
-      <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label="Aumentar fonte">A+</button>
-      <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label="Diminuir fonte">A-</button>
+    <div role="region" aria-label={t('common.a11y.region')} style={{ display: 'inline-flex', gap: 4 }}>
+      <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={t('common.a11y.highContrast')}>A</button>
+      <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={t('common.a11y.increaseFont')}>A+</button>
+      <button className="icon-btn" style={{ width: 32, height: 32 }} aria-label={t('common.a11y.decreaseFont')}>A-</button>
     </div>
   );
 }

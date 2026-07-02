@@ -15,7 +15,7 @@ export class Cnpj {
 
 export class CnpjInvalido extends Error {
   constructor(raw: string) {
-    super(`CNPJ inválido: ${raw}`);
+    super(`Invalid CNPJ: ${raw}`);
     this.name = 'CnpjInvalido';
   }
 }

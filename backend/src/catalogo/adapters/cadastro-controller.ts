@@ -18,7 +18,7 @@ export function registrarRotasCadastro(app: FastifyInstance, deps: {
     const { cnpj } = req.body as { cnpj: string };
     const r = await deps.receita.consultarCnpj(cnpj);
     if (r.frescor === 'indisponivel') {
-      return reply.code(503).send({ codigo: 'RECEITA_INDISPONIVEL', mensagem: 'Receita indisponível — preencha manualmente', frescor: r.frescor });
+      return reply.code(503).send({ codigo: 'RECEITA_INDISPONIVEL', mensagem: 'Receita unavailable — fill in manually', frescor: r.frescor });
     }
     return reply.send(r);
   });
@@ -28,7 +28,7 @@ export function registrarRotasCadastro(app: FastifyInstance, deps: {
     const { cep } = req.params as { cep: string };
     const r = await deps.cep.consultarCep(cep);
     if (!r.valor) {
-      return reply.code(404).send({ codigo: 'CEP_NAO_ENCONTRADO', mensagem: 'CEP não encontrado', frescor: r.frescor });
+      return reply.code(404).send({ codigo: 'CEP_NAO_ENCONTRADO', mensagem: 'CEP not found', frescor: r.frescor });
     }
     return reply.send(r);
   });

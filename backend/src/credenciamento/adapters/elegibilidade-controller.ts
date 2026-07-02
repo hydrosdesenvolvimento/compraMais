@@ -14,7 +14,7 @@ export function registrarRotasElegibilidade(app: FastifyInstance, deps: { elegib
 
   app.post('/bloqueios/:id/registrar-termino', async (req, reply) => {
     if (!PERFIS_CPL.includes(String(req.headers['x-papel'] ?? ''))) {
-      return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas CPL/SMGA registram término.' });
+      return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only CPL/SMGA can register termination.' });
     }
     const { id } = req.params as { id: string };
     const { dataTermino } = req.body as { dataTermino: string };

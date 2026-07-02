@@ -1,10 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation, Trans } from 'react-i18next';
 import { api } from '../../lib/api';
 import { Pill } from '../../design-system/components';
 import { IconeDocumentos, IconeUpload, IconeDownload, IconeAlerta } from '../../design-system/icons';
 
 /** Repositório documental (FR-007/008) — upload + lista com status vigente/expirado. Query. */
 export function Documentos({ fornecedorId }: { fornecedorId: string }) {
+  const { t } = useTranslation();
   const { data: docs = [] } = useQuery({ queryKey: ['documentos', fornecedorId], queryFn: () => api.documentos(fornecedorId) });
 
   const pendentes = docs.filter((d) => d.situacao === 'expirado');
@@ -13,8 +15,8 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
     <div className="stack" style={{ animation: 'cmfade .3s' }}>
       <div className="cm-page-head">
         <div>
-          <h1 className="cm-page-title">Gestão de Documentos</h1>
-          <p className="cm-page-sub">Repositório central da sua empresa. Reaproveitado automaticamente em novos editais.</p>
+          <h1 className="cm-page-title">{t('documentos.tituloPagina')}</h1>
+          <p className="cm-page-sub">{t('documentos.subtituloPagina')}</p>
         </div>
       </div>
 
@@ -37,10 +39,10 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
         </span>
         <span style={{ minWidth: 0 }}>
           <span style={{ display: 'block', font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>
-            Enviar novo documento
+            {t('documentos.enviarNovo')}
           </span>
           <span style={{ display: 'block', fontSize: 13, color: 'var(--cinza-500)', marginTop: 2 }}>
-            Formatos aceitos: PDF, JPG ou PNG.
+            {t('documentos.formatosAceitos')}
           </span>
         </span>
         <input id="doc-upload" data-cy="upload" type="file" accept=".pdf,.jpg,.png" style={{ display: 'none' }} />
@@ -56,8 +58,12 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
         >
           <IconeAlerta width={19} height={19} style={{ color: 'var(--erro-700)', flexShrink: 0 }} />
           <span style={{ fontSize: 13.5, color: 'var(--erro-700)', lineHeight: 1.5 }}>
-            <strong>{pendentes.length} documento{pendentes.length > 1 ? 's' : ''} expirado{pendentes.length > 1 ? 's' : ''}.</strong>{' '}
-            Atualize os documentos abaixo para continuar participando dos editais.
+            <Trans
+              i18nKey="documentos.alertaExpirados"
+              count={pendentes.length}
+              values={{ count: pendentes.length }}
+              components={{ b: <strong /> }}
+            />
           </span>
         </div>
       )}
@@ -71,9 +77,9 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
             font: '600 11px var(--font-body)', letterSpacing: '.08em', color: 'var(--azul-900)',
           }}
         >
-          <div>DOCUMENTO</div>
-          <div>STATUS</div>
-          <div style={{ textAlign: 'right' }}>AÇÕES</div>
+          <div>{t('documentos.colunaDocumento')}</div>
+          <div>{t('documentos.colunaStatus')}</div>
+          <div style={{ textAlign: 'right' }}>{t('documentos.colunaAcoes')}</div>
         </div>
 
         {docs.map((d) => {
@@ -102,13 +108,13 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
                 </div>
 
                 <div>
-                  <Pill tom={expirado ? 'error' : 'success'}>{d.situacao === 'vigente' ? 'Vigente' : 'Expirado'}</Pill>
+                  <Pill tom={expirado ? 'error' : 'success'}>{d.situacao === 'vigente' ? t('documentos.statusVigente') : t('documentos.statusExpirado')}</Pill>
                 </div>
 
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                   <button
                     type="button"
-                    aria-label={`Baixar ${d.tipo}`}
+                    aria-label={t('documentos.baixarDocumento', { tipo: d.tipo })}
                     style={{
                       width: 36, height: 36, border: '1px solid var(--border)', borderRadius: 8, background: '#fff',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cinza-700)',
@@ -122,7 +128,7 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}
                   >
                     <IconeUpload width={16} height={16} />
-                    {expirado ? 'Atualizar documento' : 'Reenviar'}
+                    {expirado ? t('documentos.atualizarDocumento') : t('documentos.reenviar')}
                   </button>
                 </div>
               </div>

@@ -16,7 +16,7 @@ export interface MaloteRepository {
 }
 
 export class MaloteNaoEncontrado extends Error {
-  constructor() { super('Malote não encontrado.'); this.name = 'MaloteNaoEncontrado'; }
+  constructor() { super('Malote not found.'); this.name = 'MaloteNaoEncontrado'; }
 }
 
 /** Limite global do SEI municipal (FR-003): `SEI_MALOTE_LIMITE_MB` (default 10 MB), em bytes. */

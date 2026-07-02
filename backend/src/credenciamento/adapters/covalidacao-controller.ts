@@ -16,7 +16,7 @@ export function registrarRotasCovalidacao(app: FastifyInstance, deps: { covalida
   });
 
   app.post('/documentos/:docId/covalidar', async (req, reply) => {
-    if (!cpl(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Apenas CPL/SMGA covalidam.' });
+    if (!cpl(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only CPL/SMGA can co-validate.' });
     const { docId } = req.params as { docId: string };
     const { resultado, justificativa, empresaId } = req.body as { resultado: 'aprovado' | 'reprovado'; justificativa?: string; empresaId: string };
     try {

@@ -11,17 +11,17 @@ import { aplicarMigracoes } from './migracoes.js';
  */
 async function migrar(): Promise<void> {
   if (!temPostgresConfigurado()) {
-    console.error('[migrate] Postgres não configurado (defina POSTGRES_HOST ou DATABASE_URL). Abortando.');
+    console.error('[migrate] Postgres not configured (set POSTGRES_HOST or DATABASE_URL). Aborting.');
     process.exit(1);
   }
   const config = loadConfig();
   const pool = criarPool(config.database);
   try {
     const novas = await aplicarMigracoes(pool, (m) => console.log(`[migrate] ${m}`));
-    console.log(novas.length ? `[migrate] ${novas.length} migração(ões) nova(s) aplicada(s).` : '[migrate] nada pendente — banco já atualizado.');
+    console.log(novas.length ? `[migrate] ${novas.length} new migration(s) applied.` : '[migrate] nothing pending — database already up to date.');
   } finally {
     await pool.end();
   }
 }
 
-migrar().catch((e) => { console.error('[migrate] falha:', e); process.exit(1); });
+migrar().catch((e) => { console.error('[migrate] failure:', e); process.exit(1); });

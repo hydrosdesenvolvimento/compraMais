@@ -126,6 +126,46 @@ services:
       - compramais
 
   # ----------------------------------------------------------------------- #
+  # Testes NO CONTAINER (profile `test`) — regra do projeto: toda suite de   #
+  # testes roda dentro do container, nunca no host.                          #
+  #   docker compose --profile test run --rm backend-test                    #
+  #   docker compose --profile test run --rm frontend-test                   #
+  # Reutiliza o stage `build` (toolchain + devDependencies) com bind mount   #
+  # do codigo e volume de node_modules; executa lint + typecheck + test.     #
+  # ----------------------------------------------------------------------- #
+  backend-test:
+    profiles: ["test"]
+    build:
+      context: ./backend
+      target: build
+    command: sh -c "npm ci --no-audit --no-fund && npm run lint && npm run typecheck && npm test"
+    environment:
+      NODE_ENV: test
+      CI: "true"
+      # Testes offline/deterministicos: consulta Receita/CEP via mock (sem rede).
+      RECEITA_PROVIDER: mock
+    volumes:
+      - ./backend:/app
+      - backend_test_node_modules:/app/node_modules
+    networks:
+      - compramais
+
+  frontend-test:
+    profiles: ["test"]
+    build:
+      context: ./frontend
+      target: build
+    command: sh -c "npm ci --no-audit --no-fund && npm run lint && npm run typecheck && npm test"
+    environment:
+      NODE_ENV: test
+      CI: "true"
+    volumes:
+      - ./frontend:/app
+      - frontend_test_node_modules:/app/node_modules
+    networks:
+      - compramais
+
+  # ----------------------------------------------------------------------- #
   # Backend Fastify (PROD): imagem do GHCR + deploy Swarm                   #
   # Sem build em producao (PRJ-DEC-06): apenas pull da imagem publicada.    #
   # ----------------------------------------------------------------------- #
@@ -197,6 +237,8 @@ volumes:
   db_data:
   backend_node_modules:
   frontend_node_modules:
+  backend_test_node_modules:
+  frontend_test_node_modules:
 
 networks:
   compramais:

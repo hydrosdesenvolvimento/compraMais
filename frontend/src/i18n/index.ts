@@ -31,6 +31,9 @@ void i18n
     fallbackLng: DEFAULT_LANGUAGE,
     supportedLngs: SUPPORTED_LANGUAGES,
     nonExplicitSupportedLngs: true, // 'pt', 'pt-PT' → 'pt-BR'; 'en-US' → 'en'
+    // Recursos empacotados (sem backend assíncrono): inicializa de forma SÍNCRONA para que o
+    // primeiro render já tenha as traduções (evita "flash" de chaves cruas como auth.signup.title).
+    initImmediate: false,
     interpolation: { escapeValue: false },
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],

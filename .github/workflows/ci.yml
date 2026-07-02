@@ -20,37 +20,21 @@ jobs:
   # Lint + testes dos dois servicos (matriz)                                 #
   # ----------------------------------------------------------------------- #
   test:
-    name: Lint & Test (${{ matrix.service }})
+    name: Lint, Typecheck & Test in container (${{ matrix.service }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         service: [backend, frontend]
-    defaults:
-      run:
-        working-directory: ${{ matrix.service }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node 22
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: ${{ matrix.service }}/package-lock.json
-
-      - name: Install deps
-        run: npm ci
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test
-        run: npm test
+      # Regra do projeto: toda a suite roda DENTRO do container (nunca no host).
+      # O servico `${service}-test` (profile `test`) executa lint + typecheck + test;
+      # o codigo de saida do container propaga para o step → falha o CI se algo quebrar.
+      - name: Lint, typecheck & test in container
+        run: docker compose --profile test run --rm --build ${{ matrix.service }}-test
 
   # ----------------------------------------------------------------------- #
   # Build + push das imagens para o GHCR                                     #

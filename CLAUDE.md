@@ -38,6 +38,7 @@ Sempre que a tarefa envolver desenvolvimento, refatoração ou correção de có
 - Usar [.github/skills/protocolo-tdd/](.github/skills/protocolo-tdd/) como referência operacional obrigatória (ciclo TDD, integração real via Testcontainers, E2E real com Cypress quando aplicável).
 - Usar [.github/skills/review-documentation/](.github/skills/review-documentation/) para produzir o registro técnico da entrega e o commit exigido pela skill.
 - Testes E2E usam **Cypress** como padrão: o Senior Developer prepara os pré-requisitos do projeto/container; o QA Expert valida a execução real e registra evidências ou bloqueios.
+- **Toda a suite de testes roda dentro do container, nunca no host** (DEC-STR-34). Use o profile `test` do compose: `docker compose --profile test run --rm backend-test` e `docker compose --profile test run --rm frontend-test` (executam `lint` + `typecheck` + `test` na imagem). O CI roda o mesmo gate via `docker compose --profile test`. Validação de entrega e evidências de QA devem usar a execução em container.
 
 ### Ciclo do developer com subagents utilitários
 

@@ -117,7 +117,7 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '14px 18px' }}>
             <CampoOficial rotulo={t('minhaConta.empresa.razaoSocial')} valor={fornecedor.razaoSocial} />
             <CampoOficial rotulo={t('minhaConta.empresa.cnpj')} valor={fornecedor.cnpj} />
-            <CampoOficial rotulo={t('minhaConta.empresa.situacaoCadastral')} valor="Ativa" />
+            <CampoOficial rotulo={t('minhaConta.empresa.situacaoCadastral')} valor={t('minhaConta.empresa.ativa')} />
             <CampoOficial rotulo={t('minhaConta.empresa.porteEmpresa')} valor={fornecedor.porte} />
           </div>
 

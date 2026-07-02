@@ -15,5 +15,7 @@ describe('App (Portal do Fornecedor)', () => {
     expect(await screen.findByPlaceholderText('00.000.000/0000-00')).toBeInTheDocument();
     // i18n inicializado: nenhuma chave crua (ex.: auth.signup.title) deve vazar para a tela.
     expect(document.body.textContent ?? '').not.toMatch(/\bauth\.(tabs|signup|login)\./);
+    // Idioma PADRÃO é pt-BR (sem escolha salva): o texto em português deve aparecer.
+    expect(await screen.findByText('Cadastro de fornecedor')).toBeInTheDocument();
   });
 });

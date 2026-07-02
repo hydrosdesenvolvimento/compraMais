@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { LANGUAGES } from '../i18n/languages';
+import { LANGUAGES, type LanguageCode } from '../i18n/languages';
+import { definirIdioma } from '../i18n';
 
 /**
  * Seletor de idioma (pt-BR · en · es). Persiste a escolha via i18next-browser-languagedetector
@@ -17,7 +18,7 @@ export function LanguageSwitcher({ variante = 'claro' }: { variante?: 'claro' | 
         data-cy="idioma"
         aria-label={t('common.language.aria')}
         value={atual}
-        onChange={(e) => void i18n.changeLanguage(e.target.value)}
+        onChange={(e) => definirIdioma(e.target.value as LanguageCode)}
         style={{
           appearance: 'none', border: '1px solid var(--border)', borderRadius: 8,
           padding: '7px 30px 7px 12px', font: '600 13px var(--font-body)', cursor: 'pointer',

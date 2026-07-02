@@ -171,8 +171,15 @@ export function AuthPanel() {
             <>
               <label className="label" htmlFor="senha" style={{ marginBottom: 7 }}>Senha</label>
               <div style={{ position: 'relative', marginBottom: 16 }}>
-                <input id="senha" data-cy="senha" type={verSenha ? 'text' : 'password'} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="••••••••" style={{ ...inputEstilo, paddingRight: 44 }} />
-                <button type="button" onClick={() => setVerSenha((v) => !v)} aria-label={verSenha ? 'OCULTAR senha' : 'VER senha'} />
+                <input id="senha" data-cy="senha" type={verSenha ? 'text' : 'password'} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder="••••••••" style={{ ...inputEstilo, paddingRight: 88 }} />
+                <button
+                  type="button"
+                  onClick={() => setVerSenha((v) => !v)}
+                  aria-label={verSenha ? 'Ocultar senha' : 'Ver senha'}
+                  style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', font: '600 12.5px var(--font-body)', color: 'var(--azul-700)', padding: '6px 8px' }}
+                >
+                  {verSenha ? 'Ocultar' : 'Ver'}
+                </button>
               </div>
             </>
           )}</formLogin.Field>

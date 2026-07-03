@@ -95,7 +95,7 @@ Observação: em composições do shell (`AppShell`) o texto sobre âmbar aparec
 ### Iconografia
 
 - SVG **inline** estilo **Lucide** (stroke arredondado, `viewBox 0 0 24 24`, `stroke-width` 1.8 padrão, `currentColor`), em `frontend/src/design-system/icons.tsx`.
-- Inventário (24 ícones): Início, Editais, Credenciamentos, Documentos, Demandas (navegação); Sino, Busca, Menu, Chevron, Prédio, Usuário, Sair (topbar/shell); Seta, Voltar, Alerta, Relógio, Check, CheckCírculo, Fechar, Filtro, Download, Upload, Sync, Cadeado, Câmera, Info (ações/status).
+- Inventário (26 ícones): Início, Editais, Credenciamentos, Documentos, Demandas (navegação); Sino, Busca, Menu, Chevron, Prédio, Usuário, Sair (topbar/shell); Seta, Voltar, Alerta, Relógio, Check, CheckCírculo, Fechar, Filtro, Download, Upload, Sync, Cadeado, Câmera, Info (ações/status).
 
 ### Elevação e sombras
 

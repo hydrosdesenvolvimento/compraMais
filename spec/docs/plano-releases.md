@@ -129,9 +129,9 @@ flowchart LR
 ## Documentos Relacionados
 
 - [Matriz de Lacunas de Requisitos](matriz-lacunas.md)
-- [07 - Backlog](../../source/07-Backlog.md)
-- [06 - Casos de Uso](../../source/06-CasosUso.md)
-- [08 - BPMN](../../source/08-BPMN.md)
+- [07 - Backlog](../source/07-Backlog.md)
+- [06 - Casos de Uso](../source/06-CasosUso.md)
+- [08 - BPMN](../source/08-BPMN.md)
 
 ---
 

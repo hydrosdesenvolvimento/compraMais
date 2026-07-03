@@ -505,7 +505,7 @@ As a usuário dos dois portais,
 I want consistência visual e de interação conforme o contrato de UX,
 So that a experiência seja coerente e acessível (UX-DR1/7/8/10, RNF006, AD-3).
 
-> ✅ Contrato de UX: [DESIGN.md](ux-designs/ux-compra-mais-2026-06-29/DESIGN.md) / [EXPERIENCE.md](ux-designs/ux-compra-mais-2026-06-29/EXPERIENCE.md).
+> ✅ Contrato de UX: [DESIGN.md](ux/DESIGN.md) / [EXPERIENCE.md](ux/EXPERIENCE.md).
 
 **Acceptance Criteria:**
 **Given** os tokens (Poppins; azul-700 #0061AE + escala; âmbar #FFB300; raio 8px/999px; espaçamento 8/12/14/16/20),
@@ -513,3 +513,47 @@ So that a experiência seja coerente e acessível (UX-DR1/7/8/10, RNF006, AD-3).
 **Then** componentes (AuthPanel, sidebar, cards, labels/tags, botões, barra de acessibilidade) e paleta são consistentes,
 **And** a acessibilidade atende e-MAG/WCAG 2.1 AA (foco visível âmbar 3px, alto contraste, teclado),
 **And** a IA segue o EXPERIENCE.md (Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas).
+
+---
+
+## Refinamentos de Aceite — Convergência Spec-Kit → BMad (2026-07-02)
+
+As decisões finas resolvidas nas features `spec/00X-*` (arquivadas em `../archive/2026-06-29-spec-kit/`) foram
+resgatadas aqui como **critérios de aceite adicionais**, vinculados à história de destino. Cada item complementa
+(não substitui) o AC da história. Rastreabilidade completa em [CONVERGENCIA.md](CONVERGENCIA.md).
+
+### Story 1.3 — Cadastro via CNPJ *(resgate `spec/001`)*
+- **Given** um CNPJ com situação cadastral **não ativa** (baixado/inapto/suspenso), **When** consulto, **Then** o sistema sinaliza a situação e **impede** o cadastro como fornecedor apto.
+- **Given** um CNPJ **já cadastrado**, **When** alguém tenta cadastrá-lo de novo, **Then** a duplicidade é impedida e o sistema orienta a recuperação de acesso.
+- **Given** um CNPJ em formato inválido ou inexistente na base, **When** consulto, **Then** mensagem clara de impedimento e nenhum cadastro criado.
+- **Given** o cadastro do fornecedor (RF019), **When** informo o endereço, **Then** ele é capturado de forma **estruturada/geolocalizável** para análise territorial na Transparência.
+
+### Story 1.7 — Papel Procurador *(resgate `spec/001`, RN010)*
+- **Given** uma empresa cadastrada, **When** o **titular** convida um Procurador, **Then** o vínculo é criado por ele (e ele pode **remover**); Procurador não se autovincula.
+
+### Story 2.2 — Covalidação *(resgate `spec/002`, RN011, AD-34)*
+- **Given** documentos pendentes, **When** a CPL acessa a fila, **Then** vê a **fila pendente e o tempo decorrido por documento**, **sem** SLA/prazo fixo bloqueante.
+- **Given** a listagem `GET .../documentos/pendentes`, **When** filtro, **Then** aceita **probe parcial** (status, tipo) de `Documento` (QBE); agregações e recurso único **não** recebem QBE.
+
+### Story 3.1 / 3.3 — Editais e contestação *(resgate `spec/003`, RN012)*
+- **Given** um edital **Publicado**, **When** a Secretaria/Gestor altera qualquer campo (inclusive CNAE/quantitativos), **Then** a mudança é permitida **com registro antes/depois** na trilha; mudança de CNAE **reavalia a vitrine imediatamente** mantendo o prazo original (reabertura de prazo é decisão manual auditada).
+- **Given** um edital, **When** **qualquer** fornecedor cadastrado e ativo contesta o CNAE, **Then** a contestação é aceita e julgada (acatar/recusar com justificativa) pela Secretaria/CPL.
+
+### Story 4.2 — Bloqueio transitório *(resgate `spec/002`, RN002)*
+- **Given** uma penalidade/inidoneidade, **When** avalio o prazo, **Then** uso a **data da base oficial** quando disponível; senão a **CPL registra manualmente** o termo (híbrido).
+
+### Story 6.1 / 6.2 — Malote *(resgate `spec/005`, RNF002)*
+- **Given** uma solicitação de malote, **When** o worker processa, **Then** ela roda em **fila durável com retry**, estado pendente→gerado sobrevive a restart (sem perda silenciosa).
+- **Given** uma peça **única indivisível** acima do limite, **When** fragmento, **Then** ela vira **fragmento isolado sinalizado** para tratamento manual (sem split binário); o limite é o parâmetro **global** `SEI_MALOTE_LIMITE_MB`.
+
+### Story 8.1 / 8.2 — Auditoria *(resgate `spec/004`, RNF007)*
+- **Given** um perfil de controle, **When** consulta/exporta a trilha, **Then** **não há mascaramento** de PII (salvaguarda = RBAC); acesso inclui o papel **`auditor` somente-leitura**.
+- **Given** um export acima de `AUDITORIA_EXPORT_TETO` (ex.: 50k), **When** exporto, **Then** o sistema **sinaliza o volume e conclui** por streaming/paginação (sugere refinar, mas não corta).
+
+### Story 7.3 — Retenção e direitos do titular *(resgate `spec/006`, RNF007)*
+- **Given** dados de categorias distintas, **When** avalio o descarte, **Then** aplico o prazo **por categoria** (cadastral/fiscal/contratual), não um prazo único.
+- **Given** uma solicitação de direito do titular, **When** ela é atendida, **Then** quem atende é o papel **`dpo`** (Administrador como fallback); a **CPL não** atende.
+
+### Story 9.2 — Transparência *(resgate `spec/007`, RN013)*
+- **Given** o portal público, **When** um cidadão acessa, **Then** vê **apenas agregados não-identificáveis** (editais vigentes, secretarias, segmentos CNAE) — **sem** fornecedores, valores ou PII.
+- **Given** as projeções públicas, **When** requisitadas, **Then** são calculadas **sob demanda** (materialização/cache é otimização futura sem mudar o contrato).

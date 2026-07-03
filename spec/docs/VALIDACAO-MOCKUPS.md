@@ -43,5 +43,15 @@ O wizard de credenciamento do mockup inclui a etapa **"Prova de vida"** (livenes
 - **Épicos** ([epics.md](epics.md)) — seção "Cobertura dos Mockups": Stories 3.4, 5.5, 9.4, 9.5, 9.6, 9.7 + ACs em 5.3.
 - **UX** ([EXPERIENCE.md](ux/EXPERIENCE.md)) — telas do Painel Admin detalhadas + etapas do wizard de credenciamento.
 
+## Segunda passada — validação profunda (2026-07-02)
+
+Reexecução com extração das **chaves de dado, máquinas de estado e fluxos** dos bundles (não só rótulos de UI), cruzada contra a doc **já corrigida**. Resultado: **os 10 gaps acima são a cobertura completa** — nenhum gap estrutural novo. Confirmações relevantes:
+
+- Estados batem com a doc: Edital (`Rascunho/Aberto/Em Análise/Em Distribuição/Homologado/Em Execução` — RN014); fase do fornecedor (`Requerente/Credenciado/Fornecedor/Reserva` — AD-14); `Ativa/Inativa/Bloqueado` (RN015).
+- `facialChecking` / `facialDone` **confirmam** que "Prova de vida" é liveness facial → reforça o conflito **G5** (mantido para ratificação).
+- `termoAceito`, `reuse`, `idoneo`, `Cadastro de Reserva · 2ª Demanda` → todos com destino já documentado.
+
+**Micro-ajuste (único residual):** o Admin expõe `senhaAtual` + `novaSenha` + `confirmSenha` → **troca da própria senha pelo usuário autenticado** (distinta do reset por esquecimento e do reset administrativo). Incorporada ao **RF015**.
+
 ---
-*Validação produzida em 2026-07-02. Complementa a [convergência](CONVERGENCIA.md) da mesma data.*
+*Validação produzida em 2026-07-02 (com segunda passada profunda na mesma data). Complementa a [convergência](CONVERGENCIA.md).*

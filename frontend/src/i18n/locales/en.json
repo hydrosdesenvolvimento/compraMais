@@ -1,0 +1,385 @@
+{
+  "common": {
+    "brand": {
+      "name": "Compra Mais",
+      "sub": "RIO BRANCO"
+    },
+    "nav": {
+      "inicio": "Home",
+      "editais": "Tenders",
+      "credenciamentos": "My accreditations",
+      "documentos": "Documents",
+      "demandas": "Assigned demands",
+      "painel": "Dashboard",
+      "covalidacao": "Co-validation",
+      "gestaoEditais": "Tender management",
+      "contestacoes": "Disputes",
+      "auditoria": "Audit"
+    },
+    "shell": {
+      "menu": "MENU",
+      "search": "Search tenders, documents…",
+      "searchAria": "Search",
+      "openMenu": "Open menu",
+      "notificationsAria": "Notifications",
+      "notificationsTitle": "Notifications",
+      "notificationsSubtitle": "Daily scan",
+      "notificationsEmpty": "No notifications right now.",
+      "notificationsSeeAll": "See all notifications",
+      "userMenuAria": "User menu",
+      "myAccount": "My account",
+      "logout": "Sign out",
+      "footerFornecedor": "Version 2.0 · MVP FIEAC",
+      "footerAdmin": "Administrative panel · CPL / SMGA"
+    },
+    "language": {
+      "label": "Language",
+      "aria": "Select language"
+    },
+    "a11y": {
+      "region": "Accessibility",
+      "highContrast": "High contrast",
+      "increaseFont": "Increase font",
+      "decreaseFont": "Decrease font"
+    }
+  },
+  "auth": {
+    "logoAlt": "Compra Mais — Rio Branco · Public Procurement Digital System · Transparency, Trust, Efficiency, Partnership",
+    "tabs": {
+      "login": "Sign in",
+      "signup": "Create account"
+    },
+    "signup": {
+      "title": "Supplier registration",
+      "subtitle": "Enter the company's Tax ID (CNPJ). The data is automatically validated with the Federal Revenue Service.",
+      "cnpjLabel": "Company Tax ID (CNPJ)",
+      "cnpjPlaceholder": "00.000.000/0000-00",
+      "consult": "Look up",
+      "loading": "Looking up data at the Federal Revenue Service…",
+      "razaoSocial": "LEGAL NAME",
+      "porte": "SIZE",
+      "situacao": "STATUS",
+      "address": "ADDRESS",
+      "cepPlaceholder": "00000-000",
+      "cepSearching": "Looking up address…",
+      "cepNotFound": "ZIP code not found",
+      "numero": "NUMBER",
+      "numeroPlaceholder": "No.",
+      "complemento": "COMPLEMENT",
+      "complementoPlaceholder": "Suite, floor, block… (optional)",
+      "qsa": "OWNERSHIP STRUCTURE (QSA)",
+      "manualLink": "Federal Revenue Service unavailable? Fill in manually",
+      "submit": "Create supplier account",
+      "statusNote": "Your account will start with the <b>Applicant</b> status."
+    },
+    "login": {
+      "title": "Access the platform",
+      "subtitle": "Sign in with your registered e-mail and password.",
+      "email": "E-mail",
+      "emailPlaceholder": "you@company.com",
+      "password": "Password",
+      "passwordPlaceholder": "••••••••",
+      "show": "Show",
+      "hide": "Hide",
+      "showAria": "Show password",
+      "hideAria": "Hide password",
+      "keep": "Keep me signed in",
+      "forgot": "Forgot my password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "error": "Invalid credentials."
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "carregando": "Loading…",
+      "titulo": "Administrative panel",
+      "subtitulo": "CPL / SMGA pending-items funnel.",
+      "documentosPendentes": "Pending documents",
+      "editaisPublicados": "Published tenders",
+      "editaisRascunho": "Draft tenders",
+      "bloqueiosAtivos": "Active blocks"
+    },
+    "covalidacao": {
+      "titulo": "Document co-validation",
+      "subtitulo": "Approve/reject documents (rejection requires justification).",
+      "statusLabel": "Status",
+      "statusPendente": "Pending",
+      "statusAprovado": "Approved",
+      "statusReprovado": "Rejected",
+      "tipoPlaceholder": "Type (e.g.: balanco)",
+      "vazio": "No documents for the current filters.",
+      "aprovar": "Approve",
+      "motivoPlaceholder": "Reason (required to reject)",
+      "reprovar": "Reject"
+    },
+    "gerirEditais": {
+      "titulo": "Tender management",
+      "subtitulo": "Create, publish and close individualized tenders (1 department per tender).",
+      "objetoPlaceholder": "Demand object",
+      "cnaePlaceholder": "Target CNAE(s) (comma-separated)",
+      "criar": "Create tender (draft)",
+      "filtrarSituacao": "Filter by status",
+      "situacaoRascunho": "Draft",
+      "situacaoPublicado": "Published",
+      "situacaoEncerrado": "Closed",
+      "publicar": "Publish",
+      "encerrar": "Close"
+    },
+    "contestacoes": {
+      "titulo": "CNAE challenges",
+      "subtitulo": "Accept (corrects the tender) or reject (with a reason) the challenges.",
+      "vazio": "No challenges.",
+      "novoCnaePlaceholder": "New CNAE(s)",
+      "acatar": "Accept",
+      "motivoPlaceholder": "Reason (required to reject)",
+      "recusar": "Reject"
+    },
+    "auditoria": {
+      "titulo": "Audit — trail",
+      "subtitulo": "Query and export of the append-only trail (read-only).",
+      "usuarioPlaceholder": "User/actor",
+      "eventoPlaceholder": "Action/event",
+      "editalPlaceholder": "Tender",
+      "consultar": "Search",
+      "exportarCsv": "Export CSV",
+      "exportarJson": "Export JSON",
+      "erroIntervalo": "Invalid date range (from > to).",
+      "erroAcesso": "Access restricted to control/audit profiles.",
+      "erroConsulta": "Query error.",
+      "colQuando": "When",
+      "colAtor": "Actor",
+      "colAcao": "Action",
+      "colIp": "IP",
+      "vazio": "No records for the current filters."
+    }
+  },
+  "contestacao": {
+    "titulo": "My Accreditations",
+    "subtitulo": "Track your accreditations across public notices and resume any that are still in draft.",
+    "carregando": "Loading…",
+    "filtros": "Filters",
+    "busca": {
+      "ariaLabel": "Search accreditations",
+      "placeholder": "Search by notice number or title…"
+    },
+    "exibindoPorPagina": "Showing per page: {{n}}",
+    "paginacao": "Page {{atual}} of {{total}}",
+    "vazio": {
+      "titulo": "No accreditations found.",
+      "descricao": "Open an available notice and click “Start Accreditation” to begin."
+    },
+    "status": {
+      "rascunho": "draft"
+    },
+    "contagem_one": "{{count}} accreditation",
+    "contagem_other": "{{count}} accreditations"
+  },
+  "credenciamento": {
+    "voltarVitrine": "Back to showcase",
+    "passos": {
+      "capacidade": "Capacity",
+      "documentos": "Documents",
+      "provaVida": "Liveness check",
+      "concluido": "Completed"
+    },
+    "acoes": {
+      "continuar": "Continue",
+      "enviar": "Submit application",
+      "voltar": "Back",
+      "cancelar": "Cancel",
+      "pular": "Skip this step"
+    },
+    "capacidade": {
+      "passo": "STEP 1",
+      "titulo": "Production capacity declaration",
+      "descricao": "Enter the maximum amount your company can deliver. The system uses this number as the <b>ceiling</b> in the mathematical allocation — you never receive demand above your capacity.",
+      "label": "Maximum capacity (sets)",
+      "placeholder": "e.g.: 4000",
+      "dica": "You may declare any value up to the total demand of the notice. Companies with lower capacity still compete normally in the allocation.",
+      "tetoTitulo": "How the ceiling is applied",
+      "teto1": "Your declared capacity becomes the <b>maximum limit</b> of items that can be allocated to your company.",
+      "teto2": "The notice's demand is divided among the eligible suppliers, respecting each one's ceiling.",
+      "teto3": "The unmet balance goes to the <b>Reserve Registry</b>, triggered in a 2nd demand."
+    },
+    "documentos": {
+      "passo": "STEP 2",
+      "titulo": "Required documents",
+      "descricao": "Valid documents submitted in previous notices are <b>reused automatically</b>. You only need to attach what is missing.",
+      "importado": "Imported from previous notice",
+      "necessarioEnviar": "Upload required",
+      "enviarPendentes": "Upload pending documents",
+      "arraste": "Drag the PDF here (upload will be integrated later)",
+      "limite": "PDF up to 10 MB · will be compressed for SEI"
+    },
+    "provaVida": {
+      "passo": "STEP 3 · OPTIONAL",
+      "titulo": "Facial authentication of the representative",
+      "descricao": "Liveness check to validate the signature, matching the face against the identity document. This step is optional.",
+      "verificando": "Verifying…",
+      "validada": "Liveness verified",
+      "realizar": "Run liveness check"
+    },
+    "enviado": {
+      "titulo": "Application submitted!",
+      "descricao": "Your proposal for <b>{{edital}}</b> has been submitted to the Bidding Committee.",
+      "status": "Status: Pending Review",
+      "baixarPdf": "Download PDF",
+      "voltarPainel": "Back to dashboard"
+    }
+  },
+  "documentos": {
+    "tituloPagina": "Document Management",
+    "subtituloPagina": "Your company's central repository. Automatically reused in new tenders.",
+    "enviarNovo": "Upload new document",
+    "formatosAceitos": "Accepted formats: PDF, JPG or PNG.",
+    "alertaExpirados_one": "<b>{{count}} expired document.</b> Update the documents below to keep participating in tenders.",
+    "alertaExpirados_other": "<b>{{count}} expired documents.</b> Update the documents below to keep participating in tenders.",
+    "colunaDocumento": "DOCUMENT",
+    "colunaStatus": "STATUS",
+    "colunaAcoes": "ACTIONS",
+    "statusVigente": "Valid",
+    "statusExpirado": "Expired",
+    "baixarDocumento": "Download {{tipo}}",
+    "atualizarDocumento": "Update document",
+    "reenviar": "Resend"
+  },
+  "transparencia": {
+    "carregando": "Loading…",
+    "tituloPagina": "Distributed demands",
+    "subtituloPagina": "Distribution is equal among eligible suppliers and always limited to your declared capacity (cap). See the public aggregates of the Compra Mais program below.",
+    "kpiEditaisVigentes": "Active tenders",
+    "kpiSecretarias": "Departments served",
+    "kpiSegmentos": "Segments (CNAE) served",
+    "painelSecretarias": "Departments served",
+    "painelSegmentos": "Segments (CNAE) served"
+  },
+  "editais": {
+    "vitrine": {
+      "titulo": "Bids Showcase",
+      "subtitulo": "Only bids compatible with your company's CNAE codes. 1 bid = 1 demand.",
+      "buscaAriaLabel": "Search bids",
+      "buscaPlaceholder": "Search bids by number and name…",
+      "filtros": "Filters",
+      "carregando": "Loading…",
+      "vazioTitulo": "No bids compatible with your line of business at the moment.",
+      "vazioDica": "We'll notify you when a compatible bid becomes available.",
+      "vazioBuscaTitulo": "No bids found for this search.",
+      "vazioBuscaDica": "Adjust your search terms.",
+      "iniciar": "Start"
+    },
+    "contestarCnae": {
+      "titulo": "Contest CNAE classification",
+      "cnaePlaceholder": "CNAE",
+      "justificativaPlaceholder": "Justification (required)",
+      "justificativaObrigatoria": "Justification is required",
+      "enviar": "Submit contest",
+      "sucesso": "Contest submitted — please await the Department's review."
+    }
+  },
+  "inicio": {
+    "cabecalho": {
+      "bemVindo": "Welcome, {{nome}}",
+      "cnpjCidade": "CNPJ {{cnpj}} · {{cidade}}",
+      "statusCredenciado": "Status: Accredited"
+    },
+    "alertaErro": {
+      "titulo_one": "{{count}} expired document",
+      "titulo_other": "{{count}} expired documents",
+      "descricao": "The <b>Municipal Clearance Certificate (PGM)</b> and the <b>Operating License</b> have expired. Notices requiring these documents remain blocked until they are brought up to date.",
+      "botao": "Resolve now"
+    },
+    "alertaAtencao": {
+      "titulo": "A certificate expires soon",
+      "descricao": "The Federal Tax Clearance Certificate expires in <b>{{dias}} days</b> ({{data}}). The system's daily scan has already sent a notice by <c>SMS and email</c>. Update it so you don't miss any notices.",
+      "botao": "Update document"
+    },
+    "kpis": {
+      "editaisCompativeis": "Open compatible notices",
+      "novos": "new",
+      "credenciamentosAndamento": "Accreditations in progress",
+      "documentosAprovados": "Approved documents",
+      "demandaDistribuida": "Active distributed demand"
+    },
+    "painelEditais": {
+      "titulo": "Open compatible notices",
+      "verTodos": "View all",
+      "iniciar": "Start",
+      "mostrando": "Showing {{atual}} of {{total}} compatible notices"
+    },
+    "painelCredenciamentos": {
+      "titulo": "Accreditations in progress",
+      "verMeus": "View my accreditations"
+    }
+  },
+  "minhaConta": {
+    "titulo": "My account",
+    "subtitulo": "Official company data obtained from the Federal Revenue Service (CNPJ API). Only Trade Name, Address and Phone can be edited.",
+    "sync": {
+      "titulo": "Sync CNPJ data",
+      "ultima": "Last sync: <b>{{quando}}</b>",
+      "sucesso": "Official data updated. Trade Name, Address and Phone were preserved.",
+      "erro": "Sync failed",
+      "sincronizando": "Syncing…",
+      "sincronizarAgora": "Sync now"
+    },
+    "empresa": {
+      "cnpjPrefixo": "CNPJ",
+      "ativa": "Active",
+      "dadosOficiaisLabel": "OFFICIAL DATA · FEDERAL REVENUE SERVICE (READ-ONLY)",
+      "razaoSocial": "Legal Name",
+      "cnpj": "CNPJ",
+      "situacaoCadastral": "Registration Status",
+      "porteEmpresa": "Company Size"
+    },
+    "responsavel": {
+      "secaoLabel": "LEGAL REPRESENTATIVE DATA",
+      "responsavelLegal": "Legal representative",
+      "procurador": "Attorney-in-fact",
+      "alterarFoto": "Change photo",
+      "nome": "First name",
+      "sobrenome": "Last name",
+      "senha": "Password",
+      "alterarSenha": "Change my password",
+      "novaSenhaPlaceholder": "New password (min. 8 characters)",
+      "cancelar": "Cancel"
+    },
+    "editaveis": {
+      "secaoLabel": "ADDITIONAL DATA · EDITABLE",
+      "nomeFantasia": "Trade Name",
+      "telefone": "Phone",
+      "endereco": "ADDRESS",
+      "logradouro": "Street address",
+      "ruaAvenida": "Street / Avenue",
+      "bairro": "District",
+      "cidade": "City",
+      "uf": "UF",
+      "cep": "Postal code",
+      "cepBuscando": "Looking up address…",
+      "cepPreenchido": "Address filled in by BrasilAPI",
+      "cepNaoEncontrado": "Postal code not found",
+      "cpfResponsavel": "Representative's CPF",
+      "cpfInvalido": "Invalid CPF",
+      "cpfValido": "Valid CPF",
+      "cancelar": "Cancel",
+      "salvar": "Save changes"
+    }
+  },
+  "painelTitular": {
+    "titulo": "My panel",
+    "subtitulo": "Consolidated pending items and your data subject rights (LGPD).",
+    "pendencias": {
+      "titulo": "Pending items",
+      "carregando": "Loading…",
+      "vazio": "No pending items."
+    },
+    "direitos": {
+      "titulo": "My rights (LGPD)",
+      "acesso": "Access to my data",
+      "correcao": "Data correction",
+      "exclusao": "Deletion",
+      "solicitar": "Request",
+      "registrada": "Request submitted."
+    }
+  }
+}

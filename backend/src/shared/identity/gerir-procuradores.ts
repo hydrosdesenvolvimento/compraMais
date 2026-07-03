@@ -4,7 +4,7 @@ import type { EventBus } from '../events/event-bus.js';
 import { ProcuradorConvidado, ProcuradorRemovido } from './eventos.js';
 
 export class TitularNaoEncontrado extends Error {
-  constructor() { super('Titular não encontrado para esta empresa.'); this.name = 'TitularNaoEncontrado'; }
+  constructor() { super('Data subject not found for this company.'); this.name = 'TitularNaoEncontrado'; }
 }
 
 /**

@@ -7,10 +7,10 @@ paradigm: 'monolito modular + DDD (anti-corruption layer nas bordas)'
 scope: 'Plataforma B2G de compras municipalizadas (Rio Branco) — credenciamento, covalidação, distribuição, malote SEI, transparência'
 status: final
 created: '2026-06-29'
-updated: '2026-06-29'
-binds: [Catalogo/Cadastros, Credenciamento/Covalidacao, Editais, Distribuicao, Malote/SEI, Auditoria, Transparencia, RF001-RF017, RNF001-RNF008, RN001-RN008]
-sources: ['_bmad-output/planning-artifacts/prd.md', 'source/04-Arquitetura.md', '_bmad-output/planning-artifacts/matriz-lacunas.md', '_bmad-output/planning-artifacts/plano-releases.md']
-companions: ['_bmad-output/planning-artifacts/ux-designs/ux-compra-mais-2026-06-29/DESIGN.md', '_bmad-output/planning-artifacts/ux-designs/ux-compra-mais-2026-06-29/EXPERIENCE.md']
+updated: '2026-07-02'
+binds: [Catalogo/Cadastros, Credenciamento/Covalidacao, Editais, Distribuicao, Malote/SEI, Auditoria, Transparencia, RF001-RF023, RNF001-RNF008, RN001-RN016]
+sources: ['../prd.md', '../../source/04-Arquitetura.md', '../matriz-lacunas.md', '../plano-releases.md', '../CONVERGENCIA.md']
+companions: ['../ux/DESIGN.md', '../ux/EXPERIENCE.md']
 ---
 
 # Architecture Spine — Compra Mais
@@ -64,7 +64,7 @@ graph TD
 ### AD-3 — Dois bundles SPA
 - **Binds:** Transparencia, Painel Admin, RF010/RF013
 - **Prevents:** acoplamento público/admin
-- **Rule:** Portal Público/Transparência e Painel Admin são bundles separados, compartilham o **design system** (tokens em [DESIGN.md](../../ux-designs/ux-compra-mais-2026-06-29/DESIGN.md): Poppins, azul-700 #0061AE, raio 8px/999px) e a IA de navegação ([EXPERIENCE.md](../../ux-designs/ux-compra-mais-2026-06-29/EXPERIENCE.md): Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas), ambos consumindo a API via REST/JSON. Nenhum acesso direto a banco pelo frontend.
+- **Rule:** Portal Público/Transparência e Painel Admin são bundles separados, compartilham o **design system** (tokens em [DESIGN.md](../ux/DESIGN.md): Poppins, azul-700 #0061AE, raio 8px/999px) e a IA de navegação ([EXPERIENCE.md](../ux/EXPERIENCE.md): Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas), ambos consumindo a API via REST/JSON. Nenhum acesso direto a banco pelo frontend.
 
 ### AD-4 — Integrações via ACL + circuit breaker `[ADOPTED]`
 - **Binds:** Receita, PGM, bases de dívida, SEI, mensageria; RNF001
@@ -155,8 +155,9 @@ graph TD
   PostgreSQL (`usuarios`); sessão = **JWT HS256** (`sub`, `papel`, `empresaId`, TTL configurável),
   segredo via `JWT_SECRET`/Docker secret. **Google OAuth 2.0/OIDC** (`@fastify/oauth2`) é uma 2ª via:
   vincula/auto-provisiona e emite o **mesmo** JWT. Emite eventos `UsuarioRegistrado` /
-  `UsuarioAutenticado` / `GoogleVinculado` (AD-18). Detalhe: `spec/008-autenticacao/`,
-  `docs/auth/autenticacao.md` e `docs/auth/google-cloud-setup.md`. Pendente (Onda 2/3): MFA, refresh
+  `UsuarioAutenticado` / `GoogleVinculado` (AD-18). Detalhe: `../archive/2026-06-29-spec-kit/008-autenticacao/`
+  (arquivado na convergência 2026-07-02), `docs/auth/autenticacao.md` e `docs/auth/google-cloud-setup.md`.
+  Pendente (Onda 2/3): MFA, refresh
   token + revogação, reset por mensageria, gov.br.
 
 ### AD-21 — Malote determinístico e fragmentável
@@ -229,6 +230,44 @@ graph TD
   AD-18) têm `id` mas, por serem imutáveis, não expõem `updateDate`/`lastUserUpdate` — a superclasse de
   mutação não se aplica a eles.
 
+### AD-34 — Busca por instância parcial (QBE) só em listagem de coleção
+- **Binds:** all os endpoints de listagem; RF014 (Constituição v3.3.0)
+- **Prevents:** filtros ad-hoc divergentes por módulo; QBE aplicado onde não cabe (agregações, recurso único)
+- **Rule:** listagens de coleção de uma entidade aceitam um **probe parcial** da própria entidade como filtro (ex.: `GET credenciamento/documentos/pendentes` filtra por `status`/`tipo` de `Documento`). **Isentos:** endpoints de **agregação** (ex.: `/pendencias`, projeções de transparência) e **leituras de recurso único** — não recebem QBE. Resgatado de `spec/002` (convergência 2026-07-02).
+
+### AD-35 — Catálogo de papéis (RBAC) com separação de funções
+- **Binds:** shared/identity, Auditoria, Credenciamento; RNF007, RF014, RF017 (reforça AD-19, AD-30)
+- **Prevents:** acúmulo de privilégio; direito do titular atendido por quem não deve; auditoria adulterável por quem opera
+- **Rule:** papéis canônicos e mutuamente delimitados:
+  - `titular` — responsável legal da empresa; cadastra-se primeiro e **convida/remove** `Procurador` (AD-30).
+  - `Procurador` — age em nome da empresa com rastro de ator (AD-30); **não** exerce direitos do titular (AD-19).
+  - `CPL` / `Administrador` — operação (covalidação, editais, malote, distribuição). **CPL não atende direitos do titular.**
+  - `auditor` — **somente leitura**: consulta e exporta a trilha (RF014); nunca escreve/aprova. Menor privilégio para órgãos de controle.
+  - `dpo` (Encarregado, LGPD art. 41) — **atende/recusa** direitos do titular (RF017); `Administrador` é fallback.
+  - `Secretaria/Gestor` — cria e edita editais (com auditoria, AD-16).
+  Resgatado de `spec/001/004/006` (convergência 2026-07-02).
+
+### AD-36 — Catálogo de parâmetros de configuração versionados
+- **Binds:** all que dependem de política de negócio; RNF002, RNF007, RF014 (reforça AD-8, AD-12, AD-19, AD-21)
+- **Prevents:** número mágico jurídico embutido em código; drift de política entre módulos
+- **Rule:** decisões de negócio que parametrizam invariantes vivem como **config versionada/logada**, nunca hard-coded. Catálogo mínimo:
+  - `SEI_MALOTE_LIMITE_MB` — **global** (característica do SEI municipal, não do edital/secretaria) — AD-21.
+  - `AUDITORIA_EXPORT_TETO` — teto configurável de registros por export (ex.: 50k); acima dele **sinaliza e conclui** via streaming/paginação, não corta — RF014.
+  - `RETENCAO_POR_CATEGORIA` — prazo de descarte **por categoria de dado** (cadastral, fiscal, contratual…), não único — AD-19, RNF007.
+  - `regra_vN` / `regra_reserva_vN` — regra de resto-desempate e ordem da Reserva — AD-8/AD-25.
+  - `POLITICA_INDISPONIBILIDADE` — default `fail-open + flag` — AD-12.
+  Resgatado de `spec/004/005/006` (convergência 2026-07-02).
+
+### AD-37 — Máquina de estado do Edital
+- **Binds:** Editais; RF008, RN014, RN012 (reforça AD-16)
+- **Prevents:** edital visível/distribuível em estado indevido; transição sem rastro
+- **Rule:** o `Edital` tem ciclo `Rascunho → Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`, com transições **só pelo dono** (módulo Editais) e **auditadas** (evento de domínio, AD-18/AD-23). Guardas: só **Aberto** entra na vitrine do fornecedor (RF003); a Distribuição (AD-7) só roda a partir de **Em Distribuição**; **Homologado** dispara o congelamento da alocação (AD-10). Espelha, no Edital, o padrão de fase centralizada do Credenciamento (AD-14). Identificado na validação de mockups (2026-07-02).
+
+### AD-38 — Exclusão lógica preservando histórico
+- **Binds:** all os cadastros administrativos (Secretaria, Setor/CNAE, Tipo de Documento, Usuário, Fornecedor, Edital); RN015
+- **Prevents:** perda de histórico/integridade referencial por DELETE físico; órfãos em processos vinculados
+- **Rule:** entidades de cadastro **não são apagadas fisicamente** — recebem estado `Inativo` (flag/soft-delete), somem das seleções ativas mas preservam histórico e referências. DELETE físico é proibido para entidades referenciadas por processos. Complementa a trilha append-only (AD-18) e a `EntidadeBase` (AD-33). Identificado na validação de mockups (2026-07-02).
+
 ## Consistency Conventions
 
 | Concern | Convention |
@@ -292,7 +331,9 @@ erDiagram
 | Cadastro CNPJ / CNAE (RF001/003) | `catalogo/` | AD-4, AD-5, AD-20 |
 | Covalidação documental (RF002/004) | `credenciamento/` | AD-15, AD-19 |
 | Inadimplência (RF011, RN002) | `credenciamento/` + `acl/` | AD-11, AD-12 |
-| Editais individualizados (RF008, RN007) | `editais/` | AD-16 |
+| Editais individualizados (RF008, RN007) | `editais/` | AD-16, AD-37 |
+| Cadastros administrativos — Secretarias/CNAE/Tipos-doc (RF020/021/022) | `editais/` + `catalogo/` | AD-16, AD-38 |
+| Gestão de usuários internos + RBAC (RF023, §15) | `shared/identity/` | AD-20, AD-35, AD-38 |
 | Motor de distribuição (RF005, RN005) | `distribuicao/` | AD-7, AD-8, AD-9, AD-10 |
 | Cadastro de Reserva (RF006, RN004) | `credenciamento/` | AD-10, AD-14 |
 | Malote SEI (RF007, RNF002) | `malote/` | AD-6, AD-21 |

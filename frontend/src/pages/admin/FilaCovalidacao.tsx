@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { Card, Botao } from '../../design-system/components';
 
@@ -8,6 +9,7 @@ import { Card, Botao } from '../../design-system/components';
  * (Mutation com invalidação). Reprovar exige justificativa (validação também no backend — FR-002).
  */
 export function FilaCovalidacao({ fornecedorId }: { fornecedorId: string }) {
+  const { t } = useTranslation();
   const [motivo, setMotivo] = useState('');
   const [status, setStatus] = useState<'pendente' | 'aprovado' | 'reprovado'>('pendente');
   const [tipo, setTipo] = useState('');
@@ -25,25 +27,25 @@ export function FilaCovalidacao({ fornecedorId }: { fornecedorId: string }) {
 
   return (
     <div className="stack">
-      <div><h1 className="page-title">Covalidação documental</h1><p className="page-sub">Aprovação/reprovação de documentos (reprovar exige justificativa).</p></div>
+      <div><h1 className="page-title">{t('admin.covalidacao.titulo')}</h1><p className="page-sub">{t('admin.covalidacao.subtitulo')}</p></div>
       <Card>
         <div data-cy="filtros" style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-          <label>Status
+          <label>{t('admin.covalidacao.statusLabel')}
             <select data-cy="filtro-status" value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
-              <option value="pendente">Pendente</option><option value="aprovado">Aprovado</option><option value="reprovado">Reprovado</option>
+              <option value="pendente">{t('admin.covalidacao.statusPendente')}</option><option value="aprovado">{t('admin.covalidacao.statusAprovado')}</option><option value="reprovado">{t('admin.covalidacao.statusReprovado')}</option>
             </select>
           </label>
-          <input data-cy="filtro-tipo" placeholder="Tipo (ex.: balanco)" value={tipo} onChange={(e) => setTipo(e.target.value)} />
+          <input data-cy="filtro-tipo" placeholder={t('admin.covalidacao.tipoPlaceholder')} value={tipo} onChange={(e) => setTipo(e.target.value)} />
         </div>
       </Card>
-      {pendentes.length === 0 && <p data-cy="vazio">Nenhum documento para os filtros atuais.</p>}
+      {pendentes.length === 0 && <p data-cy="vazio">{t('admin.covalidacao.vazio')}</p>}
       <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {pendentes.map((d) => (
           <li key={d.id} data-cy="doc-pendente" className="card" style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
             <strong style={{ flex: 1 }}>{d.tipo}</strong>
-            <Botao data-cy="aprovar" onClick={() => decidir.mutate({ docId: d.id, resultado: 'aprovado' })}>Aprovar</Botao>
-            <input data-cy="motivo" className="input" style={{ maxWidth: 240 }} placeholder="Motivo (obrigatório p/ reprovar)" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
-            <Botao data-cy="reprovar" variante="secundario" onClick={() => decidir.mutate({ docId: d.id, resultado: 'reprovado' })} disabled={!motivo.trim() || decidir.isPending}>Reprovar</Botao>
+            <Botao data-cy="aprovar" onClick={() => decidir.mutate({ docId: d.id, resultado: 'aprovado' })}>{t('admin.covalidacao.aprovar')}</Botao>
+            <input data-cy="motivo" className="input" style={{ maxWidth: 240 }} placeholder={t('admin.covalidacao.motivoPlaceholder')} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+            <Botao data-cy="reprovar" variante="secundario" onClick={() => decidir.mutate({ docId: d.id, resultado: 'reprovado' })} disabled={!motivo.trim() || decidir.isPending}>{t('admin.covalidacao.reprovar')}</Botao>
           </li>
         ))}
       </ul>

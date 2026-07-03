@@ -6,9 +6,9 @@ import type { Identidade, Papel } from './identity-provider.js';
 import type { EventBus } from '../events/event-bus.js';
 import { UsuarioRegistrado, UsuarioAutenticado, GoogleVinculado } from './eventos.js';
 
-export class EmailJaCadastrado extends Error { constructor() { super('E-mail já cadastrado.'); this.name = 'EmailJaCadastrado'; } }
-export class CredenciaisInvalidas extends Error { constructor() { super('Credenciais inválidas.'); this.name = 'CredenciaisInvalidas'; } }
-export class UsuarioNaoEncontrado extends Error { constructor() { super('Usuário não encontrado.'); this.name = 'UsuarioNaoEncontrado'; } }
+export class EmailJaCadastrado extends Error { constructor() { super('E-mail already registered.'); this.name = 'EmailJaCadastrado'; } }
+export class CredenciaisInvalidas extends Error { constructor() { super('Invalid credentials.'); this.name = 'CredenciaisInvalidas'; } }
+export class UsuarioNaoEncontrado extends Error { constructor() { super('User not found.'); this.name = 'UsuarioNaoEncontrado'; } }
 
 export interface ResultadoLogin { token: string; expiraEm: number; usuario: Identidade }
 

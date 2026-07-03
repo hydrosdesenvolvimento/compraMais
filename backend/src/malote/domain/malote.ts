@@ -81,5 +81,5 @@ export class Malote extends EntidadeBase {
 }
 
 export class MaloteNaoGerado extends Error {
-  constructor() { super('Malote precisa estar "gerado" para exportar.'); this.name = 'MaloteNaoGerado'; }
+  constructor() { super('Malote must be generated before export.'); this.name = 'MaloteNaoGerado'; }
 }

@@ -27,20 +27,20 @@ const demoSync = { quando: '24/06/2026 às 09:12', status: 'sucesso' as const };
 
 const ico = { width: 20, height: 20 };
 const MENU_FORNECEDOR: ItemMenu[] = [
-  { rotulo: 'Início', href: '/inicio', cy: 'nav-inicio', icone: <IconeInicio {...ico} /> },
-  { rotulo: 'Editais', href: '/editais', cy: 'nav-editais', icone: <IconeEditais {...ico} /> },
-  { rotulo: 'Meus credenciamentos', href: '/contestacao', cy: 'nav-credenciamentos', icone: <IconeCredenciamentos {...ico} /> },
-  { rotulo: 'Documentos', href: '/documentos', cy: 'nav-documentos', icone: <IconeDocumentos {...ico} /> },
-  { rotulo: 'Demandas distribuídas', href: '/transparencia', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
+  { rotuloKey: 'common.nav.inicio', href: '/inicio', cy: 'nav-inicio', icone: <IconeInicio {...ico} /> },
+  { rotuloKey: 'common.nav.editais', href: '/editais', cy: 'nav-editais', icone: <IconeEditais {...ico} /> },
+  { rotuloKey: 'common.nav.credenciamentos', href: '/contestacao', cy: 'nav-credenciamentos', icone: <IconeCredenciamentos {...ico} /> },
+  { rotuloKey: 'common.nav.documentos', href: '/documentos', cy: 'nav-documentos', icone: <IconeDocumentos {...ico} /> },
+  { rotuloKey: 'common.nav.demandas', href: '/transparencia', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
 ];
 const USUARIO_FORNECEDOR: UsuarioChip = { nome: 'Marcos Albuquerque', papel: 'Procurador', iniciais: 'VA', fantasia: 'Vale do Acre Uniformes' };
 
 const MENU_ADMIN: ItemMenu[] = [
-  { rotulo: 'Painel', href: '/admin/dashboard', cy: 'nav-admin', icone: <IconeInicio {...ico} /> },
-  { rotulo: 'Covalidação', href: '/admin/covalidacao', cy: 'nav-covalidacao', icone: <IconeCredenciamentos {...ico} /> },
-  { rotulo: 'Gestão de editais', href: '/admin/editais', cy: 'nav-gestao-editais', icone: <IconeEditais {...ico} /> },
-  { rotulo: 'Contestações', href: '/admin/contestacoes', cy: 'nav-contestacoes', icone: <IconeEditais {...ico} /> },
-  { rotulo: 'Auditoria', href: '/admin/auditoria', cy: 'nav-auditoria', icone: <IconeDocumentos {...ico} /> },
+  { rotuloKey: 'common.nav.painel', href: '/admin/dashboard', cy: 'nav-admin', icone: <IconeInicio {...ico} /> },
+  { rotuloKey: 'common.nav.covalidacao', href: '/admin/covalidacao', cy: 'nav-covalidacao', icone: <IconeCredenciamentos {...ico} /> },
+  { rotuloKey: 'common.nav.gestaoEditais', href: '/admin/editais', cy: 'nav-gestao-editais', icone: <IconeEditais {...ico} /> },
+  { rotuloKey: 'common.nav.contestacoes', href: '/admin/contestacoes', cy: 'nav-contestacoes', icone: <IconeEditais {...ico} /> },
+  { rotuloKey: 'common.nav.auditoria', href: '/admin/auditoria', cy: 'nav-auditoria', icone: <IconeDocumentos {...ico} /> },
 ];
 const USUARIO_ADMIN: UsuarioChip = { nome: 'CPL — Compra Mais', papel: 'Controle / SMGA', iniciais: 'CP' };
 
@@ -60,7 +60,7 @@ const rDocumentos = createRoute({ getParentRoute: () => fornecedorLayout, path: 
 const rTransparencia = createRoute({ getParentRoute: () => fornecedorLayout, path: '/transparencia', component: Transparencia });
 const rTitular = createRoute({ getParentRoute: () => fornecedorLayout, path: '/titular', component: () => <PainelTitular fornecedorId={DEMO_FORNECEDOR_ID} /> });
 
-const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <AppShell menu={MENU_ADMIN} usuario={USUARIO_ADMIN} rodape="Painel administrativo · CPL / SMGA" notificacoes={[]} contaHref="/admin/dashboard"><Outlet /></AppShell> });
+const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <AppShell menu={MENU_ADMIN} usuario={USUARIO_ADMIN} rodapeKey="common.shell.footerAdmin" notificacoes={[]} contaHref="/admin/dashboard"><Outlet /></AppShell> });
 const rAdminIndex = createRoute({ getParentRoute: () => adminLayout, path: '/admin', beforeLoad: () => { throw redirect({ to: '/admin/dashboard' }); } });
 const rAdminDash = createRoute({ getParentRoute: () => adminLayout, path: '/admin/dashboard', component: Dashboard });
 const rAdminCoval = createRoute({ getParentRoute: () => adminLayout, path: '/admin/covalidacao', component: () => <FilaCovalidacao fornecedorId={DEMO_FORNECEDOR_ID} /> });

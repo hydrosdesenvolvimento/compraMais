@@ -7,10 +7,10 @@ import type { EventBus } from '../../shared/events/event-bus.js';
 type Actor = { userId: string; empresaId?: string };
 
 export class EditalNaoEncontrado extends Error {
-  constructor() { super('Edital não encontrado.'); this.name = 'EditalNaoEncontrado'; }
+  constructor() { super('Edital not found.'); this.name = 'EditalNaoEncontrado'; }
 }
 export class CnaeInvalido extends Error {
-  constructor(cnae: string) { super(`CNAE inválido: ${cnae} (esperado subclasse de 7 dígitos).`); this.name = 'CnaeInvalido'; }
+  constructor(cnae: string) { super(`Invalid CNAE: ${cnae} (expected a 7-digit subclass).`); this.name = 'CnaeInvalido'; }
 }
 
 /** Validação de CNAE (FR-012). Default valida formato (subclasse 7 dígitos); o adaptador real consulta a ACL da Receita. */
@@ -81,5 +81,5 @@ export class GerirEditais {
 }
 
 export class ContestacoesPendentes extends Error {
-  constructor(n: number) { super(`Há ${n} contestação(ões) de CNAE pendente(s); resolva antes de encerrar.`); this.name = 'ContestacoesPendentes'; }
+  constructor(n: number) { super(`There are ${n} pending CNAE challenge(s); resolve them before closing.`); this.name = 'ContestacoesPendentes'; }
 }

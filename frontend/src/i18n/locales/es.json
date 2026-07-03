@@ -1,0 +1,385 @@
+{
+  "common": {
+    "brand": {
+      "name": "Compra Mais",
+      "sub": "RIO BRANCO"
+    },
+    "nav": {
+      "inicio": "Inicio",
+      "editais": "Licitaciones",
+      "credenciamentos": "Mis acreditaciones",
+      "documentos": "Documentos",
+      "demandas": "Demandas asignadas",
+      "painel": "Panel",
+      "covalidacao": "Covalidación",
+      "gestaoEditais": "Gestión de licitaciones",
+      "contestacoes": "Impugnaciones",
+      "auditoria": "Auditoría"
+    },
+    "shell": {
+      "menu": "MENÚ",
+      "search": "Buscar licitaciones, documentos…",
+      "searchAria": "Buscar",
+      "openMenu": "Abrir menú",
+      "notificationsAria": "Notificaciones",
+      "notificationsTitle": "Notificaciones",
+      "notificationsSubtitle": "Escaneo diario",
+      "notificationsEmpty": "No hay notificaciones por ahora.",
+      "notificationsSeeAll": "Ver todas las notificaciones",
+      "userMenuAria": "Menú del usuario",
+      "myAccount": "Mi cuenta",
+      "logout": "Salir",
+      "footerFornecedor": "Versión 2.0 · MVP FIEAC",
+      "footerAdmin": "Panel administrativo · CPL / SMGA"
+    },
+    "language": {
+      "label": "Idioma",
+      "aria": "Seleccionar idioma"
+    },
+    "a11y": {
+      "region": "Accesibilidad",
+      "highContrast": "Alto contraste",
+      "increaseFont": "Aumentar fuente",
+      "decreaseFont": "Disminuir fuente"
+    }
+  },
+  "auth": {
+    "logoAlt": "Compra Mais — Rio Branco · Sistema Digital de Compras Públicas · Transparencia, Confianza, Eficiencia, Colaboración",
+    "tabs": {
+      "login": "Entrar",
+      "signup": "Crear cuenta"
+    },
+    "signup": {
+      "title": "Registro de proveedor",
+      "subtitle": "Ingrese el CNPJ de la empresa. Los datos se validan automáticamente en la Receita Federal.",
+      "cnpjLabel": "CNPJ de la empresa",
+      "cnpjPlaceholder": "00.000.000/0000-00",
+      "consult": "Consultar",
+      "loading": "Consultando datos en la Receita Federal…",
+      "razaoSocial": "RAZÓN SOCIAL",
+      "porte": "TAMAÑO",
+      "situacao": "SITUACIÓN",
+      "address": "DIRECCIÓN",
+      "cepPlaceholder": "00000-000",
+      "cepSearching": "Buscando dirección…",
+      "cepNotFound": "Código postal no encontrado",
+      "numero": "NÚMERO",
+      "numeroPlaceholder": "N.º",
+      "complemento": "COMPLEMENTO",
+      "complementoPlaceholder": "Oficina, piso, bloque… (opcional)",
+      "qsa": "CUADRO SOCIETARIO (QSA)",
+      "manualLink": "¿Receita Federal no disponible? Completar manualmente",
+      "submit": "Crear cuenta de proveedor",
+      "statusNote": "Su cuenta comenzará con el estado <b>Solicitante</b>."
+    },
+    "login": {
+      "title": "Acceder a la plataforma",
+      "subtitle": "Ingrese con el correo electrónico y la contraseña registrados.",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "usted@empresa.com",
+      "password": "Contraseña",
+      "passwordPlaceholder": "••••••••",
+      "show": "Ver",
+      "hide": "Ocultar",
+      "showAria": "Ver contraseña",
+      "hideAria": "Ocultar contraseña",
+      "keep": "Mantener sesión iniciada",
+      "forgot": "Olvidé mi contraseña",
+      "submit": "Entrar",
+      "submitting": "Entrando…",
+      "error": "Credenciales inválidas."
+    }
+  },
+  "admin": {
+    "dashboard": {
+      "carregando": "Cargando…",
+      "titulo": "Panel administrativo",
+      "subtitulo": "Embudo de pendientes de la CPL / SMGA.",
+      "documentosPendentes": "Documentos pendientes",
+      "editaisPublicados": "Licitaciones publicadas",
+      "editaisRascunho": "Licitaciones en borrador",
+      "bloqueiosAtivos": "Bloqueos activos"
+    },
+    "covalidacao": {
+      "titulo": "Covalidación documental",
+      "subtitulo": "Aprobación/rechazo de documentos (rechazar exige justificación).",
+      "statusLabel": "Estado",
+      "statusPendente": "Pendiente",
+      "statusAprovado": "Aprobado",
+      "statusReprovado": "Rechazado",
+      "tipoPlaceholder": "Tipo (ej.: balanco)",
+      "vazio": "Ningún documento para los filtros actuales.",
+      "aprovar": "Aprobar",
+      "motivoPlaceholder": "Motivo (obligatorio para rechazar)",
+      "reprovar": "Rechazar"
+    },
+    "gerirEditais": {
+      "titulo": "Gestión de licitaciones",
+      "subtitulo": "Cree, publique y cierre licitaciones individualizadas (1 secretaría por licitación).",
+      "objetoPlaceholder": "Objeto de la demanda",
+      "cnaePlaceholder": "CNAE(s) objetivo (separados por comas)",
+      "criar": "Crear licitación (borrador)",
+      "filtrarSituacao": "Filtrar estado",
+      "situacaoRascunho": "Borrador",
+      "situacaoPublicado": "Publicado",
+      "situacaoEncerrado": "Cerrado",
+      "publicar": "Publicar",
+      "encerrar": "Cerrar"
+    },
+    "contestacoes": {
+      "titulo": "Impugnaciones de CNAE",
+      "subtitulo": "Acepte (corrige la licitación) o rechace (con motivo) las impugnaciones.",
+      "vazio": "Sin impugnaciones.",
+      "novoCnaePlaceholder": "Nuevo(s) CNAE(s)",
+      "acatar": "Aceptar",
+      "motivoPlaceholder": "Motivo (obligatorio para rechazar)",
+      "recusar": "Rechazar"
+    },
+    "auditoria": {
+      "titulo": "Auditoría — traza",
+      "subtitulo": "Consulta y exportación de la traza append-only (solo lectura).",
+      "usuarioPlaceholder": "Usuario/actor",
+      "eventoPlaceholder": "Acción/evento",
+      "editalPlaceholder": "Licitación",
+      "consultar": "Consultar",
+      "exportarCsv": "Exportar CSV",
+      "exportarJson": "Exportar JSON",
+      "erroIntervalo": "Rango de fechas inválido (desde > hasta).",
+      "erroAcesso": "Acceso restringido a perfiles de control/auditoría.",
+      "erroConsulta": "Error al consultar.",
+      "colQuando": "Cuándo",
+      "colAtor": "Actor",
+      "colAcao": "Acción",
+      "colIp": "IP",
+      "vazio": "Ningún registro para los filtros actuales."
+    }
+  },
+  "contestacao": {
+    "titulo": "Mis Acreditaciones",
+    "subtitulo": "Haga seguimiento de sus acreditaciones en las convocatorias y continúe las que estén en borrador.",
+    "carregando": "Cargando…",
+    "filtros": "Filtros",
+    "busca": {
+      "ariaLabel": "Buscar acreditaciones",
+      "placeholder": "Buscar por número o título de la convocatoria…"
+    },
+    "exibindoPorPagina": "Mostrando por página: {{n}}",
+    "paginacao": "Pág. {{atual}} de {{total}}",
+    "vazio": {
+      "titulo": "No se encontraron acreditaciones.",
+      "descricao": "Acceda a una convocatoria disponible y haga clic en “Iniciar Acreditación” para comenzar."
+    },
+    "status": {
+      "rascunho": "borrador"
+    },
+    "contagem_one": "{{count}} acreditación",
+    "contagem_other": "{{count}} acreditaciones"
+  },
+  "credenciamento": {
+    "voltarVitrine": "Volver a la vitrina",
+    "passos": {
+      "capacidade": "Capacidad",
+      "documentos": "Documentos",
+      "provaVida": "Prueba de vida",
+      "concluido": "Completado"
+    },
+    "acoes": {
+      "continuar": "Continuar",
+      "enviar": "Enviar acreditación",
+      "voltar": "Volver",
+      "cancelar": "Cancelar",
+      "pular": "Omitir este paso"
+    },
+    "capacidade": {
+      "passo": "PASO 1",
+      "titulo": "Declaración de capacidad productiva",
+      "descricao": "Indique la cantidad máxima que su empresa puede entregar. El sistema usa este número como <b>tope</b> en el prorrateo matemático: nunca recibe demanda por encima de su capacidad.",
+      "label": "Capacidad máxima (conjuntos)",
+      "placeholder": "Ej.: 4000",
+      "dica": "Puede declarar cualquier valor hasta la demanda total de la convocatoria. Las empresas con menor capacidad compiten normalmente en el prorrateo.",
+      "tetoTitulo": "Cómo se aplica el tope",
+      "teto1": "Su capacidad declarada se convierte en el <b>límite máximo</b> de artículos que se pueden asignar a su empresa.",
+      "teto2": "La demanda de la convocatoria se divide entre los proveedores aptos, respetando el tope de cada uno.",
+      "teto3": "El saldo no atendido va al <b>Registro de Reserva</b>, activado en una 2ª demanda."
+    },
+    "documentos": {
+      "passo": "PASO 2",
+      "titulo": "Documentos exigidos",
+      "descricao": "Los documentos válidos enviados en convocatorias anteriores se <b>reutilizan automáticamente</b>. Solo necesita adjuntar lo que falta.",
+      "importado": "Importado de convocatoria anterior",
+      "necessarioEnviar": "Es necesario enviarlo",
+      "enviarPendentes": "Enviar documentos pendientes",
+      "arraste": "Arrastre el PDF aquí (la carga se integrará posteriormente)",
+      "limite": "PDF hasta 10 MB · se comprimirá para el SEI"
+    },
+    "provaVida": {
+      "passo": "PASO 3 · OPCIONAL",
+      "titulo": "Autenticación facial del apoderado",
+      "descricao": "Prueba de vida (liveness) para validar la firma, cruzando el rostro con el documento de identidad. Este paso es opcional.",
+      "verificando": "Verificando…",
+      "validada": "Prueba de vida validada",
+      "realizar": "Realizar prueba de vida"
+    },
+    "enviado": {
+      "titulo": "¡Acreditación enviada!",
+      "descricao": "Su propuesta para <b>{{edital}}</b> fue enviada a la Comisión de Licitación.",
+      "status": "Estado: Pendiente de Análisis",
+      "baixarPdf": "Descargar PDF",
+      "voltarPainel": "Volver al panel"
+    }
+  },
+  "documentos": {
+    "tituloPagina": "Gestión de Documentos",
+    "subtituloPagina": "Repositorio central de su empresa. Reutilizado automáticamente en nuevas licitaciones.",
+    "enviarNovo": "Enviar nuevo documento",
+    "formatosAceitos": "Formatos aceptados: PDF, JPG o PNG.",
+    "alertaExpirados_one": "<b>{{count}} documento vencido.</b> Actualice los documentos a continuación para seguir participando en las licitaciones.",
+    "alertaExpirados_other": "<b>{{count}} documentos vencidos.</b> Actualice los documentos a continuación para seguir participando en las licitaciones.",
+    "colunaDocumento": "DOCUMENTO",
+    "colunaStatus": "ESTADO",
+    "colunaAcoes": "ACCIONES",
+    "statusVigente": "Vigente",
+    "statusExpirado": "Vencido",
+    "baixarDocumento": "Descargar {{tipo}}",
+    "atualizarDocumento": "Actualizar documento",
+    "reenviar": "Reenviar"
+  },
+  "transparencia": {
+    "carregando": "Cargando…",
+    "tituloPagina": "Demandas distribuidas",
+    "subtituloPagina": "El reparto es igualitario entre los proveedores aptos y siempre limitado a su capacidad declarada (tope). Vea a continuación los agregados públicos del programa Compra Mais.",
+    "kpiEditaisVigentes": "Licitaciones vigentes",
+    "kpiSecretarias": "Secretarías atendidas",
+    "kpiSegmentos": "Segmentos (CNAE) atendidos",
+    "painelSecretarias": "Secretarías atendidas",
+    "painelSegmentos": "Segmentos (CNAE) atendidos"
+  },
+  "editais": {
+    "vitrine": {
+      "titulo": "Vitrina de Licitaciones",
+      "subtitulo": "Solo licitaciones compatibles con los CNAE de su empresa. 1 licitación = 1 demanda.",
+      "buscaAriaLabel": "Buscar licitaciones",
+      "buscaPlaceholder": "Buscar licitaciones por número y nombre…",
+      "filtros": "Filtros",
+      "carregando": "Cargando…",
+      "vazioTitulo": "No hay licitaciones compatibles con su rubro en este momento.",
+      "vazioDica": "Le avisaremos cuando surja una licitación compatible.",
+      "vazioBuscaTitulo": "No se encontraron licitaciones para esta búsqueda.",
+      "vazioBuscaDica": "Ajuste los términos de búsqueda.",
+      "iniciar": "Iniciar"
+    },
+    "contestarCnae": {
+      "titulo": "Impugnar clasificación de CNAE",
+      "cnaePlaceholder": "CNAE",
+      "justificativaPlaceholder": "Justificación (obligatoria)",
+      "justificativaObrigatoria": "La justificación es obligatoria",
+      "enviar": "Enviar impugnación",
+      "sucesso": "Impugnación enviada — aguarde el análisis de la Secretaría."
+    }
+  },
+  "inicio": {
+    "cabecalho": {
+      "bemVindo": "Bienvenido, {{nome}}",
+      "cnpjCidade": "CNPJ {{cnpj}} · {{cidade}}",
+      "statusCredenciado": "Estado: Acreditado"
+    },
+    "alertaErro": {
+      "titulo_one": "{{count}} documento vencido",
+      "titulo_other": "{{count}} documentos vencidos",
+      "descricao": "El <b>Certificado Municipal (PGM)</b> y la <b>Licencia de Funcionamiento</b> están vencidos. Las convocatorias que exigen estos documentos permanecen bloqueadas hasta su regularización.",
+      "botao": "Regularizar ahora"
+    },
+    "alertaAtencao": {
+      "titulo": "Un certificado vence pronto",
+      "descricao": "El Certificado de Regularidad de Deudas Federales vence en <b>{{dias}} días</b> ({{data}}). El barrido diario del sistema ya envió un aviso por <c>SMS y correo electrónico</c>. Actualízalo para no perder convocatorias.",
+      "botao": "Actualizar documento"
+    },
+    "kpis": {
+      "editaisCompativeis": "Convocatorias compatibles abiertas",
+      "novos": "nuevos",
+      "credenciamentosAndamento": "Acreditaciones en curso",
+      "documentosAprovados": "Documentos aprobados",
+      "demandaDistribuida": "Demanda distribuida activa"
+    },
+    "painelEditais": {
+      "titulo": "Convocatorias compatibles abiertas",
+      "verTodos": "Ver todas",
+      "iniciar": "Iniciar",
+      "mostrando": "Mostrando {{atual}} de {{total}} convocatorias compatibles"
+    },
+    "painelCredenciamentos": {
+      "titulo": "Acreditaciones en curso",
+      "verMeus": "Ver mis acreditaciones"
+    }
+  },
+  "minhaConta": {
+    "titulo": "Mi cuenta",
+    "subtitulo": "Datos oficiales de la empresa obtenidos de la Receita Federal (API del CNPJ). Solo se pueden editar el Nombre Comercial, la Dirección y el Teléfono.",
+    "sync": {
+      "titulo": "Sincronizar datos del CNPJ",
+      "ultima": "Última sincronización: <b>{{quando}}</b>",
+      "sucesso": "Datos oficiales actualizados. El Nombre Comercial, la Dirección y el Teléfono se conservaron.",
+      "erro": "Error en la sincronización",
+      "sincronizando": "Sincronizando…",
+      "sincronizarAgora": "Sincronizar ahora"
+    },
+    "empresa": {
+      "cnpjPrefixo": "CNPJ",
+      "ativa": "Activa",
+      "dadosOficiaisLabel": "DATOS OFICIALES · RECEITA FEDERAL (SOLO LECTURA)",
+      "razaoSocial": "Razón Social",
+      "cnpj": "CNPJ",
+      "situacaoCadastral": "Situación Registral",
+      "porteEmpresa": "Tamaño de la Empresa"
+    },
+    "responsavel": {
+      "secaoLabel": "DATOS DEL RESPONSABLE",
+      "responsavelLegal": "Responsable legal",
+      "procurador": "Apoderado",
+      "alterarFoto": "Cambiar foto",
+      "nome": "Nombre",
+      "sobrenome": "Apellido",
+      "senha": "Contraseña",
+      "alterarSenha": "Cambiar mi contraseña",
+      "novaSenhaPlaceholder": "Nueva contraseña (mín. 8 caracteres)",
+      "cancelar": "Cancelar"
+    },
+    "editaveis": {
+      "secaoLabel": "DATOS COMPLEMENTARIOS · EDITABLES",
+      "nomeFantasia": "Nombre Comercial",
+      "telefone": "Teléfono",
+      "endereco": "DIRECCIÓN",
+      "logradouro": "Dirección",
+      "ruaAvenida": "Calle / Avenida",
+      "bairro": "Barrio",
+      "cidade": "Ciudad",
+      "uf": "UF",
+      "cep": "Código postal",
+      "cepBuscando": "Buscando dirección…",
+      "cepPreenchido": "Dirección completada por BrasilAPI",
+      "cepNaoEncontrado": "Código postal no encontrado",
+      "cpfResponsavel": "CPF del responsable",
+      "cpfInvalido": "CPF inválido",
+      "cpfValido": "CPF válido",
+      "cancelar": "Cancelar",
+      "salvar": "Guardar cambios"
+    }
+  },
+  "painelTitular": {
+    "titulo": "Mi panel",
+    "subtitulo": "Pendientes consolidados y sus derechos de titular (LGPD).",
+    "pendencias": {
+      "titulo": "Pendientes",
+      "carregando": "Cargando…",
+      "vazio": "Ningún pendiente."
+    },
+    "direitos": {
+      "titulo": "Mis derechos (LGPD)",
+      "acesso": "Acceso a mis datos",
+      "correcao": "Corrección de datos",
+      "exclusao": "Eliminación",
+      "solicitar": "Solicitar",
+      "registrada": "Solicitud registrada."
+    }
+  }
+}

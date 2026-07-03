@@ -505,7 +505,7 @@ As a usuário dos dois portais,
 I want consistência visual e de interação conforme o contrato de UX,
 So that a experiência seja coerente e acessível (UX-DR1/7/8/10, RNF006, AD-3).
 
-> ✅ Contrato de UX: [DESIGN.md](ux-designs/ux-compra-mais-2026-06-29/DESIGN.md) / [EXPERIENCE.md](ux-designs/ux-compra-mais-2026-06-29/EXPERIENCE.md).
+> ✅ Contrato de UX: [DESIGN.md](ux/DESIGN.md) / [EXPERIENCE.md](ux/EXPERIENCE.md).
 
 **Acceptance Criteria:**
 **Given** os tokens (Poppins; azul-700 #0061AE + escala; âmbar #FFB300; raio 8px/999px; espaçamento 8/12/14/16/20),
@@ -513,3 +513,84 @@ So that a experiência seja coerente e acessível (UX-DR1/7/8/10, RNF006, AD-3).
 **Then** componentes (AuthPanel, sidebar, cards, labels/tags, botões, barra de acessibilidade) e paleta são consistentes,
 **And** a acessibilidade atende e-MAG/WCAG 2.1 AA (foco visível âmbar 3px, alto contraste, teclado),
 **And** a IA segue o EXPERIENCE.md (Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas).
+
+---
+
+## Refinamentos de Aceite — Convergência Spec-Kit → BMad (2026-07-02)
+
+As decisões finas resolvidas nas features `spec/00X-*` (arquivadas em `../archive/2026-06-29-spec-kit/`) foram
+resgatadas aqui como **critérios de aceite adicionais**, vinculados à história de destino. Cada item complementa
+(não substitui) o AC da história. Rastreabilidade completa em [CONVERGENCIA.md](CONVERGENCIA.md).
+
+### Story 1.3 — Cadastro via CNPJ *(resgate `spec/001`)*
+- **Given** um CNPJ com situação cadastral **não ativa** (baixado/inapto/suspenso), **When** consulto, **Then** o sistema sinaliza a situação e **impede** o cadastro como fornecedor apto.
+- **Given** um CNPJ **já cadastrado**, **When** alguém tenta cadastrá-lo de novo, **Then** a duplicidade é impedida e o sistema orienta a recuperação de acesso.
+- **Given** um CNPJ em formato inválido ou inexistente na base, **When** consulto, **Then** mensagem clara de impedimento e nenhum cadastro criado.
+- **Given** o cadastro do fornecedor (RF019), **When** informo o endereço, **Then** ele é capturado de forma **estruturada/geolocalizável** para análise territorial na Transparência.
+
+### Story 1.7 — Papel Procurador *(resgate `spec/001`, RN010)*
+- **Given** uma empresa cadastrada, **When** o **titular** convida um Procurador, **Then** o vínculo é criado por ele (e ele pode **remover**); Procurador não se autovincula.
+
+### Story 2.2 — Covalidação *(resgate `spec/002`, RN011, AD-34)*
+- **Given** documentos pendentes, **When** a CPL acessa a fila, **Then** vê a **fila pendente e o tempo decorrido por documento**, **sem** SLA/prazo fixo bloqueante.
+- **Given** a listagem `GET .../documentos/pendentes`, **When** filtro, **Then** aceita **probe parcial** (status, tipo) de `Documento` (QBE); agregações e recurso único **não** recebem QBE.
+
+### Story 3.1 / 3.3 — Editais e contestação *(resgate `spec/003`, RN012)*
+- **Given** um edital **Publicado**, **When** a Secretaria/Gestor altera qualquer campo (inclusive CNAE/quantitativos), **Then** a mudança é permitida **com registro antes/depois** na trilha; mudança de CNAE **reavalia a vitrine imediatamente** mantendo o prazo original (reabertura de prazo é decisão manual auditada).
+- **Given** um edital, **When** **qualquer** fornecedor cadastrado e ativo contesta o CNAE, **Then** a contestação é aceita e julgada (acatar/recusar com justificativa) pela Secretaria/CPL.
+
+### Story 4.2 — Bloqueio transitório *(resgate `spec/002`, RN002)*
+- **Given** uma penalidade/inidoneidade, **When** avalio o prazo, **Then** uso a **data da base oficial** quando disponível; senão a **CPL registra manualmente** o termo (híbrido).
+
+### Story 6.1 / 6.2 — Malote *(resgate `spec/005`, RNF002)*
+- **Given** uma solicitação de malote, **When** o worker processa, **Then** ela roda em **fila durável com retry**, estado pendente→gerado sobrevive a restart (sem perda silenciosa).
+- **Given** uma peça **única indivisível** acima do limite, **When** fragmento, **Then** ela vira **fragmento isolado sinalizado** para tratamento manual (sem split binário); o limite é o parâmetro **global** `SEI_MALOTE_LIMITE_MB`.
+
+### Story 8.1 / 8.2 — Auditoria *(resgate `spec/004`, RNF007)*
+- **Given** um perfil de controle, **When** consulta/exporta a trilha, **Then** **não há mascaramento** de PII (salvaguarda = RBAC); acesso inclui o papel **`auditor` somente-leitura**.
+- **Given** um export acima de `AUDITORIA_EXPORT_TETO` (ex.: 50k), **When** exporto, **Then** o sistema **sinaliza o volume e conclui** por streaming/paginação (sugere refinar, mas não corta).
+
+### Story 7.3 — Retenção e direitos do titular *(resgate `spec/006`, RNF007)*
+- **Given** dados de categorias distintas, **When** avalio o descarte, **Then** aplico o prazo **por categoria** (cadastral/fiscal/contratual), não um prazo único.
+- **Given** uma solicitação de direito do titular, **When** ela é atendida, **Then** quem atende é o papel **`dpo`** (Administrador como fallback); a **CPL não** atende.
+
+### Story 9.2 — Transparência *(resgate `spec/007`, RN013)*
+- **Given** o portal público, **When** um cidadão acessa, **Then** vê **apenas agregados não-identificáveis** (editais vigentes, secretarias, segmentos CNAE) — **sem** fornecedores, valores ou PII.
+- **Given** as projeções públicas, **When** requisitadas, **Then** são calculadas **sob demanda** (materialização/cache é otimização futura sem mudar o contrato).
+
+---
+
+## Cobertura dos Mockups — Gaps do Painel Admin e do wizard (validação 2026-07-02)
+
+Histórias novas identificadas ao validar `AI-UI-Design/` contra a doc (ver [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)). Complementam os épicos existentes; AC em Given/When/Then.
+
+### Story 3.4 — Ciclo de vida do Edital *(gap G6 · RN014, AD-37)*
+As a Secretaria/Gestor, I want gerir o estado do edital ao longo do processo, So that a vitrine e a distribuição respeitem a fase correta.
+- **Given** um edital em `Rascunho`, **When** eu o publico, **Then** ele passa a `Aberto` e **só então** aparece na vitrine do fornecedor (RF003); a transição é auditada.
+- **Given** um edital, **When** avança por `Em Análise → Em Distribuição → Homologado → Em Execução`, **Then** cada transição é registrada na trilha e a distribuição (RF005) só é possível a partir de `Em Distribuição`; `Homologado` congela a alocação (AD-10).
+
+### Story 5.5 — Termo de Aceite e cancelamento de credenciamento *(gaps G8/G9 · RN016)*
+As a fornecedor, I want concluir meu credenciamento por Termo de Aceite e poder cancelá-lo antes da distribuição, So that eu formalize a adesão com rastro e mantenha controle.
+- **Given** um credenciamento na etapa final, **When** aceito o **Termo de Aceite**, **Then** o aceite (finalidade + timestamp + versão do termo) é registrado na trilha e o credenciamento conclui. *(A etapa "Prova de vida"/biometria do mockup é **Release 2 condicional a RIPD** — não MVP; ver VALIDACAO-MOCKUPS.md §G5.)*
+- **Given** um credenciamento **antes da distribuição**, **When** o fornecedor cancela, **Then** o registro passa a cancelado (evento na trilha) e libera a participação; **após** homologação, a saída se dá por substituição (Story 5.4).
+
+### Story 9.4 — Gestão de Secretarias *(gap G1 · RF020, AD-16/AD-38)*
+As a Administrador, I want cadastrar e manter Secretarias, So that editais possam referenciar uma secretaria demandante válida.
+- **Given** o Painel Admin, **When** crio uma secretaria (Nome, Sigla, Responsável), **Then** ela fica disponível para seleção na criação de editais (1 Edital → 1 Secretaria, AD-16).
+- **Given** uma secretaria referenciada por editais, **When** a removo, **Then** ela é **inativada** (RN015/AD-38), não apagada; editais existentes permanecem íntegros.
+
+### Story 9.5 — Catálogo de CNAE / Setores industriais *(gap G2 · RF021)*
+As a Administrador, I want manter o catálogo de CNAE/setores, So that o "CNAE exigido" do edital e o match do fornecedor usem uma base curada.
+- **Given** o Painel Admin, **When** cadastro um setor (Código CNAE de 7 dígitos + Descrição da atividade), **Then** ele fica selecionável como "CNAE exigido" no edital e participa do match (RF003, RN001).
+- **Given** um CNAE em uso, **When** o desativo, **Then** é inativado (RN015), preservando os vínculos existentes.
+
+### Story 9.6 — Catálogo de Tipos de Documento *(gap G3 · RF022)*
+As a Administrador, I want definir os tipos de documento aceitos, So that o upload e a covalidação sigam regras consistentes.
+- **Given** o Painel Admin, **When** crio um tipo (Nome, Formato aceito, regra de Validade ou "Sem validade", Categoria, exigência de Exercício), **Then** ele parametriza o upload (RF002) e a covalidação (RF004).
+- **Given** um tipo com regra "Sem validade" (ex.: Contrato Social), **When** um documento desse tipo é enviado, **Then** ele **não** é tratado como expirável.
+
+### Story 9.7 — Gestão de Usuários internos e cargos *(gap G4 · RF023, §15)*
+As a Administrador, I want cadastrar servidores e atribuir cargo/perfil, So that o acesso respeite o RBAC.
+- **Given** o Painel Admin, **When** crio um usuário (Nome, E-mail, **Cargo**), **Then** o cargo mapeia num papel RBAC (§15/AD-35) e as permissões efetivas seguem o papel.
+- **Given** um usuário, **When** aciono reset de senha, **Then** o fluxo de nova/confirmar senha respeita o provedor de identidade (AD-20) e registra o evento.
+- **Given** um usuário desligado, **When** o removo, **Then** é **inativado** (RN015/AD-38), preservando a autoria histórica de suas ações na trilha.

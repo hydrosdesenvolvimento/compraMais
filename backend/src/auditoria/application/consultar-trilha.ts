@@ -2,7 +2,7 @@ import type { AuditRecord } from '../domain/audit-record.js';
 import type { AuditQuery, AuditPage, AuditRepository } from '../infra/audit-repository.js';
 
 export class IntervaloInvalido extends Error {
-  constructor() { super('Intervalo de datas inválido: "de" não pode ser maior que "ate".'); this.name = 'IntervaloInvalido'; }
+  constructor() { super('Invalid date range: "de" cannot be greater than "ate".'); this.name = 'IntervaloInvalido'; }
 }
 
 /**

@@ -4,10 +4,10 @@ import type { Papel, Identidade } from './identity-provider.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export class EmailInvalido extends Error { constructor() { super('E-mail inválido.'); this.name = 'EmailInvalido'; } }
-export class SenhaFraca extends Error { constructor() { super('A senha deve ter ao menos 8 caracteres.'); this.name = 'SenhaFraca'; } }
-export class SemCredencialLocal extends Error { constructor() { super('Usuário não possui senha local (use login social).'); this.name = 'SemCredencialLocal'; } }
-export class GoogleJaVinculado extends Error { constructor() { super('Outra conta Google já está vinculada a este usuário.'); this.name = 'GoogleJaVinculado'; } }
+export class EmailInvalido extends Error { constructor() { super('Invalid e-mail.'); this.name = 'EmailInvalido'; } }
+export class SenhaFraca extends Error { constructor() { super('The password must be at least 8 characters long.'); this.name = 'SenhaFraca'; } }
+export class SemCredencialLocal extends Error { constructor() { super('User has no local password (use social login).'); this.name = 'SemCredencialLocal'; } }
+export class GoogleJaVinculado extends Error { constructor() { super('Another Google account is already linked to this user.'); this.name = 'GoogleJaVinculado'; } }
 
 export function normalizarEmail(email: string): string {
   const e = (email ?? '').trim().toLowerCase();

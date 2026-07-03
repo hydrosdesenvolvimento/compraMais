@@ -12,7 +12,7 @@ const PERFIS_AUDITORIA = ['cpl', 'administrador', 'auditor'];
  */
 export function registrarRotasAuditoria(app: FastifyInstance, deps: { consultar: ConsultarTrilha; exportar: ExportarTrilha }): void {
   app.get('/auditoria', async (req, reply) => {
-    if (!autorizado(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Acesso restrito a perfis de controle/auditoria.' });
+    if (!autorizado(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Access restricted to control/audit roles.' });
     const { probe, page } = parseFiltro(req);
     try {
       return reply.send(await deps.consultar.consultar(probe, page));
@@ -22,7 +22,7 @@ export function registrarRotasAuditoria(app: FastifyInstance, deps: { consultar:
   });
 
   app.get('/auditoria/exportar', async (req, reply) => {
-    if (!autorizado(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Acesso restrito a perfis de controle/auditoria.' });
+    if (!autorizado(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Access restricted to control/audit roles.' });
     const { probe } = parseFiltro(req);
     const { formato } = req.query as { formato?: FormatoExport };
     const fmt: FormatoExport = formato === 'json' ? 'json' : 'csv';

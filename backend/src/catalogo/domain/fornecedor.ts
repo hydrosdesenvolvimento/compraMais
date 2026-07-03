@@ -88,7 +88,7 @@ export class Fornecedor extends EntidadeBase {
 
 export class SituacaoNaoApta extends Error {
   constructor(situacao: SituacaoCadastral) {
-    super(`Situação cadastral não apta para cadastro: ${situacao}`);
+    super(`Registration status not eligible for registration: ${situacao}`);
     this.name = 'SituacaoNaoApta';
   }
 }

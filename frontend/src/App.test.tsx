@@ -13,5 +13,9 @@ describe('App (Portal do Fornecedor)', () => {
     // A marca é o logotipo oficial (imagem) no painel institucional — assertido pelo nome acessível.
     expect(await screen.findByRole('img', { name: /Compra Mais/i })).toBeInTheDocument();
     expect(await screen.findByPlaceholderText('00.000.000/0000-00')).toBeInTheDocument();
+    // i18n inicializado: nenhuma chave crua (ex.: auth.signup.title) deve vazar para a tela.
+    expect(document.body.textContent ?? '').not.toMatch(/\bauth\.(tabs|signup|login)\./);
+    // Idioma PADRÃO é pt-BR (sem escolha salva): o texto em português deve aparecer.
+    expect(await screen.findByText('Cadastro de fornecedor')).toBeInTheDocument();
   });
 });

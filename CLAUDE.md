@@ -38,6 +38,7 @@ Sempre que a tarefa envolver desenvolvimento, refatoração ou correção de có
 - Usar [.github/skills/protocolo-tdd/](.github/skills/protocolo-tdd/) como referência operacional obrigatória (ciclo TDD, integração real via Testcontainers, E2E real com Cypress quando aplicável).
 - Usar [.github/skills/review-documentation/](.github/skills/review-documentation/) para produzir o registro técnico da entrega e o commit exigido pela skill.
 - Testes E2E usam **Cypress** como padrão: o Senior Developer prepara os pré-requisitos do projeto/container; o QA Expert valida a execução real e registra evidências ou bloqueios.
+- **Toda a suite de testes roda dentro do container, nunca no host** (DEC-STR-34). Use o profile `test` do compose: `docker compose --profile test run --rm backend-test` e `docker compose --profile test run --rm frontend-test` (executam `lint` + `typecheck` + `test` na imagem). O CI roda o mesmo gate via `docker compose --profile test`. Validação de entrega e evidências de QA devem usar a execução em container.
 
 ### Ciclo do developer com subagents utilitários
 
@@ -93,6 +94,16 @@ Quando o projeto for operado em VS Code com suporte a MCP e ainda não houver Co
 - Aplica-se a System Design, Design System, PRD, user stories formais, validações QA, pareceres, aprovações finais, revisões consolidadas, planos operacionais e registros técnicos.
 - Não altera o idioma dos logs do `prompt-logger`, que seguem o idioma do prompt.
 - Comandos, identificadores técnicos, schemas, payloads e código podem permanecer no idioma original.
+
+## Localização (i18n) da aplicação
+
+A aplicação é localizada com **react-i18next** (`frontend/src/i18n/`). Idiomas: **português do Brasil (padrão e fallback)**, inglês e espanhol.
+
+- **Toda string visível ao usuário no frontend deve vir do i18n** (`useTranslation()` → `t('area.chave')`; use `<Trans>` para texto com markup). Nada de texto hardcoded em componentes, incluindo `placeholder`, `aria-label`, `title` e estados vazios.
+- Chaves ficam nos JSON por idioma em `frontend/src/i18n/locales/{pt-BR,en,es}.json`, namespace único (`translation`) com chaves aninhadas por área (`common.*`, `auth.*`, `inicio.*`, …). Ao adicionar uma chave, preencher os **três** idiomas.
+- O idioma é detectado (`localStorage → navegador`) e persistido em `compramais.lang`; o seletor de idioma está na topbar (`AppShell`) e na tela de autenticação.
+- **O backend responde sempre em inglês** (mensagens e erros), pois a **localização é responsabilidade do frontend**. Identificadores estáveis (`codigo`/`code`, `name` de erros) não são mensagens e permanecem inalterados; o frontend pode mapear `codigo` → texto localizado ao exibir erros.
+- Não confundir com o idioma dos **documentos de governança** (seção acima), que é PT-BR por padrão.
 
 ## Detecção de stack (baseline)
 

@@ -83,7 +83,7 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
     },
   }, async (req, reply) => {
     const id = identidadeDoToken(req, deps.tokens);
-    if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Token ausente ou inválido.' });
+    if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
     return reply.send(id);
   });
 
@@ -97,7 +97,7 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
     },
   }, async (req, reply) => {
     const id = identidadeDoToken(req, deps.tokens);
-    if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Token ausente ou inválido.' });
+    if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
     const { googleId } = req.body as { googleId: string };
     try {
       await deps.vincularGoogle.executar({ usuarioId: id.userId, googleId });

@@ -22,7 +22,7 @@ export function registrarRotasRegularizacao(app: FastifyInstance, deps: {
   app.post('/documentos/:docId/reenviar', async (req, reply) => {
     const { docId } = req.params as { docId: string };
     const doc = await deps.docs.porId(docId);
-    if (!doc) return reply.code(404).send({ codigo: 'DocumentoNaoEncontrado', mensagem: 'Documento não encontrado' });
+    if (!doc) return reply.code(404).send({ codigo: 'DocumentoNaoEncontrado', mensagem: 'Document not found' });
     try {
       doc.reenviar(actor(req));
       await deps.docs.salvar(doc);

@@ -8,7 +8,7 @@ import type { EventBus } from '../../shared/events/event-bus.js';
 export interface AnaliseRepository { salvar(a: AnaliseCovalidacao): Promise<void>; }
 
 export class DocumentoNaoEncontrado extends Error {
-  constructor() { super('Documento não encontrado.'); this.name = 'DocumentoNaoEncontrado'; }
+  constructor() { super('Document not found.'); this.name = 'DocumentoNaoEncontrado'; }
 }
 
 /**

@@ -82,7 +82,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   if (config.nodeEnv !== 'test' && temPostgresConfigurado()) {
     pool = criarPool(config.database);
     const novas = await aplicarMigracoes(pool, (m) => app.log.info(m));
-    app.log.info({ migracoesNovas: novas.length }, 'migrações verificadas');
+    app.log.info({ migracoesNovas: novas.length }, 'migrations verified');
     app.addHook('onClose', async () => { await pool!.end(); });
   }
 

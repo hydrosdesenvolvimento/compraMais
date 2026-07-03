@@ -38,3 +38,8 @@ Thumbs.db
 .eslintcache
 .tsbuildinfo
 *.tsbuildinfo
+
+# Ferramental de agents (BMad / Claude Code) — andaime, não entrega
+.claude/
+_bmad/
+_bmad-output/

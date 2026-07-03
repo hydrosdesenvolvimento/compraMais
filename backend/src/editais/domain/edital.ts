@@ -103,11 +103,11 @@ export class Edital extends EntidadeBase {
 }
 
 export class EditalSemSecretaria extends Error {
-  constructor() { super('Edital deve referenciar exatamente uma secretaria (RN007/AD-11).'); this.name = 'EditalSemSecretaria'; }
+  constructor() { super('Edital must reference exactly one department (RN007/AD-11).'); this.name = 'EditalSemSecretaria'; }
 }
 export class EditalIncompleto extends Error {
-  constructor(faltas: string[]) { super(`Edital incompleto para publicação: faltam ${faltas.join(', ')}.`); this.name = 'EditalIncompleto'; }
+  constructor(faltas: string[]) { super(`Edital incomplete for publication: missing ${faltas.join(', ')}.`); this.name = 'EditalIncompleto'; }
 }
 export class TransicaoInvalida extends Error {
-  constructor(de: string, para: string) { super(`Transição inválida de '${de}' para '${para}'.`); this.name = 'TransicaoInvalida'; }
+  constructor(de: string, para: string) { super(`Invalid transition from '${de}' to '${para}'.`); this.name = 'TransicaoInvalida'; }
 }

@@ -1,5 +1,11 @@
 # Compra Mais - Plataforma de Compras Municipalizadas
 
+> ⚠️ **INSUMO HISTÓRICO (v1.0, 2026-06-22) — NÃO CANÔNICO.**
+> A versão canônica e atual dos casos de uso é **[`../docs/casos-de-uso.md`](../docs/casos-de-uso.md)**
+> (alinhada ao PRD v2.4). Este arquivo é material de origem bruto, pré-convergência: não conhece
+> RF015–RF023, o papel Procurador, o ciclo de vida do Edital (RN014) nem a conclusão por Termo de
+> Aceite (RN016). Mantido apenas como registro. Não usar para desenvolvimento.
+
 ## Casos de Uso
 
 ---

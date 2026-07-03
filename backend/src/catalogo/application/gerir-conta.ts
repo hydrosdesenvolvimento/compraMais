@@ -10,7 +10,7 @@ const CAMPOS_EDITAVEIS = ['nomeFantasia', 'endereco', 'telefone'] as const;
 /** RN009/FR-013: rejeita edição de campos oficiais da Receita na borda. */
 export class CampoNaoEditavel extends Error {
   constructor(campo: string) {
-    super(`Campo "${campo}" é oficial da Receita (somente leitura). Editáveis: ${CAMPOS_EDITAVEIS.join(', ')}.`);
+    super(`Field "${campo}" is official Receita data (read-only). Editable: ${CAMPOS_EDITAVEIS.join(', ')}.`);
     this.name = 'CampoNaoEditavel';
   }
 }
@@ -26,7 +26,7 @@ export class GerirConta {
   /** FR-013: edição restrita. */
   async editarPerfil(fornecedorId: string, patch: Record<string, unknown>, actor: { userId: string }): Promise<void> {
     const f = await this.fornecedores.porId(fornecedorId);
-    if (!f) throw new Error('Fornecedor não encontrado');
+    if (!f) throw new Error('Supplier not found');
     for (const campo of Object.keys(patch)) {
       if (!CAMPOS_EDITAVEIS.includes(campo as (typeof CAMPOS_EDITAVEIS)[number])) throw new CampoNaoEditavel(campo);
     }
@@ -39,7 +39,7 @@ export class GerirConta {
   /** RF018: re-sincronização. Erro preserva os dados anteriores. */
   async reSincronizar(fornecedorId: string, actor: { userId: string }): Promise<{ status: string }> {
     const f = await this.fornecedores.porId(fornecedorId);
-    if (!f) throw new Error('Fornecedor não encontrado');
+    if (!f) throw new Error('Supplier not found');
     const r = await this.receita.consultarCnpj(f.cnpj.valor);
     if (r.frescor !== 'verificado' || !r.valor) {
       await this.emit(fornecedorId, actor, 'erro', []);

@@ -29,7 +29,7 @@
   - Design System (existe — ver secao obrigatoria) permanece em evolucao continua; Storybook e capturas reais ainda pendentes.
 - Premissas:
   - As decisoes PRJ-DEC-03..07 e Q-01..Q-03 estao vigentes e sao tratadas como verdade de projeto.
-  - O projeto e greenfield: `backend/`, `frontend/` e `spec/source/` estao vazios na data desta versao.
+- O projeto iniciou como greenfield; nesta versao, `backend/` e `frontend/` ja possuem scaffolding executavel (PRJ-DEC-09) e ha implementacao inicial de UI do Portal do Fornecedor (PRJ-DEC-10).
   - Backend e frontend sao servicos distintos no mesmo repositorio (monorepo unico — Q-01).
   - Os dados georreferenciados justificam o uso de PostGIS e indices espaciais GiST (PRJ-DEC-04).
   - Producao nao builda imagens: apenas faz pull do GHCR (PRJ-DEC-06).

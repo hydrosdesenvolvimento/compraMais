@@ -94,7 +94,7 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | RF012 | ~~Biometria facial (liveness)~~ — **removida do MVP**; condicional Release 2 com RIPD | 3 | Removida (LAC-09/10) |
 | RF013 | Dashboard administrativo (funil de cadastros pendentes) | 2/3 | — |
 | RF014 | Trilha de auditoria com consulta filtrada e exportação CSV/JSON | 2 | — |
-| **RF015** | **Autenticação recorrente** (login/SSO/MFA, reset de senha) | 2 | **Novo** (LAC-03) |
+| **RF015** | **Autenticação recorrente** (login/SSO/MFA, reset de senha por esquecimento **e troca da própria senha pelo usuário autenticado** — exige senha atual) | 2 | **Novo** (LAC-03); troca autenticada da própria senha add. na validação de mockups |
 | **RF016** | **Tela única de contestação/regularização** (correção de CNAE, recurso de reprovação, regularização fiscal) | 2 | **Novo** (LAC-11, convergência) |
 | **RF017** | **Gestão de consentimento e direitos do titular LGPD** (acesso, correção, exclusão) | 2 | **Novo** (LAC-09) |
 | **RF018** | **Re-sincronização dos dados do CNPJ** sob demanda (re-consulta à Receita, com timestamp da última sincronização e status) | 2 | **Novo** (design Minha conta) |

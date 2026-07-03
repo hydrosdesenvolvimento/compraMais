@@ -172,13 +172,13 @@ Dois itens reaparecem como dependência de várias lacunas — devem ser tratado
 
 ## Documentos Relacionados
 
-- [01 - Descritivo do Produto](../../source/01-DescritivoProduto.md)
-- [02 - Declaração de Escopo](../../source/02-DeclaracaoEscopo.md)
-- [03 - HDR](../../source/03-HDR.md)
-- [05 - Histórias de Usuário](../../source/05-HistoriasUsuario.md)
-- [06 - Casos de Uso](../../source/06-CasosUso.md)
-- [07 - Backlog](../../source/07-Backlog.md)
-- [Relatório de Validação de Diagramas](../../source/RELATORIO-VALIDACAO-DIAGRAMAS.md)
+- [01 - Descritivo do Produto](../source/01-DescritivoProduto.md)
+- [02 - Declaração de Escopo](../source/02-DeclaracaoEscopo.md)
+- [03 - HDR](../source/03-HDR.md)
+- [05 - Histórias de Usuário](../source/05-HistoriasUsuario.md)
+- [06 - Casos de Uso](../source/06-CasosUso.md)
+- [07 - Backlog](../source/07-Backlog.md)
+- [Relatório de Validação de Diagramas](../source/RELATORIO-VALIDACAO-DIAGRAMAS.md)
 
 ---
 

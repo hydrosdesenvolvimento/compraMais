@@ -6,10 +6,10 @@
 
 **Projeto:** Compra Mais (Programa de Compras Municipalizadas)
 **Cliente/Patrocinador:** Prefeitura Municipal de Rio Branco (SMGA / Gabinete do Prefeito)
-**Versão:** 2.2 (revisada)
-**Data:** 2026-06-29
+**Versão:** 2.3 (convergência)
+**Data:** 2026-07-02
 **Autores:** John (PM), Mary (BA), Winston (Arquiteto), Sally (UX), Amelia (Dev), Murat (Test Architect), Paige (Tech Writer) — sessão BMad Party Mode
-**Base:** `source/` (Descritivo, Escopo, HDR, Arquitetura, Histórias, Casos de Uso, Backlog, BPMN) + artefatos da sessão ([matriz-lacunas.md](matriz-lacunas.md), [plano-releases.md](plano-releases.md), [roteiro-demo-fieac.md](roteiro-demo-fieac.md))
+**Base:** `source/` (Descritivo, Escopo, HDR, Arquitetura, Histórias, Casos de Uso, Backlog, BPMN) + artefatos da sessão ([matriz-lacunas.md](matriz-lacunas.md), [plano-releases.md](plano-releases.md))
 
 ---
 
@@ -21,6 +21,7 @@
 | 2.0 | 2026-06-29 | Party Mode | PRD consolidado e revisado: motor reescrito, bloqueio transitório, biometria removida do MVP, bloco LGPD incorporado, requisitos novos (auth, contestação, consentimento), releases sequenciados |
 | 2.1 | 2026-06-29 | bmad-architecture (Update) | Alinhamento com a espinha de arquitetura: política de indisponibilidade de API corrigida de `fail-closed` para **`fail-open + flag`** (RN002, §11) — decisão da sessão de arquitetura (AD-12) |
 | 2.2 | 2026-06-29 | Party Mode (Update por designs) | Incorporação dos designs ratificados em `source/AI-UI-Design/`: slogan/value props (§1), papel **Procurador** (§4), **RF018** (re-sincronização Receita), **RN009** (dados da Receita read-only), referência ao contrato de UX (DESIGN/EXPERIENCE) em RNF006 |
+| 2.3 | 2026-07-02 | Party Mode (Convergência) | Convergência de linhagens de doc (ver [CONVERGENCIA.md](CONVERGENCIA.md)): resgate de 13 decisões do Spec-Kit — **RF019** (georreferenciamento/endereço estruturado), refino de RF003/RN001 (CNAE match exato 7 dígitos), **RN010–RN013** novas, **§15 Papéis/RBAC** e **§16 Catálogo de parâmetros**; correção do path do contrato de UX em RNF006; AD-34/35/36 na espinha |
 
 ---
 
@@ -80,7 +81,7 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 |---|---|---|---|
 | RF001 | Cadastro B2G via CNPJ com autopreenchimento (Receita); **fallback manual covalidado** se a API estiver indisponível | 1/2 | Revisado (LAC-12) |
 | RF002 | Upload documental (PDF/JPG/PNG) em repositório reutilizável até a expiração; **cifrado em repouso** | 2 | Revisado (LGPD) |
-| RF003 | Filtro de editais por compatibilidade de CNAE | 1 | — |
+| RF003 | Filtro de editais por compatibilidade de CNAE — **match exato por subclasse (7 dígitos)**: o edital lista subclasses exigidas e o fornecedor é compatível se qualquer CNAE válido (principal ou secundário) bater exatamente; incompatíveis ocultos e bloqueados inclusive por link direto | 1 | Refinado (conv. 2026-07-02, `spec/001`) |
 | RF004 | Covalidação humana (aprovar/reprovar) com **justificativa obrigatória** na reprovação | 2 | — |
 | RF005 | **Motor de Distribuição** (ver §8): water-filling iterativo + maiores restos (Hamilton) + desempate determinístico | 1/2 | Reescrito (LAC-04) |
 | RF006 | Cadastro de Reserva / Segunda Demanda, com **ciclo de vida** definido (gatilho, promoção, substituição) | 2 | Revisado (LAC-14) |
@@ -96,18 +97,19 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | **RF016** | **Tela única de contestação/regularização** (correção de CNAE, recurso de reprovação, regularização fiscal) | 2 | **Novo** (LAC-11, convergência) |
 | **RF017** | **Gestão de consentimento e direitos do titular LGPD** (acesso, correção, exclusão) | 2 | **Novo** (LAC-09) |
 | **RF018** | **Re-sincronização dos dados do CNPJ** sob demanda (re-consulta à Receita, com timestamp da última sincronização e status) | 2 | **Novo** (design Minha conta) |
+| **RF019** | **Endereço estruturado do fornecedor para análise territorial** (captura geolocalizável do endereço para fomento local na camada de Transparência) | 2 | **Novo** (resgate `spec/001` FR-012 — convergência 2026-07-02) |
 
 ## 7. Requisitos Não Funcionais (revisados)
 
 | ID | Requisito |
 |---|---|
 | RNF001 | Integrações (Receita, SICAF, LICON, PGM) via **adaptadores + circuit breaker + degradação graciosa**; dev contra mocks/contratos (Pact) |
-| RNF002 | Compressão + **fragmentação** do malote; limite do SEI como **parâmetro de configuração** (caso de PDF único acima do limite: comprimir → split por página → rejeitar com aviso) |
+| RNF002 | Compressão + **fragmentação** do malote; limite do SEI como **parâmetro de configuração global** (`SEI_MALOTE_LIMITE_MB`, §16); cadeia comprimir → split por página → fragmentar. Peça **única indivisível** acima do limite vira **fragmento isolado sinalizado** para tratamento manual da CPL (sem split binário, sem corromper). Geração em **fila durável + retry** (estado pendente→gerado sobrevive a restart; perda silenciosa é inaceitável — entregável legal/TCE). *(resgate `spec/005`)* |
 | RNF003 | Trilha de auditoria em JSON imutável (usuário, evento, data, IP) |
 | RNF004 | Conformidade Lei 14.133/21 (art. 79), Lei 2.027, TCE (preferência "por item") |
 | RNF005 | Disponibilidade com **SLA numérico** (meta a ratificar — ex. 99,5%) e janela de manutenção definida |
-| RNF006 | Identidade visual e acessibilidade conforme o **contrato de UX** ([DESIGN.md](ux-designs/ux-compra-mais-2026-06-29/DESIGN.md) / [EXPERIENCE.md](ux-designs/ux-compra-mais-2026-06-29/EXPERIENCE.md)): paleta azul institucional (azul-700 #0061AE), Poppins, acessibilidade e-MAG/WCAG 2.1 AA (foco visível âmbar, alto contraste, navegação por teclado) |
-| **RNF007** | **LGPD:** base legal por categoria; cifra em repouso e trânsito; política de retenção e descarte; segregação de acesso; **RIPD**; **DPO designado** (Art. 41); acordos de compartilhamento (Art. 26) |
+| RNF006 | Identidade visual e acessibilidade conforme o **contrato de UX** ([DESIGN.md](ux/DESIGN.md) / [EXPERIENCE.md](ux/EXPERIENCE.md); mockups em [`../AI-UI-Design/`](../AI-UI-Design/)): paleta azul institucional (azul-700 #0061AE), Poppins, acessibilidade e-MAG/WCAG 2.1 AA (foco visível âmbar, alto contraste, navegação por teclado) |
+| **RNF007** | **LGPD:** base legal por categoria; cifra em repouso e trânsito; **retenção e descarte por categoria de dado** (cadastral/fiscal/contratual, cada um com prazo configurável — §16); segregação de acesso por RBAC (§15); **RIPD**; **DPO/Encarregado designado** (Art. 41) — papel `dpo` **atende os direitos do titular** (RF017), com `Administrador` como fallback; a CPL **não** atende direitos do titular; acordos de compartilhamento (Art. 26). Na consulta/exportação de auditoria por perfil de controle **não há mascaramento de PII** — a salvaguarda é o RBAC (papel `auditor` somente-leitura), não a redação de campos *(resgate `spec/004/006`)* |
 | **RNF008** | **Determinismo/reprodutibilidade** do motor de distribuição (mesma entrada → mesma saída, com sementes de desempate logadas) |
 
 ## 8. Especificação do Motor de Distribuição (RF005)
@@ -135,7 +137,7 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | ID | Regra |
 |---|---|
 | RN001 | Filtro restritivo por CNAE válido e ativo |
-| RN002 | **Inadimplência → bloqueio TRANSITÓRIO**, reavaliado em cada porta (credenciamento → distribuição → contrato). Três estados: **débito regularizável** (bloqueia enquanto ativo), **penalidade com prazo** (até a data), **inidoneidade** (pelo termo). **Preserva o direito de regularização da ME/EPP (LC 123)** — nunca permanente. Política **fail-open + flag obrigatória para a CPL** na indisponibilidade de API (default ratificável pela Procuradoria; ver arquitetura AD-12) |
+| RN002 | **Inadimplência → bloqueio TRANSITÓRIO**, reavaliado em cada porta (credenciamento → distribuição → contrato). Três estados: **débito regularizável** (bloqueia enquanto ativo), **penalidade com prazo** (até a data), **inidoneidade** (pelo termo). **Preserva o direito de regularização da ME/EPP (LC 123)** — nunca permanente. Política **fail-open + flag obrigatória para a CPL** na indisponibilidade de API (default ratificável pela Procuradoria; ver arquitetura AD-12). **Data de fim de penalidade/inidoneidade é híbrida:** usa a data retornada pela base oficial de sanções quando disponível; a **CPL registra manualmente** como fallback quando a fonte não traz o prazo (resgate `spec/002`) |
 | RN003 | Covalidação antifraude obrigatória (Aprovar/Reprovar com justificativa) para documentos declaratórios |
 | RN004 | Ingressantes retardatários → Cadastro de Reserva, sem refração retroativa |
 | RN005 | Teto por capacidade declarada (base do water-filling) |
@@ -143,6 +145,10 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | RN007 | Editais rigorosamente individualizados (proibido "guarda-chuva") |
 | RN008 | Ordenação e fragmentação do malote conforme RF007/RNF002 |
 | RN009 | **Dados oficiais da Receita são somente leitura.** Após o autopreenchimento por CNPJ, apenas **Nome Fantasia, Endereço e Telefone** são editáveis pelo fornecedor; Razão Social, CNAE e Porte só mudam por re-sincronização (RF018). |
+| **RN010** | **Vínculo Procurador↔empresa é estabelecido pelo titular:** o responsável legal cadastra-se primeiro e **convida/adiciona (e pode remover)** os procuradores que agem em nome da empresa (resgate `spec/001`; ver AD-30/AD-35). |
+| **RN011** | **Covalidação sem SLA obrigatório:** não há prazo fixo de resposta da CPL; o sistema **exibe a fila pendente e o tempo decorrido por documento** para acompanhamento gerencial (resgate `spec/002`). |
+| **RN012** | **Edital Publicado é totalmente editável com auditoria:** a Secretaria/Gestor pode alterar qualquer campo (inclusive CNAE e quantitativos), desde que cada alteração gere registro antes/depois na trilha. Mudança de CNAE **reavalia a vitrine imediatamente**, mantendo o prazo original; reabertura/extensão de prazo é **decisão manual e auditada** (sem reabertura automática). **Qualquer fornecedor cadastrado e ativo** pode contestar o CNAE de um edital; a procedência é julgada pela Secretaria/CPL (acatar/recusar com justificativa) (resgate `spec/003`). |
+| **RN013** | **Transparência expõe só agregados não-identificáveis:** o portal público mostra editais vigentes (contagem), secretarias e segmentos (CNAEs); **não** expõe fornecedores, valores nem dados pessoais (evita reidentificação em segmentos pequenos). Projeções calculadas **sob demanda** (materialização/cache é otimização futura sem mudar o contrato) (resgate `spec/007`). |
 
 ## 10. Roadmap de Releases
 
@@ -177,12 +183,38 @@ Mantida a espinha original HU ↔ RF ↔ RN ↔ UC ↔ Backlog (`source/`), este
 - 🟠 LAC-04e (validação de capacidade), LAC-06 (SLA), LAC-07 (gateway), LAC-16 (item × lote).
 - Demais 🟡/⚪ conforme matriz.
 
+## 15. Papéis e Controle de Acesso (RBAC)
+
+Papéis canônicos com separação de funções (formalizados em AD-35). Resgatados de `spec/001/004/006` na convergência.
+
+| Papel | Faz | Não faz |
+|---|---|---|
+| **Titular** | Cadastra a empresa; **convida/remove Procuradores** (RN010); exerce direitos do titular LGPD | — |
+| **Procurador** | Age em nome da empresa com **rastro de ator + empresa representada** (RN010, AD-30) | Direitos do titular que exijam o próprio titular (RF017) |
+| **CPL / Administrador** | Covalidação, editais, malote, distribuição, operação | **Não** atende direitos do titular (é do `dpo`) |
+| **Secretaria / Gestor** | Cria e edita editais (com auditoria — RN012, AD-16) | — |
+| **`auditor`** | **Somente leitura**: consulta e exporta a trilha (RF014) | Escrever, aprovar, operar |
+| **`dpo`** (Encarregado, LGPD Art. 41) | **Atende/recusa** direitos do titular (RF017); `Administrador` é fallback | Operação de negócio |
+
+## 16. Catálogo de Parâmetros de Configuração
+
+Decisões de negócio que parametrizam invariantes vivem como **config versionada/logada**, nunca hard-coded (AD-36).
+
+| Parâmetro | Descrição | Default / Estado | Origem |
+|---|---|---|---|
+| `SEI_MALOTE_LIMITE_MB` | Limite do malote — **global** (característica do SEI municipal, não do edital/secretaria) | A ratificar (TI/SEI) | RNF002, `spec/005` |
+| `AUDITORIA_EXPORT_TETO` | Teto de registros por export; acima dele **sinaliza e conclui** via streaming/paginação (não corta) | ex.: 50.000 | RF014, `spec/004` |
+| `RETENCAO_POR_CATEGORIA` | Prazo de descarte **por categoria de dado** (cadastral/fiscal/contratual…) | A ratificar (LGPD) | RNF007, `spec/006` |
+| `regra_vN` | Regra de resto/desempate do motor | Hamilton + ordem de credenciamento, backstop menor CNPJ (a ratificar SMGA/TCE) | RNF008, AD-8 |
+| `regra_reserva_vN` | Ordem de promoção do Cadastro de Reserva | FIFO por credenciamento, backstop menor CNPJ | RN004, AD-25 |
+| `POLITICA_INDISPONIBILIDADE` | Ação quando a API de verificação está indisponível | `fail-open + flag` (a ratificar Procuradoria) | RN002, AD-12 |
+
 ---
 
 ## Documentos Relacionados
 
-- [Matriz de Lacunas](matriz-lacunas.md) · [Plano de Releases](plano-releases.md) · [Roteiro Demo FIEAC](roteiro-demo-fieac.md)
-- `source/`: [Descritivo](../../source/01-DescritivoProduto.md) · [Escopo](../../source/02-DeclaracaoEscopo.md) · [HDR](../../source/03-HDR.md) · [Arquitetura](../../source/04-Arquitetura.md) · [Histórias](../../source/05-HistoriasUsuario.md) · [Casos de Uso](../../source/06-CasosUso.md) · [Backlog](../../source/07-Backlog.md) · [BPMN](../../source/08-BPMN.md)
+- [Matriz de Lacunas](matriz-lacunas.md) · [Plano de Releases](plano-releases.md) · [Convergência](CONVERGENCIA.md)
+- `source/`: [Descritivo](../source/01-DescritivoProduto.md) · [Escopo](../source/02-DeclaracaoEscopo.md) · [HDR](../source/03-HDR.md) · [Arquitetura](../source/04-Arquitetura.md) · [Histórias](../source/05-HistoriasUsuario.md) · [Casos de Uso](../source/06-CasosUso.md) · [Backlog](../source/07-Backlog.md) · [BPMN](../source/08-BPMN.md)
 
 ---
 

@@ -20,6 +20,7 @@
 | [architecture/ARCHITECTURE-SPINE.md](architecture/ARCHITECTURE-SPINE.md) | Espinha de arquitetura: **38 ADs** (invariantes), stack, diagramas, conventions |
 | [ux/DESIGN.md](ux/DESIGN.md) | Identidade visual e tokens (Poppins, azul-700 #0061AE, acessibilidade) |
 | [ux/EXPERIENCE.md](ux/EXPERIENCE.md) | IA de navegação, telas (incl. Admin e Público), estados, jornadas |
+| [casos-de-uso.md](casos-de-uso.md) | **21 casos de uso (UC001–UC021)** — ator → objetivo → fluxo, rastreados a RF/RN/AD; alinhado ao **PRD v2.4** (UC ≠ critério de aceite: o teste vive em epics.md) |
 | [epics.md](epics.md) | **9 épicos / 31 histórias** com critérios de aceite (Given/When/Then) — **é a fila de histórias canônica** |
 | [plano-releases.md](plano-releases.md) | Sequenciamento em 3 ondas + 4 gates |
 | [matriz-lacunas.md](matriz-lacunas.md) | Lacunas catalogadas e suas resoluções |

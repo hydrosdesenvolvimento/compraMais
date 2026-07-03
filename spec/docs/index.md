@@ -16,8 +16,8 @@
 
 | Documento | Para quê |
 |---|---|
-| [prd.md](prd.md) | Requisitos (RF001–RF019, RNF001–RNF008, RN001–RN013), papéis (RBAC), catálogo de parâmetros, escopo, métricas — **v2.3** |
-| [architecture/ARCHITECTURE-SPINE.md](architecture/ARCHITECTURE-SPINE.md) | Espinha de arquitetura: **36 ADs** (invariantes), stack, diagramas, conventions |
+| [prd.md](prd.md) | Requisitos (RF001–RF023, RNF001–RNF008, RN001–RN016), papéis (RBAC), catálogo de parâmetros, escopo, métricas — **v2.4** |
+| [architecture/ARCHITECTURE-SPINE.md](architecture/ARCHITECTURE-SPINE.md) | Espinha de arquitetura: **38 ADs** (invariantes), stack, diagramas, conventions |
 | [ux/DESIGN.md](ux/DESIGN.md) | Identidade visual e tokens (Poppins, azul-700 #0061AE, acessibilidade) |
 | [ux/EXPERIENCE.md](ux/EXPERIENCE.md) | IA de navegação, telas (incl. Admin e Público), estados, jornadas |
 | [epics.md](epics.md) | **9 épicos / 31 histórias** com critérios de aceite (Given/When/Then) — **é a fila de histórias canônica** |
@@ -25,6 +25,7 @@
 | [matriz-lacunas.md](matriz-lacunas.md) | Lacunas catalogadas e suas resoluções |
 | [implementation-readiness-report.md](implementation-readiness-report.md) | Avaliação de prontidão: PRONTO COM RESSALVAS |
 | [CONVERGENCIA.md](CONVERGENCIA.md) | **Registro da convergência 2026-07-02** — regras, resgate das 13 decisões, rastreabilidade |
+| [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md) | **Validação mockups × doc (2026-07-02)** — 10 gaps do Painel Admin/wizard e suas correções |
 
 ## Referências de UI
 

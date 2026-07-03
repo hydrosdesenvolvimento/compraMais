@@ -6,7 +6,7 @@
 
 **Projeto:** Compra Mais (Programa de Compras Municipalizadas)
 **Cliente/Patrocinador:** Prefeitura Municipal de Rio Branco (SMGA / Gabinete do Prefeito)
-**Versão:** 2.3 (convergência)
+**Versão:** 2.4 (validação de mockups)
 **Data:** 2026-07-02
 **Autores:** John (PM), Mary (BA), Winston (Arquiteto), Sally (UX), Amelia (Dev), Murat (Test Architect), Paige (Tech Writer) — sessão BMad Party Mode
 **Base:** `source/` (Descritivo, Escopo, HDR, Arquitetura, Histórias, Casos de Uso, Backlog, BPMN) + artefatos da sessão ([matriz-lacunas.md](matriz-lacunas.md), [plano-releases.md](plano-releases.md))
@@ -22,6 +22,7 @@
 | 2.1 | 2026-06-29 | bmad-architecture (Update) | Alinhamento com a espinha de arquitetura: política de indisponibilidade de API corrigida de `fail-closed` para **`fail-open + flag`** (RN002, §11) — decisão da sessão de arquitetura (AD-12) |
 | 2.2 | 2026-06-29 | Party Mode (Update por designs) | Incorporação dos designs ratificados em `source/AI-UI-Design/`: slogan/value props (§1), papel **Procurador** (§4), **RF018** (re-sincronização Receita), **RN009** (dados da Receita read-only), referência ao contrato de UX (DESIGN/EXPERIENCE) em RNF006 |
 | 2.3 | 2026-07-02 | Party Mode (Convergência) | Convergência de linhagens de doc (ver [CONVERGENCIA.md](CONVERGENCIA.md)): resgate de 13 decisões do Spec-Kit — **RF019** (georreferenciamento/endereço estruturado), refino de RF003/RN001 (CNAE match exato 7 dígitos), **RN010–RN013** novas, **§15 Papéis/RBAC** e **§16 Catálogo de parâmetros**; correção do path do contrato de UX em RNF006; AD-34/35/36 na espinha |
+| 2.4 | 2026-07-02 | Party Mode (Validação de mockups) | Validação dos mockups `AI-UI-Design/` vs doc (ver [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)): gaps do Painel Admin preenchidos — **RF020** (CRUD Secretarias), **RF021** (catálogo CNAE/setores), **RF022** (catálogo de tipos de documento), **RF023** (gestão de usuários internos); **RN014** (ciclo de vida do Edital), **RN015** (inativação preservando histórico), **RN016** (Termo de Aceite + cancelamento de credenciamento); §15 cargos operacionais; AD-37/AD-38 na espinha; conflito **"Prova de vida" × biometria removida** registrado para ratificação |
 
 ---
 
@@ -98,6 +99,10 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | **RF017** | **Gestão de consentimento e direitos do titular LGPD** (acesso, correção, exclusão) | 2 | **Novo** (LAC-09) |
 | **RF018** | **Re-sincronização dos dados do CNPJ** sob demanda (re-consulta à Receita, com timestamp da última sincronização e status) | 2 | **Novo** (design Minha conta) |
 | **RF019** | **Endereço estruturado do fornecedor para análise territorial** (captura geolocalizável do endereço para fomento local na camada de Transparência) | 2 | **Novo** (resgate `spec/001` FR-012 — convergência 2026-07-02) |
+| **RF020** | **Gestão (CRUD) de Secretarias** — cadastro de secretaria demandante (Nome, Sigla, Responsável) como entidade selecionável na criação de editais (1 Edital → 1 Secretaria, AD-16) | 2 | **Novo** (validação mockup Admin) |
+| **RF021** | **Gestão (CRUD) do catálogo de CNAE / Setores industriais** — cadastro de código CNAE + descrição da atividade, base selecionável para "CNAE exigido" do edital e para o match do fornecedor (RF003) | 2 | **Novo** (validação mockup Admin) |
+| **RF022** | **Gestão (CRUD) do catálogo de Tipos de Documento** — define os documentos aceitos (Nome, Formato aceito, regra de Validade/"Sem validade", Categoria, exigência de Exercício p/ Balanço); parametriza o upload (RF002) e a covalidação (RF004) | 2 | **Novo** (validação mockup Admin) |
+| **RF023** | **Gestão de Usuários internos (servidores)** — CRUD de usuários da Prefeitura com atribuição de **cargo/perfil** (RBAC §15) e reset de senha; distinto do autocadastro do fornecedor (RF001/RF015) | 2 | **Novo** (validação mockup Admin) |
 
 ## 7. Requisitos Não Funcionais (revisados)
 
@@ -149,6 +154,9 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | **RN011** | **Covalidação sem SLA obrigatório:** não há prazo fixo de resposta da CPL; o sistema **exibe a fila pendente e o tempo decorrido por documento** para acompanhamento gerencial (resgate `spec/002`). |
 | **RN012** | **Edital Publicado é totalmente editável com auditoria:** a Secretaria/Gestor pode alterar qualquer campo (inclusive CNAE e quantitativos), desde que cada alteração gere registro antes/depois na trilha. Mudança de CNAE **reavalia a vitrine imediatamente**, mantendo o prazo original; reabertura/extensão de prazo é **decisão manual e auditada** (sem reabertura automática). **Qualquer fornecedor cadastrado e ativo** pode contestar o CNAE de um edital; a procedência é julgada pela Secretaria/CPL (acatar/recusar com justificativa) (resgate `spec/003`). |
 | **RN013** | **Transparência expõe só agregados não-identificáveis:** o portal público mostra editais vigentes (contagem), secretarias e segmentos (CNAEs); **não** expõe fornecedores, valores nem dados pessoais (evita reidentificação em segmentos pequenos). Projeções calculadas **sob demanda** (materialização/cache é otimização futura sem mudar o contrato) (resgate `spec/007`). |
+| **RN014** | **Ciclo de vida do Edital:** `Rascunho → Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`. Transições são auditadas (RN012, AD-16/AD-37); só edital **Aberto** aparece na vitrine do fornecedor; a distribuição (RF005) só ocorre a partir de **Em Distribuição**; **Homologado** congela a alocação (AD-10). (validação mockup) |
+| **RN015** | **Exclusão é lógica, preservando histórico:** entidades de cadastro administrativo (Secretaria, Setor/CNAE, Tipo de Documento, Usuário, Fornecedor, Edital) **não são apagadas** — passam a **Inativo**, mantendo o histórico e as referências existentes; registros já vinculados a processos permanecem íntegros (complementa a trilha append-only AD-18/AD-38). (validação mockup) |
+| **RN016** | **Conclusão de credenciamento por Termo de Aceite; cancelamento pelo fornecedor:** no MVP o credenciamento conclui com o **Termo de Aceite** (aceite formal registrado na trilha; a etapa "Prova de vida"/biometria é **Release 2 condicional a RIPD** — ver §12 e [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)). O fornecedor pode **cancelar** um credenciamento **antes da distribuição**; após homologação, saída se dá por substituição de desistente (RN004, AD-10). (validação mockup) |
 
 ## 10. Roadmap de Releases
 
@@ -195,6 +203,19 @@ Papéis canônicos com separação de funções (formalizados em AD-35). Resgata
 | **Secretaria / Gestor** | Cria e edita editais (com auditoria — RN012, AD-16) | — |
 | **`auditor`** | **Somente leitura**: consulta e exporta a trilha (RF014) | Escrever, aprovar, operar |
 | **`dpo`** (Encarregado, LGPD Art. 41) | **Atende/recusa** direitos do titular (RF017); `Administrador` é fallback | Operação de negócio |
+
+**Cargos operacionais internos** (mockup Admin, geridos via RF023) mapeiam nos papéis acima:
+
+| Cargo (rótulo de UI) | Papel RBAC | Nota |
+|---|---|---|
+| **Administrador** | `Administrador` | Superusuário; gere usuários (RF023) e catálogos (RF020–RF022) |
+| **Gestor** (SMGA) | `Secretaria/Gestor` / `Administrador` | Visão macro, dashboards (RF013) |
+| **Analista CPL** / **Coordenador(a)** | `CPL` | Covalidação (RF004), editais, distribuição, malote |
+| **Secretário(a)** | `Secretaria/Gestor` | Cria/edita editais da sua secretaria (RN012, RN014) |
+| **Auditor** / **Controladoria** | `auditor` | Somente leitura + export da trilha (RF014) |
+| **DPO / Encarregado** | `dpo` | Direitos do titular (RF017) |
+
+> A lista de cargos é **parametrizável** (RF023); os papéis RBAC (permissões efetivas) são o invariante (AD-35).
 
 ## 16. Catálogo de Parâmetros de Configuração
 

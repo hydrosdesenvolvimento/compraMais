@@ -8,7 +8,7 @@ scope: 'Plataforma B2G de compras municipalizadas (Rio Branco) — credenciament
 status: final
 created: '2026-06-29'
 updated: '2026-07-02'
-binds: [Catalogo/Cadastros, Credenciamento/Covalidacao, Editais, Distribuicao, Malote/SEI, Auditoria, Transparencia, RF001-RF019, RNF001-RNF008, RN001-RN013]
+binds: [Catalogo/Cadastros, Credenciamento/Covalidacao, Editais, Distribuicao, Malote/SEI, Auditoria, Transparencia, RF001-RF023, RNF001-RNF008, RN001-RN016]
 sources: ['../prd.md', '../../source/04-Arquitetura.md', '../matriz-lacunas.md', '../plano-releases.md', '../CONVERGENCIA.md']
 companions: ['../ux/DESIGN.md', '../ux/EXPERIENCE.md']
 ---
@@ -258,6 +258,16 @@ graph TD
   - `POLITICA_INDISPONIBILIDADE` — default `fail-open + flag` — AD-12.
   Resgatado de `spec/004/005/006` (convergência 2026-07-02).
 
+### AD-37 — Máquina de estado do Edital
+- **Binds:** Editais; RF008, RN014, RN012 (reforça AD-16)
+- **Prevents:** edital visível/distribuível em estado indevido; transição sem rastro
+- **Rule:** o `Edital` tem ciclo `Rascunho → Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`, com transições **só pelo dono** (módulo Editais) e **auditadas** (evento de domínio, AD-18/AD-23). Guardas: só **Aberto** entra na vitrine do fornecedor (RF003); a Distribuição (AD-7) só roda a partir de **Em Distribuição**; **Homologado** dispara o congelamento da alocação (AD-10). Espelha, no Edital, o padrão de fase centralizada do Credenciamento (AD-14). Identificado na validação de mockups (2026-07-02).
+
+### AD-38 — Exclusão lógica preservando histórico
+- **Binds:** all os cadastros administrativos (Secretaria, Setor/CNAE, Tipo de Documento, Usuário, Fornecedor, Edital); RN015
+- **Prevents:** perda de histórico/integridade referencial por DELETE físico; órfãos em processos vinculados
+- **Rule:** entidades de cadastro **não são apagadas fisicamente** — recebem estado `Inativo` (flag/soft-delete), somem das seleções ativas mas preservam histórico e referências. DELETE físico é proibido para entidades referenciadas por processos. Complementa a trilha append-only (AD-18) e a `EntidadeBase` (AD-33). Identificado na validação de mockups (2026-07-02).
+
 ## Consistency Conventions
 
 | Concern | Convention |
@@ -321,7 +331,9 @@ erDiagram
 | Cadastro CNPJ / CNAE (RF001/003) | `catalogo/` | AD-4, AD-5, AD-20 |
 | Covalidação documental (RF002/004) | `credenciamento/` | AD-15, AD-19 |
 | Inadimplência (RF011, RN002) | `credenciamento/` + `acl/` | AD-11, AD-12 |
-| Editais individualizados (RF008, RN007) | `editais/` | AD-16 |
+| Editais individualizados (RF008, RN007) | `editais/` | AD-16, AD-37 |
+| Cadastros administrativos — Secretarias/CNAE/Tipos-doc (RF020/021/022) | `editais/` + `catalogo/` | AD-16, AD-38 |
+| Gestão de usuários internos + RBAC (RF023, §15) | `shared/identity/` | AD-20, AD-35, AD-38 |
 | Motor de distribuição (RF005, RN005) | `distribuicao/` | AD-7, AD-8, AD-9, AD-10 |
 | Cadastro de Reserva (RF006, RN004) | `credenciamento/` | AD-10, AD-14 |
 | Malote SEI (RF007, RNF002) | `malote/` | AD-6, AD-21 |

@@ -76,6 +76,33 @@ export async function consultarCnpj(cnpj: string): Promise<DadosCnpj | null> {
   return j.valor ?? null;
 }
 
+export interface EnderecoEstruturado {
+  logradouro: string; numero: string; complemento?: string; bairro: string;
+  cidade: string; uf: string; cep: string; latitude?: number; longitude?: number;
+}
+
+export interface CadastroFornecedorInput {
+  cnpjRaw: string;
+  contato: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoEstruturado };
+  consentimento: { finalidade: string; versaoTermo: string };
+  titular: { identificador: string };
+  senha: string;
+  nome?: string;
+  manual?: { razaoSocial: string; porte: string; cnaes: Array<{ codigoSubclasse: string; tipo: string; ativo: boolean }> };
+}
+
+export interface CadastroErro extends Error { status: number; codigo?: string }
+
+/** Cadastro de fornecedor (POST /fornecedores → UC001). Lança CadastroErro com {status, codigo} em falha. */
+export async function cadastrarFornecedor(body: CadastroFornecedorInput): Promise<{ fornecedorId: string; status: string; origem: string }> {
+  const r = await fetch('/fornecedores', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) {
+    const j = (await r.json().catch(() => ({}))) as { codigo?: string; mensagem?: string };
+    throw Object.assign(new Error(j.mensagem ?? 'Falha no cadastro'), { status: r.status, codigo: j.codigo }) as CadastroErro;
+  }
+  return (await r.json()) as { fornecedorId: string; status: string; origem: string };
+}
+
 export interface ResultadoLogin { token: string; expiraEm: number; usuario: { userId: string; papel: string; empresaId?: string } }
 
 /** Login local (POST /auth/login → JWT). Lança CredenciaisInvalidas em 401. */

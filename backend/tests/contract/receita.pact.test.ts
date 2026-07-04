@@ -8,7 +8,7 @@ import { ReceitaMockGateway } from '../../src/shared/acl/receita/receita-mock.js
 describe('Contrato Receita (consumidor)', () => {
   it('retorna dados verificados com proveniência para CNPJ conhecido', async () => {
     const gw = new ReceitaMockGateway();
-    const r = await gw.consultarCnpj('12.345.678/0001-90');
+    const r = await gw.consultarCnpj('11.222.333/0001-81');
     expect(r.fonte).toBe('Receita');
     expect(['verificado', 'stale', 'indisponivel']).toContain(r.frescor);
     if (r.frescor === 'verificado') {

@@ -20,7 +20,7 @@ const CEP_OK = {
   valor: { cep: '01001000', estado: 'SP', cidade: 'São Paulo', bairro: 'Sé', rua: 'Praça da Sé' },
   fonte: 'BrasilAPI', timestamp: '2026-06-30T00:00:00Z', frescor: 'verificado',
 };
-const CNPJ_TESTE = '12345678000190';
+const CNPJ_TESTE = '11222333000181';
 
 describe('Cadastro do fornecedor (US1) — CNPJ → QSA → endereço → CEP', () => {
   it('consulta o CNPJ e autopreenche razão social, porte, situação, QSA e endereço', () => {
@@ -48,6 +48,23 @@ describe('Cadastro do fornecedor (US1) — CNPJ → QSA → endereço → CEP', 
     cy.get('[data-cy=cep]').clear().type('01001000');
     cy.wait('@cep');
     cy.get('[data-cy=endereco-empresa]').invoke('val').should('include', 'São Paulo').and('include', 'SP');
+  });
+
+  it('conclui o cadastro (UC001): cria conta, autentica e entra no portal', () => {
+    cy.intercept('POST', '/fornecedores/consulta-cnpj', { statusCode: 200, body: CNPJ_OK });
+    cy.intercept('POST', '/fornecedores', { statusCode: 201, body: { fornecedorId: 'f1', status: 'requerente', origem: 'oficial' } }).as('cadastro');
+    cy.intercept('POST', '/auth/login', { statusCode: 200, body: { token: 'jwt.mock', expiraEm: 3600, usuario: { userId: 'u1', papel: 'titular' } } }).as('login');
+    cy.visit('/#/cadastro');
+    cy.get('[data-cy=cnpj]').type(CNPJ_TESTE);
+    cy.get('[data-cy=consultar]').click();
+    cy.get('[data-cy=email-cadastro]').type('lojista@empresa.com');
+    cy.get('[data-cy=senha-cadastro]').type('segredo12');
+    cy.get('[data-cy=criar-conta]').should('be.disabled'); // consentimento obrigatório
+    cy.get('[data-cy=consentimento]').click();
+    cy.get('[data-cy=criar-conta]').click();
+    cy.wait('@cadastro');
+    cy.wait('@login');
+    cy.get('[data-cy=app-shell]').should('exist');
   });
 
   it('exibe fallback manual quando a Receita está indisponível (503)', () => {

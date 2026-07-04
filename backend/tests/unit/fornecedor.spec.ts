@@ -4,7 +4,7 @@ import { Cnpj } from '../../src/catalogo/domain/cnpj.js';
 
 const base = {
   id: 'f1',
-  cnpj: Cnpj.criar('12.345.678/0001-90'),
+  cnpj: Cnpj.criar('11.222.333/0001-81'),
   razaoSocial: 'Padaria X',
   porte: 'ME',
   cnaes: [{ codigoSubclasse: '1091101', tipo: 'principal' as const, ativo: true }],
@@ -34,5 +34,19 @@ describe('Fornecedor (domínio)', () => {
     f.editarContato({ nomeFantasia: 'Pão Quente' });
     expect(f.contato.nomeFantasia).toBe('Pão Quente');
     expect(f.razaoSocial).toBe('Padaria X'); // read-only (RN009)
+  });
+
+  it('nasce com status Requerente e guarda o timestamp de sincronização (UC001 passo 5 / RF018)', () => {
+    const f = Fornecedor.cadastrar({ ...base, sincronizadoEm: '2026-07-03T10:00:00Z' });
+    expect(f.status).toBe('requerente');
+    expect(f.sincronizadoEm).toBe('2026-07-03T10:00:00Z');
+  });
+
+  it('guarda endereço estruturado geolocalizável editável (RF019/RN009)', () => {
+    const endereco = { logradouro: 'Rua A', numero: '100', bairro: 'Centro', cidade: 'Rio Branco', uf: 'AC', cep: '69900062', latitude: -9.97, longitude: -67.82 };
+    const f = Fornecedor.cadastrar({ ...base, contato: { endereco } });
+    expect(f.contato.endereco?.cidade).toBe('Rio Branco');
+    f.editarContato({ endereco: { ...endereco, numero: '250' } });
+    expect(f.contato.endereco?.numero).toBe('250');
   });
 });

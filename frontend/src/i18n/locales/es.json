@@ -70,6 +70,23 @@
       "qsa": "CUADRO SOCIETARIO (QSA)",
       "manualLink": "¿Receita Federal no disponible? Completar manualmente",
       "submit": "Crear cuenta de proveedor",
+      "submitting": "Creando cuenta…",
+      "nomeFantasia": "NOMBRE DE FANTASÍA",
+      "nomeFantasiaPlaceholder": "Nombre de fantasía (opcional)",
+      "telefone": "TELÉFONO",
+      "telefonePlaceholder": "(00) 00000-0000",
+      "email": "CORREO DE ACCESO",
+      "emailPlaceholder": "tu@empresa.com",
+      "senha": "CONTRASEÑA",
+      "senhaPlaceholder": "Mínimo 8 caracteres",
+      "consent": "Autorizo el tratamiento de mis datos con fines de acreditación, conforme a la LGPD.",
+      "errors": {
+        "cnpjInvalido": "CNPJ inválido. Verifique los números ingresados.",
+        "situacao": "CNPJ con situación registral no activa — registro no permitido.",
+        "cnpjDuplicado": "Este CNPJ ya está registrado. Use la recuperación de acceso.",
+        "emailDuplicado": "Este correo ya está en uso. Inicie sesión o use otro correo.",
+        "generico": "No se pudo completar el registro. Inténtelo de nuevo."
+      },
       "statusNote": "Su cuenta comenzará con el estado <b>Solicitante</b>."
     },
     "login": {

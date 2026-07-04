@@ -4,7 +4,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import { IconeAlerta, IconeRelogio, IconeSeta } from '../../design-system/icons';
 
 /* ---- Dados de demonstração (do mockup) ---- */
-const empresa = { nome: 'Vale do Acre Uniformes', cnpj: '12.345.678/0001-90', cidade: 'Rio Branco' };
+const empresa = { nome: 'Vale do Acre Uniformes', cnpj: '11.222.333/0001-81', cidade: 'Rio Branco' };
 
 const prazoUrgente: CSSProperties = { color: 'var(--erro-700)', background: 'var(--erro-bg)' };
 const prazoAtencao: CSSProperties = { color: '#8A5410', background: 'var(--atencao-bg)' };

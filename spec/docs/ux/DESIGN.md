@@ -55,11 +55,18 @@ companions: ['EXPERIENCE.md']
 |---|---|
 | **Botões** | Primário (azul-700, texto branco), Secundário (#4B4B4B), Terciário/ghost, Desabilitado. Raio 8px. |
 | **Cards** | Superfície branca, borda cinza-200, raio 8px (ex.: card de edital, "Minha conta"). |
-| **Labels & Tags** | Pills raio 999px; status com cor semântica (Ativa/Sucesso = verde, Pendente = âmbar, Bloqueado = erro). |
+| **Labels & Tags** | Pills raio 999px; status com cor semântica (Ativa/Sucesso = verde, Pendente = âmbar, **Em Análise** = âmbar/info, Bloqueado = erro). Ver regra de uso "Em Análise" vs "Bloqueado" abaixo. |
+| **Checkbox de aceite** | Caixa de seleção obrigatória (ex.: **Termo de Responsabilidade**, RF024); estados: desmarcado, marcado, foco visível. Enquanto desmarcado, o CTA de avanço associado ("Prosseguir") permanece **Desabilitado**. |
 | **AuthPanel** | Painel dividido: lado institucional (azul-900, logo, slogan, value props, rodapé legal) + lado de autenticação (toggle Entrar/Criar conta, CNPJ + Consultar, link de fallback manual). |
 | **Sidebar** | Navegação vertical com ícones (ver IA em EXPERIENCE.md), item ativo em azul-50. |
 | **Top bar** | Busca ("Buscar editais, documentos…"), sino de notificações, menu de usuário (empresa + papel). |
 | **Barra de acessibilidade** | Alto contraste, ajuste de fonte, foco que segue o cursor (baixa visão). |
+
+### Semântica de status: "Em Análise" vs "Bloqueado" (RN021)
+
+- **Em Análise** (âmbar/info): pendência meramente **documental** — documento em validação, credenciamento em conferência. É um estado transitório e não punitivo.
+- **Bloqueado** (erro): reservado exclusivamente à **inadimplência / dívida ativa** (bloqueio fiscal). Não usar "Bloqueado" para pendência documental.
+- **Pendente** (âmbar): ação pendente do fornecedor (ex.: reenvio de documento). **Ativa** (verde): empresa regular.
 
 ## Acessibilidade (RNF006)
 
@@ -71,3 +78,14 @@ companions: ['EXPERIENCE.md']
 
 - Logo "**Compra Mais**" + selo "**Prefeitura de Rio Branco**".
 - Rodapé legal institucional: *"Lei nº 14.133/2021 · Lei Municipal 2.027 · SMGA / CPL"*.
+
+### Landing pública "Compra Mais Rio Branco" (RF010, RN013 — transparência)
+
+- **Título principal:** "**Compra Mais Rio Branco**".
+- Usar as **logomarcas oficiais da Prefeitura de Rio Branco** (marca institucional, não placeholders).
+- Paleta **azul institucional** (tokens de cor acima).
+- **E-mail de contato oficial da comissão:** `comissoes.smga22@gmail.com` (substitui qualquer e-mail genérico anterior).
+
+---
+
+> **Validação 01 (2026-07-05)** — incorpora ajustes de identidade e status validados com o cliente (título "Compra Mais Rio Branco", logomarcas oficiais, e-mail da comissão, status "Em Análise" vs "Bloqueado", checkbox do Termo de Responsabilidade). Ver [../VALIDACAO-CLIENTE-01.md](../VALIDACAO-CLIENTE-01.md).

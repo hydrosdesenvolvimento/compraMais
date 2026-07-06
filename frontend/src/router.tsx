@@ -22,7 +22,7 @@ import { ConsultaAuditoria } from './pages/admin/ConsultaAuditoria';
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
 const DEMO_EDITAL_ID = 'demo-edital';
 const DEMO_SECRETARIA_ID = 'demo-secretaria';
-const demoFornecedor = { razaoSocial: 'Confecções Vale do Acre Ltda', cnpj: '12.345.678/0001-90', porte: 'ME' };
+const demoFornecedor = { razaoSocial: 'Confecções Vale do Acre Ltda', cnpj: '11.222.333/0001-81', porte: 'ME' };
 const demoSync = { quando: '24/06/2026 às 09:12', status: 'sucesso' as const };
 
 const ico = { width: 20, height: 20 };

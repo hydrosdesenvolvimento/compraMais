@@ -37,7 +37,7 @@ export class ReceitaMockGateway implements ReceitaGateway {
 
 function demoSeed(): Map<string, DadosCnpj> {
   return new Map([
-    ['12.345.678/0001-90', {
+    ['11.222.333/0001-81', {
       razaoSocial: 'Confecções Vale do Acre Ltda',
       porte: 'ME',
       cnaes: [{ codigoSubclasse: '1412601', tipo: 'principal' }],

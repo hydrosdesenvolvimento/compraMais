@@ -70,6 +70,23 @@
       "qsa": "QUADRO SOCIETÁRIO (QSA)",
       "manualLink": "Receita Federal indisponível? Preencher manualmente",
       "submit": "Criar conta de fornecedor",
+      "submitting": "Criando conta…",
+      "nomeFantasia": "NOME FANTASIA",
+      "nomeFantasiaPlaceholder": "Nome fantasia (opcional)",
+      "telefone": "TELEFONE",
+      "telefonePlaceholder": "(00) 00000-0000",
+      "email": "E-MAIL DE ACESSO",
+      "emailPlaceholder": "voce@empresa.com",
+      "senha": "SENHA",
+      "senhaPlaceholder": "Mínimo de 8 caracteres",
+      "consent": "Autorizo o tratamento dos meus dados para fins de credenciamento, conforme a LGPD.",
+      "errors": {
+        "cnpjInvalido": "CNPJ inválido. Confira os números informados.",
+        "situacao": "CNPJ com situação cadastral não ativa na Receita — cadastro não permitido.",
+        "cnpjDuplicado": "Este CNPJ já possui cadastro. Use a recuperação de acesso.",
+        "emailDuplicado": "Este e-mail já está em uso. Faça login ou use outro e-mail.",
+        "generico": "Não foi possível concluir o cadastro. Tente novamente."
+      },
       "statusNote": "Sua conta iniciará com o status <b>Requerente</b>."
     },
     "login": {

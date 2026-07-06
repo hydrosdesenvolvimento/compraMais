@@ -70,6 +70,23 @@
       "qsa": "OWNERSHIP STRUCTURE (QSA)",
       "manualLink": "Federal Revenue Service unavailable? Fill in manually",
       "submit": "Create supplier account",
+      "submitting": "Creating account…",
+      "nomeFantasia": "TRADE NAME",
+      "nomeFantasiaPlaceholder": "Trade name (optional)",
+      "telefone": "PHONE",
+      "telefonePlaceholder": "(00) 00000-0000",
+      "email": "LOGIN E-MAIL",
+      "emailPlaceholder": "you@company.com",
+      "senha": "PASSWORD",
+      "senhaPlaceholder": "At least 8 characters",
+      "consent": "I authorize the processing of my data for accreditation purposes, in accordance with the LGPD.",
+      "errors": {
+        "cnpjInvalido": "Invalid CNPJ. Check the numbers you entered.",
+        "situacao": "CNPJ with a non-active registration status — registration not allowed.",
+        "cnpjDuplicado": "This CNPJ is already registered. Use account recovery.",
+        "emailDuplicado": "This e-mail is already in use. Sign in or use another e-mail.",
+        "generico": "Could not complete the registration. Please try again."
+      },
       "statusNote": "Your account will start with the <b>Applicant</b> status."
     },
     "login": {

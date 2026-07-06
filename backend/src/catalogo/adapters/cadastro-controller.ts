@@ -61,7 +61,7 @@ export function registrarRotasCadastro(app: FastifyInstance, deps: {
 
 function mapStatus(e: unknown): number {
   const n = nome(e);
-  if (n === 'CnpjJaCadastrado') return 409;
+  if (n === 'CnpjJaCadastrado' || n === 'EmailJaCadastrado') return 409;
   if (n === 'CnpjInvalido' || n === 'SituacaoNaoApta' || n === 'ConsentimentoInvalido') return 422;
   if (n === 'ReceitaIndisponivelSemManual') return 503;
   return 400;

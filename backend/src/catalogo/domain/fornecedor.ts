@@ -6,23 +6,45 @@ export type SituacaoCadastral = 'ativa' | 'baixada' | 'inapta' | 'suspensa';
 export type TipoCnae = 'principal' | 'secundario';
 export type OrigemDados = 'oficial' | 'manual';
 
+/**
+ * Status de credenciamento do Fornecedor (convenção UC): Requerente → Pendente de Análise →
+ * Credenciado → Apto, com Em Correção no laço de covalidação. UC001 nasce como `requerente`.
+ */
+export type StatusCredenciamento = 'requerente' | 'pendente_analise' | 'credenciado' | 'apto' | 'em_correcao';
+
 export interface Cnae {
   readonly codigoSubclasse: string; // 7 dígitos (D2)
   readonly tipo: TipoCnae;
   readonly ativo: boolean;
 }
 
+/**
+ * Endereço estruturado geolocalizável (RF019) — base da análise territorial na Transparência.
+ * Coordenadas são opcionais (preenchidas por CEP/geocodificação quando disponíveis).
+ */
+export interface Endereco {
+  readonly logradouro: string;
+  readonly numero: string;
+  readonly complemento?: string;
+  readonly bairro: string;
+  readonly cidade: string;
+  readonly uf: string;
+  readonly cep: string;
+  readonly latitude?: number;
+  readonly longitude?: number;
+}
+
 /** Campos editáveis pelo fornecedor (RN009 / FR-013). Receita = read-only. */
 export interface ContatoEditavel {
   nomeFantasia?: string;
-  endereco?: string;
+  endereco?: Endereco;
   telefone?: string;
 }
 
 /**
  * Entidade Fornecedor — CLASSE rica (AD-32) que estende EntidadeBase (AD-33).
  * Invariantes: dados oficiais read-only (RN009); só avança se situação "ativa" (FR-005);
- * re-sincronização substitui os campos oficiais (RF018).
+ * re-sincronização substitui os campos oficiais (RF018); nasce como `requerente` (UC001).
  */
 export class Fornecedor extends EntidadeBase {
   private constructor(
@@ -34,6 +56,8 @@ export class Fornecedor extends EntidadeBase {
     private _situacao: SituacaoCadastral,
     private _origem: OrigemDados,
     private _contato: ContatoEditavel,
+    private _status: StatusCredenciamento,
+    private _sincronizadoEm: string | null,
   ) {
     super(meta);
   }
@@ -47,6 +71,7 @@ export class Fornecedor extends EntidadeBase {
     situacao: SituacaoCadastral;
     origem: OrigemDados;
     contato: ContatoEditavel;
+    sincronizadoEm?: string | null; // RF018: timestamp da consulta oficial que originou os dados
     userName?: string;
   }): Fornecedor {
     if (input.situacao !== 'ativa') throw new SituacaoNaoApta(input.situacao);
@@ -54,6 +79,7 @@ export class Fornecedor extends EntidadeBase {
       EntidadeBase.metaNova(input.id, input.userName),
       input.cnpj, input.razaoSocial, input.porte,
       input.cnaes, input.situacao, input.origem, input.contato,
+      'requerente', input.sincronizadoEm ?? null,
     );
   }
 
@@ -63,6 +89,8 @@ export class Fornecedor extends EntidadeBase {
   get situacao(): SituacaoCadastral { return this._situacao; }
   get origem(): OrigemDados { return this._origem; }
   get contato(): Readonly<ContatoEditavel> { return this._contato; }
+  get status(): StatusCredenciamento { return this._status; }
+  get sincronizadoEm(): string | null { return this._sincronizadoEm; }
 
   /** RN009: só Nome Fantasia, Endereço e Telefone. */
   editarContato(patch: ContatoEditavel, userName = 'sistema'): void {
@@ -71,11 +99,12 @@ export class Fornecedor extends EntidadeBase {
   }
 
   /** RF018: re-sincronização substitui os campos oficiais a partir da Receita. */
-  aplicarSincronizacao(dados: { razaoSocial: string; porte: Porte; cnaes: Cnae[] }, userName = 'sistema'): void {
+  aplicarSincronizacao(dados: { razaoSocial: string; porte: Porte; cnaes: Cnae[] }, sincronizadoEm?: string, userName = 'sistema'): void {
     this._razaoSocial = dados.razaoSocial;
     this._porte = dados.porte;
     this._cnaes = dados.cnaes;
     this._origem = 'oficial';
+    if (sincronizadoEm) this._sincronizadoEm = sincronizadoEm;
     this.marcarAtualizacao(userName);
   }
 

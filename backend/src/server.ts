@@ -111,8 +111,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Reaproveita o mesmo pool: Postgres quando configurado; senão memória (testes sem banco).
   const usuarioRepo: UsuarioRepository = pool ? new UsuarioRepositoryPg(pool) : new UsuarioRepositoryMemory();
   const tokens = new JwtTokenService(config.auth.jwtSecret, config.auth.jwtExpiraEmSeg);
+  // Reutilizado pelo cadastro de fornecedor (UC001): o cadastro cria a credencial de login (e-mail/senha).
+  const registrarUsuario = new RegistrarUsuario(usuarioRepo, bus);
   registrarRotasAuth(app, {
-    registrar: new RegistrarUsuario(usuarioRepo, bus),
+    registrar: registrarUsuario,
     login: new AutenticarLocal(usuarioRepo, tokens, bus),
     vincularGoogle: new VincularGoogle(usuarioRepo, bus),
     tokens,
@@ -131,7 +133,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   const receita = usarMockReceita ? new ReceitaMockGateway() : new ReceitaBrasilApiGateway();
   const cep = usarMockReceita ? new CepMockGateway() : new CepBrasilApiGateway();
   const consentimentosRepo = { salvar: async () => {} };
-  const cadastrar = new CadastrarFornecedor(fornecedores, consentimentosRepo, contasRepo, receita, bus);
+  const cadastrar = new CadastrarFornecedor(fornecedores, consentimentosRepo, contasRepo, receita, registrarUsuario, bus);
   const conta = new GerirConta(fornecedores, receita, bus);
   registrarRotasCadastro(app, { cadastrar, conta, receita, cep });
 

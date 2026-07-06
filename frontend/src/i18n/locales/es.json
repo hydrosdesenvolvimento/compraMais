@@ -337,6 +337,8 @@
       "ultima": "Última sincronización: <b>{{quando}}</b>",
       "sucesso": "Datos oficiales actualizados. El Nombre Comercial, la Dirección y el Teléfono se conservaron.",
       "erro": "Error en la sincronización",
+      "revisao": "Enviado a revisión de la CPL",
+      "revisaoDetalhe": "El CNPJ dejó de estar activo en la Receita. Los datos se actualizaron y el caso se remitió a la CPL para su revisión.",
       "sincronizando": "Sincronizando…",
       "sincronizarAgora": "Sincronizar ahora"
     },

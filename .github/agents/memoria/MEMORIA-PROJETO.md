@@ -77,6 +77,7 @@
 | Resolver divergencia D1 (paleta navy `#0A2A52` implementada vs `#003A68` do contrato antigo `spec/docs/ux/DESIGN.md`) | Pendente (UX/Tech Lead/solicitante) — ratificar navy ou reconciliar com brandbook da Prefeitura |
 | Resolver divergencia D2 (`tokens.ts` vs `index.css`; `tokens.ts` nao e importado) | Pendente (Senior Dev/UX) — eleger `index.css` como fonte unica de tokens |
 | Atualizar dimensionamento/plano de expansao com base em testes de exaustao do QA | Pendente (QA) |
+| UC018 — Re-sincronizar dados do CNPJ (RF018/Story 1.6) | **Concluido (2026-07-06):** `GerirConta.reSincronizar` grava novo timestamp e devolve `{status,quando,fonte}`; `Fornecedor.aplicarSincronizacao` passa a atualizar situacao; exceção "CNPJ inativo/baixado → sinaliza revisao da CPL" (status `revisao`, evento auditavel); front `MinhaConta` consome status/quando e trata `revisao` (i18n 3 idiomas). Gates container verdes (backend 147 testes; frontend lint+typecheck+test). E2E Cypress da tela segue pendente (QA) |
 
 ## Historico de referencia
 

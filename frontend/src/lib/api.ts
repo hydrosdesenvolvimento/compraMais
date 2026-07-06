@@ -30,6 +30,8 @@ export interface Transparencia { editaisVigentes: number; secretarias: string[];
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
+/** UC018: resultado da re-sincronização — status + proveniência `{quando, fonte}` da consulta oficial. */
+export interface SincronizacaoResultado { status: 'sucesso' | 'revisao' | 'erro'; quando?: string; fonte?: string }
 
 export const api = {
   // Portal do fornecedor
@@ -38,7 +40,7 @@ export const api = {
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   pendencias: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias`),
   pendenciasConsolidadas: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias-consolidadas`),
-  sincronizar: (fid: string) => send<{ quando?: string }>(`/fornecedores/${fid}/sincronizar`, 'POST'),
+  sincronizar: (fid: string) => send<SincronizacaoResultado>(`/fornecedores/${fid}/sincronizar`, 'POST'),
   solicitarDireito: (tipo: string) => send('/titular/solicitacoes', 'POST', { tipo }),
   contestarCnae: (editalId: string, body: { cnaeContestado: string; justificativa: string }) => send(`/editais/${editalId}/contestacoes-cnae`, 'POST', body),
 

@@ -337,6 +337,8 @@
       "ultima": "Última sincronização: <b>{{quando}}</b>",
       "sucesso": "Dados oficiais atualizados. Nome Fantasia, Endereço e Telefone foram preservados.",
       "erro": "Erro na sincronização",
+      "revisao": "Enviado para revisão da CPL",
+      "revisaoDetalhe": "O CNPJ deixou de estar ativo na Receita. Os dados foram atualizados e o caso foi encaminhado à CPL para revisão.",
       "sincronizando": "Sincronizando…",
       "sincronizarAgora": "Sincronizar agora"
     },

@@ -42,6 +42,26 @@ describe('Fornecedor (domínio)', () => {
     expect(f.sincronizadoEm).toBe('2026-07-03T10:00:00Z');
   });
 
+  it('re-sincroniza campos oficiais e situação e grava novo timestamp (UC018 passo 3 / RF018)', () => {
+    const f = Fornecedor.cadastrar({ ...base, sincronizadoEm: '2026-06-01T00:00:00Z' });
+    f.aplicarSincronizacao(
+      { razaoSocial: 'Padaria Y', porte: 'EPP', cnaes: [{ codigoSubclasse: '4721102', tipo: 'principal', ativo: true }], situacao: 'ativa' },
+      '2026-07-06T09:00:00Z',
+    );
+    expect(f.razaoSocial).toBe('Padaria Y');
+    expect(f.porte).toBe('EPP');
+    expect(f.cnaes[0]?.codigoSubclasse).toBe('4721102');
+    expect(f.sincronizadoEm).toBe('2026-07-06T09:00:00Z');
+    expect(f.precisaRevisaoCpl()).toBe(false);
+  });
+
+  it('sinaliza revisão da CPL quando a situação oficial deixa de ser ativa (UC018 exceção)', () => {
+    const f = Fornecedor.cadastrar(base);
+    f.aplicarSincronizacao({ razaoSocial: 'Padaria X', porte: 'ME', cnaes: base.cnaes, situacao: 'baixada' }, '2026-07-06T09:00:00Z');
+    expect(f.situacao).toBe('baixada');
+    expect(f.precisaRevisaoCpl()).toBe(true);
+  });
+
   it('guarda endereço estruturado geolocalizável editável (RF019/RN009)', () => {
     const endereco = { logradouro: 'Rua A', numero: '100', bairro: 'Centro', cidade: 'Rio Branco', uf: 'AC', cep: '69900062', latitude: -9.97, longitude: -67.82 };
     const f = Fornecedor.cadastrar({ ...base, contato: { endereco } });

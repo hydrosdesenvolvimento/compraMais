@@ -16,7 +16,14 @@ import { api } from '../../lib/api';
 export interface MinhaContaProps {
   fornecedor: { razaoSocial: string; cnpj: string; porte: string };
   fornecedorId: string;
-  ultimaSync?: { quando: string; status: 'sucesso' | 'erro' };
+  ultimaSync?: { quando: string; status: 'sucesso' | 'revisao' | 'erro' };
+}
+
+/** Formata o timestamp ISO devolvido pela re-sincronização (UC018) no idioma ativo. */
+function formatarQuando(iso: string | undefined, lang: string): string | undefined {
+  if (!iso) return undefined;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString(lang, { dateStyle: 'short', timeStyle: 'short' });
 }
 
 /* Rótulo de seção maiúsculo (ex.: "DADOS OFICIAIS · RECEITA FEDERAL"). */
@@ -40,10 +47,14 @@ function CampoOficial({ rotulo, valor }: { rotulo: string; valor: string }) {
 }
 
 export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const iniciais = fornecedor.razaoSocial.split(' ').filter(Boolean).slice(0, 2).map((s) => s[0]).join('').toUpperCase();
   const sincronizar = useMutation({ mutationFn: () => api.sincronizar(fornecedorId) });
-  const syncStatus = sincronizar.isSuccess ? 'sucesso' : sincronizar.isError ? 'erro' : ultimaSync?.status;
+  // UC018: o backend responde 200 com { status, quando, fonte } inclusive para erro/revisão (A1/exceção);
+  // uma falha HTTP (rede) cai em `isError`. O timestamp devolvido atualiza a "última sincronização".
+  const resultado = sincronizar.data;
+  const syncStatus = resultado?.status ?? (sincronizar.isError ? 'erro' : ultimaSync?.status);
+  const quandoExibido = formatarQuando(resultado?.quando, i18n.language) ?? ultimaSync?.quando;
 
   return (
     <div className="stack">
@@ -66,18 +77,24 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
         </span>
         <div style={{ flex: 1, minWidth: 220 }}>
           <div style={{ font: '600 16px var(--font-body)' }}>{t('minhaConta.sync.titulo')}</div>
-          {ultimaSync && (
-            <div style={{ fontSize: 13, color: 'var(--azul-100)', marginTop: 3 }}>
-              <Trans i18nKey="minhaConta.sync.ultima" values={{ quando: ultimaSync.quando }} components={{ b: <strong style={{ color: '#fff' }} /> }} />
+          {quandoExibido && (
+            <div data-cy="sync-ultima" style={{ fontSize: 13, color: 'var(--azul-100)', marginTop: 3 }}>
+              <Trans i18nKey="minhaConta.sync.ultima" values={{ quando: quandoExibido }} components={{ b: <strong style={{ color: '#fff' }} /> }} />
             </div>
           )}
           {syncStatus === 'sucesso' && (
-            <div style={{ fontSize: 12.5, color: 'var(--ambar-300)', marginTop: 7, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <div data-cy="sync-sucesso" style={{ fontSize: 12.5, color: 'var(--ambar-300)', marginTop: 7, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <IconeCheck width={14} height={14} strokeWidth={2.4} /> {t('minhaConta.sync.sucesso')}
             </div>
           )}
+          {syncStatus === 'revisao' && (
+            <div data-cy="sync-revisao" style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <Pill tom="warn">{t('minhaConta.sync.revisao')}</Pill>
+              <span style={{ fontSize: 12.5, color: 'var(--azul-100)' }}>{t('minhaConta.sync.revisaoDetalhe')}</span>
+            </div>
+          )}
           {syncStatus === 'erro' && (
-            <div style={{ marginTop: 8 }}><Pill tom="error">{t('minhaConta.sync.erro')}</Pill></div>
+            <div data-cy="sync-erro" style={{ marginTop: 8 }}><Pill tom="error">{t('minhaConta.sync.erro')}</Pill></div>
           )}
         </div>
         <Botao

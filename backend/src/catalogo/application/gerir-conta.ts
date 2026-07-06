@@ -7,6 +7,13 @@ import type { ContatoEditavel } from '../domain/fornecedor.js';
 
 const CAMPOS_EDITAVEIS = ['nomeFantasia', 'endereco', 'telefone'] as const;
 
+/** Resultado da re-sincronização (UC018): status + proveniência `{quando, fonte}` para a "Minha conta". */
+export interface ResultadoSincronizacao {
+  status: 'sucesso' | 'revisao' | 'erro';
+  quando?: string; // ISO-8601 do novo timestamp oficial (ausente quando `erro`)
+  fonte?: string;
+}
+
 /** RN009/FR-013: rejeita edição de campos oficiais da Receita na borda. */
 export class CampoNaoEditavel extends Error {
   constructor(campo: string) {
@@ -36,19 +43,31 @@ export class GerirConta {
       .toEnvelope(randomUUID(), this.now()));
   }
 
-  /** RF018: re-sincronização. Erro preserva os dados anteriores. */
-  async reSincronizar(fornecedorId: string, actor: { userId: string }): Promise<{ status: string }> {
+  /**
+   * RF018 / UC018: re-sincronização sob demanda. Grava `{timestamp, fonte, status}` (Story 1.6):
+   * - `sucesso` — dados oficiais e novo timestamp aplicados;
+   * - `revisao` — CNPJ deixou de ser ativo (baixado/inapto/suspenso): dados atualizados e a CPL é
+   *   sinalizada para revisão (UC018 exceção);
+   * - `erro` — Receita indisponível (A1): dados anteriores preservados, sem sobrescrever.
+   * O `timestamp`/`fonte` retornados alimentam a "última sincronização" da tela "Minha conta".
+   */
+  async reSincronizar(fornecedorId: string, actor: { userId: string }): Promise<ResultadoSincronizacao> {
     const f = await this.fornecedores.porId(fornecedorId);
     if (!f) throw new Error('Supplier not found');
     const r = await this.receita.consultarCnpj(f.cnpj.valor);
     if (r.frescor !== 'verificado' || !r.valor) {
       await this.emit(fornecedorId, actor, 'erro', []);
-      return { status: 'erro' }; // dados atuais preservados
+      return { status: 'erro' }; // A1: dados atuais preservados, sem sobrescrever
     }
-    f.aplicarSincronizacao({ razaoSocial: r.valor.razaoSocial, porte: r.valor.porte, cnaes: r.valor.cnaes.map((c) => ({ ...c, ativo: true })) });
+    f.aplicarSincronizacao(
+      { razaoSocial: r.valor.razaoSocial, porte: r.valor.porte, cnaes: r.valor.cnaes.map((c) => ({ ...c, ativo: true })), situacao: r.valor.situacaoCadastral },
+      r.timestamp,
+    );
     await this.fornecedores.salvar(f);
-    await this.emit(fornecedorId, actor, 'sucesso', ['razaoSocial', 'porte', 'cnaes']);
-    return { status: 'sucesso' };
+    // Exceção UC018: situação oficial não-ativa → sinaliza revisão da CPL (evento auditável).
+    const status = f.precisaRevisaoCpl() ? 'revisao' : 'sucesso';
+    await this.emit(fornecedorId, actor, status, ['razaoSocial', 'porte', 'cnaes', 'situacao']);
+    return { status, quando: r.timestamp, fonte: r.fonte };
   }
 
   private async emit(id: string, actor: { userId: string }, status: string, campos: string[]): Promise<void> {

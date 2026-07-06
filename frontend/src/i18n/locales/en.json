@@ -337,6 +337,8 @@
       "ultima": "Last sync: <b>{{quando}}</b>",
       "sucesso": "Official data updated. Trade Name, Address and Phone were preserved.",
       "erro": "Sync failed",
+      "revisao": "Sent to CPL for review",
+      "revisaoDetalhe": "The CNPJ is no longer active at Receita. The data was updated and the case was forwarded to the CPL for review.",
       "sincronizando": "Syncing…",
       "sincronizarAgora": "Sync now"
     },

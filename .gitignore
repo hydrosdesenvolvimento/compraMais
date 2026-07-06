@@ -13,6 +13,11 @@ coverage/
 **/coverage/
 *.lcov
 
+# Artefatos de execucao do Cypress (E2E) — nao versionar
+**/cypress/screenshots/
+**/cypress/videos/
+**/cypress/downloads/
+
 # Variaveis de ambiente e segredos (NUNCA versionar) — PRJ-DEC-07
 .env
 .env.*

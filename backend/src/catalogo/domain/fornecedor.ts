@@ -98,14 +98,28 @@ export class Fornecedor extends EntidadeBase {
     this.marcarAtualizacao(userName);
   }
 
-  /** RF018: re-sincronização substitui os campos oficiais a partir da Receita. */
-  aplicarSincronizacao(dados: { razaoSocial: string; porte: Porte; cnaes: Cnae[] }, sincronizadoEm?: string, userName = 'sistema'): void {
+  /**
+   * RF018 (UC018 passo 3): re-sincronização substitui os campos oficiais a partir da Receita —
+   * Razão Social, Porte, CNAEs e **Situação Cadastral** — e registra o novo `timestamp`. A situação
+   * é oficial: se voltar não-ativa (baixada/inapta/suspensa), quem chama sinaliza revisão da CPL (UC018 exceção).
+   */
+  aplicarSincronizacao(
+    dados: { razaoSocial: string; porte: Porte; cnaes: Cnae[]; situacao: SituacaoCadastral },
+    sincronizadoEm?: string,
+    userName = 'sistema',
+  ): void {
     this._razaoSocial = dados.razaoSocial;
     this._porte = dados.porte;
     this._cnaes = dados.cnaes;
+    this._situacao = dados.situacao;
     this._origem = 'oficial';
     if (sincronizadoEm) this._sincronizadoEm = sincronizadoEm;
     this.marcarAtualizacao(userName);
+  }
+
+  /** UC018 exceção: situação oficial deixou de ser "ativa" → o fornecedor precisa de revisão da CPL. */
+  precisaRevisaoCpl(): boolean {
+    return this._situacao !== 'ativa';
   }
 
   /** D2: compatível se algum CNAE válido bate exatamente a subclasse exigida. */

@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#0B4A8B">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0B4A8B"/>
+    <rect x="150" y="200" width="320" height="70" rx="10" fill="#ffffff" opacity="0.95"/>
+    <rect x="150" y="300" width="900" height="60" rx="10" fill="#ffffff" opacity="0.5"/>
+    <rect x="150" y="380" width="900" height="60" rx="10" fill="#ffffff" opacity="0.35"/>
+    <rect x="150" y="460" width="900" height="60" rx="10" fill="#ffffff" opacity="0.22"/>
+    <rect x="980" y="150" width="70" height="70" rx="14" fill="#F2B705"/>
+    <text x="600" y="640" font-family="Poppins, sans-serif" font-size="52" font-weight="600" fill="#fff" text-anchor="middle">Compra Mais</text>
+    <text x="600" y="692" font-family="Poppins, sans-serif" font-size="22" letter-spacing="4" fill="#9DC3E6" text-anchor="middle">PAINEL ADMINISTRATIVO</text>
+  </svg>
+</template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_ds/prefeitura-de-rio-branco-design-system-4736aa51-9d84-41e8-b09d-cf429f0ce7ca/tokens/colors.css">
+<link rel="stylesheet" href="_ds/prefeitura-de-rio-branco-design-system-4736aa51-9d84-41e8-b09d-cf429f0ce7ca/tokens/typography.css">
+<link rel="stylesheet" href="_ds/prefeitura-de-rio-branco-design-system-4736aa51-9d84-41e8-b09d-cf429f0ce7ca/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/prefeitura-de-rio-branco-design-system-4736aa51-9d84-41e8-b09d-cf429f0ce7ca/tokens/effects.css">
+<style>
+:root{
+  --font-body:"Poppins",system-ui,sans-serif;
+  --font-display:"Poppins",system-ui,sans-serif;
+  --bg-page:#F4F4F5;
+  --border:#E6EBF1;
+  --divider:#F0F3F7;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-page);font-family:var(--font-body);color:var(--text-body);-webkit-font-smoothing:antialiased;letter-spacing:0}
+@keyframes cmfade{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes cmover{from{opacity:0}to{opacity:1}}
+@keyframes cmsheet{from{transform:translateX(100%)}to{transform:none}}
+@keyframes cmpop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@keyframes cmtoast{from{opacity:0}to{opacity:1}}
+.cm-scroll::-webkit-scrollbar{width:9px;height:9px}
+.cm-scroll::-webkit-scrollbar-thumb{background:var(--cinza-300);border-radius:99px;border:2px solid var(--bg-page)}
+.cm-sidebar{transition:width .22s ease}
+.cm-navbtn{position:relative}
+.cm-navbtn[data-active="1"]::after{content:"";position:absolute;right:-16px;top:5px;bottom:5px;width:3px;border-radius:3px 0 0 3px;background:var(--azul-700)}
+.cm-row:hover{background:var(--azul-50)}
+.cm-act{width:32px;height:32px;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:var(--cinza-500)}
+.cm-act:hover{background:var(--azul-50);color:var(--azul-700);border-color:var(--azul-100)}
+@media (min-width:921px){
+  .cm-sidebar[data-collapsed="1"]{width:78px !important}
+  .cm-sidebar[data-collapsed="1"] .cm-navlabel,.cm-sidebar[data-collapsed="1"] .cm-brandtext,.cm-sidebar[data-collapsed="1"] .cm-brandfull,.cm-sidebar[data-collapsed="1"] .cm-preffoot,.cm-sidebar[data-collapsed="1"] .cm-grouplabel{display:none !important}
+  .cm-sidebar[data-collapsed="1"] .cm-brandmini{display:block !important}
+  .cm-sidebar[data-collapsed="1"] .cm-navbtn{justify-content:center !important;padding-left:0 !important;padding-right:0 !important}
+  .cm-sidebar[data-collapsed="1"] .cm-brandrow{justify-content:center !important}
+  .cm-main[data-collapsed="1"]{margin-left:78px !important}
+}
+@media (max-width:920px){
+  .cm-sidebar{transform:translateX(-100%);transition:transform .25s ease}
+  .cm-sidebar[data-open="1"]{transform:none}
+  .cm-main{margin-left:0 !important}
+  .cm-hamburger{display:inline-flex !important}
+  .cm-grid-4,.cm-grid-3,.cm-grid-2,.cm-dash{grid-template-columns:1fr !important}
+  .cm-hide-sm{display:none !important}
+  .cm-tablewrap{overflow-x:auto}
+}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex">
+  <sc-if value="{{ sidebarOpen }}"><div onClick="{{ closeMenu }}" style="position:fixed;inset:0;background:rgba(10,25,50,.45);z-index:45;animation:cmover .2s"></div></sc-if>
+
+  <aside class="cm-sidebar cm-scroll" data-open="{{ sbFlag }}" data-collapsed="{{ sbCollapsed }}" style="width:264px;background:#fff;border-right:1px solid var(--border);position:fixed;top:0;bottom:0;left:0;z-index:50;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden">
+    <div class="cm-brandrow" style="padding:18px 16px 12px;display:flex;align-items:center;justify-content:center;gap:11px">
+      <img class="cm-brandfull" src="assets/logo-compra-mais-full.png" alt="Compra Mais — Rio Branco · Sistema Digital de Compras Públicas" style="width:100%;max-width:150px;height:auto;display:block">
+      <span class="cm-brandmini" style="display:none;width:42px;height:42px;border-radius:11px;overflow:hidden;flex-shrink:0"><img src="assets/logo-compra-mais-full.png" alt="Compra Mais" style="width:118px;max-width:none;display:block;margin-left:-38px;margin-top:-2px"></span>
+    </div>
+
+    <nav style="padding:12px 14px;flex:1">
+      <div class="cm-grouplabel" style="font:600 10px var(--font-body);letter-spacing:.13em;color:var(--cinza-400);padding:8px 6px 8px">OPERAÇÃO</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <button onClick="{{ goDashboard }}" class="cm-navbtn" data-active="{{ actDashboard }}" style="{{ navDashboard }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg><span class="cm-navlabel">Dashboard</span></button>
+        <button onClick="{{ goFornecedores }}" class="cm-navbtn" data-active="{{ actFornecedores }}" style="{{ navFornecedores }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><line x1="9" y1="9" x2="9" y2="9.01"/><line x1="9" y1="12" x2="9" y2="12.01"/><line x1="9" y1="15" x2="9" y2="15.01"/></svg><span class="cm-navlabel">Fornecedores</span></button>
+        <button onClick="{{ goEditais }}" class="cm-navbtn" data-active="{{ actEditais }}" style="{{ navEditais }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><span class="cm-navlabel">Editais</span></button>
+        <button onClick="{{ goCredenciamento }}" class="cm-navbtn" data-active="{{ actCredenciamento }}" style="{{ navCredenciamento }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span class="cm-navlabel">Credenciamento</span></button>
+        <button onClick="{{ goAnalise }}" class="cm-navbtn" data-active="{{ actAnalise }}" style="{{ navAnalise }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="11.5" cy="14.5" r="2.5"/><line x1="13.3" y1="16.3" x2="15" y2="18"/></svg><span class="cm-navlabel">Análise Documental</span><sc-if value="{{ hasAnalise }}"><span class="cm-navlabel" style="margin-left:auto;font:600 10px var(--font-body);background:var(--atencao-bg);color:#8A5410;padding:2px 7px;border-radius:999px">{{ analiseCount }}</span></sc-if></button>
+        <button onClick="{{ goDistribuicao }}" class="cm-navbtn" data-active="{{ actDistribuicao }}" style="{{ navDistribuicao }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg><span class="cm-navlabel">Distribuição</span></button>
+        <button onClick="{{ goReserva }}" class="cm-navbtn" data-active="{{ actReserva }}" style="{{ navReserva }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg><span class="cm-navlabel">Cadastro de Reserva</span></button>
+        <button onClick="{{ goMalote }}" class="cm-navbtn" data-active="{{ actMalote }}" style="{{ navMalote }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg><span class="cm-navlabel">Malote SEI</span></button>
+        <button onClick="{{ goDesistencias }}" class="cm-navbtn" data-active="{{ actDesistencias }}" style="{{ navDesistencias }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><line x1="17" y1="8" x2="22" y2="13"/><line x1="22" y1="8" x2="17" y2="13"/></svg><span class="cm-navlabel">Desistências</span></button>
+      </div>
+
+      <div class="cm-grouplabel" style="font:600 10px var(--font-body);letter-spacing:.13em;color:var(--cinza-400);padding:16px 6px 8px">ADMINISTRAÇÃO DO SISTEMA</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <button onClick="{{ goSecretarias }}" class="cm-navbtn" data-active="{{ actSecretarias }}" style="{{ navSecretarias }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg><span class="cm-navlabel">Secretarias</span></button>
+        <button onClick="{{ goUsuarios }}" class="cm-navbtn" data-active="{{ actUsuarios }}" style="{{ navUsuarios }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span class="cm-navlabel">Usuários</span></button>
+        <button onClick="{{ goSetores }}" class="cm-navbtn" data-active="{{ actSetores }}" style="{{ navSetores }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><span class="cm-navlabel">Setores Industriais</span></button>
+        <button onClick="{{ goTipos }}" class="cm-navbtn" data-active="{{ actTipos }}" style="{{ navTipos }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg><span class="cm-navlabel">Tipos de Arquivos</span></button>
+        <button onClick="{{ goAuditoria }}" class="cm-navbtn" data-active="{{ actAuditoria }}" style="{{ navAuditoria }}" style-hover="background:var(--azul-50)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="cm-navlabel">Auditoria e Logs</span></button>
+      </div>
+    </nav>
+    <div class="cm-preffoot" style="padding:16px 20px 20px;border-top:1px solid var(--divider);display:flex;justify-content:center">
+      <img src="assets/logo-prefeitura.png" alt="Prefeitura de Rio Branco" style="width:100%;max-width:138px;height:auto;display:block;opacity:.92">
+    </div>
+  </aside>
+
+  <div class="cm-main" data-collapsed="{{ sbCollapsed }}" style="margin-left:264px;flex:1;min-width:0;display:flex;flex-direction:column">
+    <header style="height:66px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;padding:0 24px;position:sticky;top:0;z-index:40">
+      <button class="cm-hamburger" onClick="{{ toggleMenu }}" style="display:inline-flex;width:38px;height:38px;border:1px solid var(--border);border-radius:9px;background:#fff;cursor:pointer;align-items:center;justify-content:center;color:var(--cinza-700);flex-shrink:0" style-hover="background:var(--azul-50)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      <div class="cm-hide-sm" style="position:relative;width:340px;max-width:34vw">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--cinza-400)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:13px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input placeholder="Buscar fornecedor, edital, documento…" style="width:100%;padding:10px 14px 10px 38px;border:1px solid var(--border);border-radius:999px;font:14px var(--font-body);background:var(--bg-page);outline:none" style-focus="border-color:var(--azul-600);background:#fff;box-shadow:0 0 0 3px var(--azul-100)">
+      </div>
+      <div style="flex:1"></div>
+      <div style="position:relative">
+        <button onClick="{{ toggleNotif }}" style="width:40px;height:40px;border:1px solid var(--border);border-radius:10px;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--cinza-700);position:relative" style-hover="background:var(--azul-50)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span style="position:absolute;top:8px;right:9px;width:8px;height:8px;border-radius:50%;background:var(--erro);border:1.5px solid #fff"></span></button>
+        <sc-if value="{{ notifOpen }}">
+        <div onClick="{{ closeNotif }}" style="position:fixed;inset:0;z-index:55"></div>
+        <div style="position:absolute;right:0;top:48px;width:344px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);z-index:60;overflow:hidden;animation:cmfade .18s">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:13px 16px;border-bottom:1px solid var(--divider)"><span style="font:600 14px var(--font-body);color:var(--azul-900)">Notificações</span><span style="font-size:11px;color:var(--cinza-400)">Varredura diária</span></div>
+          <div style="padding:8px">
+            <div style="display:flex;gap:11px;padding:11px 12px;border-radius:10px;background:var(--erro-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--erro-700)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div style="font-size:13px;line-height:1.45;color:var(--erro-700)"><strong>Xapuri Móveis bloqueado</strong> — débito ativo detectado na PGM/SICAF.</div></div>
+            <div style="display:flex;gap:11px;padding:11px 12px;border-radius:10px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azul-600)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div style="font-size:13px;line-height:1.45;color:var(--cinza-700)"><strong>2 documentos</strong> aguardando análise documental.</div></div>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+      <div style="position:relative">
+        <button onClick="{{ toggleProfile }}" style="display:flex;align-items:center;gap:10px;padding:4px 10px 4px 5px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer" style-hover="background:var(--azul-50)">
+          <div style="width:36px;height:36px;border-radius:50%;background:var(--azul-700);color:#fff;display:flex;align-items:center;justify-content:center;font:600 13px var(--font-body);flex-shrink:0">SC</div>
+          <div class="cm-hide-sm" style="text-align:left;line-height:1.25"><div style="font:600 13px var(--font-body);color:var(--azul-900)">Silas Carvalho</div><div style="font-size:11px;color:var(--cinza-400)">Administrador · CPL</div></div>
+          <svg class="cm-hide-sm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cinza-400)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <sc-if value="{{ profileOpen }}">
+        <div onClick="{{ closeProfile }}" style="position:fixed;inset:0;z-index:55"></div>
+        <div style="position:absolute;right:0;top:54px;width:264px;background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-lg);z-index:60;overflow:hidden;animation:cmfade .18s">
+          <div style="padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--divider)">
+            <div style="width:44px;height:44px;border-radius:50%;background:var(--azul-700);color:#fff;display:flex;align-items:center;justify-content:center;font:600 16px var(--font-body)">SC</div>
+            <div style="min-width:0"><div style="font:600 14.5px var(--font-body);color:var(--azul-900)">Silas Carvalho</div><div style="font-size:12px;color:var(--cinza-500);margin-top:2px">Analista CPL · silas.cpl</div></div>
+          </div>
+          <div style="padding:8px">
+            <button onClick="{{ goConta }}" style="display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border:none;border-radius:9px;background:transparent;cursor:pointer;text-align:left;font:500 14px var(--font-body);color:var(--cinza-700)" style-hover="background:var(--azul-50)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Minha conta</button>
+                        <a href="Compra Mais - Portal do Fornecedor.dc.html#login" style="display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;border:none;border-radius:9px;background:transparent;cursor:pointer;font:500 14px var(--font-body);color:var(--erro-700);text-align:left;text-decoration:none" style-hover="background:var(--erro-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Sair</a>
+          </div>
+        </div>
+        </sc-if>
+      </div>
+    </header>
+
+    <main class="cm-scroll" style="flex:1;overflow-y:auto;padding:28px 32px 56px">
+
+      <sc-if value="{{ isDashboard }}" hint-placeholder-val="{{ true }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:22px"><div style="font-size:12.5px;color:var(--cinza-400)">Compra Mais · Painel administrativo</div><h1 style="font-weight:600;font-size:23px;color:var(--azul-900);margin:5px 0 3px">Visão geral</h1><div style="font-size:13.5px;color:var(--cinza-500)">Compras municipalizadas — Rio Branco/AC · exercício 2026</div></div>
+        <div class="cm-grid-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-size:13px;color:var(--cinza-500)">Total de demandas</div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azul-600)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div style="display:flex;align-items:baseline;gap:9px;margin-top:12px"><span style="font-weight:600;font-size:27px;color:var(--azul-900);line-height:1">12</span><span style="font:600 11px var(--font-body);color:var(--azul-700);background:var(--info-bg);padding:3px 8px;border-radius:999px">4 abertos</span></div></div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-size:13px;color:var(--cinza-500)">Fornecedores ativos</div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azul-600)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div><div style="display:flex;align-items:baseline;gap:9px;margin-top:12px"><span style="font-weight:600;font-size:27px;color:var(--azul-900);line-height:1">87</span><span style="font:600 11px var(--font-body);color:var(--sucesso);background:var(--sucesso-bg);padding:3px 8px;border-radius:999px">42% MEI</span></div></div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-size:13px;color:var(--cinza-500)">Cota distribuída</div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azul-600)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="10.5" x2="15.4" y2="6.5"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/></svg></div><div style="display:flex;align-items:baseline;gap:9px;margin-top:12px"><span style="font-weight:600;font-size:27px;color:var(--azul-900);line-height:1">R$ 2,84M</span></div><div style="font-size:11.5px;color:var(--cinza-400);margin-top:4px">investidos na economia local</div></div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-size:13px;color:var(--cinza-500)">Documentos pendentes</div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--atencao)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div style="display:flex;align-items:baseline;gap:9px;margin-top:12px"><span style="font-weight:600;font-size:27px;color:var(--azul-900);line-height:1">{{ analiseCount }}</span><span style="font:600 11px var(--font-body);color:#8A5410;background:var(--atencao-bg);padding:3px 8px;border-radius:999px">aguardando</span></div></div>
+        </div>
+
+        <div class="cm-dash" style="display:grid;grid-template-columns:1fr 360px;gap:20px;margin-top:20px">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--divider)"><span style="font:600 15px var(--font-body);color:var(--azul-900)">Editais em andamento</span><button onClick="{{ goEditais }}" style="background:none;border:none;cursor:pointer;font:600 13px var(--font-body);color:var(--azul-700)">Ver todos →</button></div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ editais }}" as="e" hint-placeholder-count="3">
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--divider)">
+                <div style="min-width:0"><div style="font:600 14px var(--font-body);color:var(--azul-900)">{{ e.num }} — {{ e.objeto }}</div><div style="font-size:12.5px;color:var(--cinza-500);margin-top:3px">{{ e.secretaria }} · {{ e.cred }} credenciados</div></div>
+                <span style="{{ e.stStyle }}">{{ e.status }}</span>
+              </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--divider)"><span style="font:600 15px var(--font-body);color:var(--azul-900)">Alertas</span></div>
+            <div style="padding:12px;display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;gap:11px;padding:12px;border-radius:10px;background:var(--erro-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--erro-700)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><div style="font-size:13px;line-height:1.45;color:var(--erro-700)"><strong>1 fornecedor bloqueado</strong><div style="color:var(--cinza-500);margin-top:1px">Débito ativo na PGM/SICAF — Xapuri Móveis.</div></div></div>
+              <div style="display:flex;gap:11px;padding:12px;border-radius:10px;background:var(--atencao-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8A5410" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><div style="font-size:13px;line-height:1.45;color:#8A5410"><strong>{{ analiseCount }} documentos aguardam análise</strong><div style="margin-top:1px">Fila de covalidação humana.</div></div></div>
+              <div style="display:flex;gap:11px;padding:12px;border-radius:10px;background:var(--info-bg)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--azul-700)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div style="font-size:13px;line-height:1.45;color:var(--azul-800)"><strong>1 edital próximo do vencimento</strong><div style="color:var(--cinza-500);margin-top:1px">CR 001/2026 encerra em 31/07/2026.</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isFornecedores }}">
+      <div style="animation:cmfade .28s">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+          <div><div style="font-size:12px;color:var(--cinza-400)">Operação · Fornecedores</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Gestão de Fornecedores</h1><div style="font-size:13.5px;color:var(--cinza-500)">Empresas locais cadastradas na plataforma</div></div>
+          <button onClick="{{ openNovoFornecedor }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo fornecedor</button>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <div style="position:relative;flex:1;min-width:240px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cinza-400)" stroke-width="2" stroke-linecap="round" style="position:absolute;left:13px;top:50%;transform:translateY(-50%)"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input value="{{ fornSearch }}" onInput="{{ setFornSearch }}" placeholder="Buscar por CNPJ ou razão social…" style="width:100%;padding:10px 14px 10px 37px;border:1px solid var(--border);border-radius:9px;font:14px var(--font-body);background:#fff;outline:none" style-focus="border-color:var(--azul-600);box-shadow:0 0 0 3px var(--azul-100)">
+          </div>
+          <div style="position:relative">
+            <button onClick="{{ toggleFiltro }}" style="{{ filtroBtn }}" style-hover="background:var(--azul-50)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>Filtros<sc-if value="{{ fornFilterActive }}"><span style="width:7px;height:7px;border-radius:50%;background:var(--azul-700)"></span></sc-if></button>
+            <sc-if value="{{ filtroOpen }}">
+            <div onClick="{{ closeMenus }}" style="position:fixed;inset:0;z-index:38"></div>
+            <div style="position:absolute;right:0;top:46px;width:230px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);z-index:39;overflow:hidden;animation:cmfade .16s">
+              <div style="padding:11px 15px 7px;font:600 10.5px var(--font-body);letter-spacing:.08em;color:var(--cinza-400)">FILTRAR POR STATUS</div>
+              <div style="padding:6px">
+                <sc-for list="{{ statusFiltros }}" as="o" hint-placeholder-count="6">
+                <button onClick="{{ o.on }}" style="{{ o.style }}" style-hover="background:var(--azul-50)"><span>{{ o.label }}</span><sc-if value="{{ o.active }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--azul-700)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></button>
+                </sc-for>
+              </div>
+            </div>
+            </sc-if>
+          </div>
+          <div style="position:relative">
+            <button onClick="{{ toggleOrdenar }}" style="{{ ordenarBtn }}" style-hover="background:var(--azul-50)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5h10"/><path d="M11 9h7"/><path d="M11 13h4"/><path d="m3 17 3 3 3-3"/><path d="M6 18V4"/></svg>Ordenar</button>
+            <sc-if value="{{ ordenarOpen }}">
+            <div onClick="{{ closeMenus }}" style="position:fixed;inset:0;z-index:38"></div>
+            <div style="position:absolute;right:0;top:46px;width:250px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);z-index:39;overflow:hidden;animation:cmfade .16s">
+              <div style="padding:11px 15px 7px;font:600 10.5px var(--font-body);letter-spacing:.08em;color:var(--cinza-400)">ORDENAR POR</div>
+              <div style="padding:6px">
+                <sc-for list="{{ ordenacoes }}" as="o" hint-placeholder-count="5">
+                <button onClick="{{ o.on }}" style="{{ o.style }}" style-hover="background:var(--azul-50)"><span>{{ o.label }}</span><sc-if value="{{ o.active }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--azul-700)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></sc-if></button>
+                </sc-for>
+              </div>
+            </div>
+            </sc-if>
+          </div>
+          <button onClick="{{ exportar }}" style="{{ toolBtn }}" style-hover="background:var(--azul-50)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar</button>
+        </div>
+        <sc-if value="{{ fornEmpty }}">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:48px 24px;text-align:center;margin-bottom:14px"><div style="font:600 15px var(--font-body);color:var(--azul-900)">Nenhum fornecedor encontrado</div><div style="font-size:13px;color:var(--cinza-500);margin-top:4px">Ajuste a busca ou os filtros aplicados.</div></div>
+        </sc-if>
+        <div class="cm-tablewrap" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+          <div style="width:100%;display:table;border-spacing:0;font:14px var(--font-body)">
+            <div style="display:table-header-group"><div style="display:table-row;background:#E2E7EE"><div style="{{ thL }}">CNPJ</div><div style="{{ thL }}">Razão social</div><div style="{{ thL }}">Porte</div><div style="{{ thL }}">CNAE principal</div><div style="{{ thL }}">Cap. produtiva</div><div style="{{ thL }}">Status</div><div style="{{ thR }}">Ações</div></div></div>
+            <div style="display:table-row-group">
+              <sc-for list="{{ fornecedores }}" as="f" hint-placeholder-count="5">
+              <div class="cm-row" style="display:table-row">
+                <div style="{{ td }}"><span style="font-variant-numeric:tabular-nums;color:var(--cinza-700)">{{ f.cnpj }}</span></div>
+                <div style="{{ td }}"><div style="font-weight:600;color:var(--azul-900)">{{ f.razao }}</div><div style="font-size:12px;color:var(--cinza-400)">{{ f.nome }}</div></div>
+                <div style="{{ td }}">{{ f.porte }}</div>
+                <div style="{{ td }}"><span style="color:var(--cinza-500)">{{ f.cnae }}</span></div>
+                <div style="{{ td }}">{{ f.cap }}</div>
+                <div style="{{ td }}"><span style="{{ f.stStyle }}">{{ f.status }}</span></div>
+                <div style="{{ tdR }}"><div style="display:inline-flex;gap:6px"><button class="cm-act" onClick="{{ f.onVer }}" title="Visualizar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="cm-act" onClick="{{ f.onEditar }}" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button class="cm-act" onClick="{{ f.onBloquear }}" title="{{ f.bloqTitle }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.9" y1="4.9" x2="19.1" y2="19.1"/></svg></button></div></div>
+              </div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="{{ pager }}"><span style="color:var(--cinza-500)">Mostrando {{ fornCount }} de 87 fornecedores</span><div style="display:flex;gap:6px"><button style="{{ pgBtn }}">Anterior</button><button style="{{ pgActive }}">1</button><button style="{{ pgBtn }}">2</button><button style="{{ pgBtn }}">Próximo</button></div></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isEditais }}">
+      <div style="animation:cmfade .28s">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+          <div><div style="font-size:12px;color:var(--cinza-400)">Operação · Editais</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Editais de Credenciamento</h1><div style="font-size:13.5px;color:var(--cinza-500)">1 edital = 1 demanda de secretaria (RN007)</div></div>
+          <button onClick="{{ openNovoEdital }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo edital</button>
+        </div>
+        <div class="cm-tablewrap" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+          <div style="width:100%;display:table;border-spacing:0;font:14px var(--font-body)">
+            <div style="display:table-header-group"><div style="display:table-row;background:#E2E7EE"><div style="{{ thL }}">Edital</div><div style="{{ thL }}">Objeto</div><div style="{{ thL }}">Secretaria</div><div style="{{ thL }}">Prazo</div><div style="{{ thL }}">Status</div><div style="{{ thR }}">Ações</div></div></div>
+            <div style="display:table-row-group">
+              <sc-for list="{{ editais }}" as="e" hint-placeholder-count="4">
+              <div class="cm-row" style="display:table-row">
+                <div style="{{ td }}"><span style="font-weight:600;color:var(--azul-700)">{{ e.num }}</span><div style="font-size:12px;color:var(--cinza-400)">CNAE {{ e.cnae }}</div></div>
+                <div style="{{ td }}"><div style="font-weight:500;color:var(--azul-900);max-width:280px">{{ e.objeto }}</div><div style="font-size:12px;color:var(--cinza-400)">{{ e.qtd }}</div></div>
+                <div style="{{ td }}"><span style="color:var(--cinza-500)">{{ e.secretaria }}</span></div>
+                <div style="{{ td }}"><span style="font-variant-numeric:tabular-nums;color:var(--cinza-500)">{{ e.prazo }}</span></div>
+                <div style="{{ td }}"><span style="{{ e.stStyle }}">{{ e.status }}</span></div>
+                <div style="{{ tdR }}"><div style="display:inline-flex;gap:6px"><button class="cm-act" onClick="{{ e.onVer }}" title="Visualizar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="cm-act" onClick="{{ e.onEditar }}" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button></div></div>
+              </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isCredenciamento }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:20px"><div style="font-size:12px;color:var(--cinza-400)">Operação · Credenciamento</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Credenciamento em Edital</h1><div style="font-size:13.5px;color:var(--cinza-500)">Adesão filtrada por CNAE (RN001) e checagem de inadimplência (RN002)</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div><div style="font:600 13px var(--font-body);color:var(--azul-700)">CR 001/2026</div><div style="font-weight:600;font-size:16px;color:var(--azul-900);margin:3px 0 4px">Confecção de fardamento escolar — Ensino Fundamental</div><div style="font-size:13px;color:var(--cinza-500)">Secretaria Municipal de Educação · CNAE exigido: 1412-6/01</div></div>
+          <span style="{{ chipAberto }}">Aberto</span>
+        </div>
+        <div style="font:600 13.5px var(--font-body);color:var(--azul-900);margin:0 0 12px">Fornecedores elegíveis <span style="color:var(--cinza-400);font-weight:500">(filtro CNAE aplicado)</span></div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <sc-for list="{{ elegiveis }}" as="e" hint-placeholder-count="3">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap">
+            <div><div style="font-weight:600;font-size:15px;color:var(--azul-900)">{{ e.nome }}</div><div style="font-size:12.5px;color:var(--cinza-500);margin:3px 0 8px;font-variant-numeric:tabular-nums">{{ e.cnpj }} · Cap. {{ e.cap }}</div><div style="display:flex;gap:7px;flex-wrap:wrap"><span style="{{ pillOk }}">PGM: Regular</span><span style="{{ pillOk }}">SICAF: Regular</span><span style="{{ pillInfo }}">CNAE compatível</span></div></div>
+            <span style="{{ e.stStyle }}">{{ e.status }}</span>
+          </div>
+          </sc-for>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isAnalise }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:20px"><div style="font-size:12px;color:var(--cinza-400)">Operação · Análise Documental</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Análise Documental <span style="color:var(--cinza-400);font-weight:500">(covalidação)</span></h1><div style="font-size:13.5px;color:var(--cinza-500)">Aprovação ou reprovação com justificativa obrigatória (RN003)</div></div>
+        <sc-if value="{{ hasAnalise }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ analiseDocs }}" as="d" hint-placeholder-count="2">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 22px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
+              <div style="display:flex;gap:14px"><div style="width:46px;height:46px;border-radius:11px;background:var(--atencao-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#8A5410"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div><div style="font-weight:600;font-size:15px;color:var(--azul-900)">{{ d.titulo }}</div><div style="font-size:12.5px;color:var(--cinza-500);margin-top:2px">{{ d.empresa }} · enviado em {{ d.enviado }}</div></div></div>
+              <span style="{{ chipPendente }}">Pendente</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--divider);flex-wrap:wrap">
+              <button style="display:inline-flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;font:500 13.5px var(--font-body);color:var(--azul-700)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>Visualizar documento</button>
+              <div style="display:flex;gap:10px">
+                <button onClick="{{ d.reprovar }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:1.5px solid var(--erro);border-radius:9px;background:#fff;color:var(--erro-700);font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--erro-bg)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>Reprovar</button>
+                <button onClick="{{ d.aprovar }}" style="display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border:none;border-radius:9px;background:var(--sucesso);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--sucesso)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Aprovar</button>
+              </div>
+            </div>
+          </div>
+          </sc-for>
+        </div>
+        </sc-if>
+        <sc-if value="{{ noAnalise }}">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:56px 24px;text-align:center">
+          <div style="width:60px;height:60px;border-radius:50%;background:var(--sucesso-bg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--sucesso)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div style="font:600 16px var(--font-body);color:var(--azul-900)">Nenhum documento na fila</div>
+          <div style="font-size:13.5px;color:var(--cinza-500);margin-top:5px">Todas as análises foram concluídas.</div>
+        </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isDistribuicao }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:20px"><div style="font-size:12px;color:var(--cinza-400)">Operação · Distribuição</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Distribuição Inteligente</h1><div style="font-size:13.5px;color:var(--cinza-500)">Rateio equitativo respeitando a capacidade declarada (RN005)</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px;margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px"><div><div style="font:600 13px var(--font-body);color:var(--azul-700)">CR 002/2026</div><div style="font-weight:600;font-size:16px;color:var(--azul-900);margin:3px 0 2px">Aquisição de mobiliário escolar — mesas e cadeiras</div><div style="font-size:13px;color:var(--cinza-500)">Secretaria Municipal de Educação</div></div><span style="{{ chipDistrib }}">Em Distribuição</span></div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px;padding-top:20px;border-top:1px solid var(--divider);text-align:center">
+            <div><div style="font-size:12.5px;color:var(--cinza-500)">Total da demanda</div><div style="font-weight:600;font-size:22px;color:var(--azul-900);margin-top:4px">600 conjuntos</div></div>
+            <div><div style="font-size:12.5px;color:var(--cinza-500)">Distribuído</div><div style="font-weight:600;font-size:22px;color:var(--sucesso);margin-top:4px">600</div></div>
+            <div><div style="font-size:12.5px;color:var(--cinza-500)">Habilitados</div><div style="font-weight:600;font-size:22px;color:var(--azul-900);margin-top:4px">3</div></div>
+          </div>
+        </div>
+        <div class="cm-tablewrap" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+          <div style="padding:15px 20px;border-bottom:1px solid var(--divider);font:600 14.5px var(--font-body);color:var(--azul-900)">Resultado da distribuição</div>
+          <div style="width:100%;display:table;border-spacing:0;font:14px var(--font-body)">
+            <div style="display:table-header-group"><div style="display:table-row;background:#E2E7EE"><div style="{{ thL }}">Fornecedor</div><div style="{{ thL }}">Capacidade</div><div style="{{ thR }}">Cota atribuída</div><div style="{{ thR }}">% da demanda</div></div></div>
+            <div style="display:table-row-group">
+              <sc-for list="{{ rateio }}" as="r" hint-placeholder-count="3">
+              <div class="cm-row" style="display:table-row"><div style="{{ td }}"><span style="font-weight:600;color:var(--azul-900)">{{ r.nome }}</span></div><div style="{{ td }}">{{ r.cap }}</div><div style="{{ tdR }}"><span style="font-weight:600;color:var(--azul-700)">{{ r.cota }}</span></div><div style="{{ tdR }}"><span style="color:var(--cinza-500)">{{ r.pct }}</span></div></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;padding:16px 20px;border-top:1px solid var(--divider)"><button onClick="{{ homologar }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Homologar distribuição</button></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isReserva }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:20px"><div style="font-size:12px;color:var(--cinza-400)">Operação · Cadastro de Reserva</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Cadastro de Reserva</h1><div style="font-size:13.5px;color:var(--cinza-500)">Gestão de retardatários sem alterar contratos vigentes (RN004)</div></div>
+        <div style="display:flex;gap:12px;background:var(--atencao-bg);border:1px solid var(--atencao);border-radius:12px;padding:15px 18px;margin-bottom:16px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8A5410" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><div style="font-size:13px;line-height:1.5;color:#8A5410"><strong>Fila de reserva.</strong> Fornecedores aprovados após a distribuição inicial são alocados aqui sem alterar as cotas já distribuídas. Serão acionados em ordem cronológica caso algum titular descumpra a entrega.</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:16px">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--atencao-bg);color:#8A5410;display:flex;align-items:center;justify-content:center;font:600 15px var(--font-body);flex-shrink:0">1</div>
+          <div style="flex:1"><div style="font-weight:600;font-size:15px;color:var(--azul-900)">Gráfica Seringueira</div><div style="font-size:12.5px;color:var(--cinza-500);margin-top:2px">CR 002/2026 — Aquisição de mobiliário escolar</div></div>
+          <div style="font-size:12.5px;color:var(--cinza-500);margin-right:6px">Cap. 500 un/mês</div>
+          <span style="{{ chipReserva }}">Reserva</span>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isMalote }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:20px"><div style="font-size:12px;color:var(--cinza-400)">Operação · Malote SEI</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Geração de Malote SEI</h1><div style="font-size:13.5px;color:var(--cinza-500)">PDF único, comprimido e ordenado para upload no SEI (RN008)</div></div>
+        <div class="cm-grid-2" style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px">
+            <div style="font:600 11px var(--font-body);letter-spacing:.06em;color:var(--cinza-500);margin-bottom:8px">FORNECEDOR</div>
+            <div style="position:relative;margin-bottom:20px"><select style="width:100%;padding:12px 14px;border:1px solid var(--border);border-radius:9px;font:14px var(--font-body);background:#fff;appearance:none;outline:none;color:var(--azul-900)"><option>Floresta Uniformes — 98.765.432/0001-10</option><option>Malharia Maria — 12.345.678/0001-90</option></select><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cinza-400)" stroke-width="2" style="position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none"><polyline points="6 9 12 15 18 9"/></svg></div>
+            <div style="font:600 11px var(--font-body);letter-spacing:.06em;color:var(--cinza-500);margin-bottom:10px">ORDEM DOS DOCUMENTOS (RN008)</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ maloteOrdem }}" as="m" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg-page);border-radius:9px"><span style="width:22px;height:22px;border-radius:6px;background:var(--azul-100);color:var(--azul-700);display:flex;align-items:center;justify-content:center;font:600 12px var(--font-body);flex-shrink:0">{{ m.n }}</span><span style="font-size:14px;color:var(--azul-900)">{{ m.label }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px">
+            <div style="width:44px;height:44px;border-radius:11px;background:var(--azul-50);color:var(--azul-700);display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg></div>
+            <div style="font:600 15px var(--font-body);color:var(--azul-900)">Malote SEI</div>
+            <div style="font-size:13px;color:var(--cinza-500);line-height:1.5;margin:6px 0 16px">Gera um PDF único, ordenado e comprimido conforme o limite de upload do SEI.</div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:13px;padding:14px 0;border-top:1px solid var(--divider);border-bottom:1px solid var(--divider);margin-bottom:16px"><div style="display:flex;justify-content:space-between"><span style="color:var(--cinza-500)">Documentos</span><strong style="color:var(--azul-900)">4</strong></div><div style="display:flex;justify-content:space-between"><span style="color:var(--cinza-500)">Tamanho estimado</span><strong style="color:var(--azul-900)">8,4 MB</strong></div><div style="display:flex;justify-content:space-between"><span style="color:var(--cinza-500)">Limite SEI</span><strong style="color:var(--azul-900)">30 MB</strong></div></div>
+            <button onClick="{{ gerarMalote }}" style="width:100%;padding:12px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)">Gerar Malote</button>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isDesistencias }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:20px"><div style="font-size:12px;color:var(--cinza-400)">Operação · Desistências</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Desistências</h1><div style="font-size:13.5px;color:var(--cinza-500)">Registro de fornecedores que declinaram de cotas atribuídas</div></div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:56px 24px;text-align:center">
+          <div style="width:60px;height:60px;border-radius:50%;background:var(--azul-50);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--azul-600)"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div style="font:600 16px var(--font-body);color:var(--azul-900)">Nenhuma desistência registrada</div>
+          <div style="font-size:13.5px;color:var(--cinza-500);margin-top:5px;max-width:420px;margin-left:auto;margin-right:auto">Quando um fornecedor titular declinar de uma cota, o registro aparece aqui e o próximo da fila de reserva é acionado automaticamente.</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isSecretarias }}">
+      <div style="animation:cmfade .28s">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+          <div><div style="font-size:12px;color:var(--cinza-400)">Administração · Secretarias</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Secretarias</h1><div style="font-size:13.5px;color:var(--cinza-500)">Gestão das unidades demandantes</div></div>
+          <button onClick="{{ openNovaSecretaria }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo cadastro</button>
+        </div>
+        <div class="cm-tablewrap" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+          <div style="width:100%;display:table;border-spacing:0;font:14px var(--font-body)">
+            <div style="display:table-header-group"><div style="display:table-row;background:#E2E7EE"><div style="{{ thL }}">Sigla</div><div style="{{ thL }}">Nome</div><div style="{{ thL }}">Responsável</div><div style="{{ thL }}">Contato</div><div style="{{ thL }}">Status</div><div style="{{ thR }}">Ações</div></div></div>
+            <div style="display:table-row-group">
+              <sc-for list="{{ secretarias }}" as="s" hint-placeholder-count="5">
+              <div class="cm-row" style="display:table-row"><div style="{{ td }}"><span style="font-weight:600;color:var(--azul-900)">{{ s.sigla }}</span></div><div style="{{ td }}"><span style="color:var(--cinza-700)">{{ s.nome }}</span></div><div style="{{ td }}">{{ s.resp }}</div><div style="{{ td }}"><span style="color:var(--azul-700)">{{ s.contato }}</span></div><div style="{{ td }}"><span style="{{ s.stStyle }}">{{ s.status }}</span></div><div style="{{ tdR }}"><div style="display:inline-flex;gap:6px"><button class="cm-act" onClick="{{ s.onVer }}" title="Visualizar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="cm-act" onClick="{{ s.onEditar }}" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button class="cm-act" onClick="{{ s.onBloquear }}" title="{{ s.bloqTitle }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></div></div></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isUsuarios }}">
+      <div style="animation:cmfade .28s">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+          <div><div style="font-size:12px;color:var(--cinza-400)">Administração · Usuários</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Usuários</h1><div style="font-size:13.5px;color:var(--cinza-500)">Gestão de acessos ao sistema</div></div>
+          <button onClick="{{ openNovoUsuario }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo usuário</button>
+        </div>
+        <div class="cm-tablewrap" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+          <div style="width:100%;display:table;border-spacing:0;font:14px var(--font-body)">
+            <div style="display:table-header-group"><div style="display:table-row;background:#E2E7EE"><div style="{{ thL }}">Nome</div><div style="{{ thL }}">Cargo</div><div style="{{ thL }}">Secretaria</div><div style="{{ thL }}">Perfil</div><div style="{{ thL }}">Login</div><div style="{{ thL }}">Status</div><div style="{{ thR }}">Ações</div></div></div>
+            <div style="display:table-row-group">
+              <sc-for list="{{ usuarios }}" as="u" hint-placeholder-count="5">
+              <div class="cm-row" style="display:table-row"><div style="{{ td }}"><span style="font-weight:600;color:var(--azul-900)">{{ u.nome }}</span></div><div style="{{ td }}">{{ u.cargo }}</div><div style="{{ td }}">{{ u.sec }}</div><div style="{{ td }}"><span style="{{ u.perfilStyle }}">{{ u.perfil }}</span></div><div style="{{ td }}"><span style="color:var(--azul-700)">{{ u.login }}</span></div><div style="{{ td }}"><span style="{{ u.stStyle }}">{{ u.status }}</span></div><div style="{{ tdR }}"><div style="display:inline-flex;gap:6px"><button class="cm-act" onClick="{{ u.onVer }}" title="Visualizar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="cm-act" onClick="{{ u.onEditar }}" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button class="cm-act" onClick="{{ u.onBloquear }}" title="{{ u.bloqTitle }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></button></div></div></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isSetores }}">
+      <div style="animation:cmfade .28s">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+          <div><div style="font-size:12px;color:var(--cinza-400)">Administração · Setores Industriais</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Setores Industriais (CNAE)</h1><div style="font-size:13.5px;color:var(--cinza-500)">Códigos de atividade econômica aceitos</div></div>
+          <button onClick="{{ openNovoSetor }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo setor</button>
+        </div>
+        <div class="cm-tablewrap" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+          <div style="width:100%;display:table;border-spacing:0;font:14px var(--font-body)">
+            <div style="display:table-header-group"><div style="display:table-row;background:#E2E7EE"><div style="{{ thL }}">Código</div><div style="{{ thL }}">Descrição</div><div style="{{ thL }}">Categoria</div><div style="{{ thL }}">Situação</div><div style="{{ thR }}">Ações</div></div></div>
+            <div style="display:table-row-group">
+              <sc-for list="{{ setores }}" as="s" hint-placeholder-count="6">
+              <div class="cm-row" style="display:table-row"><div style="{{ td }}"><span style="font-variant-numeric:tabular-nums;font-weight:600;color:var(--azul-900)">{{ s.codigo }}</span></div><div style="{{ td }}"><span style="color:var(--cinza-700)">{{ s.desc }}</span></div><div style="{{ td }}">{{ s.cat }}</div><div style="{{ td }}"><span style="{{ s.stStyle }}">{{ s.status }}</span></div><div style="{{ tdR }}"><div style="display:inline-flex;gap:6px"><button class="cm-act" onClick="{{ s.onVer }}" title="Visualizar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="cm-act" onClick="{{ s.onEditar }}" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button class="cm-act" onClick="{{ s.onBloquear }}" title="{{ s.bloqTitle }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></div></div></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isTipos }}">
+      <div style="animation:cmfade .28s">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+          <div><div style="font-size:12px;color:var(--cinza-400)">Administração · Tipos de Arquivos</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Tipos de Arquivos</h1><div style="font-size:13.5px;color:var(--cinza-500)">Documentos exigidos no credenciamento</div></div>
+          <button onClick="{{ openNovoTipo }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo tipo</button>
+        </div>
+        <div class="cm-tablewrap" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+          <div style="width:100%;display:table;border-spacing:0;font:14px var(--font-body)">
+            <div style="display:table-header-group"><div style="display:table-row;background:#E2E7EE"><div style="{{ thL }}">Documento</div><div style="{{ thL }}">Formato</div><div style="{{ thL }}">Obrigatório</div><div style="{{ thL }}">Validade</div><div style="{{ thL }}">Situação</div><div style="{{ thR }}">Ações</div></div></div>
+            <div style="display:table-row-group">
+              <sc-for list="{{ tipos }}" as="t" hint-placeholder-count="5">
+              <div class="cm-row" style="display:table-row"><div style="{{ td }}"><span style="font-weight:600;color:var(--azul-900)">{{ t.nome }}</span></div><div style="{{ td }}">{{ t.formato }}</div><div style="{{ td }}">{{ t.obrig }}</div><div style="{{ td }}">{{ t.validade }}</div><div style="{{ td }}"><span style="{{ t.stStyle }}">{{ t.status }}</span></div><div style="{{ tdR }}"><div style="display:inline-flex;gap:6px"><button class="cm-act" onClick="{{ t.onVer }}" title="Visualizar"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg></button><button class="cm-act" onClick="{{ t.onEditar }}" title="Editar"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg></button><button class="cm-act" onClick="{{ t.onBloquear }}" title="{{ t.bloqTitle }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64A9 9 0 1 1 5.64 6.64"/><line x1="12" y1="2" x2="12" y2="12"/></svg></button></div></div></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isAuditoria }}">
+      <div style="animation:cmfade .28s">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+          <div><div style="font-size:12px;color:var(--cinza-400)">Administração · Auditoria</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Auditoria e Logs</h1><div style="font-size:13.5px;color:var(--cinza-500)">Trilha imutável de ações críticas (append-only)</div></div>
+          <button onClick="{{ exportarLogs }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1.5px solid var(--azul-700);border-radius:9px;background:#fff;color:var(--azul-700);font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-50)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Exportar Logs</button>
+        </div>
+        <div class="cm-tablewrap" style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden">
+          <div style="width:100%;display:table;border-spacing:0;font:13.5px var(--font-body)">
+            <div style="display:table-header-group"><div style="display:table-row;background:#E2E7EE"><div style="{{ thL }}">Data / hora</div><div style="{{ thL }}">Usuário</div><div style="{{ thL }}">Perfil</div><div style="{{ thL }}">Ação</div><div style="{{ thL }}">Alvo</div><div style="{{ thL }}">IP</div></div></div>
+            <div style="display:table-row-group">
+              <sc-for list="{{ logs }}" as="l" hint-placeholder-count="5">
+              <div class="cm-row" style="display:table-row"><div style="{{ td }}"><span style="font-variant-numeric:tabular-nums;color:var(--cinza-500)">{{ l.ts }}</span></div><div style="{{ td }}"><span style="font:500 12px var(--font-body);background:var(--azul-50);color:var(--azul-700);padding:2px 9px;border-radius:999px">{{ l.user }}</span></div><div style="{{ td }}"><span style="color:var(--cinza-500)">{{ l.perfil }}</span></div><div style="{{ td }}"><span style="font-weight:500;color:var(--azul-900)">{{ l.acao }}</span></div><div style="{{ td }}"><span style="color:var(--cinza-500)">{{ l.alvo }}</span></div><div style="{{ td }}"><span style="font-variant-numeric:tabular-nums;color:var(--cinza-400)">{{ l.ip }}</span></div></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isTransparencia }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:20px"><div style="font-size:12px;color:var(--cinza-400)">Público · Transparência</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Portal da Transparência</h1><div style="font-size:13.5px;color:var(--cinza-500)">BI público — dados consolidados (RN007)</div></div>
+        <div style="background:linear-gradient(135deg,var(--azul-900),var(--azul-700));border-radius:16px;padding:26px 28px;color:#fff;margin-bottom:18px"><div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:var(--azul-300)">INVESTIMENTO EM ECONOMIA LOCAL — 2026</div><div style="font-weight:600;font-size:38px;margin:8px 0 6px">R$ 2.840.000</div><div style="font-size:13.5px;color:var(--azul-100)">Recursos públicos investidos em MEIs, ME e EPPs da cidade de Rio Branco</div></div>
+        <div class="cm-grid-3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:18px">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px"><div style="font-weight:600;font-size:26px;color:var(--azul-900)">87</div><div style="font-size:13px;color:var(--cinza-500);margin-top:2px">Fornecedores ativos</div></div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px"><div style="font-weight:600;font-size:26px;color:var(--azul-900)">12</div><div style="font-size:13px;color:var(--cinza-500);margin-top:2px">Editais em andamento</div></div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px 22px"><div style="font-weight:600;font-size:26px;color:var(--azul-900)">42%</div><div style="font-size:13px;color:var(--cinza-500);margin-top:2px">MEIs participantes</div></div>
+        </div>
+        <div class="cm-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 22px"><div style="font:600 14.5px var(--font-body);color:var(--azul-900);margin-bottom:16px">Investimento por secretaria</div>
+            <sc-for list="{{ invSecretaria }}" as="i" hint-placeholder-count="4">
+            <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="color:var(--cinza-700)">{{ i.nome }}</span><span style="font-weight:600;color:var(--azul-900)">{{ i.valor }}</span></div><div style="height:7px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div style="height:100%;background:var(--azul-600);border-radius:99px;width:{{ i.pct }}"></div></div></div>
+            </sc-for>
+          </div>
+          <div style="background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px 22px"><div style="font:600 14.5px var(--font-body);color:var(--azul-900);margin-bottom:16px">Participação por porte</div>
+            <sc-for list="{{ porte }}" as="p" hint-placeholder-count="3">
+            <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px"><span style="color:var(--cinza-700)">{{ p.nome }}</span><span style="font-weight:600;color:var(--azul-900)">{{ p.pct }}</span></div><div style="height:7px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div style="height:100%;border-radius:99px;background:{{ p.cor }};width:{{ p.pct }}"></div></div></div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <sc-if value="{{ isConta }}">
+      <div style="animation:cmfade .28s">
+        <div style="margin-bottom:18px"><div style="font-size:12px;color:var(--cinza-400)">Administração · Minha conta</div><h1 style="font-weight:600;font-size:22px;color:var(--azul-900);margin:4px 0 3px">Minha conta</h1><p style="font-size:13.5px;color:var(--cinza-500)">Dados do usuário administrador autenticado, provenientes do módulo Usuários.</p></div>
+
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-xs);padding:24px 26px;margin-bottom:18px">
+          <div style="font:600 11px var(--font-body);letter-spacing:.08em;color:var(--azul-700);margin-bottom:18px">DADOS DO USUÁRIO</div>
+          <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-bottom:22px;border-bottom:1px solid var(--divider)">
+            <div style="width:80px;height:80px;border-radius:50%;background:var(--azul-700);color:#fff;display:flex;align-items:center;justify-content:center;font:600 28px var(--font-display);flex-shrink:0">SC</div>
+            <div><div style="font:600 17px var(--font-body);color:var(--azul-900)">Silas Carvalho</div><div style="font-size:13.5px;color:var(--cinza-500);margin:2px 0 12px">Administrador · CPL</div><button style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--azul-700);font:600 13.5px var(--font-body);cursor:pointer" style-hover="background:var(--azul-50)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Alterar foto</button></div>
+          </div>
+          <div class="cm-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 20px;margin-top:22px">
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">Nome completo</label><div style="font:500 14.5px var(--font-body);color:var(--azul-900)">Silas Carvalho</div></div>
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">E-mail</label><div style="font:500 14.5px var(--font-body);color:var(--azul-900)">silas.carvalho@riobranco.ac.gov.br</div></div>
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">CPF</label><div style="font:500 14.5px var(--font-body);color:var(--azul-900);font-variant-numeric:tabular-nums">***.456.789-**</div></div>
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">Telefone</label><div style="font:500 14.5px var(--font-body);color:var(--azul-900)">(68) 3211-1400</div></div>
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">Cargo / Função</label><div style="font:500 14.5px var(--font-body);color:var(--azul-900)">Analista da CPL</div></div>
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">Perfil de acesso</label><div><span style="display:inline-flex;align-items:center;padding:3px 11px;border-radius:999px;font:600 12px var(--font-body);background:var(--azul-700);color:#fff">Administrador</span></div></div>
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">Secretaria / Unidade</label><div style="font:500 14.5px var(--font-body);color:var(--azul-900)">Comissão Permanente de Licitação (CPL)</div></div>
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">Situação</label><div><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font:600 12px var(--font-body);background:var(--sucesso-bg);color:var(--sucesso)"><span style="width:6px;height:6px;border-radius:50%;background:var(--sucesso)"></span>Ativo</span></div></div>
+            <div><label style="font:600 12px var(--font-body);color:var(--cinza-500);margin-bottom:5px;display:block">Data de cadastro</label><div style="font:500 14.5px var(--font-body);color:var(--azul-900);font-variant-numeric:tabular-nums">12/02/2025</div></div>
+          </div>
+        </div>
+
+        <div style="background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-xs);padding:24px 26px">
+          <div style="font:600 11px var(--font-body);letter-spacing:.08em;color:var(--azul-700);margin-bottom:18px">SEGURANÇA</div>
+          <label style="font:600 12.5px var(--font-body);color:var(--cinza-700);margin-bottom:6px;display:block">Senha</label>
+          <sc-if value="{{ contaSenhaClosed }}" hint-placeholder-val="{{ true }}"><button onClick="{{ toggleContaSenha }}" style="display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--azul-700);font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-50)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Alterar minha senha</button></sc-if>
+          <sc-if value="{{ contaSenhaOpen }}"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;animation:cmfade .2s"><input type="password" value="{{ novaSenha }}" onInput="{{ setNovaSenha }}" placeholder="Nova senha (mín. 8 caracteres)" style="flex:1;min-width:240px;padding:12px 14px;border:1px solid var(--border);border-radius:9px;font:15px var(--font-body);background:#fff;outline:none" style-focus="border-color:var(--azul-600);box-shadow:0 0 0 3px var(--azul-100)"><button onClick="{{ salvarSenha }}" disabled="{{ senhaDisabled }}" style="{{ senhaBtnStyle }}">Salvar</button><button onClick="{{ senhaCancelar }}" style="padding:11px 16px;border:none;background:none;color:var(--cinza-500);font:600 13.5px var(--font-body);cursor:pointer;text-decoration:underline">Cancelar</button></div></sc-if>
+        </div>
+      </div>
+      </sc-if>
+
+    </main>
+  </div>
+
+  <sc-if value="{{ viewGenOpen }}">
+  <div onClick="{{ closeViewGen }}" style="position:fixed;inset:0;background:rgba(10,25,50,.5);z-index:73;display:flex;align-items:center;justify-content:center;padding:24px;animation:cmover .2s">
+    <div onClick="{{ stop }}" style="width:min(540px,100%);max-height:90vh;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(8,20,42,.32);display:flex;flex-direction:column;overflow:hidden;animation:cmpop .24s ease">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-bottom:1px solid var(--divider)"><div style="min-width:0"><div style="font:600 17px var(--font-body);color:var(--azul-900)">{{ vg.title }}</div><div style="font-size:12.5px;color:var(--cinza-500);margin-top:2px">{{ vg.subtitle }}</div></div><button onClick="{{ closeViewGen }}" style="width:36px;height:36px;border:none;border-radius:9px;background:var(--bg-page);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--cinza-500);flex-shrink:0" style-hover="background:var(--azul-50)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <div class="cm-scroll" style="flex:1;overflow-y:auto;padding:22px 26px">
+        <div style="margin-bottom:18px"><span style="{{ vg.stStyle }}">{{ vg.status }}</span></div>
+        <div class="cm-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 20px">
+          <sc-for list="{{ vg.fields }}" as="fld" hint-placeholder-count="4">
+          <div style="{{ fld.wrap }}"><div style="font:600 11px var(--font-body);letter-spacing:.05em;color:var(--cinza-400);text-transform:uppercase;margin-bottom:4px">{{ fld.l }}</div><div style="font:500 14px var(--font-body);color:var(--azul-900)">{{ fld.v }}</div></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;padding:18px 26px;border-top:1px solid var(--divider);background:var(--bg-page)"><sc-if value="{{ vg.hasBlock }}"><button onClick="{{ vgBloquear }}" style="padding:11px 20px;border:1.5px solid var(--border);border-radius:9px;background:#fff;color:var(--erro-700);font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--erro-bg)">{{ vg.bloqTitle }}</button></sc-if><button onClick="{{ vgEditar }}" style="padding:11px 22px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)">Editar</button></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ viewOpen }}">
+  <div onClick="{{ closeView }}" style="position:fixed;inset:0;background:rgba(10,25,50,.5);z-index:72;display:flex;align-items:center;justify-content:center;padding:24px;animation:cmover .2s">
+    <div onClick="{{ stop }}" style="width:min(560px,100%);max-height:90vh;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(8,20,42,.32);display:flex;flex-direction:column;overflow:hidden;animation:cmpop .24s ease">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-bottom:1px solid var(--divider)"><div><div style="font-size:12px;color:var(--cinza-400)">Fornecedor</div><div style="font:600 17px var(--font-body);color:var(--azul-900);margin-top:1px">{{ vf.razao }}</div></div><button onClick="{{ closeView }}" style="width:36px;height:36px;border:none;border-radius:9px;background:var(--bg-page);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--cinza-500)" style-hover="background:var(--azul-50)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <div class="cm-scroll" style="flex:1;overflow-y:auto;padding:24px 26px">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--divider)">
+          <div style="width:52px;height:52px;border-radius:12px;background:var(--azul-50);color:var(--azul-700);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div>
+          <div><div style="font:600 15.5px var(--font-body);color:var(--azul-900)">{{ vf.nome }}</div><div style="margin-top:5px"><span style="{{ vf.stStyle }}">{{ vf.status }}</span></div></div>
+        </div>
+        <div class="cm-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px 20px">
+          <div><div style="font:600 11px var(--font-body);letter-spacing:.05em;color:var(--cinza-400);text-transform:uppercase;margin-bottom:4px">CNPJ</div><div style="font:500 14px var(--font-body);color:var(--azul-900);font-variant-numeric:tabular-nums">{{ vf.cnpj }}</div></div>
+          <div><div style="font:600 11px var(--font-body);letter-spacing:.05em;color:var(--cinza-400);text-transform:uppercase;margin-bottom:4px">Porte</div><div style="font:500 14px var(--font-body);color:var(--azul-900)">{{ vf.porte }}</div></div>
+          <div style="grid-column:1/-1"><div style="font:600 11px var(--font-body);letter-spacing:.05em;color:var(--cinza-400);text-transform:uppercase;margin-bottom:4px">CNAE principal</div><div style="font:500 14px var(--font-body);color:var(--azul-900)">{{ vf.cnae }}</div></div>
+          <div><div style="font:600 11px var(--font-body);letter-spacing:.05em;color:var(--cinza-400);text-transform:uppercase;margin-bottom:4px">Capacidade produtiva</div><div style="font:500 14px var(--font-body);color:var(--azul-900)">{{ vf.cap }}</div></div>
+          <div><div style="font:600 11px var(--font-body);letter-spacing:.05em;color:var(--cinza-400);text-transform:uppercase;margin-bottom:4px">Responsável</div><div style="font:500 14px var(--font-body);color:var(--azul-900)">{{ vf.resp }}</div></div>
+          <div><div style="font:600 11px var(--font-body);letter-spacing:.05em;color:var(--cinza-400);text-transform:uppercase;margin-bottom:4px">E-mail</div><div style="font:500 14px var(--font-body);color:var(--azul-700)">{{ vf.email }}</div></div>
+          <div><div style="font:600 11px var(--font-body);letter-spacing:.05em;color:var(--cinza-400);text-transform:uppercase;margin-bottom:4px">Telefone</div><div style="font:500 14px var(--font-body);color:var(--azul-900)">{{ vf.tel }}</div></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;padding:18px 26px;border-top:1px solid var(--divider);background:var(--bg-page)"><button onClick="{{ vfBloquear }}" style="padding:11px 20px;border:1.5px solid var(--border);border-radius:9px;background:#fff;color:var(--erro-700);font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--erro-bg)">{{ vf.bloqTitle }}</button><button onClick="{{ vfEditar }}" style="padding:11px 22px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)">Editar</button></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ sheetOpen }}">
+  <div onClick="{{ closeSheet }}" style="position:fixed;inset:0;background:rgba(10,25,50,.5);z-index:70;display:flex;align-items:center;justify-content:center;padding:24px;animation:cmover .2s">
+    <div onClick="{{ stop }}" style="width:min(720px,100%);max-height:90vh;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(8,20,42,.32);display:flex;flex-direction:column;overflow:hidden;animation:cmpop .24s ease">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:22px 26px;border-bottom:1px solid var(--divider)"><div><div style="font:600 17px var(--font-body);color:var(--azul-900)">{{ sheetTitle }}</div><div style="font-size:12.5px;color:var(--cinza-500);margin-top:2px">Preencha os campos e salve</div></div><button onClick="{{ closeSheet }}" style="width:36px;height:36px;border:none;border-radius:9px;background:var(--bg-page);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--cinza-500)" style-hover="background:var(--azul-50)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+      <div class="cm-scroll" style="flex:1;overflow-y:auto;padding:26px">
+        <div class="cm-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <sc-for list="{{ sheetFields }}" as="f" hint-placeholder-count="4">
+          <div style="{{ f.spanStyle }}"><label style="font:600 12.5px var(--font-body);color:var(--cinza-700);margin-bottom:6px;display:block">{{ f.label }}</label><input placeholder="{{ f.ph }}" style="width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:9px;font:14px var(--font-body);background:#fff;outline:none" style-focus="border-color:var(--azul-600);box-shadow:0 0 0 3px var(--azul-100)"></div>
+          </sc-for>
+          <div style="grid-column:1/-1;display:flex;gap:11px;padding:13px 15px;background:var(--info-bg);border-radius:10px;font-size:12.5px;color:var(--azul-800);line-height:1.5"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Registros nunca são apagados definitivamente — a exclusão converte para <strong>Inativo</strong> ou <strong>Bloqueado</strong>, preservando o histórico.</span></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;padding:18px 26px;border-top:1px solid var(--divider);background:var(--bg-page)"><button onClick="{{ closeSheet }}" style="padding:11px 22px;border:1.5px solid var(--border);border-radius:9px;background:#fff;color:var(--cinza-700);font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-50)">Cancelar</button><button onClick="{{ saveSheet }}" style="padding:11px 24px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-800)">Salvar</button></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ reproveOpen }}">
+  <div onClick="{{ cancelReprove }}" style="position:fixed;inset:0;background:rgba(10,25,50,.5);z-index:72;display:flex;align-items:center;justify-content:center;padding:24px;animation:cmover .2s">
+    <div onClick="{{ stop }}" style="width:100%;max-width:480px;background:#fff;border-radius:16px;box-shadow:0 24px 60px rgba(8,20,42,.32);overflow:hidden;animation:cmfade .22s">
+      <div style="padding:22px 24px 0"><div style="display:flex;gap:13px;align-items:center"><div style="width:44px;height:44px;border-radius:11px;background:var(--erro-bg);color:var(--erro-700);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div><div><div style="font:600 16.5px var(--font-body);color:var(--azul-900)">Reprovar documento</div><div style="font-size:12.5px;color:var(--cinza-500);margin-top:1px">{{ reproveTitle }}</div></div></div></div>
+      <div style="padding:20px 24px">
+        <label style="font:600 12.5px var(--font-body);color:var(--cinza-700);margin-bottom:7px;display:block">Justificativa da reprovação <span style="color:var(--erro-700)">*</span></label>
+        <textarea value="{{ reproveText }}" onInput="{{ setReproveText }}" placeholder="Descreva o motivo (ex.: imagem ilegível, documento vencido, dados divergentes…). O fornecedor verá esta justificativa." style="width:100%;min-height:110px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;font:14px var(--font-body);background:#fff;outline:none;resize:vertical;line-height:1.5" style-focus="border-color:var(--azul-600);box-shadow:0 0 0 3px var(--azul-100)"></textarea>
+        <div style="font-size:12px;color:var(--cinza-400);margin-top:7px">A justificativa é obrigatória e fica registrada na auditoria (RN003).</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;padding:0 24px 22px"><button onClick="{{ cancelReprove }}" style="padding:11px 20px;border:1.5px solid var(--border);border-radius:9px;background:#fff;color:var(--cinza-700);font:600 14px var(--font-body);cursor:pointer" style-hover="background:var(--azul-50)">Cancelar</button><button onClick="{{ confirmReprove }}" disabled="{{ reproveDisabled }}" style="{{ confirmStyle }}">Confirmar reprovação</button></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ toastOpen }}">
+  <div style="position:fixed;top:82px;right:24px;z-index:80;display:flex;align-items:center;gap:12px;padding:13px 18px;background:#EDF7F0;border:1px solid #B7E0C4;border-left:4px solid #2E9E5B;border-radius:10px;box-shadow:0 8px 24px rgba(20,80,45,.14);font:500 14px var(--font-body);color:#1E7A44;max-width:min(420px,92vw);animation:cmtoast .25s ease"><span style="width:24px;height:24px;border-radius:50%;background:#2E9E5B;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span>{{ toastMsg }}</span></div>
+  </sc-if>
+
+  <div style="position:fixed;bottom:20px;right:20px;z-index:60;display:flex;align-items:center;gap:8px;padding:7px 9px 7px 14px;background:#fff;border:1px solid var(--border);border-radius:999px;box-shadow:0 8px 24px rgba(8,20,42,.16)">
+    <span style="font:600 10px var(--font-body);letter-spacing:.08em;color:var(--cinza-400)">DEMO</span>
+    <div style="display:flex;background:var(--bg-page);border-radius:999px;padding:3px">
+      <a href="Compra Mais - Landing Publica.dc.html" style="padding:6px 13px;border-radius:999px;color:var(--cinza-500);font:600 12.5px var(--font-body);text-decoration:none" style-hover="color:var(--azul-700)">Landing</a>
+      <span style="padding:6px 13px;border-radius:999px;background:var(--azul-700);color:#fff;font:600 12.5px var(--font-body)">Administrador</span>
+      <a href="Compra Mais - Portal do Fornecedor.dc.html" style="padding:6px 13px;border-radius:999px;color:var(--cinza-500);font:600 12.5px var(--font-body);text-decoration:none" style-hover="color:var(--azul-700)">Fornecedor</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    screen: 'dashboard',
+    sidebarOpen: false, sidebarCollapsed: false, notifOpen: false, profileOpen: false,
+    toastOpen: false, toastMsg: '',
+    sheetOpen: false, sheetTitle: '', sheetKind: '',
+    fornSearch: '', fornStatus: 'todos', fornSort: 'razao-asc', filtroOpen: false, ordenarOpen: false,
+    senhaAtual: '', novaSenha: '', confirmSenha: '',
+    reproveOpen: false, reproveId: null, reproveTitleTxt: '', reproveText: '',
+    viewForn: null, viewGen: null, statusOv: {},
+    fornData: [
+      { id:'f1', cnpj:'12.345.678/0001-90', razao:'Malharia Maria', nome:'Malharia Acreana LTDA', porte:'ME', cnae:'1422-0/00 · Malharia', cap:'300 un/mês', status:'Credenciado', resp:'Maria Nazaré', email:'contato@malhariamaria.com.br', tel:'(68) 3226-1200' },
+      { id:'f2', cnpj:'98.765.432/0001-10', razao:'Floresta Uniformes', nome:'Confecções Floresta EIRELI', porte:'EPP', cnae:'1412-6/01 · Vestuário', cap:'800 un/mês', status:'Fornecedor', resp:'João Batista', email:'comercial@florestauniformes.com.br', tel:'(68) 3224-8890' },
+      { id:'f3', cnpj:'11.222.333/0001-44', razao:'Xapuri Móveis', nome:'Móveis Xapuri ME', porte:'ME', cnae:'3101-2/00 · Móveis', cap:'120 un/mês', status:'Bloqueado', resp:'Antônio Ferreira', email:'contato@xapurimoveis.com.br', tel:'(68) 3232-4510' },
+      { id:'f4', cnpj:'44.555.666/0001-22', razao:'Gráfica Seringueira', nome:'Gráfica Seringueira LTDA', porte:'EPP', cnae:'1813-0/01 · Gráfica', cap:'500 un/mês', status:'Reserva', resp:'Cláudia Souza', email:'grafica@seringueira.com.br', tel:'(68) 3223-7788' },
+      { id:'f5', cnpj:'77.888.999/0001-55', razao:'Têxtil Amazônia', nome:'Têxtil Amazônia MEI', porte:'MEI', cnae:'1412-6/01 · Vestuário', cap:'150 un/mês', status:'Requerente', resp:'Pedro Henrique', email:'pedro@textilamazonia.com.br', tel:'(68) 99911-2020' },
+    ],
+    analiseDocs: [
+      { id: 'a1', titulo: 'Balanço Patrimonial', empresa: 'Malharia Maria (12.345.678/0001-90)', enviado: '2026-06-15' },
+      { id: 'a2', titulo: 'Balanço Patrimonial', empresa: 'Têxtil Amazônia (77.888.999/0001-55)', enviado: '2026-06-20' },
+    ],
+  };
+
+  chip(s) {
+    const map = {
+      'Ativo':'g','Ativa':'g','Credenciado':'g','Fornecedor':'g','Aprovado':'g','Homologado':'g','Regular':'g','Sim':'g',
+      'Pendente':'a','Requerente':'a','Reserva':'a','Rascunho':'a',
+      'Aberto':'b','Em Distribuição':'b','Em Execução':'b','Em Análise':'b',
+      'Reprovado':'r','Bloqueado':'r','Não':'r',
+      'Inativo':'n','Inativa':'n',
+    };
+    const t = map[s] || 'n';
+    const c = {
+      g:['var(--sucesso-bg)','var(--sucesso)'], a:['var(--atencao-bg)','#8A5410'],
+      b:['var(--info-bg)','var(--azul-700)'], r:['var(--erro-bg)','var(--erro-700)'],
+      n:['var(--cinza-100)','var(--cinza-500)'],
+    }[t];
+    return 'display:inline-flex;align-items:center;padding:3px 11px;border-radius:999px;font:600 12px var(--font-body);white-space:nowrap;background:' + c[0] + ';color:' + c[1] + ';';
+  }
+  perfilChip(p) {
+    const c = p === 'Administrador' ? ['var(--azul-700)','#fff'] : p === 'Auditor' ? ['var(--atencao-bg)','#8A5410'] : ['var(--info-bg)','var(--azul-700)'];
+    return 'display:inline-flex;align-items:center;padding:3px 11px;border-radius:999px;font:600 12px var(--font-body);white-space:nowrap;background:' + c[0] + ';color:' + c[1] + ';';
+  }
+
+  go = (s) => this.setState({ screen: s, sidebarOpen: false, notifOpen: false, profileOpen: false });
+  goConta = () => this.setState({ screen: 'conta', sidebarOpen: false, notifOpen: false, profileOpen: false, senhaAtual: '', novaSenha: '', confirmSenha: '' });
+  setSenha = (k) => (e) => this.setState({ [k]: e.target.value });
+  toggleContaSenha = () => this.setState((s) => ({ contaSenhaOpen: !s.contaSenhaOpen, novaSenha: '' }));
+  salvarSenha = () => { this.setState({ contaSenhaOpen: false, senhaAtual: '', novaSenha: '', confirmSenha: '' }); this.showToast('Senha atualizada com sucesso.'); };
+  setFornSearch = (e) => this.setState({ fornSearch: e.target.value });
+  toggleFiltro = () => this.setState((s) => ({ filtroOpen: !s.filtroOpen, ordenarOpen: false }));
+  toggleOrdenar = () => this.setState((s) => ({ ordenarOpen: !s.ordenarOpen, filtroOpen: false }));
+  closeMenus = () => this.setState({ filtroOpen: false, ordenarOpen: false });
+  setFornStatus = (v) => this.setState({ fornStatus: v, filtroOpen: false });
+  setFornSort = (v) => this.setState({ fornSort: v, ordenarOpen: false });
+  verForn = (id) => { const f = this.state.fornData.find((x) => x.id === id); this.setState({ viewForn: f || null }); };
+  closeView = () => this.setState({ viewForn: null });
+  editarForn = (id) => { const f = this.state.fornData.find((x) => x.id === id); this.setState({ viewForn: null, sheetOpen: true, sheetKind: 'fornecedor', sheetTitle: 'Editar fornecedor — ' + (f ? f.razao : '') }); };
+  bloquearForn = (id) => {
+    this.setState((s) => ({
+      viewForn: null,
+      fornData: s.fornData.map((f) => f.id === id ? { ...f, status: (f.status === 'Bloqueado' || f.status === 'Inativo') ? 'Credenciado' : 'Bloqueado' } : f),
+    }));
+    const f = this.state.fornData.find((x) => x.id === id);
+    const was = f && (f.status === 'Bloqueado' || f.status === 'Inativo');
+    this.showToast(was ? 'Fornecedor reativado (Credenciado).' : 'Fornecedor bloqueado — histórico preservado.');
+  };
+  openViewGen = (rec) => this.setState({ viewGen: rec });
+  closeViewGen = () => this.setState({ viewGen: null });
+  editGen = (title, kind) => this.setState({ viewGen: null, sheetOpen: true, sheetKind: kind || '', sheetTitle: title });
+  toggleStatusGen = (key, curStatus, activeVal, inactiveVal) => {
+    const isInactive = curStatus === inactiveVal;
+    this.setState((s) => ({ viewGen: null, statusOv: { ...s.statusOv, [key]: isInactive ? activeVal : inactiveVal } }));
+    this.showToast(isInactive ? 'Registro reativado (' + activeVal + ').' : 'Registro convertido para ' + inactiveVal + ' — histórico preservado.');
+  };
+  toggleMenu = () => { if (typeof window !== 'undefined' && window.innerWidth <= 920) this.setState(s => ({ sidebarOpen: !s.sidebarOpen })); else this.setState(s => ({ sidebarCollapsed: !s.sidebarCollapsed })); };
+  closeMenu = () => this.setState({ sidebarOpen: false });
+  toggleNotif = () => this.setState(s => ({ notifOpen: !s.notifOpen, profileOpen: false }));
+  closeNotif = () => this.setState({ notifOpen: false });
+  toggleProfile = () => this.setState(s => ({ profileOpen: !s.profileOpen, notifOpen: false }));
+  closeProfile = () => this.setState({ profileOpen: false });
+  stop = (e) => { if (e && e.stopPropagation) e.stopPropagation(); };
+
+  showToast(msg) {
+    this.setState({ toastOpen: true, toastMsg: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toastOpen: false }), 2800);
+  }
+
+  openSheet(title, kind) { this.setState({ sheetOpen: true, sheetTitle: title, sheetKind: kind, profileOpen: false }); }
+  closeSheet = () => this.setState({ sheetOpen: false });
+  saveSheet = () => { this.setState({ sheetOpen: false }); this.showToast('Cadastro salvo com sucesso.'); };
+
+  reprovar(id, titulo) { this.setState({ reproveOpen: true, reproveId: id, reproveTitleTxt: titulo, reproveText: '' }); }
+  setReproveText = (e) => this.setState({ reproveText: e.target.value });
+  cancelReprove = () => this.setState({ reproveOpen: false, reproveText: '' });
+  confirmReprove = () => {
+    if (!this.state.reproveText.trim()) return;
+    const id = this.state.reproveId;
+    this.setState(s => ({ reproveOpen: false, reproveText: '', analiseDocs: s.analiseDocs.filter(d => d.id !== id) }));
+    this.showToast('Documento reprovado — justificativa registrada e fornecedor notificado.');
+  };
+  aprovar(id) {
+    this.setState(s => ({ analiseDocs: s.analiseDocs.filter(d => d.id !== id) }));
+    this.showToast('Documento aprovado.');
+  }
+
+  renderVals() {
+    const S = this.state;
+    const nav = (k) => { const a = S.screen === k; return 'display:flex;align-items:center;gap:11px;width:100%;padding:10px 13px;border:none;border-radius:8px;cursor:pointer;text-align:left;font:' + (a ? '600' : '500') + ' 14px var(--font-body);background:' + (a ? 'var(--azul-50)' : 'transparent') + ';color:' + (a ? 'var(--azul-700)' : 'var(--cinza-700)') + ';transition:all .12s;'; };
+    const keys = ['dashboard','fornecedores','editais','credenciamento','analise','distribuicao','reserva','malote','desistencias','secretarias','usuarios','setores','tipos','auditoria','transparencia'];
+    const out = {};
+    const cap = (k) => k.charAt(0).toUpperCase() + k.slice(1);
+    keys.forEach(k => {
+      out['nav' + cap(k)] = nav(k);
+      out['act' + cap(k)] = S.screen === k ? '1' : '0';
+      out['is' + cap(k)] = S.screen === k;
+      out['go' + cap(k)] = () => this.go(k);
+    });
+
+    const withChip = (arr) => arr.map(r => ({ ...r, stStyle: this.chip(r.status) }));
+    const fornecedoresBase = withChip(S.fornData);
+    const capNum = (c) => parseInt(String(c).replace(/\D/g, ''), 10) || 0;
+    const q = S.fornSearch.trim().toLowerCase();
+    let fornecedores = fornecedoresBase.filter((f) => {
+      const matchQ = !q || f.razao.toLowerCase().includes(q) || f.nome.toLowerCase().includes(q) || f.cnpj.includes(q);
+      const matchS = S.fornStatus === 'todos' || f.status === S.fornStatus;
+      return matchQ && matchS;
+    });
+    const sorters = {
+      'razao-asc': (a, b) => a.razao.localeCompare(b.razao),
+      'razao-desc': (a, b) => b.razao.localeCompare(a.razao),
+      'cap-desc': (a, b) => capNum(b.cap) - capNum(a.cap),
+      'cap-asc': (a, b) => capNum(a.cap) - capNum(b.cap),
+      'status-asc': (a, b) => a.status.localeCompare(b.status),
+    };
+    fornecedores = fornecedores.slice().sort(sorters[S.fornSort] || sorters['razao-asc']);
+    fornecedores = fornecedores.map((f) => ({ ...f, onVer: () => this.verForn(f.id), onEditar: () => this.editarForn(f.id), onBloquear: () => this.bloquearForn(f.id), bloqTitle: (f.status === 'Bloqueado' || f.status === 'Inativo') ? 'Reativar' : 'Bloquear / Inativar' }));
+    const optRow = (active) => 'display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:9px 11px;border:none;border-radius:8px;background:' + (active ? 'var(--azul-50)' : 'transparent') + ';color:' + (active ? 'var(--azul-700)' : 'var(--cinza-700)') + ';font:' + (active ? '600' : '500') + ' 13.5px var(--font-body);cursor:pointer;text-align:left;';
+    const statusFiltros = [
+      ['todos', 'Todos os status'], ['Credenciado', 'Credenciado'], ['Fornecedor', 'Fornecedor'],
+      ['Requerente', 'Requerente'], ['Reserva', 'Reserva'], ['Bloqueado', 'Bloqueado'],
+    ].map(([v, label]) => ({ label, active: S.fornStatus === v, style: optRow(S.fornStatus === v), on: () => this.setFornStatus(v) }));
+    const ordenacoes = [
+      ['razao-asc', 'Razão social (A–Z)'], ['razao-desc', 'Razão social (Z–A)'],
+      ['cap-desc', 'Maior capacidade'], ['cap-asc', 'Menor capacidade'], ['status-asc', 'Status'],
+    ].map(([v, label]) => ({ label, active: S.fornSort === v, style: optRow(S.fornSort === v), on: () => this.setFornSort(v) }));
+    const activeToolBtn = 'display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border:1.5px solid var(--azul-600);border-radius:9px;background:var(--azul-50);color:var(--azul-700);font:600 13.5px var(--font-body);cursor:pointer';
+    const ov = S.statusOv;
+    const formKindMap = { edital: 'edital', sec: 'secretaria', user: 'usuario', setor: 'setor', tipo: 'tipo' };
+    const genRows = (arr, kind, opts) => arr.map((r, i) => {
+      const key = kind + ':' + i;
+      const fk = formKindMap[kind] || '';
+      const status = ov[key] || r.status;
+      const title = opts.title(r);
+      const row = { ...r, status, stStyle: this.chip(status) };
+      row.onVer = () => this.openViewGen({ title, subtitle: opts.subtitle ? opts.subtitle(r) : '', status, stStyle: this.chip(status), fields: opts.fields(r), editTitle: opts.editTitle, formKind: fk, key, active: opts.active, inactive: opts.inactive, hasBlock: !!opts.inactive, bloqTitle: (status === opts.inactive) ? 'Reativar' : (opts.blockLabel || 'Inativar') });
+      row.onEditar = () => this.editGen(opts.editTitle + ' — ' + title, fk);
+      if (opts.inactive) { row.onBloquear = () => this.toggleStatusGen(key, status, opts.active, opts.inactive); row.bloqTitle = (status === opts.inactive) ? 'Reativar' : (opts.blockLabel || 'Inativar'); }
+      return row;
+    });
+    const editais = genRows([
+      { num:'CR 001/2026', objeto:'Confecção de fardamento escolar — Ensino Fundamental', secretaria:'SEME', qtd:'2.400 peças · R$ 48,50/un', prazo:'01/06 → 31/07', cnae:'1412-6/01', cred:4, status:'Aberto' },
+      { num:'CR 002/2026', objeto:'Aquisição de mobiliário escolar — mesas e cadeiras', secretaria:'SEME', qtd:'600 conjuntos · R$ 320,00/un', prazo:'10/05 → 20/06', cnae:'3101-2/00', cred:3, status:'Em Distribuição' },
+      { num:'CR 003/2026', objeto:'Impressão de cartilhas de orientação à saúde', secretaria:'SEMSA', qtd:'15.000 exemplares · R$ 6,20/un', prazo:'01/04 → 15/05', cnae:'1813-0/01', cred:5, status:'Em Execução' },
+      { num:'CR 004/2026', objeto:'Uniformes para Guarda Municipal', secretaria:'SEMSEG', qtd:'800 peças · R$ 185,00/un', prazo:'01/07 → 15/08', cnae:'1412-6/01', cred:0, status:'Rascunho' },
+    ], 'edital', { title:(e)=>e.num, subtitle:(e)=>e.objeto, editTitle:'Editar edital', fields:(e)=>[{l:'Número',v:e.num},{l:'Secretaria',v:e.secretaria},{l:'Objeto',v:e.objeto},{l:'Quantidade / valor',v:e.qtd},{l:'CNAE exigido',v:e.cnae},{l:'Prazo',v:e.prazo},{l:'Credenciados',v:String(e.cred)}] });
+    const elegiveis = withChip([
+      { nome:'Malharia Maria', cnpj:'12.345.678/0001-90', cap:'300 un/mês', status:'Credenciado' },
+      { nome:'Floresta Uniformes', cnpj:'98.765.432/0001-10', cap:'800 un/mês', status:'Fornecedor' },
+      { nome:'Têxtil Amazônia', cnpj:'77.888.999/0001-55', cap:'150 un/mês', status:'Requerente' },
+    ]);
+    const secretarias = genRows([
+      { sigla:'SEME', nome:'Secretaria Municipal de Educação', resp:'Marina Oliveira', contato:'educacao@riobranco.ac.gov.br', status:'Ativa' },
+      { sigla:'SEMSA', nome:'Secretaria Municipal de Saúde', resp:'Carlos Andrade', contato:'saude@riobranco.ac.gov.br', status:'Ativa' },
+      { sigla:'SEMSEG', nome:'Secretaria Municipal de Segurança', resp:'Lúcia Pereira', contato:'seguranca@riobranco.ac.gov.br', status:'Ativa' },
+      { sigla:'SEMOB', nome:'Secretaria Municipal de Obras', resp:'Roberto Lima', contato:'obras@riobranco.ac.gov.br', status:'Inativa' },
+      { sigla:'SEMAS', nome:'Secretaria de Assistência Social', resp:'Joana Albuquerque', contato:'assist@riobranco.ac.gov.br', status:'Ativa' },
+    ], 'sec', { title:(s)=>s.sigla, subtitle:(s)=>s.nome, editTitle:'Editar secretaria', active:'Ativa', inactive:'Inativa', blockLabel:'Inativar', fields:(s)=>[{l:'Sigla',v:s.sigla},{l:'Nome',v:s.nome},{l:'Responsável',v:s.resp},{l:'Contato',v:s.contato}] });
+    const usuarios = genRows([
+      { nome:'Silas Carvalho', cargo:'Analista CPL', sec:'CPL', perfil:'Administrador', login:'silas.cpl', status:'Ativo' },
+      { nome:'Ana Beatriz Silva', cargo:'Coordenadora', sec:'SEMGA', perfil:'Analista', login:'ana.smga', status:'Ativo' },
+      { nome:'Marina Oliveira', cargo:'Secretária', sec:'SEME', perfil:'Gestor', login:'marina.seme', status:'Ativo' },
+      { nome:'Carlos Andrade', cargo:'Secretário', sec:'SEMSA', perfil:'Gestor', login:'carlos.semsa', status:'Inativo' },
+      { nome:'Roberto Lima', cargo:'Auditor', sec:'Controladoria', perfil:'Auditor', login:'roberto.aud', status:'Ativo' },
+    ], 'user', { title:(u)=>u.nome, subtitle:(u)=>u.cargo + ' · ' + u.sec, editTitle:'Editar usuário', active:'Ativo', inactive:'Inativo', blockLabel:'Bloquear', fields:(u)=>[{l:'Nome',v:u.nome},{l:'Cargo',v:u.cargo},{l:'Secretaria',v:u.sec},{l:'Perfil de acesso',v:u.perfil},{l:'Login',v:u.login}] }).map(u => ({ ...u, perfilStyle: this.perfilChip(u.perfil) }));
+    const setores = genRows([
+      { codigo:'1412-6/01', desc:'Confecção de peças de vestuário', cat:'Indústria têxtil', status:'Ativo' },
+      { codigo:'1422-0/00', desc:'Fabricação de artigos de malharia', cat:'Indústria têxtil', status:'Ativo' },
+      { codigo:'3101-2/00', desc:'Fabricação de móveis com predominância de madeira', cat:'Móveis', status:'Ativo' },
+      { codigo:'1813-0/01', desc:'Impressão de material para uso publicitário', cat:'Gráfica', status:'Ativo' },
+      { codigo:'1052-0/00', desc:'Fabricação de laticínios', cat:'Alimentos', status:'Ativo' },
+      { codigo:'1091-1/02', desc:'Fabricação de produtos de padaria e confeitaria', cat:'Alimentos', status:'Inativo' },
+    ], 'setor', { title:(s)=>s.codigo, subtitle:(s)=>s.desc, editTitle:'Editar setor', active:'Ativo', inactive:'Inativo', blockLabel:'Inativar', fields:(s)=>[{l:'Código CNAE',v:s.codigo},{l:'Descrição',v:s.desc},{l:'Categoria',v:s.cat}] });
+    const tipos = genRows([
+      { nome:'Cartão CNPJ', formato:'PDF', obrig:'Sim', validade:'90 dias', status:'Ativo' },
+      { nome:'Contrato Social', formato:'PDF', obrig:'Sim', validade:'Sem validade', status:'Ativo' },
+      { nome:'Certidão Negativa PGM', formato:'PDF', obrig:'Sim', validade:'30 dias', status:'Ativo' },
+      { nome:'Certidão FGTS', formato:'PDF', obrig:'Sim', validade:'30 dias', status:'Ativo' },
+      { nome:'Balanço Patrimonial', formato:'PDF', obrig:'Não', validade:'Exercício', status:'Ativo' },
+    ], 'tipo', { title:(t)=>t.nome, editTitle:'Editar tipo de arquivo', active:'Ativo', inactive:'Inativo', blockLabel:'Inativar', fields:(t)=>[{l:'Documento',v:t.nome},{l:'Formato',v:t.formato},{l:'Obrigatório',v:t.obrig},{l:'Validade',v:t.validade}] });
+    const rateio = [
+      { nome:'Floresta Uniformes', cap:'800 un/mês', cota:'300 conjuntos', pct:'50,0%' },
+      { nome:'Malharia Maria', cap:'300 un/mês', cota:'150 conjuntos', pct:'25,0%' },
+      { nome:'Têxtil Amazônia', cap:'150 un/mês', cota:'150 conjuntos', pct:'25,0%' },
+    ];
+    const maloteOrdem = [
+      { n:'1', label:'Cartão CNPJ' }, { n:'2', label:'Identificação do Sócio' },
+      { n:'3', label:'Anexos do Edital' }, { n:'4', label:'Certidões' },
+    ];
+    const logs = [
+      { ts:'2026-06-25 14:32', user:'silas.cpl', perfil:'Administrador', acao:'Aprovou documento', alvo:'Balanço Patrimonial — Floresta Uniformes', ip:'10.1.2.4' },
+      { ts:'2026-06-25 11:08', user:'sistema', perfil:'Sistema', acao:'Bloqueio automático PGM', alvo:'Xapuri Móveis (11.222.333/0001-44)', ip:'—' },
+      { ts:'2026-06-24 16:45', user:'silas.cpl', perfil:'Administrador', acao:'Gerou Malote SEI', alvo:'Edital CR 002/2026 — Floresta Uniformes', ip:'10.1.2.4' },
+      { ts:'2026-06-24 09:21', user:'ana.smga', perfil:'Analista', acao:'Reprovou documento', alvo:'Certidão PGM — Xapuri Móveis', ip:'10.1.2.9' },
+      { ts:'2026-06-23 17:55', user:'sistema', perfil:'Sistema', acao:'Distribuição calculada', alvo:'Edital CR 002/2026', ip:'—' },
+    ];
+    const invSecretaria = [
+      { nome:'Educação', valor:'R$ 1.420.000', pct:'100%' },
+      { nome:'Saúde', valor:'R$ 680.000', pct:'48%' },
+      { nome:'Segurança', valor:'R$ 420.000', pct:'30%' },
+      { nome:'Assistência Social', valor:'R$ 320.000', pct:'22%' },
+    ];
+    const porte = [
+      { nome:'MEI', pct:'42%', cor:'var(--azul-600)' },
+      { nome:'ME', pct:'38%', cor:'var(--azul-500)' },
+      { nome:'EPP', pct:'20%', cor:'var(--ambar-300)' },
+    ];
+
+    const analiseDocs = S.analiseDocs.map(d => ({
+      ...d,
+      reprovar: () => this.reprovar(d.id, d.titulo + ' · ' + d.empresa),
+      aprovar: () => this.aprovar(d.id),
+    }));
+
+    const thL = 'display:table-cell;vertical-align:middle;padding:13px 18px;font:600 11px var(--font-body);letter-spacing:.05em;color:var(--azul-900);text-transform:uppercase;text-align:left';
+    const thR = thL + ';text-align:right';
+    const td = 'display:table-cell;vertical-align:middle;border-top:1px solid var(--divider);padding:14px 18px';
+    const tdR = td + ';text-align:right';
+    const toolBtn = 'display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--cinza-700);font:600 13.5px var(--font-body);cursor:pointer';
+    const pager = 'display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-top:1px solid var(--divider);font:13px var(--font-body)';
+    const pgBtn = 'padding:7px 13px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--cinza-500);font:500 13px var(--font-body);cursor:pointer';
+    const pgActive = 'padding:7px 13px;border:1px solid var(--azul-700);border-radius:8px;background:var(--azul-700);color:#fff;font:600 13px var(--font-body);cursor:pointer';
+    const pill = (bg, cl) => 'display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font:600 11.5px var(--font-body);background:' + bg + ';color:' + cl + ';';
+
+    const canConfirm = !!S.reproveText.trim();
+    const confirmStyle = 'padding:11px 22px;border:none;border-radius:9px;font:600 14px var(--font-body);' + (canConfirm ? 'background:var(--erro);color:#fff;cursor:pointer' : 'background:var(--cinza-200);color:var(--cinza-400);cursor:not-allowed');
+
+    const sheetFieldsByKind = {
+      fornecedor: [{label:'CNPJ',ph:'00.000.000/0000-00'},{label:'Razão social',ph:'Razão social da empresa'},{label:'Porte',ph:'MEI / ME / EPP'},{label:'CNAE principal',ph:'0000-0/00'}],
+      edital: [{label:'Número do edital',ph:'CR 000/2026'},{label:'Objeto',ph:'Descrição da demanda'},{label:'Secretaria demandante',ph:'SEME, SEMSA…'},{label:'CNAE exigido',ph:'0000-0/00'}],
+      secretaria: [{label:'Sigla',ph:'SEME'},{label:'Nome',ph:'Secretaria Municipal de…'},{label:'Responsável',ph:'Nome do responsável'},{label:'E-mail de contato',ph:'setor@riobranco.ac.gov.br'}],
+      usuario: [{label:'Nome completo',ph:'Nome do servidor'},{label:'Cargo',ph:'Analista, Secretário…'},{label:'Secretaria / setor',ph:'CPL, SEME…'},{label:'Login',ph:'nome.setor'}],
+      setor: [{label:'Código CNAE',ph:'0000-0/00'},{label:'Descrição',ph:'Descrição da atividade'},{label:'Categoria',ph:'Indústria têxtil, Alimentos…'}],
+      tipo: [{label:'Nome do documento',ph:'Ex.: Certidão FGTS'},{label:'Formato aceito',ph:'PDF'},{label:'Validade',ph:'30 dias, sem validade…'}],
+    };
+
+    return {
+      ...out,
+      sbFlag: S.sidebarOpen ? '1' : '0', sbCollapsed: S.sidebarCollapsed ? '1' : '0',
+      toggleMenu: this.toggleMenu, closeMenu: this.closeMenu,
+      notifOpen: S.notifOpen, toggleNotif: this.toggleNotif, closeNotif: this.closeNotif,
+      profileOpen: S.profileOpen, toggleProfile: this.toggleProfile, closeProfile: this.closeProfile,
+      fornecedores, editais, elegiveis, secretarias, usuarios, setores, tipos, rateio, maloteOrdem, logs, invSecretaria, porte,
+      analiseDocs, hasAnalise: analiseDocs.length > 0, noAnalise: analiseDocs.length === 0, analiseCount: analiseDocs.length,
+      thL, thR, td, tdR, toolBtn, pager, pgBtn, pgActive,
+      pillOk: pill('var(--sucesso-bg)','var(--sucesso)'), pillInfo: pill('var(--info-bg)','var(--azul-700)'),
+      chipAberto: this.chip('Aberto'), chipDistrib: this.chip('Em Distribuição'), chipReserva: this.chip('Reserva'), chipPendente: this.chip('Pendente'),
+      exportar: () => this.showToast('Exportação gerada (Excel / PDF).'),
+      viewOpen: !!S.viewForn, vf: S.viewForn ? { ...S.viewForn, stStyle: this.chip(S.viewForn.status), bloqTitle: (S.viewForn.status === 'Bloqueado' || S.viewForn.status === 'Inativo') ? 'Reativar' : 'Bloquear' } : {},
+      closeView: this.closeView,
+      vfEditar: () => S.viewForn && this.editarForn(S.viewForn.id),
+      vfBloquear: () => S.viewForn && this.bloquearForn(S.viewForn.id),
+      viewGenOpen: !!S.viewGen, vg: S.viewGen || { fields: [] },
+      closeViewGen: this.closeViewGen,
+      vgEditar: () => S.viewGen && this.editGen(S.viewGen.editTitle + ' — ' + S.viewGen.title, S.viewGen.formKind),
+      vgBloquear: () => S.viewGen && S.viewGen.hasBlock && this.toggleStatusGen(S.viewGen.key, S.viewGen.status, S.viewGen.active, S.viewGen.inactive),
+      fornSearch: S.fornSearch, setFornSearch: this.setFornSearch,
+      filtroOpen: S.filtroOpen, ordenarOpen: S.ordenarOpen,
+      toggleFiltro: this.toggleFiltro, toggleOrdenar: this.toggleOrdenar, closeMenus: this.closeMenus,
+      statusFiltros, ordenacoes,
+      fornFilterActive: S.fornStatus !== 'todos',
+      filtroBtn: (S.fornStatus !== 'todos' || S.filtroOpen) ? activeToolBtn : (this._tb || 'display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--cinza-700);font:600 13.5px var(--font-body);cursor:pointer'),
+      ordenarBtn: S.ordenarOpen ? activeToolBtn : 'display:inline-flex;align-items:center;gap:7px;padding:10px 15px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--cinza-700);font:600 13.5px var(--font-body);cursor:pointer',
+      fornEmpty: fornecedores.length === 0,
+      fornCount: fornecedores.length,
+      exportarLogs: () => this.showToast('Logs de auditoria exportados.'),
+      homologar: () => this.showToast('Distribuição homologada com sucesso.'),
+      gerarMalote: () => this.showToast('Malote SEI gerado — PDF único de 8,4 MB.'),
+      acVer: () => this.showToast('Abrindo visualização do registro…'),
+      acEditar: () => this.showToast('Abrindo edição do registro…'),
+      acBloquear: () => this.showToast('Registro convertido para Inativo (histórico preservado).'),
+      openNovoFornecedor: () => this.openSheet('Novo fornecedor','fornecedor'),
+      openNovoEdital: () => this.openSheet('Novo edital','edital'),
+      openNovaSecretaria: () => this.openSheet('Nova secretaria','secretaria'),
+      openNovoUsuario: () => this.openSheet('Novo usuário','usuario'),
+      openNovoSetor: () => this.openSheet('Novo setor industrial','setor'),
+      openNovoTipo: () => this.openSheet('Novo tipo de arquivo','tipo'),
+      sheetOpen: S.sheetOpen, sheetTitle: S.sheetTitle, closeSheet: this.closeSheet, saveSheet: this.saveSheet,
+      isConta: S.screen === 'conta', goConta: this.goConta,
+      senhaAtual: S.senhaAtual, novaSenha: S.novaSenha, confirmSenha: S.confirmSenha,
+      setSenhaAtual: this.setSenha('senhaAtual'), setNovaSenha: this.setSenha('novaSenha'), setConfirmSenha: this.setSenha('confirmSenha'),
+      salvarSenha: this.salvarSenha,
+      senhaCancelar: () => this.setState({ contaSenhaOpen: false, senhaAtual: '', novaSenha: '', confirmSenha: '' }),
+      contaSenhaOpen: S.contaSenhaOpen, contaSenhaClosed: !S.contaSenhaOpen, toggleContaSenha: this.toggleContaSenha,
+      senhaDisabled: (S.novaSenha && S.novaSenha.length >= 8) ? null : 'disabled',
+      senhaBtnStyle: (S.novaSenha && S.novaSenha.length >= 8)
+        ? 'padding:11px 22px;border:none;border-radius:9px;background:var(--azul-700);color:#fff;font:600 14px var(--font-body);cursor:pointer'
+        : 'padding:11px 22px;border:none;border-radius:9px;background:var(--cinza-200);color:var(--cinza-400);font:600 14px var(--font-body);cursor:not-allowed',
+      sheetFields: (sheetFieldsByKind[S.sheetKind] || []).map((f) => { const full = /Razão social|Objeto|Descrição|E-mail|Nome completo|Nome do documento/.test(f.label); return Object.assign({}, f, { spanStyle: full ? 'grid-column:1/-1' : '' }); }),
+      reproveOpen: S.reproveOpen, reproveTitle: S.reproveTitleTxt, reproveText: S.reproveText,
+      setReproveText: this.setReproveText, cancelReprove: this.cancelReprove, confirmReprove: this.confirmReprove,
+      reproveDisabled: canConfirm ? null : 'disabled', confirmStyle, stop: this.stop,
+      toastOpen: S.toastOpen, toastMsg: S.toastMsg,
+    };
+  }
+}
+</script>
+</body>
+</html>

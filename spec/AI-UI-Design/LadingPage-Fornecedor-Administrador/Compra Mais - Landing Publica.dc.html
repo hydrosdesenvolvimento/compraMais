@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail" data-bg-color="#0A2A52">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#0A2A52"/>
+    <circle cx="980" cy="200" r="180" fill="#14508F" opacity="0.6"/>
+    <rect x="150" y="260" width="480" height="60" rx="12" fill="#ffffff"/>
+    <rect x="150" y="345" width="360" height="34" rx="8" fill="#9DC3E6"/>
+    <rect x="150" y="430" width="220" height="64" rx="14" fill="#F2B705"/>
+    <g fill="#ffffff" opacity="0.9"><rect x="700" y="430" width="80" height="120" rx="8"/><rect x="800" y="390" width="80" height="160" rx="8"/><rect x="900" y="340" width="80" height="210" rx="8"/></g>
+    <text x="600" y="680" font-family="Poppins, sans-serif" font-size="46" font-weight="700" fill="#fff" text-anchor="middle">Compra Mais</text>
+    <text x="600" y="726" font-family="Poppins, sans-serif" font-size="22" letter-spacing="4" fill="#F2B705" text-anchor="middle">GOVERNO DIGITAL · RIO BRANCO</text>
+  </svg>
+</template>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_ds/prefeitura-de-rio-branco-design-system-4736aa51-9d84-41e8-b09d-cf429f0ce7ca/tokens/colors.css">
+<link rel="stylesheet" href="_ds/prefeitura-de-rio-branco-design-system-4736aa51-9d84-41e8-b09d-cf429f0ce7ca/tokens/typography.css">
+<link rel="stylesheet" href="_ds/prefeitura-de-rio-branco-design-system-4736aa51-9d84-41e8-b09d-cf429f0ce7ca/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/prefeitura-de-rio-branco-design-system-4736aa51-9d84-41e8-b09d-cf429f0ce7ca/tokens/effects.css">
+<style>
+:root{--font-body:"Poppins",system-ui,sans-serif;--bg-page:#F4F6FA;--border:#E6EBF1;--divider:#F0F3F7;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg-page);font-family:var(--font-body);color:#0A2A52;-webkit-font-smoothing:antialiased}
+a{text-decoration:none}
+@keyframes lpUp{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes lpFade{from{opacity:0}to{opacity:1}}
+@keyframes lpFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}
+@keyframes lpFloat2{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}
+@keyframes lpBarH{from{width:0}}
+@keyframes lpBarV{from{height:0}}
+@keyframes lpDraw{from{stroke-dashoffset:var(--len)}to{stroke-dashoffset:0}}
+@keyframes lpSpinIn{from{opacity:0;transform:rotate(-90deg) scale(.8)}to{opacity:1;transform:rotate(-90deg) scale(1)}}
+.lp-up{animation:lpUp .7s both}
+.lp-nav a.lp-link:hover{color:var(--azul-700)}
+.lp-card{transition:transform .22s ease,box-shadow .22s ease}
+.lp-card:hover{transform:translateY(-6px);box-shadow:0 22px 50px rgba(10,42,82,.14)}
+.lp-cta{transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.lp-cta:hover{transform:translateY(-2px)}
+.lp-barfill{animation:lpBarH 1.1s cubic-bezier(.22,.61,.36,1) both}
+.lp-vbar{animation:lpBarV 1s cubic-bezier(.22,.61,.36,1) both}
+.lp-scroll::-webkit-scrollbar{height:8px}
+.lp-scroll::-webkit-scrollbar-thumb{background:var(--cinza-300);border-radius:99px}
+.lp-wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.lp-g6{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.lp-g2{display:grid;grid-template-columns:1.15fr .85fr;gap:20px}
+.lp-g2e{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.lp-g4{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.lp-hero{display:grid;grid-template-columns:1.05fr .95fr;gap:40px;align-items:center}
+.lp-foot{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:32px}
+@media(max-width:1000px){
+  .lp-hero{grid-template-columns:1fr;gap:32px}
+  .lp-g6{grid-template-columns:repeat(2,1fr)}
+  .lp-g4{grid-template-columns:repeat(2,1fr)}
+  .lp-g2,.lp-g2e{grid-template-columns:1fr}
+  .lp-foot{grid-template-columns:1fr 1fr}
+  .lp-hidesm{display:none !important}
+}
+@media(max-width:600px){
+  .lp-g6,.lp-g4,.lp-foot{grid-template-columns:1fr}
+  .lp-h1{font-size:38px !important}
+}
+</style>
+</helmet>
+
+<div style="overflow-x:hidden">
+
+  <header style="position:sticky;top:0;z-index:50;background:rgba(255,255,255,.86);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)">
+    <div class="lp-wrap lp-nav" style="height:74px;display:flex;align-items:center;gap:20px">
+      <a href="#topo" style="display:flex;align-items:center;gap:11px"><img src="assets/logo-compra-mais-full.png" alt="Compra Mais — Rio Branco" style="height:52px;width:auto;display:block"></a>
+      <nav class="lp-hidesm" style="display:flex;gap:28px;margin-left:24px">
+        <a class="lp-link" href="#transparencia" style="font:500 14.5px var(--font-body);color:var(--cinza-700);transition:color .15s">Transparência</a>
+        <a class="lp-link" href="#como" style="font:500 14.5px var(--font-body);color:var(--cinza-700);transition:color .15s">Como funciona</a>
+        <a class="lp-link" href="#editais" style="font:500 14.5px var(--font-body);color:var(--cinza-700);transition:color .15s">Editais</a>
+        <a class="lp-link" href="#contato" style="font:500 14.5px var(--font-body);color:var(--cinza-700);transition:color .15s">Contato</a>
+      </nav>
+      <div style="flex:1"></div>
+      <a class="lp-hidesm" href="Compra Mais - Portal do Fornecedor.dc.html#login" style="font:600 14.5px var(--font-body);color:var(--azul-700);padding:9px 6px">Já tenho conta</a>
+      <a class="lp-cta" href="Compra Mais - Portal do Fornecedor.dc.html#login" style="display:inline-flex;align-items:center;gap:8px;background:#337D26;color:#fff;font:600 14.5px var(--font-body);padding:11px 20px;border-radius:10px;box-shadow:0 6px 16px rgba(51,125,38,.3)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>Entrar no sistema</a>
+    </div>
+  </header>
+
+  <section id="topo" style="position:relative;background:linear-gradient(155deg,#0A2A52 0%,#0E3A6E 55%,#14508F 100%);color:#fff;overflow:hidden">
+    <div aria-hidden="true" style="position:absolute;inset:0;pointer-events:none">
+      <div style="position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(91,155,213,.4),transparent 68%);right:-120px;top:-140px;animation:lpFloat 9s ease-in-out infinite"></div>
+      <div style="position:absolute;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(242,183,5,.22),transparent 66%);left:-100px;bottom:-120px;animation:lpFloat2 11s ease-in-out infinite"></div>
+      <svg width="100%" height="100%" viewBox="0 0 1200 620" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;opacity:.5"><g fill="none" stroke="#5B9BD5" stroke-opacity="0.28" stroke-width="1.4"><path d="M-40 200 C 300 100, 520 320, 1240 160"/><path d="M-40 260 C 320 150, 560 380, 1240 230"/><path d="M-40 330 C 340 220, 600 440, 1240 300"/></g></svg>
+    </div>
+    <div class="lp-wrap lp-hero" style="position:relative;padding:76px 24px 96px">
+      <div>
+        <div class="lp-up" style="display:inline-flex;align-items:center;gap:9px;padding:7px 15px;border-radius:999px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);font:600 12.5px var(--font-body);letter-spacing:.02em;color:#DCEBFB"><span style="width:8px;height:8px;border-radius:50%;background:#E9AA52"></span>Governo Digital · Prefeitura de Rio Branco / AC</div>
+        <h1 class="lp-up lp-h1" style="font-weight:800;font-size:54px;line-height:1.06;letter-spacing:-0.02em;margin:22px 0 18px;animation-delay:.08s">Compras públicas <span style="color:#E9AA52">simples</span>, transparentes e <span style="color:#7FB2E8">100% digitais</span>.</h1>
+        <p class="lp-up" style="font-size:17.5px;line-height:1.6;color:#C7DBF2;max-width:540px;margin:0 0 30px;animation-delay:.16s">O Compra Mais conecta o comércio local às demandas da cidade — credenciamento sem papel, distribuição justa de cotas e transparência total dos recursos investidos em Rio Branco.</p>
+        <div class="lp-up" style="display:flex;gap:14px;flex-wrap:wrap;animation-delay:.24s">
+          <a class="lp-cta" href="Compra Mais - Portal do Fornecedor.dc.html#login" style="display:inline-flex;align-items:center;gap:9px;background:#337D26;color:#fff;font:600 15.5px var(--font-body);padding:15px 28px;border-radius:12px;box-shadow:0 12px 30px rgba(51,125,38,.32)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>Entrar no sistema</a>
+          <a class="lp-cta" href="Compra Mais - Portal do Fornecedor.dc.html#cadastro" style="display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.1);color:#fff;font:600 15.5px var(--font-body);padding:15px 28px;border-radius:12px;border:1.5px solid rgba(255,255,255,.28)">Cadastrar empresa</a>
+        </div>
+        <div class="lp-up" style="display:flex;gap:28px;flex-wrap:wrap;margin-top:36px;animation-delay:.32s">
+          <div><div style="font-weight:700;font-size:26px;color:#fff">R$ 2,84M</div><div style="font-size:12.5px;color:#9DC3E6">investidos localmente</div></div>
+          <div style="width:1px;background:rgba(255,255,255,.16)"></div>
+          <div><div style="font-weight:700;font-size:26px;color:#fff">87</div><div style="font-size:12.5px;color:#9DC3E6">fornecedores ativos</div></div>
+          <div style="width:1px;background:rgba(255,255,255,.16)"></div>
+          <div><div style="font-weight:700;font-size:26px;color:#fff">42%</div><div style="font-size:12.5px;color:#9DC3E6">são MEIs locais</div></div>
+        </div>
+      </div>
+      <div class="lp-up" style="position:relative;animation-delay:.2s">
+        <div style="position:absolute;inset:-16px;background:radial-gradient(circle at 60% 40%,rgba(242,183,5,.18),transparent 60%);border-radius:32px"></div>
+        <div style="position:relative;background:#fff;border-radius:22px;box-shadow:0 30px 70px rgba(5,16,38,.4);padding:22px;color:#0A2A52">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><div style="font:600 13px var(--font-body);color:var(--cinza-500)">Painel público · 2026</div><div style="display:inline-flex;align-items:center;gap:6px;font:600 11px var(--font-body);color:var(--sucesso);background:var(--sucesso-bg);padding:4px 10px;border-radius:999px"><span style="width:6px;height:6px;border-radius:50%;background:var(--sucesso)"></span>ao vivo</div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div style="background:var(--azul-50);border-radius:13px;padding:15px"><div style="font-weight:700;font-size:24px;color:var(--azul-900)">12</div><div style="font-size:11.5px;color:var(--cinza-500)">editais abertos</div></div>
+            <div style="background:#FFF7DE;border-radius:13px;padding:15px"><div style="font-weight:700;font-size:24px;color:#8A5410">64</div><div style="font-size:11.5px;color:#8A5410">empresas credenciadas</div></div>
+          </div>
+          <div style="margin-top:14px">
+            <div style="font:600 11.5px var(--font-body);color:var(--cinza-500);margin-bottom:10px">Investimento por secretaria</div>
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--cinza-700)">Educação</span><span style="font-weight:600">R$ 1,42M</span></div><div style="height:8px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div class="lp-barfill" style="height:100%;width:100%;background:var(--azul-600);border-radius:99px"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--cinza-700)">Saúde</span><span style="font-weight:600">R$ 680k</span></div><div style="height:8px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div class="lp-barfill" style="height:100%;width:48%;background:var(--azul-500);border-radius:99px;animation-delay:.15s"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--cinza-700)">Segurança</span><span style="font-weight:600">R$ 420k</span></div><div style="height:8px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div class="lp-barfill" style="height:100%;width:30%;background:#8A5410;border-radius:99px;animation-delay:.3s"></div></div></div>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;bottom:-22px;left:-22px;background:#fff;border-radius:14px;box-shadow:0 16px 40px rgba(5,16,38,.28);padding:13px 16px;display:flex;align-items:center;gap:11px;animation:lpFloat 7s ease-in-out infinite"><div style="width:38px;height:38px;border-radius:10px;background:var(--sucesso-bg);color:var(--sucesso);display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div><div style="font:700 13px var(--font-body);color:var(--azul-900)">Credenciamento aprovado</div><div style="font-size:11px;color:var(--cinza-500)">sem fila, sem papel</div></div></div>
+      </div>
+    </div>
+    <svg viewBox="0 0 1440 90" preserveAspectRatio="none" style="display:block;width:100%;height:70px"><path d="M0 90 L0 40 Q 360 90 720 45 T 1440 40 L1440 90 Z" fill="#F4F6FA"/></svg>
+  </section>
+
+  <section style="padding:8px 0 20px">
+    <div class="lp-wrap">
+      <div style="text-align:center;max-width:640px;margin:0 auto 34px">
+        <div style="font:700 12.5px var(--font-body);letter-spacing:.14em;color:var(--azul-600)">PORTAL DA TRANSPARÊNCIA</div>
+        <h2 style="font-weight:700;font-size:34px;letter-spacing:-0.01em;margin:10px 0 8px">Os números do Compra Mais, abertos ao cidadão</h2>
+        <p style="font-size:15.5px;color:var(--cinza-600);line-height:1.6;margin:0">Dados consolidados do exercício 2026 — atualizados diariamente e disponíveis para toda a população de Rio Branco.</p>
+      </div>
+      <div class="lp-g6">
+        <div class="lp-card" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px 24px;box-shadow:0 4px 14px rgba(10,42,82,.05)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="width:46px;height:46px;border-radius:12px;background:var(--azul-50);color:var(--azul-700);display:flex;align-items:center;justify-content:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><span style="display:inline-flex;align-items:center;gap:4px;font:600 11.5px var(--font-body);color:var(--sucesso);background:var(--sucesso-bg);padding:4px 9px;border-radius:999px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15" transform="rotate(180 12 12)"/></svg>+18%</span></div><div style="font-weight:800;font-size:32px;color:var(--azul-900);margin-top:16px">R$ 2,84M</div><div style="font-size:13.5px;color:var(--cinza-500);margin-top:2px">Investimento na economia local</div></div>
+        <div class="lp-card" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px 24px;box-shadow:0 4px 14px rgba(10,42,82,.05)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="width:46px;height:46px;border-radius:12px;background:var(--azul-50);color:var(--azul-700);display:flex;align-items:center;justify-content:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg></div><span style="display:inline-flex;align-items:center;gap:4px;font:600 11.5px var(--font-body);color:var(--sucesso);background:var(--sucesso-bg);padding:4px 9px;border-radius:999px">+12</span></div><div style="font-weight:800;font-size:32px;color:var(--azul-900);margin-top:16px">87</div><div style="font-size:13.5px;color:var(--cinza-500);margin-top:2px">Fornecedores ativos</div></div>
+        <div class="lp-card" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px 24px;box-shadow:0 4px 14px rgba(10,42,82,.05)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="width:46px;height:46px;border-radius:12px;background:var(--azul-50);color:var(--azul-700);display:flex;align-items:center;justify-content:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span style="display:inline-flex;align-items:center;gap:4px;font:600 11.5px var(--font-body);color:var(--sucesso);background:var(--sucesso-bg);padding:4px 9px;border-radius:999px">+4</span></div><div style="font-weight:800;font-size:32px;color:var(--azul-900);margin-top:16px">12</div><div style="font-size:13.5px;color:var(--cinza-500);margin-top:2px">Editais em andamento</div></div>
+        <div class="lp-card" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px 24px;box-shadow:0 4px 14px rgba(10,42,82,.05)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="width:46px;height:46px;border-radius:12px;background:var(--azul-50);color:var(--azul-700);display:flex;align-items:center;justify-content:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><span style="display:inline-flex;align-items:center;gap:4px;font:600 11.5px var(--font-body);color:var(--sucesso);background:var(--sucesso-bg);padding:4px 9px;border-radius:999px">+9</span></div><div style="font-weight:800;font-size:32px;color:var(--azul-900);margin-top:16px">64</div><div style="font-size:13.5px;color:var(--cinza-500);margin-top:2px">Empresas credenciadas</div></div>
+        <div class="lp-card" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px 24px;box-shadow:0 4px 14px rgba(10,42,82,.05)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="width:46px;height:46px;border-radius:12px;background:var(--azul-50);color:var(--azul-700);display:flex;align-items:center;justify-content:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div><span style="display:inline-flex;align-items:center;gap:4px;font:600 11.5px var(--font-body);color:var(--sucesso);background:var(--sucesso-bg);padding:4px 9px;border-radius:999px">+22%</span></div><div style="font-weight:800;font-size:32px;color:var(--azul-900);margin-top:16px">R$ 4,10M</div><div style="font-size:13.5px;color:var(--cinza-500);margin-top:2px">Valor total movimentado</div></div>
+        <div class="lp-card" style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:22px 24px;box-shadow:0 4px 14px rgba(10,42,82,.05)"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="width:46px;height:46px;border-radius:12px;background:#FFF7DE;color:#8A5410;display:flex;align-items:center;justify-content:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></div><span style="display:inline-flex;align-items:center;gap:4px;font:600 11.5px var(--font-body);color:var(--sucesso);background:var(--sucesso-bg);padding:4px 9px;border-radius:999px">+6pp</span></div><div style="font-weight:800;font-size:32px;color:var(--azul-900);margin-top:16px">42%</div><div style="font-size:13.5px;color:var(--cinza-500);margin-top:2px">Participação de MEIs</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="transparencia" style="padding:44px 0 20px">
+    <div class="lp-wrap">
+      <div class="lp-g2">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px 28px;box-shadow:0 6px 20px rgba(10,42,82,.06)">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:22px"><div><div style="font:600 15px var(--font-body);color:var(--azul-900)">Investimento por secretaria</div><div style="font-size:12.5px;color:var(--cinza-500)">Exercício 2026 · em reais</div></div><span style="font:600 11.5px var(--font-body);color:var(--azul-700);background:var(--azul-50);padding:5px 11px;border-radius:999px">R$ 2,84M total</span></div>
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div><div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:7px"><span style="color:var(--cinza-700)">Educação</span><span style="font-weight:700;color:var(--azul-900)">R$ 1.420.000</span></div><div style="height:12px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div class="lp-barfill" style="height:100%;width:100%;background:linear-gradient(90deg,var(--azul-700),var(--azul-500));border-radius:99px"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:7px"><span style="color:var(--cinza-700)">Saúde</span><span style="font-weight:700;color:var(--azul-900)">R$ 680.000</span></div><div style="height:12px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div class="lp-barfill" style="height:100%;width:48%;background:linear-gradient(90deg,var(--azul-700),var(--azul-500));border-radius:99px;animation-delay:.12s"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:7px"><span style="color:var(--cinza-700)">Segurança</span><span style="font-weight:700;color:var(--azul-900)">R$ 420.000</span></div><div style="height:12px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div class="lp-barfill" style="height:100%;width:30%;background:linear-gradient(90deg,var(--azul-700),var(--azul-500));border-radius:99px;animation-delay:.24s"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13.5px;margin-bottom:7px"><span style="color:var(--cinza-700)">Assistência Social</span><span style="font-weight:700;color:var(--azul-900)">R$ 320.000</span></div><div style="height:12px;background:var(--azul-50);border-radius:99px;overflow:hidden"><div class="lp-barfill" style="height:100%;width:23%;background:linear-gradient(90deg,#F2C24A,#E9AA52);border-radius:99px;animation-delay:.36s"></div></div></div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px 28px;box-shadow:0 6px 20px rgba(10,42,82,.06)">
+          <div style="font:600 15px var(--font-body);color:var(--azul-900);margin-bottom:4px">Participação por porte</div>
+          <div style="font-size:12.5px;color:var(--cinza-500);margin-bottom:14px">Distribuição das empresas participantes</div>
+          <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:center">
+            <div style="position:relative;width:170px;height:170px;flex-shrink:0">
+              <svg width="170" height="170" viewBox="0 0 120 120" style="animation:lpSpinIn .9s ease both">
+                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--azul-50)" stroke-width="15"/>
+                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--azul-700)" stroke-width="15" stroke-linecap="round" stroke-dasharray="137.2 189.6" transform="rotate(-90 60 60)"/>
+                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--azul-400)" stroke-width="15" stroke-linecap="round" stroke-dasharray="124.1 202.7" stroke-dashoffset="-137.2" transform="rotate(-90 60 60)"/>
+                <circle cx="60" cy="60" r="52" fill="none" stroke="#E9AA52" stroke-width="15" stroke-linecap="round" stroke-dasharray="65.3 261.5" stroke-dashoffset="-261.3" transform="rotate(-90 60 60)"/>
+              </svg>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-weight:800;font-size:26px;color:var(--azul-900)">87</div><div style="font-size:10.5px;color:var(--cinza-500)">empresas</div></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:12px;height:12px;border-radius:4px;background:var(--azul-700)"></span><div><div style="font:600 14px var(--font-body);color:var(--azul-900)">MEI · 42%</div><div style="font-size:11.5px;color:var(--cinza-500)">37 empresas</div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:12px;height:12px;border-radius:4px;background:var(--azul-400)"></span><div><div style="font:600 14px var(--font-body);color:var(--azul-900)">ME · 38%</div><div style="font-size:11.5px;color:var(--cinza-500)">33 empresas</div></div></div>
+              <div style="display:flex;align-items:center;gap:10px"><span style="width:12px;height:12px;border-radius:4px;background:#E9AA52"></span><div><div style="font:600 14px var(--font-body);color:var(--azul-900)">EPP · 20%</div><div style="font-size:11.5px;color:var(--cinza-500)">17 empresas</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lp-g2e" style="margin-top:20px">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px 28px;box-shadow:0 6px 20px rgba(10,42,82,.06)">
+          <div style="font:600 15px var(--font-body);color:var(--azul-900)">Investimento acumulado</div>
+          <div style="font-size:12.5px;color:var(--cinza-500);margin-bottom:16px">Janeiro a Junho · 2026</div>
+          <svg width="100%" height="200" viewBox="0 0 520 200" preserveAspectRatio="none">
+            <defs><linearGradient id="lpArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1E5AA0" stop-opacity="0.32"/><stop offset="1" stop-color="#1E5AA0" stop-opacity="0"/></linearGradient></defs>
+            <line x1="0" y1="50" x2="520" y2="50" stroke="var(--divider)" stroke-width="1"/><line x1="0" y1="100" x2="520" y2="100" stroke="var(--divider)" stroke-width="1"/><line x1="0" y1="150" x2="520" y2="150" stroke="var(--divider)" stroke-width="1"/>
+            <path d="M10 165 L110 150 L210 120 L310 95 L410 60 L510 30 L510 195 L10 195 Z" fill="url(#lpArea)"/>
+            <path d="M10 165 L110 150 L210 120 L310 95 L410 60 L510 30" fill="none" stroke="var(--azul-600)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1000" stroke-dasharray="1000" style="--len:1000;animation:lpDraw 1.6s ease both"/>
+            <g fill="#fff" stroke="var(--azul-600)" stroke-width="2.5"><circle cx="10" cy="165" r="4"/><circle cx="110" cy="150" r="4"/><circle cx="210" cy="120" r="4"/><circle cx="310" cy="95" r="4"/><circle cx="410" cy="60" r="4"/><circle cx="510" cy="30" r="4.5"/></g>
+          </svg>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--cinza-400);margin-top:6px"><span>Jan</span><span>Fev</span><span>Mar</span><span>Abr</span><span>Mai</span><span>Jun</span></div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:18px;padding:26px 28px;box-shadow:0 6px 20px rgba(10,42,82,.06)">
+          <div style="font:600 15px var(--font-body);color:var(--azul-900)">Editais publicados por mês</div>
+          <div style="font-size:12.5px;color:var(--cinza-500);margin-bottom:20px">Primeiro semestre · 2026</div>
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;height:190px">
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end"><div class="lp-vbar" style="width:100%;max-width:38px;height:38%;background:linear-gradient(180deg,var(--azul-500),var(--azul-700));border-radius:8px 8px 4px 4px"></div><span style="font-size:11.5px;color:var(--cinza-400)">Jan</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end"><div class="lp-vbar" style="width:100%;max-width:38px;height:58%;background:linear-gradient(180deg,var(--azul-500),var(--azul-700));border-radius:8px 8px 4px 4px;animation-delay:.08s"></div><span style="font-size:11.5px;color:var(--cinza-400)">Fev</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end"><div class="lp-vbar" style="width:100%;max-width:38px;height:50%;background:linear-gradient(180deg,var(--azul-500),var(--azul-700));border-radius:8px 8px 4px 4px;animation-delay:.16s"></div><span style="font-size:11.5px;color:var(--cinza-400)">Mar</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end"><div class="lp-vbar" style="width:100%;max-width:38px;height:78%;background:linear-gradient(180deg,var(--azul-500),var(--azul-700));border-radius:8px 8px 4px 4px;animation-delay:.24s"></div><span style="font-size:11.5px;color:var(--cinza-400)">Abr</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end"><div class="lp-vbar" style="width:100%;max-width:38px;height:66%;background:linear-gradient(180deg,var(--azul-500),var(--azul-700));border-radius:8px 8px 4px 4px;animation-delay:.32s"></div><span style="font-size:11.5px;color:var(--cinza-400)">Mai</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end"><div class="lp-vbar" style="width:100%;max-width:38px;height:92%;background:linear-gradient(180deg,#E9AA52,#F2C24A);border-radius:8px 8px 4px 4px;animation-delay:.4s"></div><span style="font-size:11.5px;color:var(--cinza-400)">Jun</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="editais" style="padding:44px 0">
+    <div class="lp-wrap">
+      <div style="background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 6px 20px rgba(10,42,82,.06)">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 26px;border-bottom:1px solid var(--divider);flex-wrap:wrap;gap:12px"><div><div style="font:600 16px var(--font-body);color:var(--azul-900)">Editais públicos</div><div style="font-size:12.5px;color:var(--cinza-500)">Oportunidades abertas e em execução</div></div><a class="lp-cta" href="Compra Mais - Portal do Fornecedor.dc.html" style="display:inline-flex;align-items:center;gap:7px;font:600 13.5px var(--font-body);color:var(--azul-700);background:var(--azul-50);padding:9px 16px;border-radius:9px">Ver todos os editais →</a></div>
+        <div class="lp-scroll" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font:14px var(--font-body);min-width:640px">
+          <thead><tr style="background:var(--azul-50);text-align:left"><th style="padding:13px 26px;font:600 11.5px var(--font-body);letter-spacing:.04em;color:var(--cinza-500);text-transform:uppercase">Edital</th><th style="padding:13px 18px;font:600 11.5px var(--font-body);letter-spacing:.04em;color:var(--cinza-500);text-transform:uppercase">Objeto</th><th style="padding:13px 18px;font:600 11.5px var(--font-body);letter-spacing:.04em;color:var(--cinza-500);text-transform:uppercase">Secretaria</th><th style="padding:13px 26px;font:600 11.5px var(--font-body);letter-spacing:.04em;color:var(--cinza-500);text-transform:uppercase;text-align:right">Valor estimado</th></tr></thead>
+          <tbody>
+            <tr style="border-top:1px solid var(--divider)"><td style="padding:15px 26px"><span style="font-weight:600;color:var(--azul-700)">CR 001/2026</span></td><td style="padding:15px 18px;color:var(--cinza-700)">Confecção de fardamento escolar</td><td style="padding:15px 18px;color:var(--cinza-600)">Educação</td><td style="padding:15px 26px;text-align:right;font-weight:600;color:var(--azul-900)">R$ 116.400</td></tr>
+            <tr style="border-top:1px solid var(--divider)"><td style="padding:15px 26px"><span style="font-weight:600;color:var(--azul-700)">CR 002/2026</span></td><td style="padding:15px 18px;color:var(--cinza-700)">Aquisição de mobiliário escolar</td><td style="padding:15px 18px;color:var(--cinza-600)">Educação</td><td style="padding:15px 26px;text-align:right;font-weight:600;color:var(--azul-900)">R$ 192.000</td></tr>
+            <tr style="border-top:1px solid var(--divider)"><td style="padding:15px 26px"><span style="font-weight:600;color:var(--azul-700)">CR 003/2026</span></td><td style="padding:15px 18px;color:var(--cinza-700)">Impressão de cartilhas de saúde</td><td style="padding:15px 18px;color:var(--cinza-600)">Saúde</td><td style="padding:15px 26px;text-align:right;font-weight:600;color:var(--azul-900)">R$ 93.000</td></tr>
+            <tr style="border-top:1px solid var(--divider)"><td style="padding:15px 26px"><span style="font-weight:600;color:var(--azul-700)">CR 004/2026</span></td><td style="padding:15px 18px;color:var(--cinza-700)">Uniformes para Guarda Municipal</td><td style="padding:15px 18px;color:var(--cinza-600)">Segurança</td><td style="padding:15px 26px;text-align:right;font-weight:600;color:var(--azul-900)">R$ 148.000</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="como" style="padding:44px 0 20px;background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+    <div class="lp-wrap">
+      <div style="text-align:center;max-width:600px;margin:0 auto 36px"><div style="font:700 12.5px var(--font-body);letter-spacing:.14em;color:var(--azul-600)">COMO FUNCIONA</div><h2 style="font-weight:700;font-size:34px;letter-spacing:-0.01em;margin:10px 0 8px">Participar é simples e 100% digital</h2><p style="font-size:15.5px;color:var(--cinza-600);line-height:1.6;margin:0">Do cadastro à entrega, todo o processo acontece online — com validação automática e distribuição justa.</p></div>
+      <div class="lp-g4">
+        <div class="lp-card" style="background:var(--bg-page);border:1px solid var(--border);border-radius:16px;padding:26px 22px"><div style="position:relative;width:56px;height:56px;border-radius:14px;background:linear-gradient(150deg,var(--azul-600),var(--azul-800));display:flex;align-items:center;justify-content:center;color:#fff"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span style="position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#E9AA52;color:#fff;font:700 13px var(--font-body);display:flex;align-items:center;justify-content:center;border:2px solid #fff">1</span></div><div style="font:600 16.5px var(--font-body);color:var(--azul-900);margin:16px 0 6px">Cadastre sua empresa</div><div style="font-size:13.5px;color:var(--cinza-600);line-height:1.55">Informe o CNPJ — os dados são puxados automaticamente da Receita Federal e checados contra dívida ativa.</div></div>
+        <div class="lp-card" style="background:var(--bg-page);border:1px solid var(--border);border-radius:16px;padding:26px 22px"><div style="position:relative;width:56px;height:56px;border-radius:14px;background:linear-gradient(150deg,var(--azul-600),var(--azul-800));display:flex;align-items:center;justify-content:center;color:#fff"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#E9AA52;color:#fff;font:700 13px var(--font-body);display:flex;align-items:center;justify-content:center;border:2px solid #fff">2</span></div><div style="font:600 16.5px var(--font-body);color:var(--azul-900);margin:16px 0 6px">Envie os documentos</div><div style="font-size:13.5px;color:var(--cinza-600);line-height:1.55">Suba apenas o que falta — documentos válidos são reaproveitados entre editais, sem reenvio.</div></div>
+        <div class="lp-card" style="background:var(--bg-page);border:1px solid var(--border);border-radius:16px;padding:26px 22px"><div style="position:relative;width:56px;height:56px;border-radius:14px;background:linear-gradient(150deg,var(--azul-600),var(--azul-800));display:flex;align-items:center;justify-content:center;color:#fff"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span style="position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#E9AA52;color:#fff;font:700 13px var(--font-body);display:flex;align-items:center;justify-content:center;border:2px solid #fff">3</span></div><div style="font:600 16.5px var(--font-body);color:var(--azul-900);margin:16px 0 6px">Credencie-se</div><div style="font-size:13.5px;color:var(--cinza-600);line-height:1.55">Veja apenas os editais compatíveis com o seu ramo (CNAE) e adira com poucos cliques.</div></div>
+        <div class="lp-card" style="background:var(--bg-page);border:1px solid var(--border);border-radius:16px;padding:26px 22px"><div style="position:relative;width:56px;height:56px;border-radius:14px;background:linear-gradient(150deg,var(--azul-600),var(--azul-800));display:flex;align-items:center;justify-content:center;color:#fff"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 9.4 7.5 4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/></svg><span style="position:absolute;top:-8px;right:-8px;width:26px;height:26px;border-radius:50%;background:#E9AA52;color:#fff;font:700 13px var(--font-body);display:flex;align-items:center;justify-content:center;border:2px solid #fff">4</span></div><div style="font:600 16.5px var(--font-body);color:var(--azul-900);margin:16px 0 6px">Forneça e receba</div><div style="font-size:13.5px;color:var(--cinza-600);line-height:1.55">A distribuição de cotas é calculada de forma justa, respeitando a capacidade declarada de cada empresa.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding:56px 0">
+    <div class="lp-wrap">
+      <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,#0A2A52,#14508F);border-radius:24px;padding:56px 48px;color:#fff;box-shadow:0 24px 60px rgba(10,42,82,.28)">
+        <div aria-hidden="true" style="position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(242,183,5,.28),transparent 65%);right:-60px;top:-80px"></div>
+        <div aria-hidden="true" style="position:absolute;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(91,155,213,.35),transparent 65%);left:-70px;bottom:-90px"></div>
+        <div style="position:relative;max-width:640px">
+          <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:rgba(242,183,5,.16);border:1px solid rgba(242,183,5,.4);font:600 12px var(--font-body);color:#FBEACB">FAÇA PARTE</div>
+          <h2 style="font-weight:800;font-size:38px;line-height:1.12;letter-spacing:-0.01em;margin:18px 0 14px">Sua empresa a serviço da cidade de Rio Branco</h2>
+          <p style="font-size:16.5px;line-height:1.6;color:#C7DBF2;margin:0 0 28px">Junte-se a dezenas de fornecedores locais que já participam das compras públicas municipais. Cadastro gratuito, transparente e sem burocracia.</p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap">
+            <a class="lp-cta" href="Compra Mais - Portal do Fornecedor.dc.html#cadastro" style="display:inline-flex;align-items:center;gap:9px;background:#337D26;color:#fff;font:600 15.5px var(--font-body);padding:15px 30px;border-radius:12px;box-shadow:0 6px 16px rgba(51,125,38,.26)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Cadastre sua empresa</a>
+            <a class="lp-cta" href="Compra Mais - Portal do Fornecedor.dc.html#login" style="display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.12);color:#fff;font:600 15.5px var(--font-body);padding:15px 30px;border-radius:12px;border:1.5px solid rgba(255,255,255,.3)">Entrar no sistema</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contato" style="background:#0A2A52;color:#C7DBF2;padding:52px 0 26px">
+    <div class="lp-wrap">
+      <div class="lp-foot">
+        <div>
+          <div style="background:#fff;border-radius:14px;padding:14px 16px;display:inline-block"><img src="assets/logo-compra-mais-full.png" alt="Compra Mais" style="height:64px;width:auto;display:block"></div>
+          <p style="font-size:13.5px;line-height:1.6;color:#9DC3E6;margin:16px 0 0;max-width:320px">Sistema Digital de Compras Públicas da Prefeitura de Rio Branco. Tecnologia, gestão e transparência a serviço do cidadão.</p>
+        </div>
+        <div>
+          <div style="font:600 13px var(--font-body);color:#fff;letter-spacing:.04em;margin-bottom:14px">Navegação</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px"><a href="#transparencia" style="color:#9DC3E6" style-hover="color:#fff">Portal da Transparência</a><a href="#como" style="color:#9DC3E6" style-hover="color:#fff">Como funciona</a><a href="#editais" style="color:#9DC3E6" style-hover="color:#fff">Editais públicos</a><a href="Compra Mais - Portal do Fornecedor.dc.html" style="color:#9DC3E6" style-hover="color:#fff">Entrar no sistema</a></div>
+        </div>
+        <div>
+          <div style="font:600 13px var(--font-body);color:#fff;letter-spacing:.04em;margin-bottom:14px">Contato</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13.5px;color:#9DC3E6"><span>R. Rui Barbosa, 285 — Centro</span><span>Rio Branco — AC · 69900-120</span><span>compramais@riobranco.ac.gov.br</span><span>(68) 3211-0000</span></div>
+        </div>
+        <div>
+          <div style="font:600 13px var(--font-body);color:#fff;letter-spacing:.04em;margin-bottom:14px">Institucional</div>
+          <div style="background:#fff;border-radius:12px;padding:12px 14px;display:inline-block;margin-bottom:14px"><img src="assets/logo-prefeitura.png" alt="Prefeitura de Rio Branco" style="height:46px;width:auto;display:block"></div>
+          <div style="display:flex;gap:10px">
+            <a href="Compra Mais - Portal do Fornecedor.dc.html" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff" style-hover="background:rgba(255,255,255,.2)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+            <a href="Compra Mais - Portal do Fornecedor.dc.html" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff" style-hover="background:rgba(255,255,255,.2)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+            <a href="Compra Mais - Portal do Fornecedor.dc.html" style="width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff" style-hover="background:rgba(255,255,255,.2)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7a10 10 0 0 1-2.9.8 5 5 0 0 0 2.2-2.7 10 10 0 0 1-3.1 1.2 5 5 0 0 0-8.5 4.5A14 14 0 0 1 1.6 3.9a5 5 0 0 0 1.5 6.6A5 5 0 0 1 .8 9.9v.1a5 5 0 0 0 4 4.9 5 5 0 0 1-2.2.1 5 5 0 0 0 4.6 3.5A10 10 0 0 1 0 20.5a14 14 0 0 0 7.5 2.2c9.1 0 14-7.5 14-14v-.6A10 10 0 0 0 23 7z"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.12);margin-top:36px;padding-top:22px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;font-size:12.5px;color:#7FA3C9"><span>© 2026 Prefeitura de Rio Branco. Todos os direitos reservados.</span><span>Lei nº 14.133/2021 · Lei Municipal 2.027 · SMGA / CPL</span></div>
+    </div>
+  </footer>
+
+  <div style="position:fixed;bottom:20px;right:20px;z-index:95;display:flex;align-items:center;gap:8px;padding:7px 9px 7px 14px;background:#fff;border:1px solid var(--border);border-radius:999px;box-shadow:0 8px 24px rgba(8,20,42,.16)">
+    <span style="font:600 10px var(--font-body);letter-spacing:.08em;color:var(--cinza-400)">DEMO</span>
+    <div style="display:flex;background:var(--bg-page);border-radius:999px;padding:3px">
+      <span style="padding:6px 13px;border-radius:999px;background:var(--azul-700);color:#fff;font:600 12.5px var(--font-body)">Landing</span>
+      <a href="Compra Mais - Painel Administrativo.dc.html" style="padding:6px 13px;border-radius:999px;color:var(--cinza-600);font:600 12.5px var(--font-body);text-decoration:none" style-hover="color:var(--azul-700)">Administrador</a>
+      <a href="Compra Mais - Portal do Fornecedor.dc.html" style="padding:6px 13px;border-radius:999px;color:var(--cinza-600);font:600 12.5px var(--font-body);text-decoration:none" style-hover="color:var(--azul-700)">Fornecedor</a>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

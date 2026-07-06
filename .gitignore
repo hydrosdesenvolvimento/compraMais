@@ -1,0 +1,45 @@
+# Dependencias
+node_modules/
+**/node_modules/
+
+# Builds
+dist/
+build/
+**/dist/
+.vite/
+
+# Cobertura e relatorios de teste
+coverage/
+**/coverage/
+*.lcov
+
+# Variaveis de ambiente e segredos (NUNCA versionar) — PRJ-DEC-07
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editores / SO
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+# VS Code: ignora config local; mantem mcp.json versionavel (Context7 — CLAUDE.md)
+.vscode/*
+!.vscode/mcp.json
+
+# Cache de ferramentas
+.eslintcache
+.tsbuildinfo
+*.tsbuildinfo
+
+# Ferramental de agents (BMad / Claude Code) — andaime, não entrega
+.claude/
+_bmad/
+_bmad-output/

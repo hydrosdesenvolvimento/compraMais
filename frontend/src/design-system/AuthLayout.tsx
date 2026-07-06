@@ -1,0 +1,51 @@
+import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import logoCompraMais from './image/logoCompraMais.png';
+import { LanguageSwitcher } from './LanguageSwitcher';
+
+/**
+ * Layout de autenticação (mockup Compra Mais): à esquerda o painel institucional CLARO (branco)
+ * com o lockup oficial da marca (`logoCompraMais.png`) centralizado; à direita o painel navy em
+ * gradiente com o cartão de acesso (children). Fiel ao mockup, o painel esquerdo é limpo (só o logo).
+ */
+export function AuthLayout({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
+  return (
+    <div className="auth">
+      {/* Seletor de idioma flutuante (canto superior direito) */}
+      <div className="auth-lang"><LanguageSwitcher variante="escuro" /></div>
+
+      {/* Painel institucional (claro) — logotipo oficial centralizado */}
+      <aside className="auth-aside cm-hide-sm">
+        <div className="auth-lockup">
+          <img className="auth-logo" src={logoCompraMais} alt={t('auth.logoAlt')} />
+        </div>
+      </aside>
+
+      {/* Painel de acesso (navy) — cartão com abas + formulário */}
+      <main className="auth-main">
+        <svg aria-hidden="true" width="100%" height="100%" viewBox="0 0 620 820" preserveAspectRatio="xMidYMid slice" style={{ position: 'absolute', inset: 0, transform: 'scaleX(-1)' }}>
+          <defs>
+            <linearGradient id="cmL2" x1="0" y1="1" x2="1" y2="0">
+              <stop offset="0" stopColor="#1E5AA0" stopOpacity="0" />
+              <stop offset="1" stopColor="#5B9BD5" stopOpacity="0.5" />
+            </linearGradient>
+            <radialGradient id="cmGlow2" cx="0.5" cy="0.5" r="0.5">
+              <stop offset="0" stopColor="#F2B705" stopOpacity="0.18" />
+              <stop offset="1" stopColor="#F2B705" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+          <circle cx="540" cy="120" r="230" fill="url(#cmGlow2)" />
+          <path d="M-40 250 C 160 170, 300 360, 680 230" fill="none" stroke="url(#cmL2)" strokeWidth="1.5" />
+          <path d="M-40 300 C 180 220, 320 410, 680 280" fill="none" stroke="url(#cmL2)" strokeWidth="2" />
+          <path d="M-40 360 C 200 290, 340 470, 680 340" fill="none" stroke="url(#cmL2)" strokeWidth="1.2" />
+          <g stroke="#FFFFFF" strokeOpacity="0.06" strokeWidth="34" strokeLinecap="round">
+            <line x1="540" y1="690" x2="540" y2="800" />
+            <line x1="486" y1="745" x2="596" y2="745" />
+          </g>
+        </svg>
+        <div className="auth-card">{children}</div>
+      </main>
+    </div>
+  );
+}

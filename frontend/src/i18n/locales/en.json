@@ -337,6 +337,8 @@
       "ultima": "Last sync: <b>{{quando}}</b>",
       "sucesso": "Official data updated. Trade Name, Address and Phone were preserved.",
       "erro": "Sync failed",
+      "revisao": "Sent to CPL for review",
+      "revisaoDetalhe": "The CNPJ is no longer active at Receita. The data was updated and the case was forwarded to the CPL for review.",
       "sincronizando": "Syncing…",
       "sincronizarAgora": "Sync now"
     },
@@ -347,7 +349,13 @@
       "razaoSocial": "Legal Name",
       "cnpj": "CNPJ",
       "situacaoCadastral": "Registration Status",
-      "porteEmpresa": "Company Size"
+      "porteEmpresa": "Company Size",
+      "situacao": { "ativa": "Active", "baixada": "Cancelled", "inapta": "Unfit", "suspensa": "Suspended" }
+    },
+    "estado": {
+      "carregando": "Loading your data…",
+      "erro": "Could not load your account data.",
+      "semEmpresa": "Your account is not linked to a company."
     },
     "responsavel": {
       "secaoLabel": "LEGAL REPRESENTATIVE DATA",
@@ -378,8 +386,13 @@
       "cpfResponsavel": "Representative's CPF",
       "cpfInvalido": "Invalid CPF",
       "cpfValido": "Valid CPF",
+      "numero": "Number",
+      "complemento": "Complement",
       "cancelar": "Cancel",
-      "salvar": "Save changes"
+      "salvar": "Save changes",
+      "salvando": "Saving…",
+      "salvo": "Changes saved",
+      "salvarErro": "Could not save. Please try again."
     }
   },
   "painelTitular": {

@@ -1,7 +1,16 @@
 /** Camada de acesso à API (usada pelo TanStack Query). Erros HTTP viram exceção → o Query trata. */
+import { obterUsuario } from './auth';
+
+/** Cabeçalhos comuns: identifica o ator autenticado (auditoria — `x-user-id`) quando há sessão. */
+function headers(extra?: Record<string, string>): Record<string, string> | undefined {
+  const h: Record<string, string> = { ...extra };
+  const uid = obterUsuario()?.userId;
+  if (uid) h['x-user-id'] = uid;
+  return Object.keys(h).length ? h : undefined;
+}
 
 async function get<T>(url: string): Promise<T> {
-  const r = await fetch(url);
+  const r = await fetch(url, { headers: headers() });
   if (!r.ok) throw new HttpError(r.status, url);
   return (await r.json()) as T;
 }
@@ -9,7 +18,7 @@ async function get<T>(url: string): Promise<T> {
 async function send<T>(url: string, method: string, body?: unknown): Promise<T> {
   const r = await fetch(url, {
     method,
-    headers: body !== undefined ? { 'content-type': 'application/json' } : undefined,
+    headers: headers(body !== undefined ? { 'content-type': 'application/json' } : undefined),
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   if (!r.ok) throw new HttpError(r.status, url);
@@ -30,15 +39,30 @@ export interface Transparencia { editaisVigentes: number; secretarias: string[];
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
+/** UC018: resultado da re-sincronização — status + proveniência `{quando, fonte}` da consulta oficial. */
+export interface SincronizacaoResultado { status: 'sucesso' | 'revisao' | 'erro'; quando?: string; fonte?: string }
+export interface EnderecoView { logradouro: string; numero: string; complemento?: string; bairro: string; cidade: string; uf: string; cep: string }
+export interface CnaeView { codigoSubclasse: string; tipo: 'principal' | 'secundario'; ativo: boolean }
+/** UC018 passo 1: perfil do fornecedor exibido na "Minha conta" (dados oficiais read-only + contato). */
+export interface FornecedorPerfil {
+  id: string; cnpj: string; razaoSocial: string; porte: string;
+  situacao: 'ativa' | 'baixada' | 'inapta' | 'suspensa';
+  origem: 'oficial' | 'manual';
+  status: string; sincronizadoEm: string | null;
+  nomeFantasia?: string; telefone?: string; endereco?: EnderecoView; cnaes: CnaeView[];
+}
 
 export const api = {
   // Portal do fornecedor
+  fornecedor: (fid: string) => get<FornecedorPerfil>(`/fornecedores/${fid}`),
   editaisCompativeis: () => get<EditalItem[]>('/editais'),
   transparencia: () => get<Transparencia>('/transparencia'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   pendencias: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias`),
   pendenciasConsolidadas: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias-consolidadas`),
-  sincronizar: (fid: string) => send<{ quando?: string }>(`/fornecedores/${fid}/sincronizar`, 'POST'),
+  sincronizar: (fid: string) => send<SincronizacaoResultado>(`/fornecedores/${fid}/sincronizar`, 'POST'),
+  // RN009/FR-013: só Nome Fantasia, Endereço e Telefone. O backend rejeita campos oficiais (422) e devolve 204.
+  editarPerfil: (fid: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) => send<void>(`/fornecedores/${fid}`, 'PATCH', patch),
   solicitarDireito: (tipo: string) => send('/titular/solicitacoes', 'POST', { tipo }),
   contestarCnae: (editalId: string, body: { cnaeContestado: string; justificativa: string }) => send(`/editais/${editalId}/contestacoes-cnae`, 'POST', body),
 

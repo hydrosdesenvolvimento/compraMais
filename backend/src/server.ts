@@ -13,6 +13,8 @@ import { CepMockGateway } from './shared/acl/cep/cep-mock.js';
 import { CadastrarFornecedor } from './catalogo/application/cadastrar-fornecedor.js';
 import { GerirConta } from './catalogo/application/gerir-conta.js';
 import { FornecedorRepositoryMemory } from './catalogo/adapters/fornecedor-repository-memory.js';
+import { FornecedorRepositoryPg } from './catalogo/adapters/fornecedor-repository-pg.js';
+import type { FornecedorRepository } from './catalogo/application/fornecedor-repository.js';
 import { registrarRotasCadastro } from './catalogo/adapters/cadastro-controller.js';
 import { ContaRepositoryMemory } from './shared/identity/conta-repository.js';
 import { GerirProcuradores } from './shared/identity/gerir-procuradores.js';
@@ -128,7 +130,9 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // Módulo catálogo (US1). CNPJ/CEP via BrasilAPI em runtime; mock em teste ou RECEITA_PROVIDER=mock
   // (sem rede). Os gateways degradam para 'indisponivel' em falha/timeout (fallback manual visível).
-  const fornecedores = new FornecedorRepositoryMemory();
+  // Persistência do fornecedor: Postgres quando disponível (durável, como `usuarios`); senão memória
+  // (testes sem banco). Antes era sempre memória → o login sobrevivia ao restart mas o fornecedor não.
+  const fornecedores: FornecedorRepository = pool ? new FornecedorRepositoryPg(pool) : new FornecedorRepositoryMemory();
   const usarMockReceita = config.nodeEnv === 'test' || process.env.RECEITA_PROVIDER === 'mock';
   const receita = usarMockReceita ? new ReceitaMockGateway() : new ReceitaBrasilApiGateway();
   const cep = usarMockReceita ? new CepMockGateway() : new CepBrasilApiGateway();

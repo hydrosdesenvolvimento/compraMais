@@ -337,6 +337,8 @@
       "ultima": "Última sincronização: <b>{{quando}}</b>",
       "sucesso": "Dados oficiais atualizados. Nome Fantasia, Endereço e Telefone foram preservados.",
       "erro": "Erro na sincronização",
+      "revisao": "Enviado para revisão da CPL",
+      "revisaoDetalhe": "O CNPJ deixou de estar ativo na Receita. Os dados foram atualizados e o caso foi encaminhado à CPL para revisão.",
       "sincronizando": "Sincronizando…",
       "sincronizarAgora": "Sincronizar agora"
     },
@@ -347,7 +349,13 @@
       "razaoSocial": "Razão Social",
       "cnpj": "CNPJ",
       "situacaoCadastral": "Situação Cadastral",
-      "porteEmpresa": "Porte da Empresa"
+      "porteEmpresa": "Porte da Empresa",
+      "situacao": { "ativa": "Ativa", "baixada": "Baixada", "inapta": "Inapta", "suspensa": "Suspensa" }
+    },
+    "estado": {
+      "carregando": "Carregando seus dados…",
+      "erro": "Não foi possível carregar os dados da sua conta.",
+      "semEmpresa": "Sua conta não está vinculada a uma empresa."
     },
     "responsavel": {
       "secaoLabel": "DADOS DO RESPONSÁVEL",
@@ -378,8 +386,13 @@
       "cpfResponsavel": "CPF do responsável",
       "cpfInvalido": "CPF inválido",
       "cpfValido": "CPF válido",
+      "numero": "Número",
+      "complemento": "Complemento",
       "cancelar": "Cancelar",
-      "salvar": "Salvar alterações"
+      "salvar": "Salvar alterações",
+      "salvando": "Salvando…",
+      "salvo": "Alterações salvas",
+      "salvarErro": "Não foi possível salvar. Tente novamente."
     }
   },
   "painelTitular": {

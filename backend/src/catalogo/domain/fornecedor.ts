@@ -41,6 +41,20 @@ export interface ContatoEditavel {
   telefone?: string;
 }
 
+/** Snapshot de persistência (AD-33): estado plano gravado/reconstruído pelo adaptador (memória/pg). */
+export interface FornecedorState {
+  meta: MetadadosBase;
+  cnpj: string;
+  razaoSocial: string;
+  porte: Porte;
+  cnaes: Cnae[];
+  situacao: SituacaoCadastral;
+  origem: OrigemDados;
+  contato: ContatoEditavel;
+  status: StatusCredenciamento;
+  sincronizadoEm: string | null;
+}
+
 /**
  * Entidade Fornecedor — CLASSE rica (AD-32) que estende EntidadeBase (AD-33).
  * Invariantes: dados oficiais read-only (RN009); só avança se situação "ativa" (FR-005);
@@ -83,6 +97,14 @@ export class Fornecedor extends EntidadeBase {
     );
   }
 
+  /** Reconstrução a partir da persistência (sem regra de criação — aceita qualquer situação/status). */
+  static deEstado(s: FornecedorState): Fornecedor {
+    return new Fornecedor(
+      s.meta, Cnpj.criar(s.cnpj), s.razaoSocial, s.porte,
+      s.cnaes, s.situacao, s.origem, s.contato, s.status, s.sincronizadoEm,
+    );
+  }
+
   get razaoSocial(): string { return this._razaoSocial; }
   get porte(): Porte { return this._porte; }
   get cnaes(): readonly Cnae[] { return this._cnaes; }
@@ -92,20 +114,44 @@ export class Fornecedor extends EntidadeBase {
   get status(): StatusCredenciamento { return this._status; }
   get sincronizadoEm(): string | null { return this._sincronizadoEm; }
 
+  /** Snapshot plano para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
+  estado(): FornecedorState {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      cnpj: this.cnpj.valor, razaoSocial: this._razaoSocial, porte: this._porte, cnaes: this._cnaes,
+      situacao: this._situacao, origem: this._origem, contato: this._contato,
+      status: this._status, sincronizadoEm: this._sincronizadoEm,
+    };
+  }
+
   /** RN009: só Nome Fantasia, Endereço e Telefone. */
   editarContato(patch: ContatoEditavel, userName = 'sistema'): void {
     this._contato = { ...this._contato, ...patch };
     this.marcarAtualizacao(userName);
   }
 
-  /** RF018: re-sincronização substitui os campos oficiais a partir da Receita. */
-  aplicarSincronizacao(dados: { razaoSocial: string; porte: Porte; cnaes: Cnae[] }, sincronizadoEm?: string, userName = 'sistema'): void {
+  /**
+   * RF018 (UC018 passo 3): re-sincronização substitui os campos oficiais a partir da Receita —
+   * Razão Social, Porte, CNAEs e **Situação Cadastral** — e registra o novo `timestamp`. A situação
+   * é oficial: se voltar não-ativa (baixada/inapta/suspensa), quem chama sinaliza revisão da CPL (UC018 exceção).
+   */
+  aplicarSincronizacao(
+    dados: { razaoSocial: string; porte: Porte; cnaes: Cnae[]; situacao: SituacaoCadastral },
+    sincronizadoEm?: string,
+    userName = 'sistema',
+  ): void {
     this._razaoSocial = dados.razaoSocial;
     this._porte = dados.porte;
     this._cnaes = dados.cnaes;
+    this._situacao = dados.situacao;
     this._origem = 'oficial';
     if (sincronizadoEm) this._sincronizadoEm = sincronizadoEm;
     this.marcarAtualizacao(userName);
+  }
+
+  /** UC018 exceção: situação oficial deixou de ser "ativa" → o fornecedor precisa de revisão da CPL. */
+  precisaRevisaoCpl(): boolean {
+    return this._situacao !== 'ativa';
   }
 
   /** D2: compatível se algum CNAE válido bate exatamente a subclasse exigida. */

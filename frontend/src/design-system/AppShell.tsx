@@ -1,7 +1,7 @@
 import { useState, type ComponentProps, type ReactNode } from 'react';
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { limparToken } from '../lib/auth';
+import { limparSessao } from '../lib/auth';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import {
   IconePredio, IconeBusca, IconeSino, IconeChevron, IconeMenu,
@@ -149,7 +149,7 @@ export function AppShell({
                     <button className="cm-menu-item" onClick={() => { setProfileOpen(false); navigate({ to: contaHref }); }}>
                       <IconeUsuario width={18} height={18} />{t('common.shell.myAccount')}
                     </button>
-                    <button className="cm-menu-item danger" data-cy="sair" onClick={() => { setProfileOpen(false); limparToken(); navigate({ to: '/cadastro' }); }}>
+                    <button className="cm-menu-item danger" data-cy="sair" onClick={() => { setProfileOpen(false); limparSessao(); navigate({ to: '/cadastro' }); }}>
                       <IconeSair width={18} height={18} />{t('common.shell.logout')}
                     </button>
                   </div>

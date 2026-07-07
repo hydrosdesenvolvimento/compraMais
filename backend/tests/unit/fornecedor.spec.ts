@@ -62,6 +62,23 @@ describe('Fornecedor (domínio)', () => {
     expect(f.precisaRevisaoCpl()).toBe(true);
   });
 
+  it('faz round-trip de persistência via estado()/deEstado() preservando o snapshot', () => {
+    const f = Fornecedor.cadastrar({ ...base, contato: { nomeFantasia: 'Pão Quente', telefone: '(68) 3333-0000' }, sincronizadoEm: '2026-06-01T00:00:00Z' });
+    const restaurado = Fornecedor.deEstado(f.estado());
+    expect(restaurado.estado()).toEqual(f.estado());
+    expect(restaurado.id).toBe(f.id);
+    expect(restaurado.contato.nomeFantasia).toBe('Pão Quente');
+    expect(restaurado.sincronizadoEm).toBe('2026-06-01T00:00:00Z');
+  });
+
+  it('deEstado() reconstrói qualquer situação/status (bypassa a regra de criação)', () => {
+    const snapshot = { ...Fornecedor.cadastrar(base).estado(), situacao: 'baixada' as const, status: 'credenciado' as const };
+    const f = Fornecedor.deEstado(snapshot);
+    expect(f.situacao).toBe('baixada');
+    expect(f.status).toBe('credenciado');
+    expect(f.precisaRevisaoCpl()).toBe(true);
+  });
+
   it('guarda endereço estruturado geolocalizável editável (RF019/RN009)', () => {
     const endereco = { logradouro: 'Rua A', numero: '100', bairro: 'Centro', cidade: 'Rio Branco', uf: 'AC', cep: '69900062', latitude: -9.97, longitude: -67.82 };
     const f = Fornecedor.cadastrar({ ...base, contato: { endereco } });

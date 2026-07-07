@@ -109,12 +109,21 @@ export async function buildServer(): Promise<FastifyInstance> {
   // `usuarios`/`fornecedores`); senão memória (testes sem banco). Antes era sempre memória → os vínculos
   // de procurador (UC019) não sobreviviam a restart.
   const contasRepo: ContaRepository = pool ? new ContaRepositoryPg(pool) : new ContaRepositoryMemory();
-  const procuradores = new GerirProcuradores(contasRepo, bus);
-  registrarRotasIdentidade(app, { procuradores });
 
   // Autenticação (FR-015 / AD-20): registro/login local com JWT + vínculo/login Google.
   // Reaproveita o mesmo pool: Postgres quando configurado; senão memória (testes sem banco).
   const usuarioRepo: UsuarioRepository = pool ? new UsuarioRepositoryPg(pool) : new UsuarioRepositoryMemory();
+
+  // Procuradores (UC019): resolve o titular pela ContaAcesso; se ausente (conta criada antes desta UC),
+  // provisiona sob demanda a partir do titular de login em `usuarios` (backfill idempotente).
+  const procuradores = new GerirProcuradores(contasRepo, bus, {
+    titularDeLogin: async (fornecedorId, userId) => {
+      const u = await usuarioRepo.porId(userId);
+      return u && u.papel === 'titular' && u.fornecedorId === fornecedorId ? { identificador: u.email } : null;
+    },
+  });
+  registrarRotasIdentidade(app, { procuradores });
+
   const tokens = new JwtTokenService(config.auth.jwtSecret, config.auth.jwtExpiraEmSeg);
   // Reutilizado pelo cadastro de fornecedor (UC001): o cadastro cria a credencial de login (e-mail/senha).
   const registrarUsuario = new RegistrarUsuario(usuarioRepo, bus);

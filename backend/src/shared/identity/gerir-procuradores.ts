@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { ContaAcesso } from './conta-acesso.js';
 import type { ContaRepository } from './conta-repository.js';
 import type { EventBus } from '../events/event-bus.js';
 import { ProcuradorConvidado, ProcuradorRemovido } from './eventos.js';
@@ -26,6 +27,16 @@ export interface ProcuradorView {
 }
 
 /**
+ * Resolve o titular de login de um fornecedor (fonte: `usuarios`). Usado para PROVISIONAR sob demanda
+ * a ContaAcesso(titular) de contas criadas antes desta UC — a ContaAcesso só passou a ser gravada com
+ * `id = userId` no cadastro recente, então usuários antigos não teriam o vínculo. Retorna null quando
+ * o userId não é o titular do fornecedor.
+ */
+export interface TitularDirectory {
+  titularDeLogin(fornecedorId: string, userId: string): Promise<{ identificador: string } | null>;
+}
+
+/**
  * Caso de uso: gestão de procuradores (UC019 / RN010, AD-30). Só o titular convida/lista/remove; cada
  * ação registra ator + empresa na trilha (AD-30). Um procurador que tente convidar/gerir é bloqueado
  * (ApenasTitularGere → 403). A remoção é lógica (append-only, RN015): a conta fica inativa, preservando o rastro.
@@ -34,6 +45,7 @@ export class GerirProcuradores {
   constructor(
     private readonly contas: ContaRepository,
     private readonly bus: EventBus,
+    private readonly titularDir?: TitularDirectory,
     private readonly now: () => string = () => new Date().toISOString(),
   ) {}
 
@@ -69,7 +81,16 @@ export class GerirProcuradores {
 
   /** Resolve e valida o titular: 404 quando não há conta/empresa; 403 quando o ator não é o titular (RN010). */
   private async exigirTitular(fornecedorId: string, titularContaId: string) {
-    const conta = await this.contas.porId(titularContaId);
+    let conta = await this.contas.porId(titularContaId);
+    // Provisiona a ContaAcesso(titular) sob demanda para contas de login criadas antes desta UC
+    // (backfill idempotente): se o ator é o titular do fornecedor em `usuarios`, cria e persiste o vínculo.
+    if (!conta && this.titularDir) {
+      const t = await this.titularDir.titularDeLogin(fornecedorId, titularContaId);
+      if (t) {
+        conta = ContaAcesso.criarTitular({ id: titularContaId, fornecedorId, identificador: t.identificador });
+        await this.contas.salvar(conta);
+      }
+    }
     if (!conta || conta.fornecedorId !== fornecedorId) throw new TitularNaoEncontrado();
     if (conta.papel !== 'titular') throw new ApenasTitularGere(); // procurador não convida outro procurador (UC019 exceção)
     return conta;

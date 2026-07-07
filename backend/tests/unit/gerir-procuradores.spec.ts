@@ -70,4 +70,20 @@ describe('GerirProcuradores (UC019 — use case)', () => {
   it('remover procurador inexistente → ProcuradorNaoEncontrado', async () => {
     await expect(uc.remover(FID, TID, 'nao-existe')).rejects.toBeInstanceOf(ProcuradorNaoEncontrado);
   });
+
+  it('provisiona a ContaAcesso(titular) sob demanda para conta antiga sem vínculo (backfill)', async () => {
+    const semConta = new ContaRepositoryMemory(); // sem titular pré-criado (conta anterior a esta UC)
+    const dir = { titularDeLogin: async (f: string, u: string) => (f === FID && u === 'antigo' ? { identificador: 'titular@empresa.com' } : null) };
+    const comDir = new GerirProcuradores(semConta, new InMemoryEventBus(), dir);
+    const { procuradorContaId } = await comDir.convidar(FID, 'antigo', 'proc@empresa.com');
+    expect((await semConta.porId('antigo'))?.papel).toBe('titular'); // vínculo criado e persistido
+    expect((await semConta.porId(procuradorContaId))?.papel).toBe('procurador');
+  });
+
+  it('backfill não provisiona quando o userId NÃO é o titular do fornecedor', async () => {
+    const semConta = new ContaRepositoryMemory();
+    const dir = { titularDeLogin: async () => null }; // usuários resolve: não é titular
+    const comDir = new GerirProcuradores(semConta, new InMemoryEventBus(), dir);
+    await expect(comDir.convidar(FID, 'estranho', 'x@empresa.com')).rejects.toBeInstanceOf(TitularNaoEncontrado);
+  });
 });

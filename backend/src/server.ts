@@ -16,7 +16,8 @@ import { FornecedorRepositoryMemory } from './catalogo/adapters/fornecedor-repos
 import { FornecedorRepositoryPg } from './catalogo/adapters/fornecedor-repository-pg.js';
 import type { FornecedorRepository } from './catalogo/application/fornecedor-repository.js';
 import { registrarRotasCadastro } from './catalogo/adapters/cadastro-controller.js';
-import { ContaRepositoryMemory } from './shared/identity/conta-repository.js';
+import { ContaRepositoryMemory, type ContaRepository } from './shared/identity/conta-repository.js';
+import { ContaRepositoryPg } from './shared/identity/conta-repository-pg.js';
 import { GerirProcuradores } from './shared/identity/gerir-procuradores.js';
 import { registrarRotasIdentidade } from './shared/identity/identity-controller.js';
 import { loadConfig, temPostgresConfigurado } from './shared/config/env.js';
@@ -104,14 +105,25 @@ export async function buildServer(): Promise<FastifyInstance> {
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
   ]);
 
-  // Identidade (US1): contas + procuradores
-  const contasRepo = new ContaRepositoryMemory();
-  const procuradores = new GerirProcuradores(contasRepo, bus);
-  registrarRotasIdentidade(app, { procuradores });
+  // Identidade (US1): contas + procuradores. Persistência durável em Postgres quando disponível (como
+  // `usuarios`/`fornecedores`); senão memória (testes sem banco). Antes era sempre memória → os vínculos
+  // de procurador (UC019) não sobreviviam a restart.
+  const contasRepo: ContaRepository = pool ? new ContaRepositoryPg(pool) : new ContaRepositoryMemory();
 
   // Autenticação (FR-015 / AD-20): registro/login local com JWT + vínculo/login Google.
   // Reaproveita o mesmo pool: Postgres quando configurado; senão memória (testes sem banco).
   const usuarioRepo: UsuarioRepository = pool ? new UsuarioRepositoryPg(pool) : new UsuarioRepositoryMemory();
+
+  // Procuradores (UC019): resolve o titular pela ContaAcesso; se ausente (conta criada antes desta UC),
+  // provisiona sob demanda a partir do titular de login em `usuarios` (backfill idempotente).
+  const procuradores = new GerirProcuradores(contasRepo, bus, {
+    titularDeLogin: async (fornecedorId, userId) => {
+      const u = await usuarioRepo.porId(userId);
+      return u && u.papel === 'titular' && u.fornecedorId === fornecedorId ? { identificador: u.email } : null;
+    },
+  });
+  registrarRotasIdentidade(app, { procuradores });
+
   const tokens = new JwtTokenService(config.auth.jwtSecret, config.auth.jwtExpiraEmSeg);
   // Reutilizado pelo cadastro de fornecedor (UC001): o cadastro cria a credencial de login (e-mail/senha).
   const registrarUsuario = new RegistrarUsuario(usuarioRepo, bus);

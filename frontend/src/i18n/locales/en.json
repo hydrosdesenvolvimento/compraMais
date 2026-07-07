@@ -10,6 +10,7 @@
       "credenciamentos": "My accreditations",
       "documentos": "Documents",
       "demandas": "Assigned demands",
+      "procuradores": "Attorneys",
       "painel": "Dashboard",
       "covalidacao": "Co-validation",
       "gestaoEditais": "Tender management",
@@ -393,6 +394,36 @@
       "salvando": "Saving…",
       "salvo": "Changes saved",
       "salvarErro": "Could not save. Please try again."
+    }
+  },
+  "procuradores": {
+    "titulo": "Attorneys",
+    "subtitulo": "Authorize third parties to act on behalf of the company, with an audit trail for every action.",
+    "convite": {
+      "titulo": "Invite attorney",
+      "identificadorLabel": "Attorney e-mail or ID",
+      "identificadorPlaceholder": "name@company.com",
+      "enviar": "Invite",
+      "enviando": "Inviting…",
+      "erro": "Could not invite. Check the details and try again."
+    },
+    "lista": {
+      "titulo": "Active attorneys",
+      "vazio": "No attorneys linked yet.",
+      "ativo": "Active",
+      "removido": "Removed",
+      "convidadoEm": "Linked on {{data}}",
+      "remover": "Remove",
+      "removendo": "Removing…"
+    },
+    "removidos": {
+      "titulo": "Removal history"
+    },
+    "estado": {
+      "carregando": "Loading attorneys…",
+      "erro": "Could not load attorneys.",
+      "semEmpresa": "No company linked to your account.",
+      "somenteTitular": "Only the company's data subject can manage attorneys."
     }
   },
   "painelTitular": {

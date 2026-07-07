@@ -10,6 +10,7 @@
       "credenciamentos": "Mis acreditaciones",
       "documentos": "Documentos",
       "demandas": "Demandas asignadas",
+      "procuradores": "Apoderados",
       "painel": "Panel",
       "covalidacao": "Covalidación",
       "gestaoEditais": "Gestión de licitaciones",
@@ -393,6 +394,36 @@
       "salvando": "Guardando…",
       "salvo": "Cambios guardados",
       "salvarErro": "No se pudo guardar. Inténtelo de nuevo."
+    }
+  },
+  "procuradores": {
+    "titulo": "Apoderados",
+    "subtitulo": "Autorice a terceros a actuar en nombre de la empresa, con registro de cada acción.",
+    "convite": {
+      "titulo": "Invitar apoderado",
+      "identificadorLabel": "Correo o documento del apoderado",
+      "identificadorPlaceholder": "nombre@empresa.com",
+      "enviar": "Invitar",
+      "enviando": "Invitando…",
+      "erro": "No se pudo invitar. Verifique los datos e inténtelo de nuevo."
+    },
+    "lista": {
+      "titulo": "Apoderados activos",
+      "vazio": "Aún no hay apoderados vinculados.",
+      "ativo": "Activo",
+      "removido": "Eliminado",
+      "convidadoEm": "Vinculado el {{data}}",
+      "remover": "Eliminar",
+      "removendo": "Eliminando…"
+    },
+    "removidos": {
+      "titulo": "Historial de eliminaciones"
+    },
+    "estado": {
+      "carregando": "Cargando apoderados…",
+      "erro": "No se pudieron cargar los apoderados.",
+      "semEmpresa": "No hay ninguna empresa vinculada a su cuenta.",
+      "somenteTitular": "Solo el titular de la empresa puede gestionar apoderados."
     }
   },
   "painelTitular": {

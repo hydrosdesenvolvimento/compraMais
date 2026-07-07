@@ -10,6 +10,7 @@
       "credenciamentos": "Meus credenciamentos",
       "documentos": "Documentos",
       "demandas": "Demandas distribuídas",
+      "procuradores": "Procuradores",
       "painel": "Painel",
       "covalidacao": "Covalidação",
       "gestaoEditais": "Gestão de editais",
@@ -393,6 +394,36 @@
       "salvando": "Salvando…",
       "salvo": "Alterações salvas",
       "salvarErro": "Não foi possível salvar. Tente novamente."
+    }
+  },
+  "procuradores": {
+    "titulo": "Procuradores",
+    "subtitulo": "Autorize terceiros a agir em nome da empresa, com rastro de cada ação.",
+    "convite": {
+      "titulo": "Convidar procurador",
+      "identificadorLabel": "E-mail ou CPF do procurador",
+      "identificadorPlaceholder": "nome@empresa.com",
+      "enviar": "Convidar",
+      "enviando": "Convidando…",
+      "erro": "Não foi possível convidar. Verifique os dados e tente novamente."
+    },
+    "lista": {
+      "titulo": "Procuradores ativos",
+      "vazio": "Nenhum procurador vinculado ainda.",
+      "ativo": "Ativo",
+      "removido": "Removido",
+      "convidadoEm": "Vinculado em {{data}}",
+      "remover": "Remover",
+      "removendo": "Removendo…"
+    },
+    "removidos": {
+      "titulo": "Histórico de remoções"
+    },
+    "estado": {
+      "carregando": "Carregando procuradores…",
+      "erro": "Não foi possível carregar os procuradores.",
+      "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
+      "somenteTitular": "Apenas o titular da empresa pode gerir procuradores."
     }
   },
   "painelTitular": {

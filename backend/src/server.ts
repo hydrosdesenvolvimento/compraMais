@@ -16,7 +16,8 @@ import { FornecedorRepositoryMemory } from './catalogo/adapters/fornecedor-repos
 import { FornecedorRepositoryPg } from './catalogo/adapters/fornecedor-repository-pg.js';
 import type { FornecedorRepository } from './catalogo/application/fornecedor-repository.js';
 import { registrarRotasCadastro } from './catalogo/adapters/cadastro-controller.js';
-import { ContaRepositoryMemory } from './shared/identity/conta-repository.js';
+import { ContaRepositoryMemory, type ContaRepository } from './shared/identity/conta-repository.js';
+import { ContaRepositoryPg } from './shared/identity/conta-repository-pg.js';
 import { GerirProcuradores } from './shared/identity/gerir-procuradores.js';
 import { registrarRotasIdentidade } from './shared/identity/identity-controller.js';
 import { loadConfig, temPostgresConfigurado } from './shared/config/env.js';
@@ -104,8 +105,10 @@ export async function buildServer(): Promise<FastifyInstance> {
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
   ]);
 
-  // Identidade (US1): contas + procuradores
-  const contasRepo = new ContaRepositoryMemory();
+  // Identidade (US1): contas + procuradores. Persistência durável em Postgres quando disponível (como
+  // `usuarios`/`fornecedores`); senão memória (testes sem banco). Antes era sempre memória → os vínculos
+  // de procurador (UC019) não sobreviviam a restart.
+  const contasRepo: ContaRepository = pool ? new ContaRepositoryPg(pool) : new ContaRepositoryMemory();
   const procuradores = new GerirProcuradores(contasRepo, bus);
   registrarRotasIdentidade(app, { procuradores });
 

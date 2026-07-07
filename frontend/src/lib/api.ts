@@ -43,6 +43,14 @@ export interface RegistroAuditoria { id: string; usuario: string | null; evento:
 export interface SincronizacaoResultado { status: 'sucesso' | 'revisao' | 'erro'; quando?: string; fonte?: string }
 export interface EnderecoView { logradouro: string; numero: string; complemento?: string; bairro: string; cidade: string; uf: string; cep: string }
 export interface CnaeView { codigoSubclasse: string; tipo: 'principal' | 'secundario'; ativo: boolean }
+/** UC019: vínculo de procurador exibido na tela "Procuradores" (ativos + rastro dos removidos, RN015). */
+export interface ProcuradorView {
+  contaId: string;
+  identificador: string;
+  ativo: boolean;
+  convidadoPor: string | null;
+  desde: string;
+}
 /** UC018 passo 1: perfil do fornecedor exibido na "Minha conta" (dados oficiais read-only + contato). */
 export interface FornecedorPerfil {
   id: string; cnpj: string; razaoSocial: string; porte: string;
@@ -64,6 +72,10 @@ export const api = {
   // RN009/FR-013: só Nome Fantasia, Endereço e Telefone. O backend rejeita campos oficiais (422) e devolve 204.
   editarPerfil: (fid: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) => send<void>(`/fornecedores/${fid}`, 'PATCH', patch),
   solicitarDireito: (tipo: string) => send('/titular/solicitacoes', 'POST', { tipo }),
+  // UC019 — Gerir procuradores (só o titular; 403 quando o ator não é o titular).
+  procuradores: (fid: string) => get<ProcuradorView[]>(`/fornecedores/${fid}/procuradores`),
+  convidarProcurador: (fid: string, identificador: string) => send<{ procuradorContaId: string }>(`/fornecedores/${fid}/procuradores`, 'POST', { identificador }),
+  removerProcurador: (fid: string, contaId: string) => send<void>(`/fornecedores/${fid}/procuradores/${contaId}`, 'DELETE'),
   contestarCnae: (editalId: string, body: { cnaeContestado: string; justificativa: string }) => send(`/editais/${editalId}/contestacoes-cnae`, 'POST', body),
 
   // Painel admin

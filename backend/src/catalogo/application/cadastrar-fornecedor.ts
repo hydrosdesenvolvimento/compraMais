@@ -88,11 +88,14 @@ export class CadastrarFornecedor {
     const fornecedor = Fornecedor.cadastrar({ id, cnpj, ...dados, origem, contato, sincronizadoEm });
 
     // Credencial de login (UC001 passo 4). Falha em e-mail duplicado antes de persistir o fornecedor.
-    await this.login.executar({ email: input.titular.identificador, senha: input.senha, nome: input.nome ?? dados.razaoSocial, papel: 'titular', fornecedorId: id });
+    const { usuarioId } = await this.login.executar({ email: input.titular.identificador, senha: input.senha, nome: input.nome ?? dados.razaoSocial, papel: 'titular', fornecedorId: id });
 
     await this.fornecedores.salvar(fornecedor);
 
-    const titular = ContaAcesso.criarTitular({ id: randomUUID(), fornecedorId: id, identificador: input.titular.identificador });
+    // A ContaAcesso(titular) COMPARTILHA o id do usuário de login: as rotas de procuradores (UC019)
+    // resolvem o titular por `x-user-id` (= userId do JWT). Sem esse alinhamento, o convite nunca
+    // encontraria o titular. (Antes usava randomUUID() e o fluxo de convite era inoperante.)
+    const titular = ContaAcesso.criarTitular({ id: usuarioId, fornecedorId: id, identificador: input.titular.identificador });
     await this.contas.salvar(titular);
 
     await this.consentimentos.salvar(Consentimento.conceder({

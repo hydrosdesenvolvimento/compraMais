@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { Trans, useTranslation } from 'react-i18next';
 import { cadastrarFornecedor, consultarCnpj, consultarCep, login, mascaraCnpj, mascaraCep, soDigitos, type CadastroErro, type DadosCnpj, type EnderecoCep, type EnderecoEstruturado } from '../../lib/br';
-import { salvarToken } from '../../lib/auth';
+import { salvarSessao } from '../../lib/auth';
 
 /**
  * AuthPanel — cartão de acesso do AuthLayout (mockup Compra Mais). Abas Entrar / Criar conta.
@@ -106,12 +106,12 @@ export function AuthPanel() {
       });
       return login(v.email, v.senha);
     },
-    onSuccess: (r) => { salvarToken(r.token); void navigate({ to: '/inicio' }); },
+    onSuccess: (r) => { salvarSessao({ token: r.token, usuario: r.usuario }); void navigate({ to: '/inicio' }); },
   });
 
   const loginMut = useMutation({
     mutationFn: (v: { email: string; senha: string }) => login(v.email, v.senha),
-    onSuccess: (r) => { salvarToken(r.token); void navigate({ to: '/inicio' }); },
+    onSuccess: (r) => { salvarSessao({ token: r.token, usuario: r.usuario }); void navigate({ to: '/inicio' }); },
   });
   const formLogin = useForm({ defaultValues: { email: '', senha: '' }, onSubmit: async ({ value }) => { await loginMut.mutateAsync(value).catch(() => { /* erro via loginMut.isError */ }); } });
 

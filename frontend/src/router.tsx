@@ -10,7 +10,8 @@ import { Editais } from './pages/publico/Editais';
 import { ContestarCnae } from './pages/publico/ContestarCnae';
 import { Documentos } from './pages/publico/Documentos';
 import { Contestacao } from './pages/publico/Contestacao';
-import { MinhaConta } from './pages/publico/MinhaConta';
+import { MinhaContaConectada } from './pages/publico/MinhaContaConectada';
+import { estaAutenticado } from './lib/auth';
 import { PainelTitular } from './pages/publico/PainelTitular';
 import { Transparencia } from './pages/publico/Transparencia';
 import { Dashboard } from './pages/admin/Dashboard';
@@ -22,8 +23,6 @@ import { ConsultaAuditoria } from './pages/admin/ConsultaAuditoria';
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
 const DEMO_EDITAL_ID = 'demo-edital';
 const DEMO_SECRETARIA_ID = 'demo-secretaria';
-const demoFornecedor = { razaoSocial: 'Confecções Vale do Acre Ltda', cnpj: '11.222.333/0001-81', porte: 'ME' };
-const demoSync = { quando: '24/06/2026 às 09:12', status: 'sucesso' as const };
 
 const ico = { width: 20, height: 20 };
 const MENU_FORNECEDOR: ItemMenu[] = [
@@ -51,7 +50,7 @@ const cadastroRoute = createRoute({ getParentRoute: () => rootRoute, path: '/cad
 
 const fornecedorLayout = createRoute({ getParentRoute: () => rootRoute, id: 'fornecedor', component: () => <AppShell menu={MENU_FORNECEDOR} usuario={USUARIO_FORNECEDOR}><Outlet /></AppShell> });
 const rInicio = createRoute({ getParentRoute: () => fornecedorLayout, path: '/inicio', component: Inicio });
-const rMinhaConta = createRoute({ getParentRoute: () => fornecedorLayout, path: '/minha-conta', component: () => <MinhaConta fornecedor={demoFornecedor} fornecedorId={DEMO_FORNECEDOR_ID} ultimaSync={demoSync} /> });
+const rMinhaConta = createRoute({ getParentRoute: () => fornecedorLayout, path: '/minha-conta', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: MinhaContaConectada });
 const rEditais = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais', component: Editais });
 const rCredenciamento = createRoute({ getParentRoute: () => fornecedorLayout, path: '/credenciamento', component: Credenciamento });
 const rContestarCnae = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais/contestar', component: () => <ContestarCnae editalId={DEMO_EDITAL_ID} /> });

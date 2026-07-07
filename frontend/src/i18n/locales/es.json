@@ -349,7 +349,13 @@
       "razaoSocial": "Razón Social",
       "cnpj": "CNPJ",
       "situacaoCadastral": "Situación Registral",
-      "porteEmpresa": "Tamaño de la Empresa"
+      "porteEmpresa": "Tamaño de la Empresa",
+      "situacao": { "ativa": "Activa", "baixada": "Baja", "inapta": "No apta", "suspensa": "Suspendida" }
+    },
+    "estado": {
+      "carregando": "Cargando sus datos…",
+      "erro": "No fue posible cargar los datos de su cuenta.",
+      "semEmpresa": "Su cuenta no está vinculada a una empresa."
     },
     "responsavel": {
       "secaoLabel": "DATOS DEL RESPONSABLE",

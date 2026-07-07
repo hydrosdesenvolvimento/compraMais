@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { GerirConta } from '../../src/catalogo/application/gerir-conta.js';
+import { GerirConta, FornecedorNaoEncontrado } from '../../src/catalogo/application/gerir-conta.js';
 import { Fornecedor, type SituacaoCadastral } from '../../src/catalogo/domain/fornecedor.js';
 import { Cnpj } from '../../src/catalogo/domain/cnpj.js';
 import { FornecedorRepositoryMemory } from '../../src/catalogo/adapters/fornecedor-repository-memory.js';
@@ -92,7 +92,24 @@ describe('GerirConta.reSincronizar (UC018 — integração, adaptadores em memó
     expect(eventos).toEqual(['revisao']);
   });
 
-  it('fornecedor inexistente → erro', async () => {
-    await expect(novo(receitaFake('verificado')).reSincronizar('nao-existe', actor)).rejects.toThrow();
+  it('fornecedor inexistente → FornecedorNaoEncontrado (borda mapeia 404, nunca 500)', async () => {
+    await expect(novo(receitaFake('verificado')).reSincronizar('nao-existe', actor)).rejects.toBeInstanceOf(FornecedorNaoEncontrado);
+  });
+
+  describe('obterPerfil (UC018 passo 1 — "Minha conta")', () => {
+    it('devolve os dados oficiais + contato + última sincronização', async () => {
+      const perfil = await novo(receitaFake('verificado')).obterPerfil('f1');
+      expect(perfil).toMatchObject({
+        id: 'f1', razaoSocial: 'Confecções Vale do Acre Ltda', porte: 'ME', situacao: 'ativa',
+        status: 'requerente', sincronizadoEm: '2026-06-01T00:00:00Z',
+        nomeFantasia: 'Vale do Acre', telefone: '(68) 3333-0000',
+      });
+      expect(perfil.cnpj).toBe(CNPJ);
+      expect(perfil.cnaes[0]?.codigoSubclasse).toBe('1412601');
+    });
+
+    it('fornecedor inexistente → FornecedorNaoEncontrado', async () => {
+      await expect(novo(receitaFake('verificado')).obterPerfil('nao-existe')).rejects.toBeInstanceOf(FornecedorNaoEncontrado);
+    });
   });
 });

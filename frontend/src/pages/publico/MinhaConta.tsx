@@ -6,17 +6,29 @@ import { useMutation } from '@tanstack/react-query';
 import { Card, Pill, Botao, Campo } from '../../design-system/components';
 import { IconeSync, IconeCadeado, IconeCamera, IconeCheck } from '../../design-system/icons';
 import { mascaraCpf, mascaraCep, validarCpf, consultarCep } from '../../lib/br';
-import { api } from '../../lib/api';
+import { api, type EnderecoView } from '../../lib/api';
 
 /**
  * "Minha conta" (UX-DR4 / RN009 / RF018) — dashboard do fornecedor (design de referência).
  * Sincronização e autofill de CEP via TanStack Query; formulário editável via TanStack Form
  * (autofill de endereço por CEP + CPF do responsável com validação de dígitos).
  */
+export type SituacaoCadastral = 'ativa' | 'baixada' | 'inapta' | 'suspensa';
+
 export interface MinhaContaProps {
-  fornecedor: { razaoSocial: string; cnpj: string; porte: string };
+  fornecedor: {
+    razaoSocial: string;
+    cnpj: string;
+    porte: string;
+    situacao: SituacaoCadastral;
+    nomeFantasia?: string;
+    telefone?: string;
+    endereco?: EnderecoView;
+  };
   fornecedorId: string;
   ultimaSync?: { quando: string; status: 'sucesso' | 'revisao' | 'erro' };
+  /** Chamado após uma sincronização bem-sucedida para o container revalidar os dados oficiais. */
+  onSincronizado?: () => void;
 }
 
 /** Formata o timestamp ISO devolvido pela re-sincronização (UC018) no idioma ativo. */
@@ -46,15 +58,21 @@ function CampoOficial({ rotulo, valor }: { rotulo: string; valor: string }) {
   );
 }
 
-export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaProps) {
+export function MinhaConta({ fornecedor, fornecedorId, ultimaSync, onSincronizado }: MinhaContaProps) {
   const { t, i18n } = useTranslation();
   const iniciais = fornecedor.razaoSocial.split(' ').filter(Boolean).slice(0, 2).map((s) => s[0]).join('').toUpperCase();
-  const sincronizar = useMutation({ mutationFn: () => api.sincronizar(fornecedorId) });
+  const sincronizar = useMutation({
+    mutationFn: () => api.sincronizar(fornecedorId),
+    // Sucesso/revisão atualizam os dados oficiais no servidor → o container revalida o GET.
+    onSuccess: (r) => { if (r.status !== 'erro') onSincronizado?.(); },
+  });
   // UC018: o backend responde 200 com { status, quando, fonte } inclusive para erro/revisão (A1/exceção);
   // uma falha HTTP (rede) cai em `isError`. O timestamp devolvido atualiza a "última sincronização".
   const resultado = sincronizar.data;
   const syncStatus = resultado?.status ?? (sincronizar.isError ? 'erro' : ultimaSync?.status);
-  const quandoExibido = formatarQuando(resultado?.quando, i18n.language) ?? ultimaSync?.quando;
+  const quandoExibido = formatarQuando(resultado?.quando, i18n.language) ?? formatarQuando(ultimaSync?.quando, i18n.language);
+  const situacaoLabel = t(`minhaConta.empresa.situacao.${fornecedor.situacao}`);
+  const situacaoTom = fornecedor.situacao === 'ativa' ? 'success' : 'warn';
 
   return (
     <div className="stack">
@@ -124,7 +142,7 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
             <div style={{ font: '600 18px var(--font-body)', color: 'var(--azul-900)' }}>{fornecedor.razaoSocial}</div>
             <div style={{ fontSize: 13.5, color: 'var(--cinza-500)', marginTop: 2 }}>{t('minhaConta.empresa.cnpjPrefixo')} {fornecedor.cnpj}</div>
           </div>
-          <Pill tom="success">{t('minhaConta.empresa.ativa')}</Pill>
+          <Pill tom={situacaoTom}>{situacaoLabel}</Pill>
         </div>
 
         <div style={{ paddingTop: 24 }}>
@@ -134,11 +152,11 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync }: MinhaContaP
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '14px 18px' }}>
             <CampoOficial rotulo={t('minhaConta.empresa.razaoSocial')} valor={fornecedor.razaoSocial} />
             <CampoOficial rotulo={t('minhaConta.empresa.cnpj')} valor={fornecedor.cnpj} />
-            <CampoOficial rotulo={t('minhaConta.empresa.situacaoCadastral')} valor={t('minhaConta.empresa.ativa')} />
+            <CampoOficial rotulo={t('minhaConta.empresa.situacaoCadastral')} valor={situacaoLabel} />
             <CampoOficial rotulo={t('minhaConta.empresa.porteEmpresa')} valor={fornecedor.porte} />
           </div>
 
-          <DadosEditaveis />
+          <DadosEditaveis inicial={{ nomeFantasia: fornecedor.nomeFantasia, telefone: fornecedor.telefone, endereco: fornecedor.endereco }} />
         </div>
       </Card>
     </div>
@@ -194,11 +212,17 @@ function ResponsavelCard({ iniciais, fantasia }: { iniciais: string; fantasia: s
 }
 
 /** Formulário editável (TanStack Form): autofill de CEP (Query) e CPF do responsável (validação). */
-function DadosEditaveis() {
+function DadosEditaveis({ inicial }: { inicial?: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView } }) {
   const { t } = useTranslation();
   const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
+  const end = inicial?.endereco;
   const form = useForm({
-    defaultValues: { nomeFantasia: '', cep: '', rua: '', bairro: '', cidade: '', uf: '', telefone: '', cpf: '' },
+    // Prefill com os dados editáveis reais do fornecedor (RN009). Persistência via PATCH — próxima fase.
+    defaultValues: {
+      nomeFantasia: inicial?.nomeFantasia ?? '', telefone: inicial?.telefone ?? '',
+      cep: end?.cep ? mascaraCep(end.cep) : '', rua: end?.logradouro ?? '',
+      bairro: end?.bairro ?? '', cidade: end?.cidade ?? '', uf: end?.uf ?? '', cpf: '',
+    },
     onSubmit: async () => { /* persistência do perfil — PATCH /fornecedores/:id (próxima fase) */ },
   });
 

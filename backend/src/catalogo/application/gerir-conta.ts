@@ -3,7 +3,7 @@ import type { FornecedorRepository } from './fornecedor-repository.js';
 import type { ReceitaGateway } from '../../shared/acl/receita/receita-gateway.js';
 import type { EventBus } from '../../shared/events/event-bus.js';
 import { FornecedorSincronizado, PerfilEditado } from '../domain/eventos.js';
-import type { ContatoEditavel } from '../domain/fornecedor.js';
+import type { Cnae, ContatoEditavel, Endereco, OrigemDados, SituacaoCadastral, StatusCredenciamento } from '../domain/fornecedor.js';
 
 const CAMPOS_EDITAVEIS = ['nomeFantasia', 'endereco', 'telefone'] as const;
 
@@ -14,11 +14,38 @@ export interface ResultadoSincronizacao {
   fonte?: string;
 }
 
+/**
+ * Read model do perfil do fornecedor (UC018 passo 1 — "Minha conta"). DTO plano: não vaza a
+ * entidade. Dados oficiais (razão/porte/situação/CNAEs) são read-only; contato é editável (RN009).
+ */
+export interface FornecedorPerfil {
+  id: string;
+  cnpj: string;
+  razaoSocial: string;
+  porte: string;
+  situacao: SituacaoCadastral;
+  origem: OrigemDados;
+  status: StatusCredenciamento;
+  sincronizadoEm: string | null;
+  nomeFantasia?: string;
+  telefone?: string;
+  endereco?: Endereco;
+  cnaes: ReadonlyArray<Cnae>;
+}
+
 /** RN009/FR-013: rejeita edição de campos oficiais da Receita na borda. */
 export class CampoNaoEditavel extends Error {
   constructor(campo: string) {
     super(`Field "${campo}" is official Receita data (read-only). Editable: ${CAMPOS_EDITAVEIS.join(', ')}.`);
     this.name = 'CampoNaoEditavel';
+  }
+}
+
+/** Fornecedor inexistente na borda → 404 (nunca 500). */
+export class FornecedorNaoEncontrado extends Error {
+  constructor() {
+    super('Supplier not found.');
+    this.name = 'FornecedorNaoEncontrado';
   }
 }
 
@@ -30,10 +57,30 @@ export class GerirConta {
     private readonly now: () => string = () => new Date().toISOString(),
   ) {}
 
+  /** UC018 passo 1: dados atuais do fornecedor para a "Minha conta". */
+  async obterPerfil(fornecedorId: string): Promise<FornecedorPerfil> {
+    const f = await this.fornecedores.porId(fornecedorId);
+    if (!f) throw new FornecedorNaoEncontrado();
+    return {
+      id: f.id,
+      cnpj: f.cnpj.valor,
+      razaoSocial: f.razaoSocial,
+      porte: f.porte,
+      situacao: f.situacao,
+      origem: f.origem,
+      status: f.status,
+      sincronizadoEm: f.sincronizadoEm,
+      nomeFantasia: f.contato.nomeFantasia,
+      telefone: f.contato.telefone,
+      endereco: f.contato.endereco,
+      cnaes: f.cnaes,
+    };
+  }
+
   /** FR-013: edição restrita. */
   async editarPerfil(fornecedorId: string, patch: Record<string, unknown>, actor: { userId: string }): Promise<void> {
     const f = await this.fornecedores.porId(fornecedorId);
-    if (!f) throw new Error('Supplier not found');
+    if (!f) throw new FornecedorNaoEncontrado();
     for (const campo of Object.keys(patch)) {
       if (!CAMPOS_EDITAVEIS.includes(campo as (typeof CAMPOS_EDITAVEIS)[number])) throw new CampoNaoEditavel(campo);
     }
@@ -53,7 +100,7 @@ export class GerirConta {
    */
   async reSincronizar(fornecedorId: string, actor: { userId: string }): Promise<ResultadoSincronizacao> {
     const f = await this.fornecedores.porId(fornecedorId);
-    if (!f) throw new Error('Supplier not found');
+    if (!f) throw new FornecedorNaoEncontrado();
     const r = await this.receita.consultarCnpj(f.cnpj.valor);
     if (r.frescor !== 'verificado' || !r.valor) {
       await this.emit(fornecedorId, actor, 'erro', []);

@@ -48,21 +48,37 @@ export function registrarRotasCadastro(app: FastifyInstance, deps: {
       await deps.conta.editarPerfil(id, req.body as Record<string, unknown>, { userId: actor(req) });
       return reply.code(204).send();
     } catch (e) {
-      return reply.code(422).send({ codigo: nome(e), mensagem: (e as Error).message });
+      return reply.code(mapStatus(e)).send({ codigo: nome(e), mensagem: (e as Error).message });
+    }
+  });
+
+  // UC018 passo 1: dados atuais do fornecedor para a "Minha conta".
+  app.get('/fornecedores/:id', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    try {
+      return reply.send(await deps.conta.obterPerfil(id));
+    } catch (e) {
+      return reply.code(mapStatus(e)).send({ codigo: nome(e), mensagem: (e as Error).message });
     }
   });
 
   app.post('/fornecedores/:id/sincronizar', async (req, reply) => {
     const { id } = req.params as { id: string };
-    const r = await deps.conta.reSincronizar(id, { userId: actor(req) });
-    return reply.send(r);
+    try {
+      const r = await deps.conta.reSincronizar(id, { userId: actor(req) });
+      return reply.send(r);
+    } catch (e) {
+      // Fornecedor inexistente → 404 (nunca 500). RF018 preserva os demais estados dentro do caso de uso.
+      return reply.code(mapStatus(e)).send({ codigo: nome(e), mensagem: (e as Error).message });
+    }
   });
 }
 
 function mapStatus(e: unknown): number {
   const n = nome(e);
+  if (n === 'FornecedorNaoEncontrado') return 404;
   if (n === 'CnpjJaCadastrado' || n === 'EmailJaCadastrado') return 409;
-  if (n === 'CnpjInvalido' || n === 'SituacaoNaoApta' || n === 'ConsentimentoInvalido') return 422;
+  if (n === 'CnpjInvalido' || n === 'SituacaoNaoApta' || n === 'ConsentimentoInvalido' || n === 'CampoNaoEditavel') return 422;
   if (n === 'ReceitaIndisponivelSemManual') return 503;
   return 400;
 }

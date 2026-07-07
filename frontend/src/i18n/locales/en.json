@@ -349,7 +349,13 @@
       "razaoSocial": "Legal Name",
       "cnpj": "CNPJ",
       "situacaoCadastral": "Registration Status",
-      "porteEmpresa": "Company Size"
+      "porteEmpresa": "Company Size",
+      "situacao": { "ativa": "Active", "baixada": "Cancelled", "inapta": "Unfit", "suspensa": "Suspended" }
+    },
+    "estado": {
+      "carregando": "Loading your data…",
+      "erro": "Could not load your account data.",
+      "semEmpresa": "Your account is not linked to a company."
     },
     "responsavel": {
       "secaoLabel": "LEGAL REPRESENTATIVE DATA",

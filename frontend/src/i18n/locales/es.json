@@ -386,8 +386,13 @@
       "cpfResponsavel": "CPF del responsable",
       "cpfInvalido": "CPF inválido",
       "cpfValido": "CPF válido",
+      "numero": "Número",
+      "complemento": "Complemento",
       "cancelar": "Cancelar",
-      "salvar": "Guardar cambios"
+      "salvar": "Guardar cambios",
+      "salvando": "Guardando…",
+      "salvo": "Cambios guardados",
+      "salvarErro": "No se pudo guardar. Inténtelo de nuevo."
     }
   },
   "painelTitular": {

@@ -156,7 +156,7 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync, onSincronizad
             <CampoOficial rotulo={t('minhaConta.empresa.porteEmpresa')} valor={fornecedor.porte} />
           </div>
 
-          <DadosEditaveis inicial={{ nomeFantasia: fornecedor.nomeFantasia, telefone: fornecedor.telefone, endereco: fornecedor.endereco }} />
+          <DadosEditaveis fornecedorId={fornecedorId} onSalvo={onSincronizado} inicial={{ nomeFantasia: fornecedor.nomeFantasia, telefone: fornecedor.telefone, endereco: fornecedor.endereco }} />
         </div>
       </Card>
     </div>
@@ -212,18 +212,38 @@ function ResponsavelCard({ iniciais, fantasia }: { iniciais: string; fantasia: s
 }
 
 /** Formulário editável (TanStack Form): autofill de CEP (Query) e CPF do responsável (validação). */
-function DadosEditaveis({ inicial }: { inicial?: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView } }) {
+function DadosEditaveis({ fornecedorId, inicial, onSalvo }: {
+  fornecedorId: string;
+  inicial?: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView };
+  onSalvo?: () => void;
+}) {
   const { t } = useTranslation();
   const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
   const end = inicial?.endereco;
+  // RN009: persiste só Nome Fantasia, Endereço e Telefone (PATCH /fornecedores/:id → 204). Após salvar,
+  // o container revalida o GET (onSalvo). O backend rejeita campos oficiais (422).
+  const salvar = useMutation({
+    mutationFn: (patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) => api.editarPerfil(fornecedorId, patch),
+    onSuccess: () => onSalvo?.(),
+  });
   const form = useForm({
-    // Prefill com os dados editáveis reais do fornecedor (RN009). Persistência via PATCH — próxima fase.
+    // Prefill com os dados editáveis reais do fornecedor (RN009).
     defaultValues: {
       nomeFantasia: inicial?.nomeFantasia ?? '', telefone: inicial?.telefone ?? '',
-      cep: end?.cep ? mascaraCep(end.cep) : '', rua: end?.logradouro ?? '',
-      bairro: end?.bairro ?? '', cidade: end?.cidade ?? '', uf: end?.uf ?? '', cpf: '',
+      cep: end?.cep ? mascaraCep(end.cep) : '', rua: end?.logradouro ?? '', numero: end?.numero ?? '',
+      complemento: end?.complemento ?? '', bairro: end?.bairro ?? '', cidade: end?.cidade ?? '', uf: end?.uf ?? '', cpf: '',
     },
-    onSubmit: async () => { /* persistência do perfil — PATCH /fornecedores/:id (próxima fase) */ },
+    onSubmit: async ({ value }) => {
+      const cep = value.cep.replace(/\D/g, '');
+      const patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView } = {
+        nomeFantasia: value.nomeFantasia, telefone: value.telefone,
+      };
+      // Só envia o endereço se houver conteúdo, para não sobrescrever o oficial com campos em branco.
+      if (value.rua || cep) {
+        patch.endereco = { logradouro: value.rua, numero: value.numero, complemento: value.complemento || undefined, bairro: value.bairro, cidade: value.cidade, uf: value.uf, cep };
+      }
+      await salvar.mutateAsync(patch).catch(() => { /* erro exposto via salvar.isError */ });
+    },
   });
 
   function buscarCep(valor: string) {
@@ -261,6 +281,8 @@ function DadosEditaveis({ inicial }: { inicial?: { nomeFantasia?: string; telefo
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
         <form.Field name="rua">{(f) => <Campo label={t('minhaConta.editaveis.logradouro')}><input data-cy="rua" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.ruaAvenida')} /></Campo>}</form.Field>
+        <form.Field name="numero">{(f) => <Campo label={t('minhaConta.editaveis.numero')}><input data-cy="numero" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.numero')} /></Campo>}</form.Field>
+        <form.Field name="complemento">{(f) => <Campo label={t('minhaConta.editaveis.complemento')}><input data-cy="complemento" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.complemento')} /></Campo>}</form.Field>
         <form.Field name="bairro">{(f) => <Campo label={t('minhaConta.editaveis.bairro')}><input data-cy="bairro" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.bairro')} /></Campo>}</form.Field>
         <form.Field name="cidade">{(f) => <Campo label={t('minhaConta.editaveis.cidade')}><input data-cy="cidade" className="input" value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} placeholder={t('minhaConta.editaveis.cidade')} /></Campo>}</form.Field>
         <form.Field name="uf">{(f) => <Campo label={t('minhaConta.editaveis.uf')}><input data-cy="uf" className="input" maxLength={2} value={f.state.value} onChange={(e) => f.handleChange(e.target.value.toUpperCase())} placeholder={t('minhaConta.editaveis.uf')} /></Campo>}</form.Field>
@@ -293,9 +315,11 @@ function DadosEditaveis({ inicial }: { inicial?: { nomeFantasia?: string; telefo
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 26, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-        <button type="button" className="btn btn-ghost" style={{ padding: '11px 20px' }}>{t('minhaConta.editaveis.cancelar')}</button>
-        <Botao variante="primario" type="submit" style={{ padding: '12px 24px' }}>
-          <IconeCheck width={16} height={16} strokeWidth={2} /> {t('minhaConta.editaveis.salvar')}
+        {salvar.isSuccess && <small data-cy="perfil-salvo" style={{ color: 'var(--sucesso)', marginRight: 'auto' }}>{t('minhaConta.editaveis.salvo')}</small>}
+        {salvar.isError && <small data-cy="perfil-erro" style={{ color: 'var(--erro)', marginRight: 'auto' }}>{t('minhaConta.editaveis.salvarErro')}</small>}
+        <button type="button" className="btn btn-ghost" style={{ padding: '11px 20px' }} onClick={() => form.reset()}>{t('minhaConta.editaveis.cancelar')}</button>
+        <Botao data-cy="salvar-perfil" variante="primario" type="submit" disabled={salvar.isPending} style={{ padding: '12px 24px' }}>
+          <IconeCheck width={16} height={16} strokeWidth={2} /> {salvar.isPending ? t('minhaConta.editaveis.salvando') : t('minhaConta.editaveis.salvar')}
         </Botao>
       </div>
     </form>

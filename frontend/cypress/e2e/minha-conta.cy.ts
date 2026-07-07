@@ -59,6 +59,16 @@ describe('Minha conta — re-sincronizar CNPJ (UC018)', () => {
     cy.get('[data-cy=sync-sucesso]').should('not.exist');
   });
 
+  it('salva os campos editáveis (RN009) via PATCH e revalida o perfil', () => {
+    entrar();
+    cy.intercept('PATCH', `/fornecedores/${FID}`, { statusCode: 204 }).as('patch');
+    cy.get('[data-cy=numero]').clear().type('250');
+    cy.get('[data-cy=salvar-perfil]').click();
+    cy.wait('@patch').its('request.body').should('deep.include', { telefone: '(68) 3333-0000' });
+    cy.get('[data-cy=perfil-salvo]').should('be.visible');
+    cy.get('@perfil.all').its('length').should('be.gte', 2); // GET revalidado após salvar
+  });
+
   it('sem sessão → redireciona para /cadastro (rota protegida)', () => {
     cy.visit('/#/minha-conta');
     cy.get('[data-cy=aba-entrar]').should('be.visible'); // AuthPanel

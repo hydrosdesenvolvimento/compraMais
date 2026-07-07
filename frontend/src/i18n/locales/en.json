@@ -386,8 +386,13 @@
       "cpfResponsavel": "Representative's CPF",
       "cpfInvalido": "Invalid CPF",
       "cpfValido": "Valid CPF",
+      "numero": "Number",
+      "complemento": "Complement",
       "cancelar": "Cancel",
-      "salvar": "Save changes"
+      "salvar": "Save changes",
+      "salvando": "Saving…",
+      "salvo": "Changes saved",
+      "salvarErro": "Could not save. Please try again."
     }
   },
   "painelTitular": {

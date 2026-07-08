@@ -106,6 +106,34 @@
       "submit": "Sign in",
       "submitting": "Signing in…",
       "error": "Invalid credentials."
+    },
+    "reset": {
+      "title": "Recover password",
+      "subtitle": "Enter your registered e-mail. If an account exists, we'll send a link to reset your password.",
+      "enviar": "Send recovery link",
+      "enviando": "Sending…",
+      "erro": "Could not send the link. Please try again.",
+      "voltarLogin": "Back to login",
+      "enviadoTitle": "Check your e-mail",
+      "enviadoInfo": "If the e-mail has an account, you'll receive a link to reset your password shortly.",
+      "voltar": "Back to login"
+    },
+    "redefinir": {
+      "title": "Set a new password",
+      "subtitle": "Choose a new password for your account.",
+      "novaSenha": "New password",
+      "novaSenhaPlaceholder": "At least 8 characters",
+      "confirmar": "Confirm new password",
+      "confirmarPlaceholder": "Repeat the new password",
+      "enviar": "Reset password",
+      "enviando": "Resetting…",
+      "erroToken": "Invalid or expired link. Please request a new password recovery.",
+      "erroFraca": "The password must be at least 8 characters long.",
+      "erroConfirma": "The passwords do not match.",
+      "erroGenerico": "Could not reset the password. Please try again.",
+      "irLogin": "Go to login",
+      "sucessoTitle": "Password reset",
+      "sucessoInfo": "Your password has been updated. You can now sign in with the new password."
     }
   },
   "admin": {
@@ -351,7 +379,12 @@
       "cnpj": "CNPJ",
       "situacaoCadastral": "Registration Status",
       "porteEmpresa": "Company Size",
-      "situacao": { "ativa": "Active", "baixada": "Cancelled", "inapta": "Unfit", "suspensa": "Suspended" }
+      "situacao": {
+        "ativa": "Active",
+        "baixada": "Cancelled",
+        "inapta": "Unfit",
+        "suspensa": "Suspended"
+      }
     },
     "estado": {
       "carregando": "Loading your data…",
@@ -368,7 +401,20 @@
       "senha": "Password",
       "alterarSenha": "Change my password",
       "novaSenhaPlaceholder": "New password (min. 8 characters)",
-      "cancelar": "Cancel"
+      "cancelar": "Cancel",
+      "senhaAtualPlaceholder": "Current password",
+      "confirmarPlaceholder": "Confirm new password",
+      "salvarSenha": "Save new password",
+      "salvando": "Saving…",
+      "sucesso": "Password changed successfully.",
+      "fechar": "Close",
+      "ver": "Show passwords",
+      "ocultar": "Hide passwords",
+      "erroAtual": "Current password is incorrect.",
+      "erroFraca": "The new password must be at least 8 characters long.",
+      "erroConfirma": "The passwords do not match.",
+      "erroGenerico": "Could not change the password. Please try again.",
+      "sessaoExpirada": "Your session has expired. Sign in again to change your password."
     },
     "editaveis": {
       "secaoLabel": "ADDITIONAL DATA · EDITABLE",

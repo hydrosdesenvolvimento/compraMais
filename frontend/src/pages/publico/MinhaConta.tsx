@@ -163,7 +163,7 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync, onSincronizad
   );
 }
 
-/** Cartão "Dados do responsável": avatar, nome/sobrenome, foto e alteração de senha. */
+/** Cartão "Dados do responsável": avatar, nome/sobrenome, foto e alteração de senha (UC015 · A2). */
 function ResponsavelCard({ iniciais, fantasia }: { iniciais: string; fantasia: string }) {
   const { t } = useTranslation();
   const [editSenha, setEditSenha] = useState(false);
@@ -191,25 +191,90 @@ function ResponsavelCard({ iniciais, fantasia }: { iniciais: string; fantasia: s
       <div style={{ marginTop: 16 }}>
         <label className="label">{t('minhaConta.responsavel.senha')}</label>
         {!editSenha ? (
-          <button className="btn btn-ghost" style={{ padding: '11px 18px' }} type="button" onClick={() => setEditSenha(true)}>
+          <button data-cy="abrir-troca-senha" className="btn btn-ghost" style={{ padding: '11px 18px' }} type="button" onClick={() => setEditSenha(true)}>
             <IconeCadeado width={16} height={16} /> {t('minhaConta.responsavel.alterarSenha')}
           </button>
         ) : (
-          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            <input className="input" type="password" placeholder={t('minhaConta.responsavel.novaSenhaPlaceholder')} style={{ flex: 1, minWidth: 240 }} />
-            <button
-              type="button"
-              onClick={() => setEditSenha(false)}
-              style={{ padding: '11px 16px', border: 'none', background: 'none', color: 'var(--cinza-500)', font: '600 13.5px var(--font-body)', cursor: 'pointer', textDecoration: 'underline' }}
-            >
-              {t('minhaConta.responsavel.cancelar')}
-            </button>
-          </div>
+          <TrocaSenhaForm onFechar={() => setEditSenha(false)} />
         )}
       </div>
     </Card>
   );
 }
+
+/**
+ * Formulário de troca da própria senha (UC015 · A2). Exige senha atual + nova + confirmação; valida
+ * localmente (mín. 8, confirmação igual) e envia POST /auth/senha (Bearer). Mapeia o erro do backend:
+ * 400 = senha atual incorreta; 422 = senha fraca; 401 = sessão expirada.
+ */
+function TrocaSenhaForm({ onFechar }: { onFechar: () => void }) {
+  const { t } = useTranslation();
+  const [atual, setAtual] = useState('');
+  const [nova, setNova] = useState('');
+  const [confirma, setConfirma] = useState('');
+  const [ver, setVer] = useState(false);
+  const [erroLocal, setErroLocal] = useState<string | null>(null);
+
+  const trocar = useMutation({
+    mutationFn: () => api.trocarSenha(atual, nova),
+    onSuccess: () => { setAtual(''); setNova(''); setConfirma(''); },
+  });
+
+  function chaveErro(): string {
+    const status = (trocar.error as HttpErrorLike | null)?.status;
+    if (status === 400) return 'minhaConta.responsavel.erroAtual';
+    if (status === 422) return 'minhaConta.responsavel.erroFraca';
+    if (status === 401) return 'minhaConta.responsavel.sessaoExpirada';
+    return 'minhaConta.responsavel.erroGenerico';
+  }
+
+  function submeter(e: React.FormEvent) {
+    e.preventDefault();
+    setErroLocal(null);
+    if (nova.length < 8) { setErroLocal('minhaConta.responsavel.erroFraca'); return; }
+    if (nova !== confirma) { setErroLocal('minhaConta.responsavel.erroConfirma'); return; }
+    trocar.mutate();
+  }
+
+  if (trocar.isSuccess) {
+    return (
+      <div data-cy="senha-sucesso" style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 6, color: 'var(--sucesso)', fontSize: 13.5 }}>
+        <IconeCheck width={16} height={16} strokeWidth={2.2} /> {t('minhaConta.responsavel.sucesso')}
+        <button type="button" onClick={onFechar} style={{ border: 'none', background: 'none', color: 'var(--azul-700)', font: '600 13.5px var(--font-body)', cursor: 'pointer', textDecoration: 'underline' }}>
+          {t('minhaConta.responsavel.fechar')}
+        </button>
+      </div>
+    );
+  }
+
+  const tipoInput = ver ? 'text' : 'password';
+  const erroExibido = erroLocal ?? (trocar.isError ? chaveErro() : null);
+
+  return (
+    <form onSubmit={submeter} style={{ marginTop: 6, display: 'grid', gap: 12, maxWidth: 420 }}>
+      <input data-cy="senha-atual" className="input" type={tipoInput} autoComplete="current-password" value={atual} onChange={(e) => setAtual(e.target.value)} placeholder={t('minhaConta.responsavel.senhaAtualPlaceholder')} />
+      <input data-cy="senha-nova" className="input" type={tipoInput} autoComplete="new-password" value={nova} onChange={(e) => setNova(e.target.value)} placeholder={t('minhaConta.responsavel.novaSenhaPlaceholder')} />
+      <input data-cy="senha-confirma" className="input" type={tipoInput} autoComplete="new-password" value={confirma} onChange={(e) => setConfirma(e.target.value)} placeholder={t('minhaConta.responsavel.confirmarPlaceholder')} />
+
+      <button type="button" onClick={() => setVer((v) => !v)} style={{ justifySelf: 'start', border: 'none', background: 'none', color: 'var(--azul-700)', font: '600 12.5px var(--font-body)', cursor: 'pointer', padding: 0 }}>
+        {ver ? t('minhaConta.responsavel.ocultar') : t('minhaConta.responsavel.ver')}
+      </button>
+
+      {erroExibido && <small data-cy="senha-erro" style={{ color: 'var(--erro)' }}>{t(erroExibido)}</small>}
+
+      <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Botao data-cy="salvar-senha" variante="primario" type="submit" disabled={trocar.isPending} style={{ padding: '11px 20px' }}>
+          <IconeCadeado width={15} height={15} /> {trocar.isPending ? t('minhaConta.responsavel.salvando') : t('minhaConta.responsavel.salvarSenha')}
+        </Botao>
+        <button type="button" onClick={onFechar} style={{ border: 'none', background: 'none', color: 'var(--cinza-500)', font: '600 13.5px var(--font-body)', cursor: 'pointer', textDecoration: 'underline' }}>
+          {t('minhaConta.responsavel.cancelar')}
+        </button>
+      </div>
+    </form>
+  );
+}
+
+interface HttpErrorLike { status?: number }
 
 /** Formulário editável (TanStack Form): autofill de CEP (Query) e CPF do responsável (validação). */
 function DadosEditaveis({ fornecedorId, inicial, onSalvo }: {

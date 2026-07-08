@@ -3,7 +3,7 @@ import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { Trans, useTranslation } from 'react-i18next';
-import { cadastrarFornecedor, consultarCnpj, consultarCep, login, mascaraCnpj, mascaraCep, soDigitos, type CadastroErro, type DadosCnpj, type EnderecoCep, type EnderecoEstruturado } from '../../lib/br';
+import { cadastrarFornecedor, consultarCnpj, consultarCep, login, solicitarResetSenha, mascaraCnpj, mascaraCep, soDigitos, type CadastroErro, type DadosCnpj, type EnderecoCep, type EnderecoEstruturado } from '../../lib/br';
 import { salvarSessao } from '../../lib/auth';
 
 /**
@@ -66,6 +66,7 @@ export function AuthPanel() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [aba, setAba] = useState<'entrar' | 'criar'>('criar');
+  const [esqueci, setEsqueci] = useState(false);
   const [verSenha, setVerSenha] = useState(false);
   const [verSenhaCad, setVerSenhaCad] = useState(false);
   const [consentido, setConsentido] = useState(false);
@@ -231,6 +232,8 @@ export function AuthPanel() {
           <button data-cy="criar-conta" type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24, padding: 13, fontSize: 15 }} disabled={!dados || !consentido || cadastroMut.isPending}>{cadastroMut.isPending ? t('auth.signup.submitting') : t('auth.signup.submit')}</button>
           {dados && <p style={{ margin: '12px 0 0', textAlign: 'center', fontSize: 12.5, color: 'var(--cinza-400)' }}><Trans i18nKey="auth.signup.statusNote" components={{ b: <strong style={{ color: 'var(--azul-700)' }} /> }} /></p>}
         </form>
+      ) : esqueci ? (
+        <RecuperarSenha onVoltar={() => setEsqueci(false)} />
       ) : (
         <form onSubmit={(e) => { e.preventDefault(); void formLogin.handleSubmit(); }}>
           <h2 style={{ fontSize: 21, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{t('auth.login.title')}</h2>
@@ -259,7 +262,7 @@ export function AuthPanel() {
             <button type="button" role="checkbox" aria-checked={manter} onClick={() => setManter((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: '500 13px var(--font-body)', color: 'var(--cinza-700)' }}>
               {t('auth.login.keep')}
             </button>
-            <a href="#recuperar" style={{ font: '500 12.5px var(--font-body)', color: 'var(--azul-700)', textDecoration: 'none' }}>{t('auth.login.forgot')}</a>
+            <button type="button" data-cy="esqueci-senha" onClick={() => setEsqueci(true)} style={{ border: 'none', background: 'none', font: '500 12.5px var(--font-body)', color: 'var(--azul-700)', cursor: 'pointer', padding: 0 }}>{t('auth.login.forgot')}</button>
           </div>
 
           {loginMut.isError && <p data-cy="login-erro" style={{ color: 'var(--erro)', marginBottom: 12, fontSize: 13 }}>{t('auth.login.error')}</p>}
@@ -267,5 +270,41 @@ export function AuthPanel() {
         </form>
       )}
     </>
+  );
+}
+
+/**
+ * UC015 · A1 — "Esqueci minha senha". Solicita o link de redefinição (POST /auth/senha/esqueci). Por
+ * design, o backend responde igual exista ou não a conta (não revela existência): a tela sempre mostra
+ * a mesma mensagem de sucesso. O link chega por fora (e-mail/SMS no futuro; log no MVP) e leva a
+ * /redefinir-senha. `inputEstilo` é o mesmo do restante do painel.
+ */
+function RecuperarSenha({ onVoltar }: { onVoltar: () => void }) {
+  const { t } = useTranslation();
+  const [email, setEmail] = useState('');
+  const solicitar = useMutation({ mutationFn: () => solicitarResetSenha(email) });
+
+  if (solicitar.isSuccess) {
+    return (
+      <div data-cy="reset-enviado">
+        <h2 style={{ fontSize: 21, margin: '0 0 10px', letterSpacing: '-0.01em' }}>{t('auth.reset.enviadoTitle')}</h2>
+        <p style={{ margin: '0 0 22px', fontSize: 14, color: 'var(--cinza-500)', lineHeight: 1.55 }}>{t('auth.reset.enviadoInfo')}</p>
+        <button type="button" data-cy="reset-voltar" onClick={onVoltar} className="btn btn-primary btn-block" style={{ padding: 13, fontSize: 15 }}>{t('auth.reset.voltar')}</button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); solicitar.mutate(); }}>
+      <h2 style={{ fontSize: 21, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{t('auth.reset.title')}</h2>
+      <p style={{ margin: '0 0 22px', fontSize: 14, color: 'var(--cinza-500)', lineHeight: 1.5 }}>{t('auth.reset.subtitle')}</p>
+
+      <label className="label" htmlFor="reset-email" style={{ marginBottom: 7 }}>{t('auth.login.email')}</label>
+      <input id="reset-email" data-cy="reset-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('auth.login.emailPlaceholder')} style={{ ...inputEstilo, marginBottom: 20 }} />
+
+      {solicitar.isError && <p data-cy="reset-erro" style={{ color: 'var(--erro)', marginBottom: 12, fontSize: 13 }}>{t('auth.reset.erro')}</p>}
+      <button data-cy="reset-enviar" type="submit" className="btn btn-primary btn-block" style={{ padding: 13, fontSize: 15 }} disabled={solicitar.isPending || !email}>{solicitar.isPending ? t('auth.reset.enviando') : t('auth.reset.enviar')}</button>
+      <button type="button" onClick={onVoltar} style={{ display: 'block', width: '100%', marginTop: 14, border: 'none', background: 'none', font: '500 13px var(--font-body)', color: 'var(--azul-700)', cursor: 'pointer' }}>{t('auth.reset.voltarLogin')}</button>
+    </form>
   );
 }

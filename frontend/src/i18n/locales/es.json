@@ -106,6 +106,34 @@
       "submit": "Entrar",
       "submitting": "Entrando…",
       "error": "Credenciales inválidas."
+    },
+    "reset": {
+      "title": "Recuperar contraseña",
+      "subtitle": "Ingrese el correo registrado. Si existe una cuenta, enviaremos un enlace para restablecer la contraseña.",
+      "enviar": "Enviar enlace de recuperación",
+      "enviando": "Enviando…",
+      "erro": "No se pudo enviar el enlace. Inténtelo de nuevo.",
+      "voltarLogin": "Volver al inicio de sesión",
+      "enviadoTitle": "Revise su correo",
+      "enviadoInfo": "Si el correo tiene una cuenta, recibirá un enlace para restablecer la contraseña en breve.",
+      "voltar": "Volver al inicio de sesión"
+    },
+    "redefinir": {
+      "title": "Establecer nueva contraseña",
+      "subtitle": "Elija una nueva contraseña para su cuenta.",
+      "novaSenha": "Nueva contraseña",
+      "novaSenhaPlaceholder": "Mínimo 8 caracteres",
+      "confirmar": "Confirmar nueva contraseña",
+      "confirmarPlaceholder": "Repita la nueva contraseña",
+      "enviar": "Restablecer contraseña",
+      "enviando": "Restableciendo…",
+      "erroToken": "Enlace inválido o expirado. Solicite una nueva recuperación de contraseña.",
+      "erroFraca": "La contraseña debe tener al menos 8 caracteres.",
+      "erroConfirma": "Las contraseñas no coinciden.",
+      "erroGenerico": "No se pudo restablecer la contraseña. Inténtelo de nuevo.",
+      "irLogin": "Ir al inicio de sesión",
+      "sucessoTitle": "Contraseña restablecida",
+      "sucessoInfo": "Su contraseña ha sido actualizada. Ya puede iniciar sesión con la nueva contraseña."
     }
   },
   "admin": {
@@ -351,7 +379,12 @@
       "cnpj": "CNPJ",
       "situacaoCadastral": "Situación Registral",
       "porteEmpresa": "Tamaño de la Empresa",
-      "situacao": { "ativa": "Activa", "baixada": "Baja", "inapta": "No apta", "suspensa": "Suspendida" }
+      "situacao": {
+        "ativa": "Activa",
+        "baixada": "Baja",
+        "inapta": "No apta",
+        "suspensa": "Suspendida"
+      }
     },
     "estado": {
       "carregando": "Cargando sus datos…",
@@ -368,7 +401,20 @@
       "senha": "Contraseña",
       "alterarSenha": "Cambiar mi contraseña",
       "novaSenhaPlaceholder": "Nueva contraseña (mín. 8 caracteres)",
-      "cancelar": "Cancelar"
+      "cancelar": "Cancelar",
+      "senhaAtualPlaceholder": "Contraseña actual",
+      "confirmarPlaceholder": "Confirmar nueva contraseña",
+      "salvarSenha": "Guardar nueva contraseña",
+      "salvando": "Guardando…",
+      "sucesso": "Contraseña cambiada con éxito.",
+      "fechar": "Cerrar",
+      "ver": "Mostrar contraseñas",
+      "ocultar": "Ocultar contraseñas",
+      "erroAtual": "La contraseña actual es incorrecta.",
+      "erroFraca": "La nueva contraseña debe tener al menos 8 caracteres.",
+      "erroConfirma": "Las contraseñas no coinciden.",
+      "erroGenerico": "No se pudo cambiar la contraseña. Inténtelo de nuevo.",
+      "sessaoExpirada": "Su sesión ha expirado. Inicie sesión de nuevo para cambiar la contraseña."
     },
     "editaveis": {
       "secaoLabel": "DATOS COMPLEMENTARIOS · EDITABLES",

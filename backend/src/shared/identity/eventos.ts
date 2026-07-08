@@ -41,3 +41,32 @@ export class GoogleVinculado extends DomainEvent<{ googleId: string }> {
     super(aggregateId, payload, actor);
   }
 }
+
+// --- Gestão da própria senha (UC015 / RF015). Consumidos pela auditoria (AD-18). ---
+
+/** A2 — o usuário autenticado trocou a própria senha (informou a senha atual). */
+export class SenhaAlterada extends DomainEvent<{ metodo: 'local' }> {
+  readonly eventName = 'SenhaAlterada';
+  readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { metodo: 'local' }, actor?: { userId: string; empresaId?: string }) {
+    super(aggregateId, payload, actor);
+  }
+}
+
+/** A1 — reset solicitado (link emitido). Só é emitido quando existe conta local para o e-mail. */
+export class ResetSenhaSolicitado extends DomainEvent<{ email: string }> {
+  readonly eventName = 'ResetSenhaSolicitado';
+  readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { email: string }, actor?: { userId: string; empresaId?: string }) {
+    super(aggregateId, payload, actor);
+  }
+}
+
+/** A1 — senha redefinida via token válido (token consumido). */
+export class SenhaRedefinida extends DomainEvent<{ metodo: 'reset' }> {
+  readonly eventName = 'SenhaRedefinida';
+  readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { metodo: 'reset' }, actor?: { userId: string; empresaId?: string }) {
+    super(aggregateId, payload, actor);
+  }
+}

@@ -28,6 +28,10 @@ import { UsuarioRepositoryMemory, type UsuarioRepository } from './shared/identi
 import { UsuarioRepositoryPg } from './shared/identity/usuario-repository-pg.js';
 import { JwtTokenService } from './shared/identity/token-service.js';
 import { RegistrarUsuario, AutenticarLocal, VincularGoogle, AutenticarGoogle } from './shared/identity/autenticacao.js';
+import { TrocarSenha, SolicitarResetSenha, RedefinirSenha } from './shared/identity/gerir-senha.js';
+import { ResetTokenRepositoryMemory, type ResetTokenRepository } from './shared/identity/reset-token-repository.js';
+import { ResetTokenRepositoryPg } from './shared/identity/reset-token-repository-pg.js';
+import { NotificadorResetLog } from './shared/identity/notificador-reset.js';
 import { registrarRotasAuth } from './shared/identity/auth-controller.js';
 import { registrarGoogleOAuth } from './shared/http/google-oauth.js';
 import { EditalRepositoryMemory } from './editais/adapters/edital-repository-memory.js';
@@ -103,6 +107,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'MaloteGerado', 'MaloteExportado',
     'DireitoTitularSolicitado', 'DireitoTitularAtendido',
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
+    'SenhaAlterada', 'ResetSenhaSolicitado', 'SenhaRedefinida',
   ]);
 
   // Identidade (US1): contas + procuradores. Persistência durável em Postgres quando disponível (como
@@ -127,10 +132,19 @@ export async function buildServer(): Promise<FastifyInstance> {
   const tokens = new JwtTokenService(config.auth.jwtSecret, config.auth.jwtExpiraEmSeg);
   // Reutilizado pelo cadastro de fornecedor (UC001): o cadastro cria a credencial de login (e-mail/senha).
   const registrarUsuario = new RegistrarUsuario(usuarioRepo, bus);
+  // UC015 — gestão da própria senha (RF015): reset de senha (A1) com token durável + notificador plugável.
+  // MVP sem gateway de e-mail (LAC-07): o link é registrado no log (NotificadorResetLog); o token some do
+  // servidor (só o hash é persistido). O link aponta para a rota do frontend #/redefinir-senha.
+  const resetTokens: ResetTokenRepository = pool ? new ResetTokenRepositoryPg(pool) : new ResetTokenRepositoryMemory();
+  const resetLinkBase = process.env.RESET_LINK_BASE ?? '/#/redefinir-senha';
+  const notificadorReset = new NotificadorResetLog(resetLinkBase, (m) => app.log.info(m));
   registrarRotasAuth(app, {
     registrar: registrarUsuario,
     login: new AutenticarLocal(usuarioRepo, tokens, bus),
     vincularGoogle: new VincularGoogle(usuarioRepo, bus),
+    trocarSenha: new TrocarSenha(usuarioRepo, bus),
+    solicitarReset: new SolicitarResetSenha(usuarioRepo, resetTokens, notificadorReset, bus, config.auth.jwtExpiraEmSeg),
+    redefinirSenha: new RedefinirSenha(usuarioRepo, resetTokens, bus),
     tokens,
   });
   if (config.auth.google) {

@@ -1,11 +1,17 @@
 /** Camada de acesso à API (usada pelo TanStack Query). Erros HTTP viram exceção → o Query trata. */
-import { obterUsuario } from './auth';
+import { obterUsuario, obterToken } from './auth';
 
-/** Cabeçalhos comuns: identifica o ator autenticado (auditoria — `x-user-id`) quando há sessão. */
+/**
+ * Cabeçalhos comuns: identifica o ator autenticado (auditoria — `x-user-id`) e envia o JWT
+ * (`Authorization: Bearer`) quando há sessão. Rotas que exigem token real (ex.: trocar senha, UC015)
+ * validam o Bearer; as demais o ignoram (compatível com o modelo de ator por `x-user-id`).
+ */
 function headers(extra?: Record<string, string>): Record<string, string> | undefined {
   const h: Record<string, string> = { ...extra };
   const uid = obterUsuario()?.userId;
   if (uid) h['x-user-id'] = uid;
+  const token = obterToken();
+  if (token) h['authorization'] = `Bearer ${token}`;
   return Object.keys(h).length ? h : undefined;
 }
 
@@ -72,6 +78,8 @@ export const api = {
   // RN009/FR-013: só Nome Fantasia, Endereço e Telefone. O backend rejeita campos oficiais (422) e devolve 204.
   editarPerfil: (fid: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) => send<void>(`/fornecedores/${fid}`, 'PATCH', patch),
   solicitarDireito: (tipo: string) => send('/titular/solicitacoes', 'POST', { tipo }),
+  // UC015 · A2 — troca da própria senha (autenticada via Bearer). 400 = senha atual incorreta; 422 = senha fraca.
+  trocarSenha: (senhaAtual: string, novaSenha: string) => send<void>('/auth/senha', 'POST', { senhaAtual, novaSenha }),
   // UC019 — Gerir procuradores (só o titular; 403 quando o ator não é o titular).
   procuradores: (fid: string) => get<ProcuradorView[]>(`/fornecedores/${fid}/procuradores`),
   convidarProcurador: (fid: string, identificador: string) => send<{ procuradorContaId: string }>(`/fornecedores/${fid}/procuradores`, 'POST', { identificador }),

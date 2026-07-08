@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { RegistrarUsuario, AutenticarLocal, VincularGoogle } from './autenticacao.js';
+import type { TrocarSenha, SolicitarResetSenha, RedefinirSenha } from './gerir-senha.js';
 import type { TokenService } from './token-service.js';
 import type { Identidade } from './identity-provider.js';
 
@@ -17,6 +18,9 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
   registrar: RegistrarUsuario;
   login: AutenticarLocal;
   vincularGoogle: VincularGoogle;
+  trocarSenha: TrocarSenha;
+  solicitarReset: SolicitarResetSenha;
+  redefinirSenha: RedefinirSenha;
   tokens: TokenService;
 }): void {
   app.post('/auth/registro', {
@@ -104,6 +108,68 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
       return reply.code(204).send();
     } catch (e) {
       return reply.code(status(e) as 400 | 404).send(erro(e));
+    }
+  });
+
+  // UC015 · A2 — troca da própria senha (autenticado): valida a senha ATUAL antes de definir a nova.
+  app.post('/auth/senha', {
+    schema: {
+      tags: ['autenticacao'],
+      summary: 'Troca a própria senha (senha atual + nova senha)',
+      security: [{ bearerAuth: [] }],
+      body: {
+        type: 'object',
+        required: ['senhaAtual', 'novaSenha'],
+        properties: { senhaAtual: { type: 'string' }, novaSenha: { type: 'string', description: 'mínimo 8 caracteres' } },
+      },
+      response: { 204: { type: 'null' }, 400: ERRO, 401: ERRO, 422: ERRO },
+    },
+  }, async (req, reply) => {
+    const id = identidadeDoToken(req, deps.tokens);
+    if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
+    const { senhaAtual, novaSenha } = req.body as { senhaAtual: string; novaSenha: string };
+    try {
+      await deps.trocarSenha.executar({ usuarioId: id.userId, senhaAtual, novaSenha });
+      return reply.code(204).send();
+    } catch (e) {
+      return reply.code(status(e) as 400 | 422).send(erro(e));
+    }
+  });
+
+  // UC015 · A1 — "Esqueci a senha": SEMPRE 204 (não revela existência da conta). Emite link se houver conta local.
+  app.post('/auth/senha/esqueci', {
+    schema: {
+      tags: ['autenticacao'],
+      summary: 'Solicita redefinição de senha (envia link se houver conta)',
+      body: { type: 'object', required: ['email'], properties: { email: { type: 'string', format: 'email' } } },
+      response: { 204: { type: 'null' } },
+    },
+  }, async (req, reply) => {
+    const { email } = req.body as { email: string };
+    // Silencioso por design: mesmo em falha interna não vazamos existência de conta pela resposta.
+    try { await deps.solicitarReset.executar({ email }); } catch (e) { req.log.error(e); }
+    return reply.code(204).send();
+  });
+
+  // UC015 · A1 — redefine com o token recebido. Token inválido/expirado → 400 (sem revelar conta).
+  app.post('/auth/senha/redefinir', {
+    schema: {
+      tags: ['autenticacao'],
+      summary: 'Redefine a senha usando o token de recuperação',
+      body: {
+        type: 'object',
+        required: ['token', 'novaSenha'],
+        properties: { token: { type: 'string' }, novaSenha: { type: 'string', description: 'mínimo 8 caracteres' } },
+      },
+      response: { 204: { type: 'null' }, 400: ERRO, 422: ERRO },
+    },
+  }, async (req, reply) => {
+    const { token, novaSenha } = req.body as { token: string; novaSenha: string };
+    try {
+      await deps.redefinirSenha.executar({ token, novaSenha });
+      return reply.code(204).send();
+    } catch (e) {
+      return reply.code(status(e) as 400 | 422).send(erro(e));
     }
   });
 }

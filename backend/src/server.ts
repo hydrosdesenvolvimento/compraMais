@@ -35,7 +35,8 @@ import { NotificadorResetLog } from './shared/identity/notificador-reset.js';
 import { registrarRotasAuth } from './shared/identity/auth-controller.js';
 import { registrarGoogleOAuth } from './shared/http/google-oauth.js';
 import { EditalRepositoryMemory } from './editais/adapters/edital-repository-memory.js';
-import { ListarEditaisCompativeis } from './editais/application/listar-editais-compativeis.js';
+import { EditalRepositoryPg } from './editais/adapters/edital-repository-pg.js';
+import { ListarEditaisCompativeis, type EditalRepository } from './editais/application/listar-editais-compativeis.js';
 import { registrarRotasEditais } from './editais/adapters/editais-controller.js';
 import { GerirEditais } from './editais/application/gerir-editais.js';
 import { BuscarEditais } from './editais/application/buscar-editais.js';
@@ -168,7 +169,9 @@ export async function buildServer(): Promise<FastifyInstance> {
   registrarRotasCadastro(app, { cadastrar, conta, receita, cep });
 
   // Módulo editais — vitrine filtrada por CNAE (002) + gestão/contestação de editais (003)
-  const editaisRepo = new EditalRepositoryMemory();
+  // Persistência: Postgres quando disponível (durável, como `fornecedores`/`contas_acesso`); senão
+  // memória (testes sem banco). Antes era sempre memória → editais criados/publicados se perdiam no restart.
+  const editaisRepo: EditalRepository = pool ? new EditalRepositoryPg(pool) : new EditalRepositoryMemory();
   const vitrine = new ListarEditaisCompativeis(editaisRepo, fornecedores);
   registrarRotasEditais(app, { vitrine });
 

@@ -2,14 +2,18 @@
 import { obterUsuario, obterToken } from './auth';
 
 /**
- * Cabeçalhos comuns: identifica o ator autenticado (auditoria — `x-user-id`) e envia o JWT
- * (`Authorization: Bearer`) quando há sessão. Rotas que exigem token real (ex.: trocar senha, UC015)
- * validam o Bearer; as demais o ignoram (compatível com o modelo de ator por `x-user-id`).
+ * Cabeçalhos comuns: identifica o ator autenticado (auditoria — `x-user-id`), seu papel RBAC
+ * (`x-papel`, exigido pelas rotas de gestão/admin) e a empresa representada (`x-empresa-id`, usada
+ * pela vitrine/contestação para resolver o fornecedor). Envia também o JWT (`Authorization: Bearer`)
+ * quando há sessão — rotas que exigem token real (ex.: trocar senha, UC015) validam o Bearer; as
+ * demais o ignoram (compatível com o modelo de ator por header).
  */
 function headers(extra?: Record<string, string>): Record<string, string> | undefined {
   const h: Record<string, string> = { ...extra };
-  const uid = obterUsuario()?.userId;
-  if (uid) h['x-user-id'] = uid;
+  const u = obterUsuario();
+  if (u?.userId) h['x-user-id'] = u.userId;
+  if (u?.papel) h['x-papel'] = u.papel;
+  if (u?.empresaId) h['x-empresa-id'] = u.empresaId;
   const token = obterToken();
   if (token) h['authorization'] = `Bearer ${token}`;
   return Object.keys(h).length ? h : undefined;

@@ -38,4 +38,17 @@ describe('Edital (US1)', () => {
     const e = rascunho();
     expect(e.editar({ objeto: 'merenda' }, 'g').diff).toHaveLength(0);
   });
+
+  it('estado()/deEstado() faz round-trip fiel (persistência durável — AD-33)', () => {
+    const e = rascunho(); e.publicar('gestor1');
+    const clone = Edital.deEstado(e.estado());
+    expect(clone.estado()).toEqual(e.estado());
+    expect(clone.id).toBe(e.id);
+    expect(clone.situacao).toBe('publicado');
+    expect([...clone.cnaesAlvo]).toEqual([...e.cnaesAlvo]);
+    expect(clone.lastUserUpdate).toBe('gestor1');
+    // deEstado reconstrói fora das regras de criação (aceita já-publicado, sem revalidar completude)
+    clone.encerrar('gestor2');
+    expect(clone.situacao).toBe('encerrado');
+  });
 });

@@ -3,6 +3,17 @@ import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-b
 export type SituacaoEdital = 'rascunho' | 'publicado' | 'encerrado';
 export interface CampoDiff { campo: string; antes: unknown; depois: unknown }
 
+/** Snapshot plano do agregado para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
+export interface EditalState {
+  meta: MetadadosBase;
+  secretariaId: string;
+  objeto: string;
+  cnaesAlvo: string[];
+  quantitativos: number;
+  prazoVigencia: string | null;
+  situacao: SituacaoEdital;
+}
+
 /**
  * Edital — entidade rica que estende EntidadeBase (AD-33). Invariante RN007/AD-11: UMA secretaria,
  * UMA demanda (inacumulável). Ciclo de vida: rascunho → publicado → encerrado (research D2; o estado
@@ -33,6 +44,23 @@ export class Edital extends EntidadeBase {
       input.secretariaId, input.objeto, [...cnaes], input.quantitativos ?? 0,
       input.prazoVigencia ?? null, 'rascunho',
     );
+  }
+
+  /** Reconstrução a partir da persistência (sem regra de criação — aceita qualquer situação do ciclo). */
+  static deEstado(s: EditalState): Edital {
+    return new Edital(
+      s.meta, s.secretariaId, s.objeto, [...s.cnaesAlvo],
+      s.quantitativos, s.prazoVigencia, s.situacao,
+    );
+  }
+
+  /** Snapshot plano para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
+  estado(): EditalState {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      secretariaId: this.secretariaId, objeto: this._objeto, cnaesAlvo: [...this._cnaesAlvo],
+      quantitativos: this._quantitativos, prazoVigencia: this._prazoVigencia, situacao: this._situacao,
+    };
   }
 
   get objeto(): string { return this._objeto; }

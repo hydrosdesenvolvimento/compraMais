@@ -159,6 +159,26 @@ export class Fornecedor extends EntidadeBase {
     const meus = new Set(this._cnaes.filter((c) => c.ativo).map((c) => c.codigoSubclasse));
     return subclassesExigidas.some((s) => meus.has(s));
   }
+
+  /**
+   * UC004 passo 4 / RN016: o Termo de Aceite conclui o credenciamento e coloca o fornecedor
+   * em análise. Origens válidas: `requerente` (primeiro credenciamento) e `em_correcao` (reenvio
+   * após o laço de covalidação). Demais estados não transicionam por aqui.
+   */
+  enviarParaAnalise(userName = 'sistema'): void {
+    if (this._status !== 'requerente' && this._status !== 'em_correcao') {
+      throw new TransicaoStatusInvalida(this._status, 'pendente_analise');
+    }
+    this._status = 'pendente_analise';
+    this.marcarAtualizacao(userName);
+  }
+}
+
+export class TransicaoStatusInvalida extends Error {
+  constructor(de: StatusCredenciamento, para: StatusCredenciamento) {
+    super(`Invalid supplier status transition from '${de}' to '${para}'.`);
+    this.name = 'TransicaoStatusInvalida';
+  }
 }
 
 export class SituacaoNaoApta extends Error {

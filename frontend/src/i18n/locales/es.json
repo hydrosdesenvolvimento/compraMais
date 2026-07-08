@@ -223,10 +223,12 @@
   },
   "credenciamento": {
     "voltarVitrine": "Volver a la vitrina",
+    "noEdital": "Acreditación en la convocatoria",
+    "erroGenerico": "No se pudo completar este paso. Inténtelo de nuevo.",
     "passos": {
       "capacidade": "Capacidad",
       "documentos": "Documentos",
-      "provaVida": "Prueba de vida",
+      "termo": "Términos de Aceptación",
       "concluido": "Completado"
     },
     "acoes": {
@@ -234,7 +236,7 @@
       "enviar": "Enviar acreditación",
       "voltar": "Volver",
       "cancelar": "Cancelar",
-      "pular": "Omitir este paso"
+      "enviando": "Enviando…"
     },
     "capacidade": {
       "passo": "PASO 1",
@@ -258,17 +260,19 @@
       "arraste": "Arrastre el PDF aquí (la carga se integrará posteriormente)",
       "limite": "PDF hasta 10 MB · se comprimirá para el SEI"
     },
-    "provaVida": {
-      "passo": "PASO 3 · OPCIONAL",
-      "titulo": "Autenticación facial del apoderado",
-      "descricao": "Prueba de vida (liveness) para validar la firma, cruzando el rostro con el documento de identidad. Este paso es opcional.",
-      "verificando": "Verificando…",
-      "validada": "Prueba de vida validada",
-      "realizar": "Realizar prueba de vida"
+    "termo": {
+      "passo": "PASO 3",
+      "titulo": "Términos de Aceptación",
+      "descricao": "Al finalizar, usted firma los <b>Términos de Aceptación</b> de la acreditación. La aceptación se registra en la traza de auditoría con finalidad, versión y fecha.",
+      "versaoLabel": "Versión de los términos",
+      "finalidadeLabel": "Finalidad",
+      "finalidade": "Acreditación en convocatoria",
+      "resumo": "Declaro que la información y los documentos enviados son verdaderos y acepto las condiciones de participación de la convocatoria, conforme a la Ley Complementaria 123 y las reglas del programa Compra Mais.",
+      "checkbox": "He leído y acepto los Términos de Aceptación de la acreditación."
     },
     "enviado": {
       "titulo": "¡Acreditación enviada!",
-      "descricao": "Su propuesta para <b>{{edital}}</b> fue enviada a la Comisión de Licitación.",
+      "descricao": "Su solicitud de acreditación fue enviada a la Comisión de Licitación.",
       "status": "Estado: Pendiente de Análisis",
       "baixarPdf": "Descargar PDF",
       "voltarPainel": "Volver al panel"

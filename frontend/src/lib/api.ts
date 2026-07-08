@@ -89,6 +89,10 @@ export const api = {
   convidarProcurador: (fid: string, identificador: string) => send<{ procuradorContaId: string }>(`/fornecedores/${fid}/procuradores`, 'POST', { identificador }),
   removerProcurador: (fid: string, contaId: string) => send<void>(`/fornecedores/${fid}/procuradores/${contaId}`, 'DELETE'),
   contestarCnae: (editalId: string, body: { cnaeContestado: string; justificativa: string }) => send(`/editais/${editalId}/contestacoes-cnae`, 'POST', body),
+  // UC004 — Solicitar credenciamento (capacidade = teto, RN005) e concluir por Termo de Aceite (RN016).
+  iniciarCredenciamento: (editalId: string, capacidade: number) => send<{ credenciamentoId: string; estado: string }>(`/editais/${editalId}/credenciamentos`, 'POST', { capacidade }),
+  aceitarTermo: (credId: string, body: { versaoTermo: string; finalidade: string }) => send<{ estado: string; status: string }>(`/credenciamentos/${credId}/termo`, 'POST', body),
+  cancelarCredenciamento: (credId: string) => send<{ estado: string }>(`/credenciamentos/${credId}/cancelar`, 'POST'),
 
   // Painel admin
   dashboardAdmin: () => get<Funil>('/admin/dashboard'),

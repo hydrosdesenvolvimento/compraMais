@@ -223,10 +223,12 @@
   },
   "credenciamento": {
     "voltarVitrine": "Voltar à vitrine",
+    "noEdital": "Credenciamento no edital",
+    "erroGenerico": "Não foi possível concluir esta etapa. Tente novamente.",
     "passos": {
       "capacidade": "Capacidade",
       "documentos": "Documentos",
-      "provaVida": "Prova de vida",
+      "termo": "Termo de Aceite",
       "concluido": "Concluído"
     },
     "acoes": {
@@ -234,7 +236,7 @@
       "enviar": "Enviar credenciamento",
       "voltar": "Voltar",
       "cancelar": "Cancelar",
-      "pular": "Pular esta etapa"
+      "enviando": "Enviando…"
     },
     "capacidade": {
       "passo": "PASSO 1",
@@ -258,17 +260,19 @@
       "arraste": "Arraste o PDF aqui (upload será integrado posteriormente)",
       "limite": "PDF até 10 MB · será comprimido para o SEI"
     },
-    "provaVida": {
-      "passo": "PASSO 3 · OPCIONAL",
-      "titulo": "Autenticação facial do procurador",
-      "descricao": "Prova de vida (liveness) para validar a assinatura, cruzando o rosto com o documento de identidade. Esta etapa é opcional.",
-      "verificando": "Verificando…",
-      "validada": "Prova de vida validada",
-      "realizar": "Realizar prova de vida"
+    "termo": {
+      "passo": "PASSO 3",
+      "titulo": "Termo de Aceite",
+      "descricao": "Ao concluir, você assina o <b>Termo de Aceite</b> do credenciamento. O aceite é registrado na trilha de auditoria com finalidade, versão e data.",
+      "versaoLabel": "Versão do termo",
+      "finalidadeLabel": "Finalidade",
+      "finalidade": "Credenciamento em edital",
+      "resumo": "Declaro que as informações e documentos enviados são verdadeiros e concordo com as condições de participação do edital, nos termos da Lei Complementar 123 e das regras do programa Compra Mais.",
+      "checkbox": "Li e aceito o Termo de Aceite do credenciamento."
     },
     "enviado": {
       "titulo": "Credenciamento enviado!",
-      "descricao": "Sua proposta para <b>{{edital}}</b> foi submetida à Comissão de Licitação.",
+      "descricao": "Sua solicitação de credenciamento foi submetida à Comissão de Licitação.",
       "status": "Status: Pendente de Análise",
       "baixarPdf": "Baixar PDF",
       "voltarPainel": "Voltar ao painel"

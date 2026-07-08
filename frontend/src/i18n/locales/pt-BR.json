@@ -106,6 +106,34 @@
       "submit": "Entrar",
       "submitting": "Entrando…",
       "error": "Credenciais inválidas."
+    },
+    "reset": {
+      "title": "Recuperar senha",
+      "subtitle": "Informe o e-mail cadastrado. Se houver uma conta, enviaremos um link para redefinir a senha.",
+      "enviar": "Enviar link de recuperação",
+      "enviando": "Enviando…",
+      "erro": "Não foi possível enviar o link. Tente novamente.",
+      "voltarLogin": "Voltar ao login",
+      "enviadoTitle": "Verifique seu e-mail",
+      "enviadoInfo": "Se houver uma conta com esse e-mail, você receberá um link para redefinir a senha em instantes.",
+      "voltar": "Voltar ao login"
+    },
+    "redefinir": {
+      "title": "Definir nova senha",
+      "subtitle": "Escolha uma nova senha para a sua conta.",
+      "novaSenha": "Nova senha",
+      "novaSenhaPlaceholder": "Mínimo de 8 caracteres",
+      "confirmar": "Confirmar nova senha",
+      "confirmarPlaceholder": "Repita a nova senha",
+      "enviar": "Redefinir senha",
+      "enviando": "Redefinindo…",
+      "erroToken": "Link inválido ou expirado. Solicite uma nova recuperação de senha.",
+      "erroFraca": "A senha deve ter pelo menos 8 caracteres.",
+      "erroConfirma": "As senhas não coincidem.",
+      "erroGenerico": "Não foi possível redefinir a senha. Tente novamente.",
+      "irLogin": "Ir para o login",
+      "sucessoTitle": "Senha redefinida",
+      "sucessoInfo": "Sua senha foi atualizada. Você já pode entrar com a nova senha."
     }
   },
   "admin": {
@@ -351,7 +379,12 @@
       "cnpj": "CNPJ",
       "situacaoCadastral": "Situação Cadastral",
       "porteEmpresa": "Porte da Empresa",
-      "situacao": { "ativa": "Ativa", "baixada": "Baixada", "inapta": "Inapta", "suspensa": "Suspensa" }
+      "situacao": {
+        "ativa": "Ativa",
+        "baixada": "Baixada",
+        "inapta": "Inapta",
+        "suspensa": "Suspensa"
+      }
     },
     "estado": {
       "carregando": "Carregando seus dados…",
@@ -368,7 +401,20 @@
       "senha": "Senha",
       "alterarSenha": "Alterar minha senha",
       "novaSenhaPlaceholder": "Nova senha (mín. 8 caracteres)",
-      "cancelar": "Cancelar"
+      "cancelar": "Cancelar",
+      "senhaAtualPlaceholder": "Senha atual",
+      "confirmarPlaceholder": "Confirmar nova senha",
+      "salvarSenha": "Salvar nova senha",
+      "salvando": "Salvando…",
+      "sucesso": "Senha alterada com sucesso.",
+      "fechar": "Fechar",
+      "ver": "Ver senhas",
+      "ocultar": "Ocultar senhas",
+      "erroAtual": "Senha atual incorreta.",
+      "erroFraca": "A nova senha deve ter pelo menos 8 caracteres.",
+      "erroConfirma": "As senhas não coincidem.",
+      "erroGenerico": "Não foi possível alterar a senha. Tente novamente.",
+      "sessaoExpirada": "Sua sessão expirou. Entre novamente para alterar a senha."
     },
     "editaveis": {
       "secaoLabel": "DADOS COMPLEMENTARES · EDITÁVEIS",

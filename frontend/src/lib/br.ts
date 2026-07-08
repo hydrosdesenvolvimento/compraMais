@@ -111,3 +111,24 @@ export async function login(email: string, senha: string): Promise<ResultadoLogi
   if (!r.ok) throw new Error('Credenciais inválidas.');
   return (await r.json()) as ResultadoLogin;
 }
+
+/**
+ * UC015 · A1 — Solicita redefinição de senha (POST /auth/senha/esqueci). SEMPRE resolve: o backend
+ * responde 204 mesmo quando a conta não existe (não revela existência). Só rejeita em falha de rede.
+ */
+export async function solicitarResetSenha(email: string): Promise<void> {
+  const r = await fetch('/auth/senha/esqueci', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }) });
+  if (!r.ok) throw new Error('Falha ao solicitar redefinição.');
+}
+
+/**
+ * UC015 · A1 — Redefine a senha com o token recebido (POST /auth/senha/redefinir). Lança CadastroErro
+ * com {status, codigo}: 400 = token inválido/expirado (TokenResetInvalido); 422 = senha fraca (SenhaFraca).
+ */
+export async function redefinirSenha(token: string, novaSenha: string): Promise<void> {
+  const r = await fetch('/auth/senha/redefinir', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, novaSenha }) });
+  if (!r.ok) {
+    const j = (await r.json().catch(() => ({}))) as { codigo?: string; mensagem?: string };
+    throw Object.assign(new Error(j.mensagem ?? 'Falha ao redefinir a senha'), { status: r.status, codigo: j.codigo }) as CadastroErro;
+  }
+}

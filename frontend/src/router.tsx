@@ -4,6 +4,7 @@ import { AuthLayout } from './design-system/AuthLayout';
 import { IconeInicio, IconeEditais, IconeCredenciamentos, IconeDocumentos, IconeDemandas, IconeUsuario } from './design-system/icons';
 
 import { AuthPanel } from './pages/publico/AuthPanel';
+import { RedefinirSenha } from './pages/publico/RedefinirSenha';
 import { Inicio } from './pages/publico/Inicio';
 import { Credenciamento } from './pages/publico/Credenciamento';
 import { Editais } from './pages/publico/Editais';
@@ -49,6 +50,7 @@ const rootRoute = createRootRoute();
 
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', beforeLoad: () => { throw redirect({ to: '/cadastro' }); } });
 const cadastroRoute = createRoute({ getParentRoute: () => rootRoute, path: '/cadastro', component: () => <AuthLayout><AuthPanel /></AuthLayout> });
+const redefinirSenhaRoute = createRoute({ getParentRoute: () => rootRoute, path: '/redefinir-senha', component: () => <AuthLayout><RedefinirSenha /></AuthLayout> });
 
 const fornecedorLayout = createRoute({ getParentRoute: () => rootRoute, id: 'fornecedor', component: () => <AppShell menu={MENU_FORNECEDOR} usuario={USUARIO_FORNECEDOR}><Outlet /></AppShell> });
 const rInicio = createRoute({ getParentRoute: () => fornecedorLayout, path: '/inicio', component: Inicio });
@@ -75,6 +77,7 @@ const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '*', 
 const routeTree = rootRoute.addChildren([
   indexRoute,
   cadastroRoute,
+  redefinirSenhaRoute,
   fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rEditais, rCredenciamento, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
   adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminAudit]),
   naoEncontrada,

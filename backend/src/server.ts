@@ -50,8 +50,9 @@ import { registrarRotasDocumentos } from './credenciamento/adapters/documentos-c
 import { Covalidar } from './credenciamento/application/covalidar.js';
 import { AnaliseRepositoryMemory } from './credenciamento/adapters/analise-repository-memory.js';
 import { registrarRotasCovalidacao } from './credenciamento/adapters/covalidacao-controller.js';
-import { VerificarElegibilidade } from './credenciamento/application/verificar-elegibilidade.js';
+import { VerificarElegibilidade, type BloqueioRepository } from './credenciamento/application/verificar-elegibilidade.js';
 import { BloqueioRepositoryMemory } from './credenciamento/adapters/bloqueio-repository-memory.js';
+import { BloqueioRepositoryPg } from './credenciamento/adapters/bloqueio-repository-pg.js';
 import { DividaMockGateway } from './shared/acl/divida/divida-mock.js';
 import { registrarRotasElegibilidade } from './credenciamento/adapters/elegibilidade-controller.js';
 import { registrarRotasRegularizacao } from './credenciamento/adapters/regularizacao-controller.js';
@@ -209,7 +210,8 @@ export async function buildServer(): Promise<FastifyInstance> {
   const metrics = new InMemoryAdapterMetrics();
   app.get('/metrics/adapters', async () => metrics.snapshot());
   const divida = new DividaMockGateway(new Map(), metrics);
-  const bloqueios = new BloqueioRepositoryMemory();
+  // Durável em Postgres (bloqueio transitório sobrevive a restart p/ reavaliação por porta); memória em teste.
+  const bloqueios: BloqueioRepository = pool ? new BloqueioRepositoryPg(pool) : new BloqueioRepositoryMemory();
   // Política de indisponibilidade configurável por ambiente (AD-12): default fail-open + flag CPL.
   const politicaInadimplencia = process.env.INADIMPLENCIA_POLICY === 'fail-closed' ? 'fail-closed' : 'fail-open';
   const elegibilidade = new VerificarElegibilidade(divida, bloqueios, bus, politicaInadimplencia);

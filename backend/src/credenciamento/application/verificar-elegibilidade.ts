@@ -9,6 +9,8 @@ export interface BloqueioRepository {
   salvar(b: Bloqueio): Promise<void>;
   porId(id: string): Promise<Bloqueio | null>;
   ativosDe(fornecedorId: string): Promise<Bloqueio[]>;
+  /** Contagem global de bloqueios ativos (funil do dashboard — Épico 9). */
+  contarAtivos(): Promise<number>;
 }
 
 export type PoliticaIndisponibilidade = 'fail-open' | 'fail-closed';

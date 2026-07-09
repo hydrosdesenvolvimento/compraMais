@@ -223,10 +223,12 @@
   },
   "credenciamento": {
     "voltarVitrine": "Back to showcase",
+    "noEdital": "Application to notice",
+    "erroGenerico": "This step could not be completed. Please try again.",
     "passos": {
       "capacidade": "Capacity",
       "documentos": "Documents",
-      "provaVida": "Liveness check",
+      "termo": "Terms of Acceptance",
       "concluido": "Completed"
     },
     "acoes": {
@@ -234,7 +236,7 @@
       "enviar": "Submit application",
       "voltar": "Back",
       "cancelar": "Cancel",
-      "pular": "Skip this step"
+      "enviando": "Submitting…"
     },
     "capacidade": {
       "passo": "STEP 1",
@@ -258,17 +260,19 @@
       "arraste": "Drag the PDF here (upload will be integrated later)",
       "limite": "PDF up to 10 MB · will be compressed for SEI"
     },
-    "provaVida": {
-      "passo": "STEP 3 · OPTIONAL",
-      "titulo": "Facial authentication of the representative",
-      "descricao": "Liveness check to validate the signature, matching the face against the identity document. This step is optional.",
-      "verificando": "Verifying…",
-      "validada": "Liveness verified",
-      "realizar": "Run liveness check"
+    "termo": {
+      "passo": "STEP 3",
+      "titulo": "Terms of Acceptance",
+      "descricao": "By finishing, you sign the <b>Terms of Acceptance</b> of the application. The acceptance is recorded in the audit trail with purpose, version and date.",
+      "versaoLabel": "Terms version",
+      "finalidadeLabel": "Purpose",
+      "finalidade": "Application to a notice",
+      "resumo": "I declare that the information and documents submitted are true and I agree to the notice's participation conditions, under Complementary Law 123 and the Compra Mais program rules.",
+      "checkbox": "I have read and accept the Terms of Acceptance of the application."
     },
     "enviado": {
       "titulo": "Application submitted!",
-      "descricao": "Your proposal for <b>{{edital}}</b> has been submitted to the Bidding Committee.",
+      "descricao": "Your application has been submitted to the Bidding Committee.",
       "status": "Status: Pending Review",
       "baixarPdf": "Download PDF",
       "voltarPainel": "Back to dashboard"

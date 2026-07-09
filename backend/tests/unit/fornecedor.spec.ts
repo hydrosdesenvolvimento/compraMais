@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Fornecedor, SituacaoNaoApta } from '../../src/catalogo/domain/fornecedor.js';
+import { Fornecedor, SituacaoNaoApta, TransicaoStatusInvalida } from '../../src/catalogo/domain/fornecedor.js';
 import { Cnpj } from '../../src/catalogo/domain/cnpj.js';
 
 const base = {
@@ -77,6 +77,23 @@ describe('Fornecedor (domínio)', () => {
     expect(f.situacao).toBe('baixada');
     expect(f.status).toBe('credenciado');
     expect(f.precisaRevisaoCpl()).toBe(true);
+  });
+
+  it('vai para Pendente de Análise ao concluir o credenciamento pelo Termo (UC004 passo 4 / RN016)', () => {
+    const f = Fornecedor.cadastrar(base); // nasce requerente
+    f.enviarParaAnalise('f1');
+    expect(f.status).toBe('pendente_analise');
+
+    const emCorrecao = Fornecedor.deEstado({ ...Fornecedor.cadastrar(base).estado(), status: 'em_correcao' });
+    emCorrecao.enviarParaAnalise('f1');
+    expect(emCorrecao.status).toBe('pendente_analise');
+  });
+
+  it('rejeita enviarParaAnalise a partir de status não elegíveis (RN016)', () => {
+    for (const status of ['pendente_analise', 'credenciado', 'apto'] as const) {
+      const f = Fornecedor.deEstado({ ...Fornecedor.cadastrar(base).estado(), status });
+      expect(() => f.enviarParaAnalise('f1')).toThrow(TransicaoStatusInvalida);
+    }
   });
 
   it('guarda endereço estruturado geolocalizável editável (RF019/RN009)', () => {

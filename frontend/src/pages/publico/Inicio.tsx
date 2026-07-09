@@ -81,7 +81,8 @@ export function Inicio() {
   const navigate = useNavigate();
   const goDocs = () => navigate({ to: '/documentos' });
   const goEditais = () => navigate({ to: '/editais' });
-  const goCredenciamento = () => navigate({ to: '/credenciamento' });
+  // O credenciamento (UC004) parte de um edital compatível escolhido na vitrine (UC003).
+  const goCredenciamento = () => navigate({ to: '/editais' });
   const goMeusCred = () => navigate({ to: '/contestacao' });
 
   return (

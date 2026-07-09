@@ -55,6 +55,10 @@ import { BloqueioRepositoryMemory } from './credenciamento/adapters/bloqueio-rep
 import { DividaMockGateway } from './shared/acl/divida/divida-mock.js';
 import { registrarRotasElegibilidade } from './credenciamento/adapters/elegibilidade-controller.js';
 import { registrarRotasRegularizacao } from './credenciamento/adapters/regularizacao-controller.js';
+import { SolicitarCredenciamento, type CredenciamentoRepository } from './credenciamento/application/solicitar-credenciamento.js';
+import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
+import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
+import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
 import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
 import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
@@ -102,6 +106,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'FornecedorCadastrado', 'FornecedorSincronizado', 'PerfilEditado',
     'ProcuradorConvidado', 'ProcuradorRemovido',
     'DocumentoAprovado', 'DocumentoReprovado',
+    'CredenciamentoIniciado', 'TermoAceito', 'CredenciamentoCancelado',
     'InadimplenciaVerificada', 'BloqueioAplicado', 'BloqueioLiberado',
     'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalEditado',
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
@@ -191,6 +196,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   registrarRotasDocumentos(app, { docs });
   const covalidar = new Covalidar(docRepo, new AnaliseRepositoryMemory(), bus);
   registrarRotasCovalidacao(app, { covalidar });
+
+  // Credenciamento — solicitação + Termo de Aceite (UC004 / RN005/RN016). Persistência durável em
+  // Postgres quando disponível (como `editais`/`fornecedores`); senão memória (testes sem banco).
+  // Precondição de edital Aberto + compatível reusa a vitrine (UC003); o aceite move o fornecedor a
+  // `pendente_analise`; o cancelamento (A2) é permitido antes da distribuição.
+  const credRepo: CredenciamentoRepository = pool ? new CredenciamentoRepositoryPg(pool) : new CredenciamentoRepositoryMemory();
+  const solicitarCredenciamento = new SolicitarCredenciamento(credRepo, vitrine, fornecedores, bus);
+  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();

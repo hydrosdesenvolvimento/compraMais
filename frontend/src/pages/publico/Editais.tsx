@@ -134,8 +134,9 @@ export function Editais() {
 
                 <button
                   type="button"
+                  data-cy="iniciar-credenciamento"
                   className="btn btn-primary"
-                  onClick={() => navigate({ to: '/credenciamento' })}
+                  onClick={() => navigate({ to: '/credenciamento/$editalId', params: { editalId: e.id } })}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' }}
                 >
                   {t('editais.vitrine.iniciar')}

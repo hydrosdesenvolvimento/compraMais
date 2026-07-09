@@ -172,6 +172,33 @@ export class Fornecedor extends EntidadeBase {
     this._status = 'pendente_analise';
     this.marcarAtualizacao(userName);
   }
+
+  /**
+   * UC006 passo 3 / RF004: veredito de habilitação. Ao aprovar o **conjunto** de documentos, a
+   * covalidação promove o fornecedor `pendente_analise → credenciado`. Só transita a partir de
+   * `pendente_analise` (a checagem "conjunto aprovado" é responsabilidade do caso de uso Covalidar).
+   */
+  credenciar(userName = 'sistema'): void {
+    if (this._status !== 'pendente_analise') {
+      throw new TransicaoStatusInvalida(this._status, 'credenciado');
+    }
+    this._status = 'credenciado';
+    this.marcarAtualizacao(userName);
+  }
+
+  /**
+   * UC006 A1 / RN003: reprovação de documento devolve o fornecedor ao laço de correção
+   * (`pendente_analise → em_correcao`, laço com UC016). Idempotente quando já está `em_correcao`
+   * (várias reprovações na mesma rodada). Demais estados não regridem por aqui.
+   */
+  devolverParaCorrecao(userName = 'sistema'): void {
+    if (this._status === 'em_correcao') return;
+    if (this._status !== 'pendente_analise') {
+      throw new TransicaoStatusInvalida(this._status, 'em_correcao');
+    }
+    this._status = 'em_correcao';
+    this.marcarAtualizacao(userName);
+  }
 }
 
 export class TransicaoStatusInvalida extends Error {

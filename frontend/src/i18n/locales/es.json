@@ -157,7 +157,8 @@
       "vazio": "Ningún documento para los filtros actuales.",
       "aprovar": "Aprobar",
       "motivoPlaceholder": "Motivo (obligatorio para rechazar)",
-      "reprovar": "Rechazar"
+      "reprovar": "Rechazar",
+      "enviadoHa": "Enviado {{tempo}}"
     },
     "gerirEditais": {
       "titulo": "Gestión de licitaciones",

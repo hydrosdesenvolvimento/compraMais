@@ -2,14 +2,16 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
+import { tempoDecorrido } from '../../lib/br';
 import { Card, Botao } from '../../design-system/components';
 
 /**
- * Fila de covalidação da CPL (US1). Lista pendentes (Query, QBE por status/tipo) e aprova/reprova
- * (Mutation com invalidação). Reprovar exige justificativa (validação também no backend — FR-002).
+ * Fila de covalidação da CPL (UC006 / US1). Lista pendentes (Query, QBE por status/tipo) com o tempo
+ * decorrido por documento (RN011 — sem SLA fixo) e aprova/reprova (Mutation com invalidação). Aprovar o
+ * conjunto credencia o fornecedor; reprovar exige justificativa (backend — FR-002) e o devolve à correção.
  */
 export function FilaCovalidacao({ fornecedorId }: { fornecedorId: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [motivo, setMotivo] = useState('');
   const [status, setStatus] = useState<'pendente' | 'aprovado' | 'reprovado'>('pendente');
   const [tipo, setTipo] = useState('');
@@ -42,7 +44,14 @@ export function FilaCovalidacao({ fornecedorId }: { fornecedorId: string }) {
       <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {pendentes.map((d) => (
           <li key={d.id} data-cy="doc-pendente" className="card" style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-            <strong style={{ flex: 1 }}>{d.tipo}</strong>
+            <div style={{ flex: 1 }}>
+              <strong>{d.tipo}</strong>
+              {d.enviadoEm && (
+                <span data-cy="tempo-decorrido" className="page-sub" style={{ display: 'block', fontSize: 12 }}>
+                  {t('admin.covalidacao.enviadoHa', { tempo: tempoDecorrido(d.enviadoEm, i18n.language) })}
+                </span>
+              )}
+            </div>
             <Botao data-cy="aprovar" onClick={() => decidir.mutate({ docId: d.id, resultado: 'aprovado' })}>{t('admin.covalidacao.aprovar')}</Botao>
             <input data-cy="motivo" className="input" style={{ maxWidth: 240 }} placeholder={t('admin.covalidacao.motivoPlaceholder')} value={motivo} onChange={(e) => setMotivo(e.target.value)} />
             <Botao data-cy="reprovar" variante="secundario" onClick={() => decidir.mutate({ docId: d.id, resultado: 'reprovado' })} disabled={!motivo.trim() || decidir.isPending}>{t('admin.covalidacao.reprovar')}</Botao>

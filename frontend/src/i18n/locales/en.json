@@ -157,7 +157,8 @@
       "vazio": "No documents for the current filters.",
       "aprovar": "Approve",
       "motivoPlaceholder": "Reason (required to reject)",
-      "reprovar": "Reject"
+      "reprovar": "Reject",
+      "enviadoHa": "Submitted {{tempo}}"
     },
     "gerirEditais": {
       "titulo": "Tender management",

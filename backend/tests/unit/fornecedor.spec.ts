@@ -96,6 +96,38 @@ describe('Fornecedor (domínio)', () => {
     }
   });
 
+  it('credencia ao aprovar o conjunto: pendente_analise → credenciado (UC006 passo 3)', () => {
+    const f = Fornecedor.deEstado({ ...Fornecedor.cadastrar(base).estado(), status: 'pendente_analise' });
+    f.credenciar('cpl1');
+    expect(f.status).toBe('credenciado');
+  });
+
+  it('rejeita credenciar a partir de status que não seja pendente_analise', () => {
+    for (const status of ['requerente', 'em_correcao', 'credenciado', 'apto'] as const) {
+      const f = Fornecedor.deEstado({ ...Fornecedor.cadastrar(base).estado(), status });
+      expect(() => f.credenciar('cpl1')).toThrow(TransicaoStatusInvalida);
+    }
+  });
+
+  it('devolve para correção ao reprovar: pendente_analise → em_correcao (UC006 A1)', () => {
+    const f = Fornecedor.deEstado({ ...Fornecedor.cadastrar(base).estado(), status: 'pendente_analise' });
+    f.devolverParaCorrecao('cpl1');
+    expect(f.status).toBe('em_correcao');
+  });
+
+  it('devolverParaCorrecao é idempotente quando já está em_correcao (múltiplas reprovações)', () => {
+    const f = Fornecedor.deEstado({ ...Fornecedor.cadastrar(base).estado(), status: 'em_correcao' });
+    expect(() => f.devolverParaCorrecao('cpl1')).not.toThrow();
+    expect(f.status).toBe('em_correcao');
+  });
+
+  it('rejeita devolverParaCorrecao a partir de status não elegíveis', () => {
+    for (const status of ['requerente', 'credenciado', 'apto'] as const) {
+      const f = Fornecedor.deEstado({ ...Fornecedor.cadastrar(base).estado(), status });
+      expect(() => f.devolverParaCorrecao('cpl1')).toThrow(TransicaoStatusInvalida);
+    }
+  });
+
   it('guarda endereço estruturado geolocalizável editável (RF019/RN009)', () => {
     const endereco = { logradouro: 'Rua A', numero: '100', bairro: 'Centro', cidade: 'Rio Branco', uf: 'AC', cep: '69900062', latitude: -9.97, longitude: -67.82 };
     const f = Fornecedor.cadastrar({ ...base, contato: { endereco } });

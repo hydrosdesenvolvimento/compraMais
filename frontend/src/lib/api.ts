@@ -43,7 +43,7 @@ export class HttpError extends Error {
 export interface EditalItem { id: string; objeto: string }
 export interface EditalGestao { id: string; objeto: string; secretariaId: string; situacao: string }
 export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado' }
-export interface DocPendente { id: string; tipo: string }
+export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
 export interface Transparencia { editaisVigentes: number; secretarias: string[]; segmentos: string[] }
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }

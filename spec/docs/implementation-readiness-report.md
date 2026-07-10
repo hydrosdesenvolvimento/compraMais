@@ -32,8 +32,8 @@ filesExcluded:
 ## 2. PRD Analysis
 
 ### Functional Requirements (18)
-RF001 Cadastro CNPJ + autopreenchimento (fallback manual) · RF002 Upload documental reutilizável cifrado · RF003 Filtro de editais por CNAE · RF004 Covalidação com justificativa · RF005 Motor de distribuição (water-filling+Hamilton) · RF006 Cadastro de Reserva + substituição · RF007 Malote SEI ordenado/fragmentável · RF008 Editais individualizados (1=1 secretaria) · RF009 Notificações [R2] · RF010 Portal público · RF011 Inadimplência + bloqueio transitório · RF012 Biometria [removida MVP] · RF013 Dashboard admin · RF014 Auditoria consulta/exportação · RF015 Autenticação recorrente · RF016 Tela única de contestação · RF017 Consentimento + direitos do titular · RF018 Re-sincronização CNPJ.
-**Total FRs: 18** (16 no MVP; RF009/RF012 fora do MVP).
+RF001 Cadastro CNPJ + autopreenchimento (fallback manual) · RF002 Upload documental reutilizável cifrado · RF003 Filtro de editais por CNAE · RF004 Covalidação com justificativa · RF005 Motor de distribuição (water-filling+Hamilton) · RF006 Cadastro de Reserva + substituição · RF007 Malote SEI ordenado/fragmentável · RF008 Editais individualizados (1=1 secretaria) · RF009 Notificações [R2] · RF010 Portal público · RF011 Inadimplência + bloqueio transitório · RF012 Biometria/prova de vida [MVP condicional a RIPD, feature flag OFF — ratificado 2026-07-09] · RF013 Dashboard admin · RF014 Auditoria consulta/exportação · RF015 Autenticação recorrente · RF016 Tela única de contestação · RF017 Consentimento + direitos do titular · RF018 Re-sincronização CNPJ.
+**Total FRs: 18** (17 no MVP — RF012 reativado condicional a RIPD/feature flag em 2026-07-09; RF009 fora do MVP).
 
 ### Non-Functional Requirements (8)
 RNF001 Integrações ACL+circuit breaker+Pact · RNF002 Compressão/fragmentação malote · RNF003 Auditoria JSON imutável · RNF004 Conformidade 14.133/2.027/TCE · RNF005 SLA (a ratificar) · RNF006 Identidade visual+acessibilidade (contrato de UX) · RNF007 LGPD · RNF008 Determinismo do motor.
@@ -70,12 +70,12 @@ PRD v2.2 completo e coerente; validado anteriormente (grade Fair → forte como 
 | RF018 | E1 / 1.6 | ✓ |
 
 ### Missing Requirements
-Nenhum FR do MVP sem cobertura. RF009 e RF012 estão **explicitamente fora do MVP** (não são gaps).
+Nenhum FR do MVP sem cobertura. RF009 está **explicitamente fora do MVP** (não é gap). RF012 (biometria/prova de vida) foi **reativado no MVP condicional a RIPD** (Story 5.6, feature flag OFF).
 
 ### Coverage Statistics
 - Total PRD FRs: 18
-- FRs do MVP cobertos: 16/16 (100%)
-- FRs fora do MVP (declarados): 2 (RF009, RF012)
+- FRs do MVP cobertos: 17/17 (100%) — inclui RF012 (condicional a RIPD, feature flag OFF)
+- FRs fora do MVP (declarados): 1 (RF009)
 - Cobertura efetiva do MVP: **100%**
 
 ## 4. UX Alignment Assessment

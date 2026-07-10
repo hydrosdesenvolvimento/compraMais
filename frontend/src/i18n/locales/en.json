@@ -229,6 +229,7 @@
     "passos": {
       "capacidade": "Capacity",
       "documentos": "Documents",
+      "prova": "Liveness",
       "termo": "Terms of Acceptance",
       "concluido": "Completed"
     },
@@ -270,6 +271,18 @@
       "finalidade": "Application to a notice",
       "resumo": "I declare that the information and documents submitted are true and I agree to the notice's participation conditions, under Complementary Law 123 and the Compra Mais program rules.",
       "checkbox": "I have read and accept the Terms of Acceptance of the application."
+    },
+    "provaVida": {
+      "passo": "VERIFICATION",
+      "titulo": "Liveness check",
+      "descricao": "Confirm that it is you submitting this application. The check is <b>facial and instant</b> — your image is not stored.",
+      "iniciar": "Start verification",
+      "repetir": "Try again",
+      "verificando": "Verifying…",
+      "aprovada": "Identity confirmed.",
+      "reprovada": "Could not confirm. Adjust the lighting and try again.",
+      "indisponivel": "Verification temporarily unavailable. Your application proceeds and the identity will be checked manually by the Committee.",
+      "privacidade": "Biometric data processed under the LGPD and the program's DPIA. The image is not retained — only the verification result."
     },
     "enviado": {
       "titulo": "Application submitted!",

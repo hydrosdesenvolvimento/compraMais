@@ -60,6 +60,12 @@ import { SolicitarCredenciamento, type CredenciamentoRepository } from './creden
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
+import { ValidarProvaDeVida, GateProvaDeVidaRepo, type ProvaDeVidaRepository } from './credenciamento/application/validar-prova-de-vida.js';
+import { ProvaDeVidaRepositoryMemory } from './credenciamento/adapters/prova-de-vida-repository-memory.js';
+import { ProvaDeVidaRepositoryPg } from './credenciamento/adapters/prova-de-vida-repository-pg.js';
+import { registrarRotasProvaDeVida } from './credenciamento/adapters/prova-de-vida-controller.js';
+import { LivenessMockGateway } from './shared/acl/liveness/liveness-mock.js';
+import type { GateProvaDeVida } from './credenciamento/application/solicitar-credenciamento.js';
 import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
 import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
@@ -107,7 +113,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'FornecedorCadastrado', 'FornecedorSincronizado', 'PerfilEditado',
     'ProcuradorConvidado', 'ProcuradorRemovido',
     'DocumentoAprovado', 'DocumentoReprovado', 'FornecedorCredenciado', 'FornecedorEmCorrecao',
-    'CredenciamentoIniciado', 'TermoAceito', 'CredenciamentoCancelado',
+    'CredenciamentoIniciado', 'TermoAceito', 'CredenciamentoCancelado', 'ProvaDeVidaAvaliada',
     'InadimplenciaVerificada', 'BloqueioAplicado', 'BloqueioLiberado',
     'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalEditado',
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
@@ -200,17 +206,33 @@ export async function buildServer(): Promise<FastifyInstance> {
   const covalidar = new Covalidar(docRepo, new AnaliseRepositoryMemory(), bus, fornecedores);
   registrarRotasCovalidacao(app, { covalidar });
 
+  // Métricas de adaptadores (AD-22): compartilhadas pelos ACLs (divida, liveness). Criadas antes do
+  // bloco de credenciamento porque o provedor de liveness também as reporta.
+  const metrics = new InMemoryAdapterMetrics();
+  app.get('/metrics/adapters', async () => metrics.snapshot());
+
   // Credenciamento — solicitação + Termo de Aceite (UC004 / RN005/RN016). Persistência durável em
   // Postgres quando disponível (como `editais`/`fornecedores`); senão memória (testes sem banco).
   // Precondição de edital Aberto + compatível reusa a vitrine (UC003); o aceite move o fornecedor a
   // `pendente_analise`; o cancelamento (A2) é permitido antes da distribuição.
   const credRepo: CredenciamentoRepository = pool ? new CredenciamentoRepositoryPg(pool) : new CredenciamentoRepositoryMemory();
-  const solicitarCredenciamento = new SolicitarCredenciamento(credRepo, vitrine, fornecedores, bus);
+
+  // UC007 / RF012 — Prova de Vida (liveness). Feature flag OFF por padrão (condicional a RIPD): quando
+  // desligada, as rotas respondem 409 e o gate do Termo é no-op (fluxo MVP por Termo de Aceite intacto).
+  // Provedor mock com circuit breaker (AD-4); indisponibilidade = fail-open + flag CPL (AD-12). Durável.
+  const livenessLigado = process.env.LIVENESS_ENABLED === 'true';
+  const provaRepo: ProvaDeVidaRepository = pool ? new ProvaDeVidaRepositoryPg(pool) : new ProvaDeVidaRepositoryMemory();
+  const livenessGateway = new LivenessMockGateway(new Map(), metrics);
+  const limiarLiveness = Number(process.env.LIVENESS_LIMIAR ?? '0.8');
+  const validarProvaDeVida = new ValidarProvaDeVida(livenessGateway, provaRepo, bus, limiarLiveness);
+  registrarRotasProvaDeVida(app, { validar: validarProvaDeVida, ligado: livenessLigado });
+  // Gate do Termo de Aceite: só exige liveness liberado quando a flag está ligada; senão no-op.
+  const gateProvaDeVida: GateProvaDeVida | undefined = livenessLigado ? new GateProvaDeVidaRepo(provaRepo) : undefined;
+
+  const solicitarCredenciamento = new SolicitarCredenciamento(credRepo, vitrine, fornecedores, bus, undefined, gateProvaDeVida);
   registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
-  const metrics = new InMemoryAdapterMetrics();
-  app.get('/metrics/adapters', async () => metrics.snapshot());
   const divida = new DividaMockGateway(new Map(), metrics);
   // Durável em Postgres (bloqueio transitório sobrevive a restart p/ reavaliação por porta); memória em teste.
   const bloqueios: BloqueioRepository = pool ? new BloqueioRepositoryPg(pool) : new BloqueioRepositoryMemory();

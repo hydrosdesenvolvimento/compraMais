@@ -229,6 +229,7 @@
     "passos": {
       "capacidade": "Capacidad",
       "documentos": "Documentos",
+      "prova": "Prueba de Vida",
       "termo": "Términos de Aceptación",
       "concluido": "Completado"
     },
@@ -270,6 +271,18 @@
       "finalidade": "Acreditación en convocatoria",
       "resumo": "Declaro que la información y los documentos enviados son verdaderos y acepto las condiciones de participación de la convocatoria, conforme a la Ley Complementaria 123 y las reglas del programa Compra Mais.",
       "checkbox": "He leído y acepto los Términos de Aceptación de la acreditación."
+    },
+    "provaVida": {
+      "passo": "VERIFICACIÓN",
+      "titulo": "Prueba de vida",
+      "descricao": "Confirme que es usted quien envía esta acreditación. La verificación es <b>facial e instantánea</b> — su imagen no se almacena.",
+      "iniciar": "Iniciar verificación",
+      "repetir": "Intentar de nuevo",
+      "verificando": "Verificando…",
+      "aprovada": "Identidad confirmada.",
+      "reprovada": "No se pudo confirmar. Ajuste la iluminación e intente de nuevo.",
+      "indisponivel": "Verificación temporalmente no disponible. Su acreditación continúa y la identidad será verificada manualmente por la Comisión.",
+      "privacidade": "Tratamiento de dato biométrico conforme a la LGPD y la EIPD del programa. La imagen no se retiene — solo el resultado de la verificación."
     },
     "enviado": {
       "titulo": "¡Acreditación enviada!",

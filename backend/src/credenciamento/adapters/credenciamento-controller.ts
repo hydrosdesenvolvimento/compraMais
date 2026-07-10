@@ -56,6 +56,6 @@ function erro(e: unknown): number {
   const n = (e as Error).name;
   if (n === 'EditalIncompativel' || n === 'EditalNaoAberto') return 403;
   if (n === 'CredenciamentoNaoEncontrado' || n === 'FornecedorNaoEncontrado') return 404;
-  if (n === 'TransicaoCredenciamentoInvalida' || n === 'TransicaoStatusInvalida' || n === 'CredenciamentoJaDistribuido' || n === 'CredenciamentoDuplicado') return 409;
+  if (n === 'TransicaoCredenciamentoInvalida' || n === 'TransicaoStatusInvalida' || n === 'CredenciamentoJaDistribuido' || n === 'CredenciamentoDuplicado' || n === 'ProvaDeVidaPendente') return 409;
   return 422; // CapacidadeInvalida, TermoIncompleto, etc.
 }

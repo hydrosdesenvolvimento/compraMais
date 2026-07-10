@@ -229,6 +229,7 @@
     "passos": {
       "capacidade": "Capacidade",
       "documentos": "Documentos",
+      "prova": "Prova de Vida",
       "termo": "Termo de Aceite",
       "concluido": "Concluído"
     },
@@ -270,6 +271,18 @@
       "finalidade": "Credenciamento em edital",
       "resumo": "Declaro que as informações e documentos enviados são verdadeiros e concordo com as condições de participação do edital, nos termos da Lei Complementar 123 e das regras do programa Compra Mais.",
       "checkbox": "Li e aceito o Termo de Aceite do credenciamento."
+    },
+    "provaVida": {
+      "passo": "VERIFICAÇÃO",
+      "titulo": "Prova de vida",
+      "descricao": "Confirme que é você quem está enviando este credenciamento. A verificação é <b>facial e instantânea</b> — sua imagem não é armazenada.",
+      "iniciar": "Iniciar verificação",
+      "repetir": "Tentar novamente",
+      "verificando": "Verificando…",
+      "aprovada": "Identidade confirmada.",
+      "reprovada": "Não foi possível confirmar. Ajuste a iluminação e tente novamente.",
+      "indisponivel": "Verificação temporariamente indisponível. Seu credenciamento segue e a identidade será conferida manualmente pela Comissão.",
+      "privacidade": "Tratamento de dado biométrico conforme a LGPD e o RIPD do programa. A imagem não é retida — apenas o resultado da verificação."
     },
     "enviado": {
       "titulo": "Credenciamento enviado!",

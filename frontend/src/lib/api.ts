@@ -51,6 +51,8 @@ export interface ContestacaoView { id: string; cnae: string; justificativa: stri
 export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
 /** UC018: resultado da re-sincronização — status + proveniência `{quando, fonte}` da consulta oficial. */
 export interface SincronizacaoResultado { status: 'sucesso' | 'revisao' | 'erro'; quando?: string; fonte?: string }
+/** UC007: veredito da prova de vida. `indisponivel` = provedor fora (fail-open + flag CPL, AD-12). */
+export interface ProvaDeVidaResultado { estado: 'aprovada' | 'reprovada' | 'indisponivel'; liberado: boolean; flagCpl: boolean; score: number | null }
 export interface EnderecoView { logradouro: string; numero: string; complemento?: string; bairro: string; cidade: string; uf: string; cep: string }
 export interface CnaeView { codigoSubclasse: string; tipo: 'principal' | 'secundario'; ativo: boolean }
 /** UC019: vínculo de procurador exibido na tela "Procuradores" (ativos + rastro dos removidos, RN015). */
@@ -93,6 +95,10 @@ export const api = {
   iniciarCredenciamento: (editalId: string, capacidade: number) => send<{ credenciamentoId: string; estado: string }>(`/editais/${editalId}/credenciamentos`, 'POST', { capacidade }),
   aceitarTermo: (credId: string, body: { versaoTermo: string; finalidade: string }) => send<{ estado: string; status: string }>(`/credenciamentos/${credId}/termo`, 'POST', body),
   cancelarCredenciamento: (credId: string) => send<{ estado: string }>(`/credenciamentos/${credId}/cancelar`, 'POST'),
+  // UC007 / RF012 — Prova de vida (liveness). Condicional a RIPD, exposta só quando a flag está ligada
+  // (backend responde 409 se desligada). `desafio` dirige o provedor mock (aprovar/reprovar/indisponivel).
+  provaDeVida: (credId: string, desafio: string) =>
+    send<ProvaDeVidaResultado>(`/credenciamentos/${credId}/prova-de-vida`, 'POST', { desafio }),
 
   // Painel admin
   dashboardAdmin: () => get<Funil>('/admin/dashboard'),

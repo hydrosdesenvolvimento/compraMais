@@ -33,7 +33,7 @@ FR008: Criação de editais individualizados (1 edital = 1 secretaria).
 FR009: Notificações de vencimento (e-mail/SMS). [Release 2]
 FR010: Portal público de transparência. [Release 2/3]
 FR011: Verificação de inadimplência (PGM/SICAF/bases) com bloqueio transitório.
-FR012: Biometria facial (liveness) — REMOVIDA do MVP; condicional Release 2 com RIPD.
+FR012: Biometria facial (liveness) — REATIVADA no MVP condicional a RIPD (ratificação 2026-07-09); desligada por feature flag. Story 5.6.
 FR013: Dashboard administrativo (funil de cadastros pendentes, status).
 FR014: Trilha de auditoria com consulta filtrada e exportação CSV/JSON.
 FR015: Autenticação recorrente (login, reset de senha, provedor plugável; MFA quando aplicável).
@@ -103,7 +103,7 @@ DECISÕES ABERTAS: LAYOUT A vs B do login; cor azul oficial (brandbook).
 
 ```
 RF001→E1 · RF002→E2 · RF003→E3 · RF004→E2 · RF005→E5 · RF006→E5 · RF007→E6 · RF008→E3
-RF009→[R2] · RF010→E9 · RF011→E4 · RF012→[R2] · RF013→E9 · RF014→E8 · RF015→E1
+RF009→[R2] · RF010→E9 · RF011→E4 · RF012→E5 *(Story 5.6, cond. RIPD)* · RF013→E9 · RF014→E8 · RF015→E1
 RF016→E7 · RF017→E7 · RF018→E1
 UX-DR1/2/4/7/8→E1 · UX-DR3→E3 · UX-DR9→E4 · UX-DR6→E7 · UX-DR5/10→E9
 ```
@@ -146,7 +146,7 @@ Trilha consultável e exportável para o TCE.
 Dashboard administrativo + portal público; herdam o design system.
 **FRs covered:** RF013, RF010 *(AD-3; UX-DR5/10)*
 
-> **Fora do MVP:** RF009 (notificações — R2), RF012 (biometria — R2 condicional).
+> **Fora do MVP:** RF009 (notificações — R2). **RF012 (biometria/prova de vida) reativado no MVP condicional a RIPD** (Story 5.6, ratificação 2026-07-09, desligado por feature flag).
 > **Pré-condição bloqueante do Épico 5:** fechar Item × Lote com SMGA/TCE.
 > **Contestação:** micro-fluxos em E2/E3/E4; consolidação no E7.
 
@@ -571,8 +571,17 @@ As a Secretaria/Gestor, I want gerir o estado do edital ao longo do processo, So
 
 ### Story 5.5 — Termo de Aceite e cancelamento de credenciamento *(gaps G8/G9 · RN016)*
 As a fornecedor, I want concluir meu credenciamento por Termo de Aceite e poder cancelá-lo antes da distribuição, So that eu formalize a adesão com rastro e mantenha controle.
-- **Given** um credenciamento na etapa final, **When** aceito o **Termo de Aceite**, **Then** o aceite (finalidade + timestamp + versão do termo) é registrado na trilha e o credenciamento conclui. *(A etapa "Prova de vida"/biometria do mockup é **Release 2 condicional a RIPD** — não MVP; ver VALIDACAO-MOCKUPS.md §G5.)*
+- **Given** um credenciamento na etapa final, **When** aceito o **Termo de Aceite**, **Then** o aceite (finalidade + timestamp + versão do termo) é registrado na trilha e o credenciamento conclui. *(Quando a prova de vida está ligada — Story 5.6 — ela é pré-requisito do Termo; ver VALIDACAO-MOCKUPS.md §G5.)*
 - **Given** um credenciamento **antes da distribuição**, **When** o fornecedor cancela, **Then** o registro passa a cancelado (evento na trilha) e libera a participação; **após** homologação, a saída se dá por substituição (Story 5.4).
+
+### Story 5.6 — Prova de Vida / Liveness *(RF012 · UC007 · RN016 · AD-4/AD-12 · condicional a RIPD)*
+As a fornecedor, I want confirmar minha presença por prova de vida no ato do envio, So that o credenciamento seja resistente a fraude por terceiros (procurador/contador sem o titular).
+> **Condicional a RIPD e desligada por feature flag** (`LIVENESS_ENABLED`, default OFF). Enquanto desligada, o credenciamento conclui só por Termo de Aceite (Story 5.5) e estes AC não se aplicam. Tratamento de **dado biométrico sensível** governado pelo [RIPD](lgpd/RIPD-prova-de-vida.md) (LGPD Art. 11).
+- **Given** a prova de vida **ligada** e um credenciamento iniciado com consentimento biométrico registrado, **When** o fornecedor conclui a captura de liveness e o provedor retorna veredito **acima do limiar**, **Then** a prova é **aprovada** (veredito + score + provedor + timestamp na trilha, **sem** reter a imagem/vídeo) e o **Termo de Aceite é liberado**.
+- **Given** a prova de vida ligada, **When** o veredito fica **abaixo do limiar** (A1), **Then** a prova é **reprovada**, o fornecedor pode **repetir** a captura e o Termo permanece **bloqueado** até haver aprovação.
+- **Given** a prova de vida ligada, **When** o **provedor está indisponível** (A2), **Then** aplica-se `fail-open + flag` (AD-12): a prova fica **`indisponivel`**, o credenciamento pode prosseguir **sinalizado para covalidação manual de identidade** pela CPL, nunca auto-aprovado em silêncio.
+- **Given** a base legal do tratamento biométrico, **When** a feature é ativada, **Then** o **consentimento** (capturado no cadastro — domínio `Consentimento`, LGPD) é a base do tratamento e o **texto de consentimento biométrico específico** (finalidade/versão) é registrado como **condicionante de ativação do RIPD** (`RIPD-prova-de-vida.md`, item #4), não como bloqueio por requisição no mock do MVP.
+- **Given** a feature flag **desligada**, **When** o fornecedor credencia, **Then** a etapa de prova de vida **não é apresentada** e a conclusão se dá por Termo de Aceite (Story 5.5) — sem regressão.
 
 ### Story 9.4 — Gestão de Secretarias *(gap G1 · RF020, AD-16/AD-38)*
 As a Administrador, I want cadastrar e manter Secretarias, So that editais possam referenciar uma secretaria demandante válida.

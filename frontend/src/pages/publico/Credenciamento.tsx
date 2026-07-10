@@ -7,11 +7,13 @@ import { api } from '../../lib/api';
 
 /**
  * Wizard de credenciamento em um edital (UC004). Passos: Capacidade (teto declarado, RN005) →
- * Documentos → Termo de Aceite (RN016) → Concluído. A conclusão é por Termo de Aceite; a biometria/
- * "prova de vida" (UC007) está fora do MVP (Release 2, condicional a RIPD).
+ * Documentos → [Prova de Vida] → Termo de Aceite (RN016) → Concluído. A etapa de prova de vida
+ * (UC007/RF012) só aparece quando a feature flag `VITE_LIVENESS_ENABLED` está ligada (condicional a
+ * RIPD); desligada (default), a conclusão é por Termo de Aceite, sem regressão.
  */
 
 type DocReq = { nome: string; reuse: boolean };
+type StepKey = 'capacidade' | 'documentos' | 'prova' | 'termo' | 'concluido';
 
 const VERSAO_TERMO = 'v1';
 
@@ -31,62 +33,67 @@ export function Credenciamento() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { editalId } = useParams({ strict: false }) as { editalId?: string };
-  const [step, setStep] = useState(0); // 0..3
+
+  // Prova de vida (UC007) só entra quando a flag está ligada (condicional a RIPD). Lida em render-time.
+  const livenessAtivo = import.meta.env.VITE_LIVENESS_ENABLED === 'true';
+  const KEYS: StepKey[] = ['capacidade', 'documentos', ...(livenessAtivo ? ['prova' as const] : []), 'termo', 'concluido'];
+  const ultimo = KEYS.length - 1;
+
+  const [step, setStep] = useState(0);
   const [cap, setCap] = useState('');
   const [credId, setCredId] = useState<string | null>(null);
   const [aceito, setAceito] = useState(false);
+  const [provaLiberada, setProvaLiberada] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
-  const PASSOS = [
-    t('credenciamento.passos.capacidade'),
-    t('credenciamento.passos.documentos'),
-    t('credenciamento.passos.termo'),
-    t('credenciamento.passos.concluido'),
-  ];
+  const stepKey = KEYS[step];
+  const PASSOS = KEYS.map((k) => t(`credenciamento.passos.${k}`));
 
-  const isSucesso = step === 3;
+  const isSucesso = stepKey === 'concluido';
   const showFooter = !isSucesso;
   const showBack = step > 0;
 
   const nextLabel = enviando
     ? t('credenciamento.acoes.enviando')
-    : step === 2 ? t('credenciamento.acoes.enviar') : t('credenciamento.acoes.continuar');
+    : stepKey === 'termo' ? t('credenciamento.acoes.enviar') : t('credenciamento.acoes.continuar');
 
   const capNum = Number(cap);
   const capValida = Number.isInteger(capNum) && capNum > 0;
   const podeAvancar = enviando
     ? false
-    : step === 0 ? capValida
-    : step === 2 ? aceito
+    : stepKey === 'capacidade' ? capValida
+    : stepKey === 'prova' ? provaLiberada
+    : stepKey === 'termo' ? aceito
     : true;
 
   async function avancar() {
     setErro(null);
-    // Passo 0 → 1: declara a capacidade (teto, RN005) iniciando o credenciamento no backend.
-    if (step === 0) {
+    // Capacidade → próximo: declara a capacidade (teto, RN005) iniciando o credenciamento no backend.
+    if (stepKey === 'capacidade') {
       if (!editalId) { setErro(t('credenciamento.erroGenerico')); return; }
       setEnviando(true);
       try {
         const r = await api.iniciarCredenciamento(editalId, capNum);
         setCredId(r.credenciamentoId);
-        setStep(1);
+        setStep((s) => s + 1);
       } catch { setErro(t('credenciamento.erroGenerico')); }
       finally { setEnviando(false); }
       return;
     }
-    // Passo 2 → 3: assina o Termo de Aceite (RN016) → fornecedor Pendente de Análise.
-    if (step === 2) {
+    // Termo → concluído: assina o Termo de Aceite (RN016) → fornecedor Pendente de Análise. Com liveness
+    // ligado, o backend só aceita após prova liberada; o gate da UI já exige `provaLiberada` no passo anterior.
+    if (stepKey === 'termo') {
       if (!credId) { setErro(t('credenciamento.erroGenerico')); return; }
       setEnviando(true);
       try {
         await api.aceitarTermo(credId, { versaoTermo: VERSAO_TERMO, finalidade: t('credenciamento.termo.finalidade') });
-        setStep(3);
+        setStep(ultimo);
       } catch { setErro(t('credenciamento.erroGenerico')); }
       finally { setEnviando(false); }
       return;
     }
-    setStep((s) => Math.min(3, s + 1));
+    setStep((s) => Math.min(ultimo, s + 1));
   }
 
   const wPrev = () => { setErro(null); setStep((s) => Math.max(0, s - 1)); };
@@ -132,10 +139,11 @@ export function Credenciamento() {
       {/* Card principal */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '28px 30px 26px' }}>
-          {step === 0 && <PassoCapacidade cap={cap} setCap={setCap} />}
-          {step === 1 && <PassoDocumentos />}
-          {step === 2 && <PassoTermo aceito={aceito} setAceito={setAceito} />}
-          {step === 3 && <PassoSucesso onPainel={() => void navigate({ to: '/inicio' })} />}
+          {stepKey === 'capacidade' && <PassoCapacidade cap={cap} setCap={setCap} />}
+          {stepKey === 'documentos' && <PassoDocumentos />}
+          {stepKey === 'prova' && <PassoProvaVida credId={credId} liberada={provaLiberada} onLiberada={() => setProvaLiberada(true)} />}
+          {stepKey === 'termo' && <PassoTermo aceito={aceito} setAceito={setAceito} />}
+          {stepKey === 'concluido' && <PassoSucesso onPainel={() => void navigate({ to: '/inicio' })} />}
         </div>
 
         {erro && (
@@ -567,6 +575,93 @@ function PassoTermo({ aceito, setAceito }: { aceito: boolean; setAceito: (v: boo
           {t('credenciamento.termo.checkbox')}
         </span>
       </label>
+    </div>
+  );
+}
+
+/* ---------- Passo: Prova de Vida / Liveness (UC007 · condicional a RIPD) ---------- */
+type EstadoProva = 'idle' | 'verificando' | 'aprovada' | 'reprovada' | 'indisponivel';
+
+function PassoProvaVida({ credId, liberada, onLiberada }: { credId: string | null; liberada: boolean; onLiberada: () => void }) {
+  const { t } = useTranslation();
+  const [estado, setEstado] = useState<EstadoProva>(liberada ? 'aprovada' : 'idle');
+
+  async function verificar(desafio: string) {
+    if (!credId) return;
+    setEstado('verificando');
+    try {
+      const r = await api.provaDeVida(credId, desafio);
+      setEstado(r.estado);
+      if (r.liberado) onLiberada();
+    } catch {
+      setEstado('reprovada');
+    }
+  }
+
+  const verificando = estado === 'verificando';
+  return (
+    <div data-cy="prova-de-vida" style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
+      <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.1em', color: 'var(--azul-700)', marginBottom: 6 }}>
+        {t('credenciamento.provaVida.passo')}
+      </div>
+      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 22, color: 'var(--azul-900)', margin: '0 0 8px' }}>
+        {t('credenciamento.provaVida.titulo')}
+      </h2>
+      <p style={{ fontSize: 14.5, color: 'var(--cinza-500)', lineHeight: 1.55, margin: '0 0 22px' }}>
+        <Trans i18nKey="credenciamento.provaVida.descricao" components={{ b: <strong /> }} />
+      </p>
+
+      {/* Moldura da captura (mock) */}
+      <div
+        style={{
+          width: 200, height: 200, margin: '0 auto 20px', borderRadius: '50%',
+          border: `3px ${estado === 'aprovada' ? 'solid var(--sucesso)' : estado === 'reprovada' ? 'solid var(--erro, #B42318)' : 'dashed var(--azul-300, #9DB8DC)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', background: varAzul50,
+          color: 'var(--azul-700)',
+        }}
+      >
+        {estado === 'aprovada'
+          ? <IconeCheck width={64} height={64} strokeWidth={2} />
+          : <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a5 5 0 0 0-5 5v3a5 5 0 0 0 10 0V7a5 5 0 0 0-5-5Z" /><path d="M5 10a7 7 0 0 0 14 0" /><path d="M8 21h8" /><path d="M12 17v4" /></svg>}
+      </div>
+
+      {estado === 'indisponivel' && (
+        <div data-cy="prova-indisponivel" style={{ background: 'var(--atencao-bg)', color: '#8A5410', borderRadius: 10, padding: '12px 16px', font: '600 13px var(--font-body)', marginBottom: 16, lineHeight: 1.5 }}>
+          {t('credenciamento.provaVida.indisponivel')}
+        </div>
+      )}
+      {estado === 'reprovada' && (
+        <div data-cy="prova-reprovada" style={{ color: 'var(--erro, #B42318)', font: '600 13.5px var(--font-body)', marginBottom: 16 }}>
+          {t('credenciamento.provaVida.reprovada')}
+        </div>
+      )}
+      {estado === 'aprovada' && (
+        <div data-cy="prova-aprovada" style={{ color: 'var(--sucesso)', font: '600 13.5px var(--font-body)', marginBottom: 16 }}>
+          {t('credenciamento.provaVida.aprovada')}
+        </div>
+      )}
+
+      {!liberada && estado !== 'aprovada' && (
+        <button
+          type="button"
+          data-cy="iniciar-liveness"
+          onClick={() => void verificar('aprovar')}
+          disabled={verificando || !credId}
+          style={{
+            padding: '12px 24px', border: 'none', borderRadius: 10,
+            background: verificando ? 'var(--cinza-300)' : 'var(--azul-700)', color: '#fff',
+            font: '600 14.5px var(--font-body)', cursor: verificando ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {verificando
+            ? t('credenciamento.provaVida.verificando')
+            : estado === 'reprovada' ? t('credenciamento.provaVida.repetir') : t('credenciamento.provaVida.iniciar')}
+        </button>
+      )}
+
+      <p style={{ fontSize: 12, color: 'var(--cinza-400)', marginTop: 18, lineHeight: 1.5 }}>
+        {t('credenciamento.provaVida.privacidade')}
+      </p>
     </div>
   );
 }

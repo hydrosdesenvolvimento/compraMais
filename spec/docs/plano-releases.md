@@ -80,7 +80,7 @@ O Backlog original (`07-Backlog.md`) tratava praticamente tudo como **Must Have*
 | BI-009 | Portal público de transparência (FIEAC) | Stack de BI definida (LAC-20) |
 | BI-008 | Dashboard administrativo interno | — |
 | — | Notificações SMS/e-mail | Gateway contratado (LAC-07) |
-| — | Biometria facial + RIPD | **Somente se** a Procuradoria exigir (LAC-10 / LAC-09) |
+| — | ~~Biometria facial + RIPD~~ → **antecipada à Onda 2 (MVP) condicional a RIPD** (ratificação 2026-07-09) | RIPD produzido ([lgpd/RIPD-prova-de-vida.md](lgpd/RIPD-prova-de-vida.md)); entra desligada por feature flag |
 | BI-007 | Maturidade do workflow de covalidação | — |
 
 **Portão de qualidade:** SEI automático com retry/idempotência; RIPD aprovado (se biometria); SLA definido para o portal público.

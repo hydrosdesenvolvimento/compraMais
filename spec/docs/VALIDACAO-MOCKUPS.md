@@ -16,7 +16,7 @@ O mockup do **Portal do Fornecedor** está **majoritariamente coberto** — 1 co
 | G2 | **CRUD de Setores Industriais / catálogo CNAE** | "Novo setor industrial" · Código CNAE, Descrição da atividade | CNAE só como dado da Receita (RF003) | **RF021**, Story 9.5 |
 | G3 | **CRUD de Tipos de Documento** | "Novo tipo de arquivo" · Nome, Formato aceito, Validade/Sem validade, Categoria, Exercício | Não encontrado | **RF022**, Story 9.6 |
 | G4 | **Gestão de Usuários internos (servidores)** | "Novo usuário" · Nome, E-mail, **Cargo**, nova/confirmar senha | Não encontrado (RF015 é auth do fornecedor) | **RF023**, §15, Story 9.7 |
-| G5 | **⚠️ "Prova de vida" no wizard de credenciamento** | Etapa "Prova de vida" no fluxo do fornecedor | **Biometria REMOVIDA do MVP** (RF012, R2 condicional) | **Divergência a ratificar** — ver §Conflito |
+| G5 | **✅ "Prova de vida" no wizard de credenciamento** | Etapa "Prova de vida" no fluxo do fornecedor | **RF012 reativado no MVP condicional a RIPD** (ratificado 2026-07-09) | **Resolvido** — feature flag OFF + RIPD; ver §Conflito |
 | G6 | **Ciclo de vida do Edital** | Estados Rascunho / Aberto / Em Análise / Em Distribuição / Homologado / Em Execução | Sem máquina de estado (AD-14 é do Credenciamento) | **RN014**, **AD-37**, Story 3.4 |
 | G7 | **Inativação preservando histórico** | "Registro convertido para Inativo (histórico preservado)" | Não formalizado | **RN015**, **AD-38** |
 | G8 | **Termo de Aceite** | Etapa "Termo de Aceite" + tipo de documento | Só consentimento LGPD (RF017/1.5); sem termo formal | **RN016**, Story 5.5 |
@@ -27,9 +27,15 @@ O mockup do **Portal do Fornecedor** está **majoritariamente coberto** — 1 co
 
 O wizard de credenciamento do mockup inclui a etapa **"Prova de vida"** (liveness). O PRD **removeu biometria do MVP** (RF012 — condicional Release 2, somente com RIPD aprovado; risco de escopo explicitamente mitigado em §12).
 
-**Decisão adotada (conservadora, a ratificar):** manter a decisão do PRD — **"Prova de vida" NÃO entra no MVP**. No MVP a conclusão do credenciamento usa **Termo de Aceite** (G8/RN016); a etapa de liveness é **Release 2 condicional a RIPD**. O mockup é um alvo de UI futuro nesse ponto, não requisito de MVP.
+**Decisão anterior (conservadora):** manter a decisão do PRD — "Prova de vida" NÃO entra no MVP; a conclusão usa **Termo de Aceite** (G8/RN016) e a liveness fica em Release 2 condicional a RIPD.
 
-> 🔴 **Ratificar com o solicitante:** se "Prova de vida" for MVP, reabrir RF012 exige RIPD aprovado (gate LGPD LAC-09) e revisão de risco — não é troca de parâmetro. Enquanto não ratificado, vale a decisão conservadora acima.
+**✅ RATIFICADO (2026-07-09):** o solicitante **reabriu o RF012/UC007 para o MVP condicional a RIPD**. A etapa "Prova de vida" do mockup passa a ser **requisito de MVP**, porém:
+- entra **desligada por feature flag** (`LIVENESS_ENABLED`, default OFF), preservando o fluxo por Termo de Aceite enquanto o RIPD não for operacionalizado;
+- quando ligada, é **pré-requisito do Termo de Aceite** (UC007);
+- o **RIPD** foi produzido como gate formal de LGPD ([lgpd/RIPD-prova-de-vida.md](lgpd/RIPD-prova-de-vida.md)) — tratamento de dado biométrico sensível (Art. 11), imagem/vídeo **não retidos**;
+- indisponibilidade do provedor = `fail-open + flag` para a CPL (AD-12).
+
+Rastreável em UC007 ([casos-de-uso.md](casos-de-uso.md)), RF012 ([prd.md](prd.md) v2.5) e Story 5.6 ([epics.md](epics.md)). Conflito G5 **resolvido**.
 
 ## Cobertura confirmada (sem ação)
 

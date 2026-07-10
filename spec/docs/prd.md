@@ -23,6 +23,7 @@
 | 2.2 | 2026-06-29 | Party Mode (Update por designs) | Incorporação dos designs ratificados em `source/AI-UI-Design/`: slogan/value props (§1), papel **Procurador** (§4), **RF018** (re-sincronização Receita), **RN009** (dados da Receita read-only), referência ao contrato de UX (DESIGN/EXPERIENCE) em RNF006 |
 | 2.3 | 2026-07-02 | Party Mode (Convergência) | Convergência de linhagens de doc (ver [CONVERGENCIA.md](CONVERGENCIA.md)): resgate de 13 decisões do Spec-Kit — **RF019** (georreferenciamento/endereço estruturado), refino de RF003/RN001 (CNAE match exato 7 dígitos), **RN010–RN013** novas, **§15 Papéis/RBAC** e **§16 Catálogo de parâmetros**; correção do path do contrato de UX em RNF006; AD-34/35/36 na espinha |
 | 2.4 | 2026-07-02 | Party Mode (Validação de mockups) | Validação dos mockups `AI-UI-Design/` vs doc (ver [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)): gaps do Painel Admin preenchidos — **RF020** (CRUD Secretarias), **RF021** (catálogo CNAE/setores), **RF022** (catálogo de tipos de documento), **RF023** (gestão de usuários internos); **RN014** (ciclo de vida do Edital), **RN015** (inativação preservando histórico), **RN016** (Termo de Aceite + cancelamento de credenciamento); §15 cargos operacionais; AD-37/AD-38 na espinha; conflito **"Prova de vida" × biometria removida** registrado para ratificação |
+| 2.5 | 2026-07-09 | Solicitante + Tech Lead | **RF012 (Biometria facial / Prova de Vida) reativado no MVP condicional a RIPD** (ratificação do solicitante em 2026-07-09, resolvendo o conflito §G5 de [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)): entra **desligado por feature flag** (`LIVENESS_ENABLED`) preservando a conclusão por Termo de Aceite (RN016); RIPD produzido ([lgpd/RIPD-prova-de-vida.md](lgpd/RIPD-prova-de-vida.md)); detalhado em UC007 ([casos-de-uso.md](casos-de-uso.md)) e Story 5.6 ([epics.md](epics.md)) |
 
 ---
 
@@ -66,12 +67,12 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 
 ### 5.1 Incluído (por onda — ver [plano-releases.md](plano-releases.md))
 - **Onda 1 (Demo FIEAC, dados sintéticos):** cadastro CNPJ, filtro CNAE, motor de distribuição, geração de malote.
-- **Onda 2 (MVP de produção):** integrações reais, bloqueio transitório de inadimplência, controles LGPD, tela de contestação, upload manual ao SEI.
-- **Onda 3 (Release 2):** SEI automático, portal público de transparência, dashboard interno, notificações, covalidação madura, biometria condicional.
+- **Onda 2 (MVP de produção):** integrações reais, bloqueio transitório de inadimplência, controles LGPD, tela de contestação, upload manual ao SEI, **prova de vida/biometria condicional a RIPD** (feature flag, ratificação 2026-07-09).
+- **Onda 3 (Release 2):** SEI automático, portal público de transparência, dashboard interno, notificações, covalidação madura.
 
 ### 5.2 Não incluído (MVP)
 - Transferência automática para o SEI (Release 2).
-- Biometria facial / liveness (condicional, Release 2, somente com RIPD aprovado).
+- ~~Biometria facial / liveness~~ — **reativada no MVP condicional a RIPD (ratificação 2026-07-09)**, desligada por feature flag até o RIPD ser operacionalizado (ver UC007, RF012, §5.1 Onda 2).
 - Notificações SMS/e-mail (Release 2, requer gateway).
 - GPI / Leilão / desfazimento.
 - Empenho e pagamento (permanecem no SEI).
@@ -91,7 +92,7 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | RF009 | Notificações de vencimento (e-mail/SMS) | 3 | Gateway (LAC-07) |
 | RF010 | Portal público de transparência | 3 | Stack BI (LAC-20) |
 | RF011 | Verificação de inadimplência (PGM/SICAF) com **bloqueio transitório** (ver RN002) | 2 | Revisado (LAC-08) |
-| RF012 | ~~Biometria facial (liveness)~~ — **removida do MVP**; condicional Release 2 com RIPD | 3 | Removida (LAC-09/10) |
+| RF012 | **Biometria facial (liveness) — reativada no MVP condicional a RIPD** (ratificação 2026-07-09): prova de vida no ato do envio do credenciamento; **desligada por feature flag** (`LIVENESS_ENABLED`) preservando o Termo de Aceite (RN016); indisponibilidade = `fail-open + flag` para a CPL (AD-12). Ver UC007 e [lgpd/RIPD-prova-de-vida.md](lgpd/RIPD-prova-de-vida.md) | 2 (cond. RIPD) | Reativada (LAC-09/10 → ratificado) |
 | RF013 | Dashboard administrativo (funil de cadastros pendentes) | 2/3 | — |
 | RF014 | Trilha de auditoria com consulta filtrada e exportação CSV/JSON | 2 | — |
 | **RF015** | **Autenticação recorrente** (login/SSO/MFA, reset de senha por esquecimento **e troca da própria senha pelo usuário autenticado** — exige senha atual) | 2 | **Novo** (LAC-03); troca autenticada da própria senha add. na validação de mockups |
@@ -156,7 +157,7 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | **RN013** | **Transparência expõe só agregados não-identificáveis:** o portal público mostra editais vigentes (contagem), secretarias e segmentos (CNAEs); **não** expõe fornecedores, valores nem dados pessoais (evita reidentificação em segmentos pequenos). Projeções calculadas **sob demanda** (materialização/cache é otimização futura sem mudar o contrato) (resgate `spec/007`). |
 | **RN014** | **Ciclo de vida do Edital:** `Rascunho → Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`. Transições são auditadas (RN012, AD-16/AD-37); só edital **Aberto** aparece na vitrine do fornecedor; a distribuição (RF005) só ocorre a partir de **Em Distribuição**; **Homologado** congela a alocação (AD-10). (validação mockup) |
 | **RN015** | **Exclusão é lógica, preservando histórico:** entidades de cadastro administrativo (Secretaria, Setor/CNAE, Tipo de Documento, Usuário, Fornecedor, Edital) **não são apagadas** — passam a **Inativo**, mantendo o histórico e as referências existentes; registros já vinculados a processos permanecem íntegros (complementa a trilha append-only AD-18/AD-38). (validação mockup) |
-| **RN016** | **Conclusão de credenciamento por Termo de Aceite; cancelamento pelo fornecedor:** no MVP o credenciamento conclui com o **Termo de Aceite** (aceite formal registrado na trilha; a etapa "Prova de vida"/biometria é **Release 2 condicional a RIPD** — ver §12 e [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)). O fornecedor pode **cancelar** um credenciamento **antes da distribuição**; após homologação, saída se dá por substituição de desistente (RN004, AD-10). (validação mockup) |
+| **RN016** | **Conclusão de credenciamento por Termo de Aceite; cancelamento pelo fornecedor:** no MVP o credenciamento conclui com o **Termo de Aceite** (aceite formal registrado na trilha). A etapa "Prova de vida"/biometria (RF012/UC007) foi **reativada no MVP condicional a RIPD** (ratificação 2026-07-09, ver [lgpd/RIPD-prova-de-vida.md](lgpd/RIPD-prova-de-vida.md) e [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md) §G5) e entra **desligada por feature flag**; quando ligada, é **pré-requisito do Termo de Aceite**. O fornecedor pode **cancelar** um credenciamento **antes da distribuição**; após homologação, saída se dá por substituição de desistente (RN004, AD-10). (validação mockup) |
 
 ## 10. Roadmap de Releases
 

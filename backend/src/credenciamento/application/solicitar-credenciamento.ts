@@ -26,6 +26,19 @@ export class CredenciamentoDuplicado extends Error {
 export class FornecedorNaoEncontrado extends Error {
   constructor() { super('Supplier not found.'); this.name = 'FornecedorNaoEncontrado'; }
 }
+export class ProvaDeVidaPendente extends Error {
+  constructor() { super('Liveness check is required and not yet cleared for this credenciamento (UC007).'); this.name = 'ProvaDeVidaPendente'; }
+}
+
+/**
+ * Gate opcional do Termo de Aceite pela prova de vida (UC007 / RF012). Quando a feature flag `LIVENESS_
+ * ENABLED` está ligada (condicional a RIPD), o wiring injeta um gate real que exige liveness liberado
+ * antes do aceite; desligada (default), usa-se o no-op abaixo e o fluxo conclui só pelo Termo (UC004).
+ */
+export interface GateProvaDeVida {
+  exigirLiberacao(credenciamentoId: string): Promise<void>;
+}
+const GATE_ABERTO: GateProvaDeVida = { async exigirLiberacao() { /* liveness desligado: nada a exigir */ } };
 
 /**
  * UC004 — Solicitar Credenciamento e concluir por Termo de Aceite (RN016). Precondição: edital
@@ -39,6 +52,8 @@ export class SolicitarCredenciamento {
     private readonly fornecedores: FornecedorRepository,
     private readonly bus: EventBus,
     private readonly now: () => string = () => new Date().toISOString(),
+    // Gate de prova de vida (UC007). Default no-op = feature flag desligada (fluxo MVP por Termo de Aceite).
+    private readonly gateProvaDeVida: GateProvaDeVida = GATE_ABERTO,
   ) {}
 
   async iniciar(fornecedorId: string, editalId: string, capacidade: number, actor: Actor): Promise<{ credenciamentoId: string }> {
@@ -62,6 +77,9 @@ export class SolicitarCredenciamento {
   async aceitarTermo(credenciamentoId: string, dados: { versaoTermo: string; finalidade: string }, actor: Actor): Promise<{ estado: 'aceito'; status: 'pendente_analise' }> {
     const cred = await this.repo.porId(credenciamentoId);
     if (!cred) throw new CredenciamentoNaoEncontrado();
+
+    // UC007: com liveness ligado, o Termo só é aceito após prova de vida liberada (no-op quando desligado).
+    await this.gateProvaDeVida.exigirLiberacao(credenciamentoId);
 
     const agora = this.now();
     cred.aceitarTermo({ versao: dados.versaoTermo, finalidade: dados.finalidade }, actor.userId, agora);

@@ -24,6 +24,7 @@
 |---|---|---|---|
 | 1.0 | 2026-06-22 | Equipe de Análise | Rascunho inicial (14 UCs) — em `source/06-CasosUso.md` |
 | 2.0 | 2026-07-02 | Party Mode | Versão canônica alinhada ao **PRD v2.4**: atores por papel (RBAC §15); ciclo de vida do Edital (RN014); Termo de Aceite conclui o credenciamento no MVP e **UC007 (liveness) marcado R2 condicional a RIPD** (RN016, RF012); inativação lógica (RN015); **novos UC015–UC021** para RF015–RF023 e Procurador (RN010) |
+| 2.1 | 2026-07-09 | Solicitante + Tech Lead | **UC007 (Prova de Vida/Liveness) ratificado para o MVP condicional a RIPD** (RF012 reativado): UC007 detalhado com fluxo principal/alternativos/exceções; entra **desligado por feature flag** preservando UC004/Termo de Aceite; RIPD produzido ([lgpd/RIPD-prova-de-vida.md](lgpd/RIPD-prova-de-vida.md)); rastreável a Story 5.6 (épicos) |
 
 ---
 
@@ -33,7 +34,7 @@
 |---|---|
 | **A. Cadastro & Identidade do Fornecedor** | UC001, UC018, UC019, UC015 |
 | **B. Editais** | UC005 |
-| **C. Credenciamento & Covalidação** | UC003, UC004, UC002, UC006, UC007 *(R2)*, UC016 |
+| **C. Credenciamento & Covalidação** | UC003, UC004, UC002, UC006, UC007 *(condicional a RIPD)*, UC016 |
 | **D. Distribuição & Malote** | UC008, UC009, UC010 |
 | **E. Transparência, Auditoria & Notificações** | UC011, UC012, UC013, UC014 |
 | **F. LGPD** | UC017 |
@@ -180,11 +181,22 @@
 **Pós-condições:** fornecedor apto ao cálculo de distribuição ou em fila de correção.
 **Rastreabilidade:** RF004 · RN003, RN006, RN011 · RNF003 · Prioridade **Must** · Complexidade Média.
 
-### UC007 — Validar Identidade por Prova de Vida (Liveness) · **Release 2 — condicional a RIPD**
-**Objetivo:** prova de vida no ato do envio para mitigar fraude por terceiros.
-**Ator principal:** Fornecedor.
-**Status:** **fora do MVP.** A biometria facial (RF012) foi **removida do MVP**; o credenciamento conclui por **Termo de Aceite** (UC004/RN016). Este UC só se ativa em **Release 2**, condicionado a **RIPD** e ratificação do solicitante. Documentado aqui para preservar a intenção; **não** deve gerar história no MVP.
-**Rastreabilidade:** RF012 *(removida do MVP)* · RN016 · ver [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md) (conflito "Prova de vida" × biometria) · Prioridade **Could/R2** · Complexidade Alta.
+### UC007 — Validar Identidade por Prova de Vida (Liveness) · **Ratificado para o MVP condicional a RIPD (2026-07-09)**
+**Objetivo:** confirmar a presença de uma pessoa viva no **ato do envio** do credenciamento, mitigando fraude por terceiros (procurador/contador agindo sem o titular — vetor de origem de AD-30).
+**Ator principal:** Fornecedor (Titular ou Procurador). **Apoio:** Sistema (provedor de liveness); Analista CPL (fallback manual).
+**Status:** **ratificado para o MVP em 2026-07-09** pelo solicitante, **condicionado ao RIPD** ([RIPD-prova-de-vida.md](lgpd/RIPD-prova-de-vida.md), LGPD Art. 11 — dado biométrico sensível). Substitui o status anterior "fora do MVP" (RF012 removida) — ver histórico em [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md) §G5. Entra **desligado por padrão** (feature flag `LIVENESS_ENABLED`), preservando a conclusão por **Termo de Aceite** (UC004/RN016) enquanto o RIPD não for operacionalizado; quando ligado, a prova de vida é **pré-requisito do Termo de Aceite**.
+**Pré-condições:** credenciamento **iniciado** (UC004, capacidade declarada); fornecedor autenticado; **consentimento específico** do titular para o tratamento biométrico registrado (LGPD, base do RIPD).
+**Fluxo principal:**
+1. Após os documentos (UC004 passo 3) e **antes** do Termo de Aceite, o Sistema apresenta a etapa de **Prova de Vida**.
+2. O ator inicia a captura de liveness; o Sistema envia a amostra ao **provedor de liveness** (ACL, AD-4).
+3. O provedor retorna um **veredito + score**; acima do limiar → **aprovada**. O Sistema registra veredito, score, provedor e `timestamp` na trilha (AD-18) — **sem** reter a imagem/vídeo (minimização, RIPD).
+4. Com a prova **aprovada**, o fornecedor assina o **Termo de Aceite** (RN016) e o credenciamento conclui (**Pendente de Análise**).
+**Fluxos alternativos:**
+- **A1 — Falha de liveness (abaixo do limiar):** veredito **reprovada**; o Sistema permite **repetir** a captura; o Termo permanece bloqueado enquanto não houver aprovação.
+- **A2 — Provedor indisponível:** política **`fail-open + flag` obrigatória para a CPL** (AD-12) — a prova fica **`indisponivel`** e o credenciamento pode prosseguir, mas entra sinalizado para **covalidação manual da identidade** pela CPL (nunca auto-aprovação silenciosa).
+**Exceções:** ausência de consentimento específico para biometria → etapa bloqueada (não há tratamento sem base legal, RIPD). Feature flag desligada → a etapa não é apresentada e o credenciamento conclui por Termo de Aceite (UC004).
+**Pós-condições:** prova de vida registrada (aprovada / indisponível-com-flag) e vinculada ao credenciamento; trilha auditável do veredito; imagem/vídeo não retidos.
+**Rastreabilidade:** RF012 *(reativado condicional a RIPD)* · RN016 · AD-4, AD-12, AD-30 · [RIPD-prova-de-vida.md](lgpd/RIPD-prova-de-vida.md) · ver [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md) §G5 · Prioridade **Must (condicional a RIPD)** · Complexidade Alta.
 
 ### UC016 — Contestar / Regularizar (Tela Única)
 **Objetivo:** dar ao fornecedor um único ponto para correção de CNAE, recurso de reprovação e regularização fiscal.
@@ -351,7 +363,7 @@
 | UC004 | Solicitar Credenciamento + Termo de Aceite | C | Fornecedor | RF002 | Must | Média |
 | UC002 | Validar Situação de Inadimplência | C | Sistema | RF011 | Must | Alta |
 | UC006 | Analisar e Covalidar Documentação | C | Analista CPL | RF004 | Must | Média |
-| UC007 | Prova de Vida (Liveness) | C | Fornecedor | RF012 | **R2** | Alta |
+| UC007 | Prova de Vida (Liveness) | C | Fornecedor | RF012 | **Must (cond. RIPD)** | Alta |
 | UC016 | Contestar / Regularizar | C | Fornecedor | RF016 | Must | Média |
 | UC008 | Distribuir Demanda (Motor) | D | Sistema | RF005 | Must | Alta |
 | UC009 | Gerir Cadastro de Reserva | D | Sistema | RF006 | Must | Alta |
@@ -364,7 +376,7 @@
 | UC020 | Manter Catálogos Base (CRUD) | G | Administrador | RF020, RF021, RF022 | Must | Média |
 | UC021 | Gerir Usuários Internos | G | Administrador | RF023 | Must | Média |
 
-**Cobertura de RF:** RF001–RF011, RF013–RF023 mapeados; **RF012** presente apenas como **UC007 (R2)**. Os critérios de aceite testáveis de cada UC vivem em [epics.md](epics.md).
+**Cobertura de RF:** RF001–RF023 mapeados; **RF012** reativado como **UC007 (Must condicional a RIPD)** — Story 5.6 em [epics.md](epics.md), com feature flag desligada por padrão. Os critérios de aceite testáveis de cada UC vivem em [epics.md](epics.md).
 
 ---
 

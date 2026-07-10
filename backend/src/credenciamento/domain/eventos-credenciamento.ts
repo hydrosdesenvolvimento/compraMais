@@ -19,3 +19,12 @@ export class CredenciamentoCancelado extends DomainEvent<{ credenciamentoId: str
   readonly eventName = 'CredenciamentoCancelado'; readonly eventVersion = 1;
   constructor(aggregateId: string, payload: { credenciamentoId: string; fornecedorId: string; editalId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
 }
+
+/**
+ * UC007 / RF012 — veredito de prova de vida registrado na trilha (AD-18). Carrega estado, score e a flag
+ * de covalidação manual (indisponibilidade, AD-12). NÃO carrega imagem/vídeo (minimização, RIPD).
+ */
+export class ProvaDeVidaAvaliada extends DomainEvent<{ credenciamentoId: string; fornecedorId: string; estado: string; score: number | null; provedor: string; flagCpl: boolean }> {
+  readonly eventName = 'ProvaDeVidaAvaliada'; readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { credenciamentoId: string; fornecedorId: string; estado: string; score: number | null; provedor: string; flagCpl: boolean }, actor?: Actor) { super(aggregateId, payload, actor); }
+}

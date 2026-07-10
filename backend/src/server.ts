@@ -106,7 +106,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   new AuditConsumer(bus, auditRepo).register([
     'FornecedorCadastrado', 'FornecedorSincronizado', 'PerfilEditado',
     'ProcuradorConvidado', 'ProcuradorRemovido',
-    'DocumentoAprovado', 'DocumentoReprovado',
+    'DocumentoAprovado', 'DocumentoReprovado', 'FornecedorCredenciado', 'FornecedorEmCorrecao',
     'CredenciamentoIniciado', 'TermoAceito', 'CredenciamentoCancelado',
     'InadimplenciaVerificada', 'BloqueioAplicado', 'BloqueioLiberado',
     'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalEditado',
@@ -191,11 +191,13 @@ export async function buildServer(): Promise<FastifyInstance> {
   const resolver = new ResolverContestacao(contestacaoRepo, gerirEditais, bus);
   registrarRotasContestacao(app, { contestar, resolver, contestacoes: contestacaoRepo });
 
-  // Módulo credenciamento — documentos (001 US3) + covalidação (002 US1), repo compartilhado
+  // Módulo credenciamento — documentos (001 US3) + covalidação (UC006 / 002 US1), repo compartilhado.
+  // A covalidação recebe o repo de fornecedores (`fornecedores`, def. acima) para o veredito do conjunto:
+  // aprovar o conjunto → `credenciado` (UC006 passo 3); reprovar → `em_correcao` (A1, laço UC016).
   const docRepo = new DocumentoRepositoryMemory();
   const docs = new GerirDocumentos(docRepo, new ObjectStorageMemory(), new PiiCipherDev());
   registrarRotasDocumentos(app, { docs });
-  const covalidar = new Covalidar(docRepo, new AnaliseRepositoryMemory(), bus);
+  const covalidar = new Covalidar(docRepo, new AnaliseRepositoryMemory(), bus, fornecedores);
   registrarRotasCovalidacao(app, { covalidar });
 
   // Credenciamento — solicitação + Termo de Aceite (UC004 / RN005/RN016). Persistência durável em

@@ -157,7 +157,8 @@
       "vazio": "Nenhum documento para os filtros atuais.",
       "aprovar": "Aprovar",
       "motivoPlaceholder": "Motivo (obrigatório p/ reprovar)",
-      "reprovar": "Reprovar"
+      "reprovar": "Reprovar",
+      "enviadoHa": "Enviado {{tempo}}"
     },
     "gerirEditais": {
       "titulo": "Gestão de editais",

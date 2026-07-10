@@ -40,6 +40,21 @@ export function validarCpf(v: string): boolean {
   return dv(9) === Number(d[9]) && dv(10) === Number(d[10]);
 }
 
+/**
+ * Tempo decorrido desde `desdeIso` até `agora`, localizado (RN011 — a fila mostra a espera, sem SLA
+ * fixo). Usa Intl.RelativeTimeFormat na maior unidade sensível (dias→horas→minutos→"agora").
+ */
+export function tempoDecorrido(desdeIso: string, locale = 'pt-BR', agora: Date = new Date()): string {
+  const ms = agora.getTime() - new Date(desdeIso).getTime();
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return rtf.format(0, 'minute');
+  if (min < 60) return rtf.format(-min, 'minute');
+  const horas = Math.floor(min / 60);
+  if (horas < 24) return rtf.format(-horas, 'hour');
+  return rtf.format(-Math.floor(horas / 24), 'day');
+}
+
 export interface EnderecoCep {
   cep: string; estado: string; cidade: string; bairro: string; rua: string;
   latitude?: number; longitude?: number;

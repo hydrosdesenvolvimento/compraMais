@@ -78,6 +78,11 @@ export const api = {
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   pendencias: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias`),
   pendenciasConsolidadas: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias-consolidadas`),
+  // UC016 (tela única) — ações delegadas aos módulos donos:
+  // recurso de reprovação → reenvia o documento reprovado (volta a `pendente`, notifica a CPL — UC006).
+  reenviarDocumento: (docId: string) => send<{ status: string }>(`/documentos/${docId}/reenviar`, 'POST'),
+  // regularização fiscal → reconsulta a elegibilidade na porta (libera se o débito sumiu — UC002).
+  reconsultarElegibilidade: (fid: string, cnpj: string) => send<{ estado: string; podeAvancar: boolean }>(`/fornecedores/${fid}/reconsultar`, 'POST', { cnpj }),
   sincronizar: (fid: string) => send<SincronizacaoResultado>(`/fornecedores/${fid}/sincronizar`, 'POST'),
   // RN009/FR-013: só Nome Fantasia, Endereço e Telefone. O backend rejeita campos oficiais (422) e devolve 204.
   editarPerfil: (fid: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) => send<void>(`/fornecedores/${fid}`, 'PATCH', patch),

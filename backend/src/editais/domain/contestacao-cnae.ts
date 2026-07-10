@@ -2,6 +2,18 @@ import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-b
 
 export type SituacaoContestacao = 'pendente' | 'acatada' | 'recusada';
 
+/** Snapshot plano do agregado para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
+export interface ContestacaoState {
+  meta: MetadadosBase;
+  editalId: string;
+  fornecedorId: string;
+  cnaeContestado: string;
+  justificativa: string;
+  situacao: SituacaoContestacao;
+  motivoResolucao: string | null;
+  resolvidaPor: string | null;
+}
+
 /**
  * Contestação de enquadramento de CNAE sobre um Edital (US2, FR-007/008/009) — entidade rica (AD-33).
  * Justificativa obrigatória na abertura; motivo obrigatório na recusa (espelha o padrão antifraude RN003).
@@ -26,6 +38,24 @@ export class ContestacaoCnae extends EntidadeBase {
       EntidadeBase.metaNova(input.id, input.fornecedorId),
       input.editalId, input.fornecedorId, input.cnaeContestado, input.justificativa, 'pendente', null, null,
     );
+  }
+
+  /** Reconstrução a partir da persistência (sem regra de abertura — aceita qualquer situação). */
+  static deEstado(s: ContestacaoState): ContestacaoCnae {
+    return new ContestacaoCnae(
+      s.meta, s.editalId, s.fornecedorId, s.cnaeContestado, s.justificativa,
+      s.situacao, s.motivoResolucao, s.resolvidaPor,
+    );
+  }
+
+  /** Snapshot plano para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
+  estado(): ContestacaoState {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      editalId: this.editalId, fornecedorId: this.fornecedorId, cnaeContestado: this.cnaeContestado,
+      justificativa: this.justificativa, situacao: this._situacao,
+      motivoResolucao: this._motivoResolucao, resolvidaPor: this._resolvidaPor,
+    };
   }
 
   get situacao(): SituacaoContestacao { return this._situacao; }

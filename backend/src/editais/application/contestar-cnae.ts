@@ -13,6 +13,8 @@ export interface ContestacaoRepository extends ContestacoesPendentesQuery {
   salvar(c: ContestacaoCnae): Promise<void>;
   porId(id: string): Promise<ContestacaoCnae | null>;
   doEdital(editalId: string): Promise<ContestacaoCnae[]>;
+  /** Contestações pendentes abertas por um fornecedor (consolidação — tela única, Épico 7-1). */
+  pendentesDoFornecedor(fornecedorId: string): Promise<ContestacaoCnae[]>;
 }
 
 /** Verifica se um fornecedor está cadastrado e ativo (legitimidade — clarify Q3). */

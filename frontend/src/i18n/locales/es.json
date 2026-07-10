@@ -219,6 +219,20 @@
     "status": {
       "rascunho": "borrador"
     },
+    "tipos": {
+      "documento": "Documento rechazado",
+      "bloqueio": "Pendencia fiscal",
+      "contestacao-cnae": "Impugnación de CNAE",
+      "lgpd": "Solicitud de datos (LGPD)"
+    },
+    "acao": {
+      "reenviar": "Reenviar documento",
+      "regularizar": "Regularizar y reconsultar",
+      "processando": "Procesando…",
+      "aguardando": "En análisis",
+      "sucesso": "Solicitud enviada.",
+      "erro": "No se pudo completar. Inténtelo de nuevo."
+    },
     "contagem_one": "{{count}} acreditación",
     "contagem_other": "{{count}} acreditaciones"
   },

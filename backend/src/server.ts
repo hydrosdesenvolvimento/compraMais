@@ -40,8 +40,9 @@ import { ListarEditaisCompativeis, type EditalRepository } from './editais/appli
 import { registrarRotasEditais } from './editais/adapters/editais-controller.js';
 import { GerirEditais } from './editais/application/gerir-editais.js';
 import { BuscarEditais } from './editais/application/buscar-editais.js';
-import { ContestarCnae, ResolverContestacao } from './editais/application/contestar-cnae.js';
+import { ContestarCnae, ResolverContestacao, type ContestacaoRepository } from './editais/application/contestar-cnae.js';
 import { ContestacaoRepositoryMemory } from './editais/adapters/contestacao-repository-memory.js';
+import { ContestacaoRepositoryPg } from './editais/adapters/contestacao-repository-pg.js';
 import { registrarRotasGestaoEditais } from './editais/adapters/editais-gestao-controller.js';
 import { registrarRotasContestacao } from './editais/adapters/contestacao-controller.js';
 import { GerirDocumentos } from './credenciamento/application/gerir-documentos.js';
@@ -182,7 +183,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   registrarRotasEditais(app, { vitrine });
 
   // Editais individualizados (003): criação/publicação/edição/encerramento + busca QBE + contestação de CNAE
-  const contestacaoRepo = new ContestacaoRepositoryMemory();
+  const contestacaoRepo: ContestacaoRepository = pool ? new ContestacaoRepositoryPg(pool) : new ContestacaoRepositoryMemory();
   const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo);
   const buscarEditais = new BuscarEditais(editaisRepo);
   registrarRotasGestaoEditais(app, { gerir: gerirEditais, buscar: buscarEditais });

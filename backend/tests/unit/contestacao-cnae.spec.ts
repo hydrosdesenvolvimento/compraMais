@@ -26,4 +26,15 @@ describe('ContestacaoCnae (US2)', () => {
     const c = aberta(); c.acatar('cpl1');
     expect(() => c.recusar('x', 'cpl1')).toThrow();
   });
+
+  it('round-trip estado()/deEstado() preserva o agregado (durabilidade UC016/AD-33)', () => {
+    const c = aberta();
+    c.recusar('CNAE realmente incompatível', 'cpl1');
+    const reconstruida = ContestacaoCnae.deEstado(c.estado());
+    expect(reconstruida.estado()).toEqual(c.estado());
+    expect(reconstruida.situacao).toBe('recusada');
+    expect(reconstruida.motivoResolucao).toMatch(/incompatível/);
+    expect(reconstruida.resolvidaPor).toBe('cpl1');
+    expect(reconstruida.id).toBe(c.id);
+  });
 });

@@ -219,6 +219,20 @@
     "status": {
       "rascunho": "draft"
     },
+    "tipos": {
+      "documento": "Rejected document",
+      "bloqueio": "Tax pending issue",
+      "contestacao-cnae": "CNAE challenge",
+      "lgpd": "Data request (LGPD)"
+    },
+    "acao": {
+      "reenviar": "Resubmit document",
+      "regularizar": "Settle and re-check",
+      "processando": "Processing…",
+      "aguardando": "Under review",
+      "sucesso": "Request submitted.",
+      "erro": "Could not complete. Please try again."
+    },
     "contagem_one": "{{count}} accreditation",
     "contagem_other": "{{count}} accreditations"
   },

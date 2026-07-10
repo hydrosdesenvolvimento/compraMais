@@ -219,6 +219,20 @@
     "status": {
       "rascunho": "rascunho"
     },
+    "tipos": {
+      "documento": "Documento reprovado",
+      "bloqueio": "Pendência fiscal",
+      "contestacao-cnae": "Contestação de CNAE",
+      "lgpd": "Solicitação de dados (LGPD)"
+    },
+    "acao": {
+      "reenviar": "Reenviar documento",
+      "regularizar": "Regularizar e reconsultar",
+      "processando": "Processando…",
+      "aguardando": "Em análise",
+      "sucesso": "Solicitação enviada.",
+      "erro": "Não foi possível concluir. Tente novamente."
+    },
     "contagem_one": "{{count}} credenciamento",
     "contagem_other": "{{count}} credenciamentos"
   },

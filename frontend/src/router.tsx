@@ -21,6 +21,7 @@ import { FilaCovalidacao } from './pages/admin/FilaCovalidacao';
 import { GerirEditais } from './pages/admin/GerirEditais';
 import { FilaContestacoes } from './pages/admin/FilaContestacoes';
 import { ConsultaAuditoria } from './pages/admin/ConsultaAuditoria';
+import { ManterCatalogos } from './pages/admin/ManterCatalogos';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
 const DEMO_EDITAL_ID = 'demo-edital';
@@ -42,6 +43,7 @@ const MENU_ADMIN: ItemMenu[] = [
   { rotuloKey: 'common.nav.covalidacao', href: '/admin/covalidacao', cy: 'nav-covalidacao', icone: <IconeCredenciamentos {...ico} /> },
   { rotuloKey: 'common.nav.gestaoEditais', href: '/admin/editais', cy: 'nav-gestao-editais', icone: <IconeEditais {...ico} /> },
   { rotuloKey: 'common.nav.contestacoes', href: '/admin/contestacoes', cy: 'nav-contestacoes', icone: <IconeEditais {...ico} /> },
+  { rotuloKey: 'common.nav.catalogos', href: '/admin/catalogos', cy: 'nav-catalogos', icone: <IconeDocumentos {...ico} /> },
   { rotuloKey: 'common.nav.auditoria', href: '/admin/auditoria', cy: 'nav-auditoria', icone: <IconeDocumentos {...ico} /> },
 ];
 const USUARIO_ADMIN: UsuarioChip = { nome: 'CPL — Compra Mais', papel: 'Controle / SMGA', iniciais: 'CP' };
@@ -70,6 +72,7 @@ const rAdminDash = createRoute({ getParentRoute: () => adminLayout, path: '/admi
 const rAdminCoval = createRoute({ getParentRoute: () => adminLayout, path: '/admin/covalidacao', component: () => <FilaCovalidacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
 const rAdminEditais = createRoute({ getParentRoute: () => adminLayout, path: '/admin/editais', component: () => <GerirEditais secretariaId={DEMO_SECRETARIA_ID} /> });
 const rAdminContest = createRoute({ getParentRoute: () => adminLayout, path: '/admin/contestacoes', component: () => <FilaContestacoes editalId={DEMO_EDITAL_ID} /> });
+const rAdminCatalogos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/catalogos', component: ManterCatalogos });
 const rAdminAudit = createRoute({ getParentRoute: () => adminLayout, path: '/admin/auditoria', component: ConsultaAuditoria });
 
 const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '*', beforeLoad: () => { throw redirect({ to: '/cadastro' }); } });
@@ -79,7 +82,7 @@ const routeTree = rootRoute.addChildren([
   cadastroRoute,
   redefinirSenhaRoute,
   fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rEditais, rCredenciamento, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
-  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminAudit]),
+  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminCatalogos, rAdminAudit]),
   naoEncontrada,
 ]);
 

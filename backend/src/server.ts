@@ -28,6 +28,8 @@ import { UsuarioRepositoryMemory, type UsuarioRepository } from './shared/identi
 import { UsuarioRepositoryPg } from './shared/identity/usuario-repository-pg.js';
 import { JwtTokenService } from './shared/identity/token-service.js';
 import { RegistrarUsuario, AutenticarLocal, VincularGoogle, AutenticarGoogle } from './shared/identity/autenticacao.js';
+import { GerirUsuariosInternos } from './shared/identity/gerir-usuarios-internos.js';
+import { registrarRotasUsuariosInternos } from './shared/identity/usuarios-internos-controller.js';
 import { TrocarSenha, SolicitarResetSenha, RedefinirSenha } from './shared/identity/gerir-senha.js';
 import { ResetTokenRepositoryMemory, type ResetTokenRepository } from './shared/identity/reset-token-repository.js';
 import { ResetTokenRepositoryPg } from './shared/identity/reset-token-repository-pg.js';
@@ -125,6 +127,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
     'SenhaAlterada', 'ResetSenhaSolicitado', 'SenhaRedefinida',
     'CatalogoItemCriado', 'CatalogoItemEditado', 'CatalogoItemInativado', 'CatalogoItemReativado',
+    'UsuarioInternoCriado', 'UsuarioInternoEditado', 'UsuarioSenhaResetada', 'UsuarioInternoInativado', 'UsuarioInternoReativado',
   ]);
 
   // Identidade (US1): contas + procuradores. Persistência durável em Postgres quando disponível (como
@@ -170,6 +173,11 @@ export async function buildServer(): Promise<FastifyInstance> {
       frontendRedirect: config.auth.frontendRedirect,
     });
   }
+
+  // UC021 — Gestão de usuários internos/servidores (RF023, §15/AD-35). CRUD administrativo sobre a
+  // MESMA identidade de login (`usuarioRepo`): cargo→papel RBAC, reset de senha e inativação lógica
+  // (RN015). Durável junto com `usuarios` (Postgres quando disponível). Só o Administrador opera.
+  registrarRotasUsuariosInternos(app, { gerir: new GerirUsuariosInternos(usuarioRepo, bus) });
 
   // Módulo catálogo (US1). CNPJ/CEP via BrasilAPI em runtime; mock em teste ou RECEITA_PROVIDER=mock
   // (sem rede). Os gateways degradam para 'indisponivel' em falha/timeout (fallback manual visível).

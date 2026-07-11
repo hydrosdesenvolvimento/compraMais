@@ -15,9 +15,10 @@ import type { Papel } from '../identity/identity-provider.js';
  * Persistimos hoje a identidade (usuarios). Os demais domínios ainda são in-memory (MVP); à medida que
  * ganharem adaptador pg + migração, novos blocos de seed entram aqui.
  */
-const USUARIOS_SEED: Array<{ email: string; senha: string; nome: string; papel: Papel; fornecedorId: string | null }> = [
-  { email: 'admin@compramais.local', senha: 'admin12345', nome: 'Administrador CPL', papel: 'cpl', fornecedorId: null },
-  { email: 'smga@compramais.local', senha: 'smga123456', nome: 'Gestor SMGA', papel: 'smga', fornecedorId: null },
+const USUARIOS_SEED: Array<{ email: string; senha: string; nome: string; papel: Papel; fornecedorId: string | null; cargo?: string | null }> = [
+  { email: 'administrador@compramais.local', senha: 'admin12345', nome: 'Administrador', papel: 'administrador', fornecedorId: null, cargo: 'administrador' },
+  { email: 'admin@compramais.local', senha: 'admin12345', nome: 'Analista CPL', papel: 'cpl', fornecedorId: null, cargo: 'analista_cpl' },
+  { email: 'smga@compramais.local', senha: 'smga123456', nome: 'Gestor SMGA', papel: 'smga', fornecedorId: null, cargo: 'gestor' },
   { email: 'fornecedor@demo.local', senha: 'fornecedor123', nome: 'Fornecedor Demo', papel: 'titular', fornecedorId: 'demo-fornecedor' },
 ];
 
@@ -41,7 +42,7 @@ async function seed(): Promise<void> {
           console.log(`[seed] already exists: ${s.email}`);
           continue;
         }
-        const u = Usuario.criarLocal({ id: randomUUID(), email: s.email, senha: s.senha, nome: s.nome, papel: s.papel, fornecedorId: s.fornecedorId });
+        const u = Usuario.criarLocal({ id: randomUUID(), email: s.email, senha: s.senha, nome: s.nome, papel: s.papel, fornecedorId: s.fornecedorId, cargo: s.cargo ?? null });
         await repo.salvar(u);
         criados++;
         console.log(`[seed] created: ${s.email} (${s.papel})`);

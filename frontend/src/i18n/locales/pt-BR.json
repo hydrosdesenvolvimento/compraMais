@@ -16,7 +16,8 @@
       "gestaoEditais": "Gestão de editais",
       "contestacoes": "Contestações",
       "auditoria": "Auditoria",
-      "catalogos": "Catálogos"
+      "catalogos": "Catálogos",
+      "usuarios": "Usuários"
     },
     "shell": {
       "menu": "MENU",
@@ -233,6 +234,38 @@
       "inativar": "Inativar",
       "reativar": "Reativar",
       "vazio": "Nenhum item cadastrado ainda."
+    },
+    "usuarios": {
+      "titulo": "Usuários internos",
+      "subtitulo": "Cadastre servidores da Prefeitura e atribua um cargo — o cargo define o papel de acesso (RBAC). A exclusão é lógica: o usuário inativado não acessa, mas o histórico de suas ações é preservado.",
+      "campos": {
+        "nome": "Nome",
+        "email": "E-mail",
+        "cargo": "Cargo",
+        "senha": "Senha inicial (mín. 8 caracteres)"
+      },
+      "cargos": {
+        "administrador": "Administrador",
+        "analistaCpl": "Analista CPL",
+        "coordenadorCpl": "Coordenador(a) CPL",
+        "secretario": "Secretário(a)",
+        "gestor": "Gestor",
+        "auditor": "Auditor",
+        "dpo": "DPO / Encarregado"
+      },
+      "selecioneCargo": "Selecione um cargo",
+      "criar": "Adicionar usuário",
+      "erroCriar": "Não foi possível salvar. Verifique se o e-mail já existe, o cargo e a senha (mín. 8 caracteres).",
+      "mostrarInativos": "Mostrar inativos",
+      "situacaoInativo": "inativo",
+      "resetarSenha": "Resetar senha",
+      "novaSenha": "Nova senha (mín. 8)",
+      "confirmarReset": "Confirmar",
+      "resetOk": "Senha redefinida.",
+      "erroReset": "Não foi possível redefinir. Verifique a senha (mín. 8).",
+      "inativar": "Inativar",
+      "reativar": "Reativar",
+      "vazio": "Nenhum servidor cadastrado ainda."
     }
   },
   "contestacao": {

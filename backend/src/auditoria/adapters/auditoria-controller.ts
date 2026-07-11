@@ -40,7 +40,7 @@ export function registrarRotasAuditoria(app: FastifyInstance, deps: { consultar:
 
 function parseFiltro(req: { query: unknown }): { probe: AuditQuery; page: AuditPage } {
   const q = req.query as Record<string, string | undefined>;
-  const probe: AuditQuery = { usuario: q.usuario, evento: q.evento, de: q.de, ate: q.ate, editalId: q.editalId };
+  const probe: AuditQuery = { usuario: q.usuario, evento: q.evento, de: q.de, ate: q.ate, editalId: q.editalId, fornecedorId: q.fornecedorId };
   const page: AuditPage = {
     page: q.page ? Number(q.page) : undefined,
     size: q.size ? Number(q.size) : undefined,

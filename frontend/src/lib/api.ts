@@ -39,6 +39,19 @@ export class HttpError extends Error {
   constructor(readonly status: number, url: string) { super(`HTTP ${status} em ${url}`); this.name = 'HttpError'; }
 }
 
+/**
+ * Baixa um recurso como arquivo. Diferente de navegar via `window.location`, envia os cabeçalhos de
+ * ator/RBAC (`x-papel`, `x-user-id`) — imprescindível em rotas protegidas como a exportação da trilha
+ * (auditoria), que de outro modo responderia 403. Devolve o blob e o nome sugerido pelo servidor.
+ */
+export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: string }> {
+  const r = await fetch(url, { headers: headers() });
+  if (!r.ok) throw new HttpError(r.status, url);
+  const disp = r.headers.get('content-disposition') ?? '';
+  const m = /filename="?([^"]+?)"?(?:;|$)/.exec(disp);
+  return { blob: await r.blob(), nome: m?.[1] ?? 'download' };
+}
+
 // --- Tipos de leitura ---
 export interface EditalItem { id: string; objeto: string }
 export interface EditalGestao { id: string; objeto: string; secretariaId: string; situacao: string }
@@ -136,6 +149,8 @@ export const api = {
   acatarContestacao: (id: string, novoCnaes: string[]) => send(`/contestacoes-cnae/${id}/acatar`, 'POST', { novoCnaes }),
   recusarContestacao: (id: string, motivo: string) => send(`/contestacoes-cnae/${id}/recusar`, 'POST', { motivo }),
   auditoria: (params: URLSearchParams) => get<RegistroAuditoria[]>(`/auditoria?${params.toString()}`),
+  // UC012: exportação da trilha via fetch (carrega x-papel — a rota é protegida por RBAC).
+  auditoriaExportar: (params: URLSearchParams) => baixarArquivo(`/auditoria/exportar?${params.toString()}`),
 
   // UC010 — Malote SEI (CPL/Administrador). Geração assíncrona (202), QBE, exportação idempotente.
   malotesListar: (params: URLSearchParams) => get<MaloteListaView[]>(`/malotes?${params.toString()}`),

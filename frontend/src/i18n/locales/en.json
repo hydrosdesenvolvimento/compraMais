@@ -191,6 +191,7 @@
       "usuarioPlaceholder": "User/actor",
       "eventoPlaceholder": "Action/event",
       "editalPlaceholder": "Tender",
+      "fornecedorPlaceholder": "Supplier (Tax ID)",
       "consultar": "Search",
       "exportarCsv": "Export CSV",
       "exportarJson": "Export JSON",

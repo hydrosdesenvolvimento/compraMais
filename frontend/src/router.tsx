@@ -27,6 +27,8 @@ import { ConsultaAuditoria } from './pages/admin/ConsultaAuditoria';
 import { ManterCatalogos } from './pages/admin/ManterCatalogos';
 import { GerirUsuarios } from './pages/admin/GerirUsuarios';
 import { GerarMalote } from './pages/admin/GerarMalote';
+import { AdministracaoTelas } from './pages/admin/AdministracaoTelas';
+import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
 const DEMO_EDITAL_ID = 'demo-edital';
@@ -43,17 +45,8 @@ const MENU_FORNECEDOR: ItemMenu[] = [
   { rotuloKey: 'common.nav.privacidade', href: '/privacidade', cy: 'nav-privacidade', icone: <IconeDocumentos {...ico} /> },
 ];
 
-const MENU_ADMIN: ItemMenu[] = [
-  { rotuloKey: 'common.nav.painel', href: '/admin/dashboard', cy: 'nav-admin', icone: <IconeInicio {...ico} /> },
-  { rotuloKey: 'common.nav.covalidacao', href: '/admin/covalidacao', cy: 'nav-covalidacao', icone: <IconeCredenciamentos {...ico} /> },
-  { rotuloKey: 'common.nav.gestaoEditais', href: '/admin/editais', cy: 'nav-gestao-editais', icone: <IconeEditais {...ico} /> },
-  { rotuloKey: 'common.nav.contestacoes', href: '/admin/contestacoes', cy: 'nav-contestacoes', icone: <IconeEditais {...ico} /> },
-  { rotuloKey: 'common.nav.malote', href: '/admin/malote', cy: 'nav-malote', icone: <IconeDemandas {...ico} /> },
-  { rotuloKey: 'common.nav.catalogos', href: '/admin/catalogos', cy: 'nav-catalogos', icone: <IconeDocumentos {...ico} /> },
-  { rotuloKey: 'common.nav.usuarios', href: '/admin/usuarios', cy: 'nav-usuarios', icone: <IconeUsuario {...ico} /> },
-  { rotuloKey: 'common.nav.lgpd', href: '/admin/lgpd', cy: 'nav-lgpd', icone: <IconeCredenciamentos {...ico} /> },
-  { rotuloKey: 'common.nav.auditoria', href: '/admin/auditoria', cy: 'nav-auditoria', icone: <IconeDocumentos {...ico} /> },
-];
+// O menu do Painel Admin não é mais estático: é montado dentro do ShellAdmin a partir das TELAS visíveis
+// ao papel (GET /permissoes/telas/me — "Administração de telas por perfil"). Ver lib/telas-admin.tsx.
 
 const rootRoute = createRootRoute();
 
@@ -64,8 +57,8 @@ const redefinirSenhaRoute = createRoute({ getParentRoute: () => rootRoute, path:
 const fornecedorLayout = createRoute({ getParentRoute: () => rootRoute, id: 'fornecedor', component: () => <ShellFornecedor menu={MENU_FORNECEDOR} /> });
 const rInicio = createRoute({ getParentRoute: () => fornecedorLayout, path: '/inicio', component: Inicio });
 const rMinhaConta = createRoute({ getParentRoute: () => fornecedorLayout, path: '/minha-conta', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: MinhaContaConectada });
-const rProcuradores = createRoute({ getParentRoute: () => fornecedorLayout, path: '/procuradores', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: ProcuradoresConectada });
-const rPrivacidade = createRoute({ getParentRoute: () => fornecedorLayout, path: '/privacidade', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: PrivacidadeConectada });
+const rProcuradores = createRoute({ getParentRoute: () => fornecedorLayout, path: '/procuradores', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); exigirTitular(); }, component: ProcuradoresConectada });
+const rPrivacidade = createRoute({ getParentRoute: () => fornecedorLayout, path: '/privacidade', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); exigirTitular(); }, component: PrivacidadeConectada });
 const rEditais = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais', component: Editais });
 const rCredenciamento = createRoute({ getParentRoute: () => fornecedorLayout, path: '/credenciamento/$editalId', component: Credenciamento });
 const rContestarCnae = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais/contestar', component: () => <ContestarCnae editalId={DEMO_EDITAL_ID} /> });
@@ -74,17 +67,18 @@ const rDocumentos = createRoute({ getParentRoute: () => fornecedorLayout, path: 
 const rTransparencia = createRoute({ getParentRoute: () => fornecedorLayout, path: '/transparencia', component: Transparencia });
 const rTitular = createRoute({ getParentRoute: () => fornecedorLayout, path: '/titular', component: () => <PainelTitular fornecedorId={DEMO_FORNECEDOR_ID} /> });
 
-const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <ShellAdmin menu={MENU_ADMIN} /> });
+const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <ShellAdmin /> });
 const rAdminIndex = createRoute({ getParentRoute: () => adminLayout, path: '/admin', beforeLoad: () => { throw redirect({ to: '/admin/dashboard' }); } });
-const rAdminDash = createRoute({ getParentRoute: () => adminLayout, path: '/admin/dashboard', component: Dashboard });
-const rAdminCoval = createRoute({ getParentRoute: () => adminLayout, path: '/admin/covalidacao', component: () => <FilaCovalidacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
-const rAdminEditais = createRoute({ getParentRoute: () => adminLayout, path: '/admin/editais', component: () => <GerirEditais secretariaId={DEMO_SECRETARIA_ID} /> });
-const rAdminContest = createRoute({ getParentRoute: () => adminLayout, path: '/admin/contestacoes', component: () => <FilaContestacoes editalId={DEMO_EDITAL_ID} /> });
-const rAdminMalote = createRoute({ getParentRoute: () => adminLayout, path: '/admin/malote', component: GerarMalote });
-const rAdminCatalogos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/catalogos', component: ManterCatalogos });
-const rAdminUsuarios = createRoute({ getParentRoute: () => adminLayout, path: '/admin/usuarios', component: GerirUsuarios });
-const rAdminLgpd = createRoute({ getParentRoute: () => adminLayout, path: '/admin/lgpd', component: AtendimentoLgpd });
-const rAdminAudit = createRoute({ getParentRoute: () => adminLayout, path: '/admin/auditoria', component: ConsultaAuditoria });
+const rAdminDash = createRoute({ getParentRoute: () => adminLayout, path: '/admin/dashboard', beforeLoad: () => exigirTelaAdmin('painel'), component: Dashboard });
+const rAdminCoval = createRoute({ getParentRoute: () => adminLayout, path: '/admin/covalidacao', beforeLoad: () => exigirTelaAdmin('covalidacao'), component: () => <FilaCovalidacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
+const rAdminEditais = createRoute({ getParentRoute: () => adminLayout, path: '/admin/editais', beforeLoad: () => exigirTelaAdmin('gestaoEditais'), component: () => <GerirEditais secretariaId={DEMO_SECRETARIA_ID} /> });
+const rAdminContest = createRoute({ getParentRoute: () => adminLayout, path: '/admin/contestacoes', beforeLoad: () => exigirTelaAdmin('contestacoes'), component: () => <FilaContestacoes editalId={DEMO_EDITAL_ID} /> });
+const rAdminMalote = createRoute({ getParentRoute: () => adminLayout, path: '/admin/malote', beforeLoad: () => exigirTelaAdmin('malote'), component: GerarMalote });
+const rAdminCatalogos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/catalogos', beforeLoad: () => exigirTelaAdmin('catalogos'), component: ManterCatalogos });
+const rAdminUsuarios = createRoute({ getParentRoute: () => adminLayout, path: '/admin/usuarios', beforeLoad: () => exigirTelaAdmin('usuarios'), component: GerirUsuarios });
+const rAdminLgpd = createRoute({ getParentRoute: () => adminLayout, path: '/admin/lgpd', beforeLoad: () => exigirTelaAdmin('lgpd'), component: AtendimentoLgpd });
+const rAdminAudit = createRoute({ getParentRoute: () => adminLayout, path: '/admin/auditoria', beforeLoad: () => exigirTelaAdmin('auditoria'), component: ConsultaAuditoria });
+const rAdminPerfis = createRoute({ getParentRoute: () => adminLayout, path: '/admin/perfis', beforeLoad: () => exigirTelaAdmin('perfis'), component: AdministracaoTelas });
 
 const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '*', beforeLoad: () => { throw redirect({ to: '/cadastro' }); } });
 
@@ -93,7 +87,7 @@ const routeTree = rootRoute.addChildren([
   cadastroRoute,
   redefinirSenhaRoute,
   fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
-  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos, rAdminUsuarios, rAdminLgpd, rAdminAudit]),
+  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos, rAdminUsuarios, rAdminLgpd, rAdminAudit, rAdminPerfis]),
   naoEncontrada,
 ]);
 

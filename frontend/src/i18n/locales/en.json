@@ -20,7 +20,8 @@
       "usuarios": "Users",
       "malote": "SEI Package",
       "privacidade": "Privacy",
-      "lgpd": "LGPD Requests"
+      "lgpd": "LGPD Requests",
+      "perfis": "Screens by role"
     },
     "shell": {
       "menu": "MENU",
@@ -153,6 +154,16 @@
     }
   },
   "admin": {
+    "perfis": {
+      "titulo": "Screen access by role",
+      "subtitulo": "Choose which Admin Panel screens each role can see. The Administrator sees them all.",
+      "colPerfil": "Role",
+      "superusuario": "sees all",
+      "customizado": "customized",
+      "salvar": "Save",
+      "salvo": "Visibility updated.",
+      "erro": "Could not save. Check your permissions."
+    },
     "dashboard": {
       "carregando": "Loading…",
       "titulo": "Administrative panel",

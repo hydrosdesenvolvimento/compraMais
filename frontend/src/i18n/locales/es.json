@@ -20,7 +20,8 @@
       "usuarios": "Usuarios",
       "malote": "Valija SEI",
       "privacidade": "Privacidad",
-      "lgpd": "Solicitudes LGPD"
+      "lgpd": "Solicitudes LGPD",
+      "perfis": "Pantallas por perfil"
     },
     "shell": {
       "menu": "MENÚ",
@@ -153,6 +154,16 @@
     }
   },
   "admin": {
+    "perfis": {
+      "titulo": "Administración de pantallas por perfil",
+      "subtitulo": "Defina qué pantallas del Panel Admin ve cada rol. El Administrador las ve todas.",
+      "colPerfil": "Perfil (rol)",
+      "superusuario": "ve todas",
+      "customizado": "personalizado",
+      "salvar": "Guardar",
+      "salvo": "Visibilidad actualizada.",
+      "erro": "No se pudo guardar. Verifique sus permisos."
+    },
     "dashboard": {
       "carregando": "Cargando…",
       "titulo": "Panel administrativo",

@@ -88,6 +88,11 @@ import type { SetorCnae } from './catalogos/domain/setor-cnae.js';
 import type { TipoDocumento } from './catalogos/domain/tipo-documento.js';
 import type { CatalogoRepository } from './catalogos/application/catalogo-repository.js';
 import { registrarRotasCatalogos } from './catalogos/adapters/catalogos-controller.js';
+import { GerirVisibilidadeTelas } from './permissoes/application/gerir-visibilidade.js';
+import { VisibilidadeRepositoryMemory } from './permissoes/adapters/visibilidade-repository-memory.js';
+import { VisibilidadeRepositoryPg } from './permissoes/adapters/visibilidade-repository-pg.js';
+import type { VisibilidadeRepository } from './permissoes/application/visibilidade-repository.js';
+import { registrarRotasPermissoes } from './permissoes/adapters/permissoes-controller.js';
 
 /**
  * Bootstrap (camada de INFRA) + composition root. O Fastify é detalhe plugável: o domínio e os
@@ -131,6 +136,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'SenhaAlterada', 'ResetSenhaSolicitado', 'SenhaRedefinida',
     'CatalogoItemCriado', 'CatalogoItemEditado', 'CatalogoItemInativado', 'CatalogoItemReativado',
     'UsuarioInternoCriado', 'UsuarioInternoEditado', 'UsuarioSenhaResetada', 'UsuarioInternoInativado', 'UsuarioInternoReativado',
+    'VisibilidadeTelasAlterada',
   ]);
 
   // Identidade (US1): contas + procuradores. Persistência durável em Postgres quando disponível (como
@@ -298,6 +304,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   const tiposDocRepo: CatalogoRepository<TipoDocumento> = pool ? new TipoDocumentoRepositoryPg(pool) : new CatalogoRepositoryMemory<TipoDocumento>();
   const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);
   registrarRotasCatalogos(app, { manter: manterCatalogos });
+
+  // Administração de telas por perfil (§15/AD-35): governa quais TELAS do Painel Admin cada papel enxerga.
+  // O Administrador é superusuário (vê tudo); os demais papéis internos seguem o override persistido ou o
+  // padrão dos UCs. Durável em Postgres quando disponível (a política sobrevive a restart e é compartilhada
+  // entre servidores); senão memória (testes sem banco). Alimenta o menu e as guardas de rota do frontend.
+  const visibilidadeRepo: VisibilidadeRepository = pool ? new VisibilidadeRepositoryPg(pool) : new VisibilidadeRepositoryMemory();
+  const gerirVisibilidade = new GerirVisibilidadeTelas(visibilidadeRepo, bus);
+  registrarRotasPermissoes(app, { gerir: gerirVisibilidade });
 
   // Observabilidade base (AD-22): instrumentar timeouts/circuit-breaker dos adaptadores — pendente.
   return app;

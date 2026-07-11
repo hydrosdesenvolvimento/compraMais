@@ -5,7 +5,7 @@ import type { AuditQuery, AuditPage, AuditRepository } from '../infra/audit-repo
 /**
  * Trilha de auditoria em PostgreSQL (AD-18 / AD-28). Append-only: só INSERT e SELECT — a tabela
  * `auditoria` bloqueia UPDATE/DELETE por trigger (migração 0001). QBE: probe parcial AND, ausentes
- * ignorados; `editalId` casa contra o payload (jsonb). Ordenação determinística por (ts, id).
+ * ignorados; `editalId`/`fornecedorId` casam contra o payload (jsonb). Ordenação determinística por (ts, id).
  */
 export class AuditRepositoryPg implements AuditRepository {
   constructor(private readonly pool: Pool) {}
@@ -19,7 +19,7 @@ export class AuditRepositoryPg implements AuditRepository {
 
   async query(f: AuditQuery, page?: AuditPage): Promise<AuditRecord[]> {
     const dir = (page?.ordem ?? 'desc') === 'asc' ? 'ASC' : 'DESC';
-    const params: unknown[] = [f.usuario ?? null, f.evento ?? null, f.de ?? null, f.ate ?? null, f.editalId ?? null];
+    const params: unknown[] = [f.usuario ?? null, f.evento ?? null, f.de ?? null, f.ate ?? null, f.editalId ?? null, f.fornecedorId ?? null];
     let sql =
       `SELECT id, usuario, evento, ts, ip, payload FROM auditoria
        WHERE ($1::text IS NULL OR usuario = $1)
@@ -27,12 +27,13 @@ export class AuditRepositoryPg implements AuditRepository {
          AND ($3::timestamptz IS NULL OR ts >= $3::timestamptz)
          AND ($4::timestamptz IS NULL OR ts <= $4::timestamptz)
          AND ($5::text IS NULL OR payload->>'editalId' = $5 OR payload->>'aggregateId' = $5)
+         AND ($6::text IS NULL OR payload->>'fornecedorId' = $6 OR payload->>'empresa' = $6)
        ORDER BY ts ${dir}, id ${dir}`;
     if (page?.page ?? page?.size) {
       const size = page?.size ?? 50;
       const p = page?.page ?? 1;
       params.push(size, (p - 1) * size);
-      sql += ' LIMIT $6 OFFSET $7';
+      sql += ' LIMIT $7 OFFSET $8';
     }
     const res = await this.pool.query(sql, params);
     return res.rows.map((row: Record<string, unknown>) => AuditRecord.deLinha({

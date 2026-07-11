@@ -244,7 +244,9 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // Auditoria — leitura/exportação da trilha (004). SOMENTE LEITURA: lê o mesmo auditRepo do escritor único.
   const consultarTrilha = new ConsultarTrilha(auditRepo);
-  const exportarTrilha = new ExportarTrilha(consultarTrilha);
+  // Teto de sinalização de volume da exportação (§16 — AUDITORIA_EXPORT_TETO); default 50k quando ausente/ inválido.
+  const tetoExport = Number(process.env.AUDITORIA_EXPORT_TETO) || undefined;
+  const exportarTrilha = new ExportarTrilha(consultarTrilha, tetoExport);
   registrarRotasAuditoria(app, { consultar: consultarTrilha, exportar: exportarTrilha });
 
   // Malote SEI (005 / Épico 6): geração assíncrona DURÁVEL (fila + retry, FR-002) + fragmentação + export idempotente.

@@ -28,6 +28,17 @@ describe('Auditoria — consulta (US1)', () => {
     await app.close();
   });
 
+  it('aceita filtro por fornecedorId (UC012) — sem correspondência retorna vazio, sem quebrar', async () => {
+    const app = await buildServer();
+    await criarEdital(app); // EditalCriado não carrega empresa → não casa fornecedorId
+    const semFiltro = (await app.inject({ method: 'GET', url: '/auditoria', headers: { 'x-papel': 'auditor' } })).json();
+    const res = await app.inject({ method: 'GET', url: '/auditoria?fornecedorId=CNPJ-INEXISTENTE', headers: { 'x-papel': 'auditor' } });
+    expect(res.statusCode).toBe(200);
+    expect(semFiltro.length).toBeGreaterThanOrEqual(1);
+    expect(res.json()).toEqual([]);
+    await app.close();
+  });
+
   it('consulta é somente leitura: contagem inalterada entre duas leituras', async () => {
     const app = await buildServer();
     await criarEdital(app);

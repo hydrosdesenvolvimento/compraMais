@@ -202,6 +202,7 @@
       "usuarioPlaceholder": "Usuário/ator",
       "eventoPlaceholder": "Ação/evento",
       "editalPlaceholder": "Edital",
+      "fornecedorPlaceholder": "Fornecedor (CNPJ)",
       "consultar": "Consultar",
       "exportarCsv": "Exportar CSV",
       "exportarJson": "Exportar JSON",

@@ -430,7 +430,12 @@
     "kpiSecretarias": "Secretarias atendidas",
     "kpiSegmentos": "Segmentos (CNAE) atendidos",
     "painelSecretarias": "Secretarias atendidas",
-    "painelSegmentos": "Segmentos (CNAE) atendidos"
+    "painelSegmentos": "Segmentos (CNAE) atendidos",
+    "filtroTitulo": "Filtrar por período",
+    "filtroDe": "De",
+    "filtroAte": "Até",
+    "filtroAplicar": "Aplicar",
+    "filtroLimpar": "Limpar"
   },
   "editais": {
     "vitrine": {

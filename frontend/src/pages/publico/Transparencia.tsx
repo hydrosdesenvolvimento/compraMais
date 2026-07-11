@@ -1,14 +1,28 @@
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties, type FormEvent } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { IconeDemandas, IconeEditais, IconePredio } from '../../design-system/icons';
 
-/** Portal público de transparência (Épico 9 / US2). Sem login; só agregados públicos (§VI). */
+/** Portal público de transparência (UC011 / RF010). Sem login; só agregados não-identificáveis (RN013). */
 export function Transparencia() {
   const { t } = useTranslation();
-  const { data, isLoading } = useQuery({ queryKey: ['transparencia'], queryFn: api.transparencia });
-  if (isLoading || !data) return <p data-cy="carregando">{t('transparencia.carregando')}</p>;
+  // Filtro básico por período (UC011 A1). `rascunho` = digitação; `periodo` = filtro efetivamente aplicado.
+  const [rascunho, setRascunho] = useState<{ de: string; ate: string }>({ de: '', ate: '' });
+  const [periodo, setPeriodo] = useState<{ de: string; ate: string }>({ de: '', ate: '' });
+  const { data, isLoading } = useQuery({
+    queryKey: ['transparencia', periodo.de, periodo.ate],
+    queryFn: () => api.transparencia({ de: periodo.de || undefined, ate: periodo.ate || undefined }),
+  });
+
+  function aplicar(e: FormEvent) {
+    e.preventDefault();
+    setPeriodo(rascunho);
+  }
+  function limpar() {
+    setRascunho({ de: '', ate: '' });
+    setPeriodo({ de: '', ate: '' });
+  }
 
   return (
     <div className="stack" style={{ animation: 'cmfade .3s' }}>
@@ -18,6 +32,45 @@ export function Transparencia() {
           {t('transparencia.subtituloPagina')}
         </p>
       </div>
+
+      {/* Filtro básico por período (UC011 A1) */}
+      <form style={filtro} onSubmit={aplicar} aria-label={t('transparencia.filtroTitulo')}>
+        <label style={filtroLabel}>
+          {t('transparencia.filtroDe')}
+          <input
+            type="date" data-cy="filtro-de" value={rascunho.de}
+            onChange={(e) => setRascunho((r) => ({ ...r, de: e.target.value }))} style={filtroInput}
+          />
+        </label>
+        <label style={filtroLabel}>
+          {t('transparencia.filtroAte')}
+          <input
+            type="date" data-cy="filtro-ate" value={rascunho.ate}
+            onChange={(e) => setRascunho((r) => ({ ...r, ate: e.target.value }))} style={filtroInput}
+          />
+        </label>
+        <button type="submit" data-cy="filtro-aplicar" className="btn btn-primary">{t('transparencia.filtroAplicar')}</button>
+        {(periodo.de || periodo.ate) && (
+          <button type="button" data-cy="filtro-limpar" className="btn btn-ghost" onClick={limpar}>
+            {t('transparencia.filtroLimpar')}
+          </button>
+        )}
+      </form>
+
+      {isLoading || !data ? (
+        <p data-cy="carregando">{t('transparencia.carregando')}</p>
+      ) : (
+        <TransparenciaAgregados data={data} />
+      )}
+    </div>
+  );
+}
+
+/** Bloco de agregados (KPIs + painéis). Extraído para manter o filtro sempre visível durante o loading. */
+function TransparenciaAgregados({ data }: { data: import('../../lib/api').Transparencia }) {
+  const { t } = useTranslation();
+  return (
+    <>
 
       {/* KPIs agregados */}
       <div className="cm-grid-3">
@@ -96,11 +149,24 @@ export function Transparencia() {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
 /* ---- estilos inline (design system: navy/âmbar, cartões do mockup) ---- */
+const filtro: CSSProperties = {
+  display: 'flex', alignItems: 'flex-end', gap: 12, flexWrap: 'wrap',
+  background: '#fff', border: '1px solid var(--border)', borderRadius: 14,
+  boxShadow: 'var(--shadow-xs)', padding: '14px 18px',
+};
+const filtroLabel: CSSProperties = {
+  display: 'flex', flexDirection: 'column', gap: 5,
+  font: '600 12.5px var(--font-body)', color: 'var(--cinza-500)',
+};
+const filtroInput: CSSProperties = {
+  font: '400 14px var(--font-body)', color: 'var(--azul-900)',
+  border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', background: '#fff',
+};
 const kpiCard: CSSProperties = { display: 'flex', alignItems: 'center', gap: 14, padding: '18px 20px' };
 const kpiLabel: CSSProperties = { fontSize: 12.5, color: 'var(--cinza-500)', marginTop: 3 };
 const kpiIcon = (bg: string, fg: string): CSSProperties => ({

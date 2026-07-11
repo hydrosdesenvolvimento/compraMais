@@ -10,9 +10,10 @@ export function registrarRotasPaineis(app: FastifyInstance, deps: { dashboard: D
     return reply.send(await deps.dashboard.funil());
   });
 
-  // Público — SEM autenticação, só agregados (FR-003/004 / §VI)
-  app.get('/transparencia', async (_req, reply) => {
-    return reply.send(await deps.transparencia.publico());
+  // Público — SEM autenticação, só agregados (RN013 / UC011). Filtro básico por período (A1): ?de&ate (YYYY-MM-DD).
+  app.get('/transparencia', async (req, reply) => {
+    const { de, ate } = req.query as { de?: string; ate?: string };
+    return reply.send(await deps.transparencia.publico({ de, ate }));
   });
 }
 

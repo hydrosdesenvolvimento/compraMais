@@ -271,7 +271,11 @@ export async function buildServer(): Promise<FastifyInstance> {
   });
   registrarRotasTitular(app, { direitos: direitosTitular, pendencias: consolidar });
 
-  // Painéis (007 / Épico 9): dashboard admin (funil) + transparência pública. Somente leitura (projeções).
+  // Catálogo de Secretarias (UC020/RF020) — instanciado já aqui porque a Transparência (UC011) resolve o
+  // `secretariaId` do edital para a **sigla** legível (RN013: agregado não-identificável, sem IDs internos).
+  const secretariasRepo: CatalogoRepository<Secretaria> = pool ? new SecretariaRepositoryPg(pool) : new CatalogoRepositoryMemory<Secretaria>();
+
+  // Painéis (007 / Épico 9): dashboard admin (funil, UC014) + transparência pública (UC011). Somente leitura.
   const paineisFonte = {
     contarDocumentosPendentes: async () => (await docRepo.buscarPorExemplo({ status: 'pendente' as const })).length,
     contarEditaisPorSituacao: async () => ({
@@ -280,7 +284,14 @@ export async function buildServer(): Promise<FastifyInstance> {
       encerrado: (await editaisRepo.buscarPorExemplo({ situacao: 'encerrado' })).length,
     }),
     contarBloqueiosAtivos: async () => bloqueios.contarAtivos(),
-    editaisPublicados: async () => (await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })).map((e) => ({ secretariaId: e.secretariaId, cnaesAlvo: e.cnaesAlvo })),
+    editaisPublicados: async () => {
+      const siglaPorId = new Map((await secretariasRepo.listar({ incluirInativos: true })).map((s) => [s.id, s.sigla]));
+      return (await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })).map((e) => ({
+        secretaria: siglaPorId.get(e.secretariaId) ?? e.secretariaId, // fallback ao id se a secretaria sumiu
+        cnaesAlvo: [...e.cnaesAlvo],
+        referencia: e.registerDate, // data de registro/publicação — base do filtro por período (A1)
+      }));
+    },
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
 
@@ -288,7 +299,6 @@ export async function buildServer(): Promise<FastifyInstance> {
   // inativação lógica (RN015), mantido pelo Administrador. Durável em Postgres quando disponível (como
   // `editais`/`fornecedores`); senão memória (testes sem banco). Alimenta editais (secretaria/CNAE) e
   // o upload/covalidação (tipos de documento).
-  const secretariasRepo: CatalogoRepository<Secretaria> = pool ? new SecretariaRepositoryPg(pool) : new CatalogoRepositoryMemory<Secretaria>();
   const setoresRepo: CatalogoRepository<SetorCnae> = pool ? new SetorCnaeRepositoryPg(pool) : new CatalogoRepositoryMemory<SetorCnae>();
   const tiposDocRepo: CatalogoRepository<TipoDocumento> = pool ? new TipoDocumentoRepositoryPg(pool) : new CatalogoRepositoryMemory<TipoDocumento>();
   const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);

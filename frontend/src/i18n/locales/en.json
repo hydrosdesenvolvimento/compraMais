@@ -430,7 +430,12 @@
     "kpiSecretarias": "Departments served",
     "kpiSegmentos": "Segments (CNAE) served",
     "painelSecretarias": "Departments served",
-    "painelSegmentos": "Segments (CNAE) served"
+    "painelSegmentos": "Segments (CNAE) served",
+    "filtroTitulo": "Filter by period",
+    "filtroDe": "From",
+    "filtroAte": "To",
+    "filtroAplicar": "Apply",
+    "filtroLimpar": "Clear"
   },
   "editais": {
     "vitrine": {

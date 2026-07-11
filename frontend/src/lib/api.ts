@@ -19,6 +19,15 @@ function headers(extra?: Record<string, string>): Record<string, string> | undef
   return Object.keys(h).length ? h : undefined;
 }
 
+/** Anexa uma query-string à URL, ignorando parâmetros vazios/indefinidos. */
+function comQuery(url: string, params?: Record<string, string | undefined>): string {
+  if (!params) return url;
+  const qs = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) if (v) qs.set(k, v);
+  const s = qs.toString();
+  return s ? `${url}?${s}` : url;
+}
+
 async function get<T>(url: string): Promise<T> {
   const r = await fetch(url, { headers: headers() });
   if (!r.ok) throw new HttpError(r.status, url);
@@ -45,7 +54,8 @@ export interface EditalGestao { id: string; objeto: string; secretariaId: string
 export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado' }
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
-export interface Transparencia { editaisVigentes: number; secretarias: string[]; segmentos: string[] }
+export interface Transparencia { editaisVigentes: number; secretarias: string[]; segmentos: string[]; periodo: { de: string | null; ate: string | null } }
+export interface FiltroPeriodo { de?: string; ate?: string }
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
@@ -99,7 +109,7 @@ export const api = {
   // Portal do fornecedor
   fornecedor: (fid: string) => get<FornecedorPerfil>(`/fornecedores/${fid}`),
   editaisCompativeis: () => get<EditalItem[]>('/editais'),
-  transparencia: () => get<Transparencia>('/transparencia'),
+  transparencia: (filtro?: FiltroPeriodo) => get<Transparencia>(comQuery('/transparencia', { de: filtro?.de, ate: filtro?.ate })),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   pendencias: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias`),
   pendenciasConsolidadas: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias-consolidadas`),

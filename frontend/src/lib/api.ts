@@ -99,6 +99,13 @@ export interface ProcuradorView {
   convidadoPor: string | null;
   desde: string;
 }
+/** UC017 — solicitação de direito do titular (LGPD) exibida ao próprio titular e na fila do DPO. */
+export type TipoDireito = 'acesso' | 'correcao' | 'exclusao';
+export type CategoriaDado = 'cadastral' | 'fiscal' | 'contratual';
+export interface SolicitacaoTitularView {
+  id: string; titularId: string; tipo: TipoDireito; detalhe: string | null;
+  categoria: CategoriaDado | null; status: 'pendente' | 'atendida' | 'recusada'; resultado: string | null;
+}
 /** UC018 passo 1: perfil do fornecedor exibido na "Minha conta" (dados oficiais read-only + contato). */
 export interface FornecedorPerfil {
   id: string; cnpj: string; razaoSocial: string; porte: string;
@@ -124,7 +131,11 @@ export const api = {
   sincronizar: (fid: string) => send<SincronizacaoResultado>(`/fornecedores/${fid}/sincronizar`, 'POST'),
   // RN009/FR-013: só Nome Fantasia, Endereço e Telefone. O backend rejeita campos oficiais (422) e devolve 204.
   editarPerfil: (fid: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) => send<void>(`/fornecedores/${fid}`, 'PATCH', patch),
-  solicitarDireito: (tipo: string) => send('/titular/solicitacoes', 'POST', { tipo }),
+  // UC017 — direitos do titular (LGPD). Só o PRÓPRIO titular exerce (§V); o backend bloqueia procurador (403).
+  solicitarDireito: (tipo: TipoDireito, detalhe?: string, categoria?: CategoriaDado) =>
+    send<{ solicitacaoId: string; status: string }>('/titular/solicitacoes', 'POST', { tipo, detalhe, categoria }),
+  // Self-service: o titular lista os SEUS pedidos (backend exige titularId === ator para não-DPO).
+  minhasSolicitacoes: (titularId: string) => get<SolicitacaoTitularView[]>(`/titular/solicitacoes?titularId=${encodeURIComponent(titularId)}`),
   // UC015 · A2 — troca da própria senha (autenticada via Bearer). 400 = senha atual incorreta; 422 = senha fraca.
   trocarSenha: (senhaAtual: string, novaSenha: string) => send<void>('/auth/senha', 'POST', { senhaAtual, novaSenha }),
   // UC019 — Gerir procuradores (só o titular; 403 quando o ator não é o titular).
@@ -151,6 +162,14 @@ export const api = {
   auditoria: (params: URLSearchParams) => get<RegistroAuditoria[]>(`/auditoria?${params.toString()}`),
   // UC012: exportação da trilha via fetch (carrega x-papel — a rota é protegida por RBAC).
   auditoriaExportar: (params: URLSearchParams) => baixarArquivo(`/auditoria/exportar?${params.toString()}`),
+
+  // UC017 — Atendimento LGPD pelo Encarregado (DPO) / Administrador. CPL não atende (RNF007 → 403 no backend).
+  solicitacoesLgpd: (status?: 'pendente' | 'atendida' | 'recusada') =>
+    get<SolicitacaoTitularView[]>(`/titular/solicitacoes${status ? `?status=${status}` : ''}`),
+  atenderSolicitacao: (id: string, resultado: string) => send<{ status: string }>(`/titular/solicitacoes/${id}/atender`, 'POST', { resultado }),
+  recusarSolicitacao: (id: string, motivo: string) => send<{ status: string }>(`/titular/solicitacoes/${id}/recusar`, 'POST', { motivo }),
+  // Exclusão: descarte só após a retenção legal da categoria (FR-008); 409 se ainda retido.
+  descartarSolicitacao: (id: string, dataRegistro: string) => send<{ descartado: boolean }>(`/titular/solicitacoes/${id}/descartar`, 'POST', { dataRegistro }),
 
   // UC010 — Malote SEI (CPL/Administrador). Geração assíncrona (202), QBE, exportação idempotente.
   malotesListar: (params: URLSearchParams) => get<MaloteListaView[]>(`/malotes?${params.toString()}`),

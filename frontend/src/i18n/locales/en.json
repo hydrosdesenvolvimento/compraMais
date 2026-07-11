@@ -18,7 +18,9 @@
       "auditoria": "Audit",
       "catalogos": "Catalogs",
       "usuarios": "Users",
-      "malote": "SEI Package"
+      "malote": "SEI Package",
+      "privacidade": "Privacy",
+      "lgpd": "LGPD Requests"
     },
     "shell": {
       "menu": "MENU",
@@ -631,6 +633,64 @@
       "exclusao": "Deletion",
       "solicitar": "Request",
       "registrada": "Request submitted."
+    }
+  },
+  "privacidade": {
+    "titulo": "My data / Privacy",
+    "subtitulo": "Exercise your data subject rights (LGPD): access, correction and deletion. Handled by the Data Protection Officer (DPO).",
+    "semSessao": "Sign in as the data subject to exercise your rights.",
+    "erro": "We could not register your request. Please try again.",
+    "tipos": {
+      "acesso": "Access to my data",
+      "correcao": "Data correction",
+      "exclusao": "Deletion"
+    },
+    "categorias": {
+      "cadastral": "Registration",
+      "fiscal": "Tax",
+      "contratual": "Contractual"
+    },
+    "status": {
+      "pendente": "Pending",
+      "atendida": "Fulfilled",
+      "recusada": "Rejected"
+    },
+    "novo": {
+      "titulo": "New request",
+      "tipo": "Right",
+      "categoria": "Data category (optional)",
+      "categoriaAny": "All categories",
+      "detalhe": "Details (optional)",
+      "detalhePlaceholder": "Describe what you want to access, correct or delete.",
+      "solicitar": "Submit request",
+      "enviando": "Submitting…",
+      "registrada": "Request submitted. The DPO will review it."
+    },
+    "lista": {
+      "titulo": "My requests",
+      "carregando": "Loading…",
+      "vazio": "You have no requests yet.",
+      "resposta": "Response"
+    }
+  },
+  "adminLgpd": {
+    "titulo": "LGPD Requests",
+    "subtitulo": "Queue of pending data subject rights (DPO). The procurement team does not handle these (RNF007).",
+    "carregando": "Loading…",
+    "vazio": "No pending requests.",
+    "titular": "Data subject",
+    "respostaPlaceholder": "Response to the data subject (optional)",
+    "motivoPlaceholder": "Rejection reason (required)",
+    "atender": "Fulfill",
+    "recusar": "Reject",
+    "descartar": "Dispose of data",
+    "atendidaPadrao": "Fulfilled",
+    "feedback": {
+      "atendida": "Request fulfilled.",
+      "recusada": "Request rejected.",
+      "descartada": "Data disposed of (retention met).",
+      "retido": "Disposal denied: data still under legal retention.",
+      "erro": "The action could not be completed."
     }
   }
 }

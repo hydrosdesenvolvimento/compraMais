@@ -18,7 +18,9 @@
       "auditoria": "Auditoría",
       "catalogos": "Catálogos",
       "usuarios": "Usuarios",
-      "malote": "Valija SEI"
+      "malote": "Valija SEI",
+      "privacidade": "Privacidad",
+      "lgpd": "Solicitudes LGPD"
     },
     "shell": {
       "menu": "MENÚ",
@@ -631,6 +633,64 @@
       "exclusao": "Eliminación",
       "solicitar": "Solicitar",
       "registrada": "Solicitud registrada."
+    }
+  },
+  "privacidade": {
+    "titulo": "Mis datos / Privacidad",
+    "subtitulo": "Ejerza sus derechos como titular (LGPD): acceso, corrección y eliminación. Atendidos por el Encargado (DPO).",
+    "semSessao": "Inicie sesión como titular para ejercer sus derechos.",
+    "erro": "No se pudo registrar su solicitud. Inténtelo de nuevo.",
+    "tipos": {
+      "acesso": "Acceso a mis datos",
+      "correcao": "Corrección de datos",
+      "exclusao": "Eliminación"
+    },
+    "categorias": {
+      "cadastral": "Registral",
+      "fiscal": "Fiscal",
+      "contratual": "Contractual"
+    },
+    "status": {
+      "pendente": "Pendiente",
+      "atendida": "Atendida",
+      "recusada": "Rechazada"
+    },
+    "novo": {
+      "titulo": "Nueva solicitud",
+      "tipo": "Derecho",
+      "categoria": "Categoría del dato (opcional)",
+      "categoriaAny": "Todas las categorías",
+      "detalhe": "Detalle (opcional)",
+      "detalhePlaceholder": "Describa lo que desea acceder, corregir o eliminar.",
+      "solicitar": "Enviar solicitud",
+      "enviando": "Enviando…",
+      "registrada": "Solicitud registrada. El Encargado (DPO) la evaluará."
+    },
+    "lista": {
+      "titulo": "Mis solicitudes",
+      "carregando": "Cargando…",
+      "vazio": "Aún no tiene solicitudes.",
+      "resposta": "Respuesta"
+    }
+  },
+  "adminLgpd": {
+    "titulo": "Solicitudes LGPD",
+    "subtitulo": "Cola de derechos del titular pendientes (Encargado/DPO). La CPL no atiende (RNF007).",
+    "carregando": "Cargando…",
+    "vazio": "Ninguna solicitud pendiente.",
+    "titular": "Titular",
+    "respostaPlaceholder": "Respuesta al titular (opcional)",
+    "motivoPlaceholder": "Motivo del rechazo (obligatorio)",
+    "atender": "Atender",
+    "recusar": "Rechazar",
+    "descartar": "Descartar dato",
+    "atendidaPadrao": "Atendida",
+    "feedback": {
+      "atendida": "Solicitud atendida.",
+      "recusada": "Solicitud rechazada.",
+      "descartada": "Dato descartado (retención cumplida).",
+      "retido": "Descarte denegado: dato aún bajo retención legal.",
+      "erro": "No se pudo completar la acción."
     }
   }
 }

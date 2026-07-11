@@ -25,7 +25,7 @@ export function registrarRotasTitular(app: FastifyInstance, deps: { direitos: Ge
     if (!dpo(req) && titularId !== actor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Access restricted.' });
     const probe: SolicitacaoProbe = { titularId: dpo(req) ? titularId : actor(req), tipo, status };
     const r = await deps.direitos.consultar(probe);
-    return reply.send(r.map((s) => ({ id: s.id, titularId: s.titularId, tipo: s.tipo, status: s.status, resultado: s.resultado })));
+    return reply.send(r.map((s) => ({ id: s.id, titularId: s.titularId, tipo: s.tipo, detalhe: s.detalhe, categoria: s.categoria, status: s.status, resultado: s.resultado })));
   });
 
   app.post('/titular/solicitacoes/:id/atender', async (req, reply) => {
@@ -34,6 +34,19 @@ export function registrarRotasTitular(app: FastifyInstance, deps: { direitos: Ge
     const { resultado } = req.body as { resultado: string };
     try { await deps.direitos.atender(id, resultado ?? 'atendida', { userId: actor(req) }); return reply.send({ status: 'atendida' }); }
     catch (e) { return reply.code((e as Error).name === 'SolicitacaoNaoEncontrada' ? 404 : 409).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
+  });
+
+  // Recusar com justificativa (fluxo passo 2 — "atende OU recusa"). Motivo obrigatório (RN003).
+  app.post('/titular/solicitacoes/:id/recusar', async (req, reply) => {
+    if (!dpo(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only DPO/Administrator can reject.' });
+    const { id } = req.params as { id: string };
+    const { motivo } = req.body as { motivo: string };
+    try { await deps.direitos.recusar(id, motivo, { userId: actor(req) }); return reply.send({ status: 'recusada' }); }
+    catch (e) {
+      const n = (e as Error).name;
+      const code = n === 'SolicitacaoNaoEncontrada' ? 404 : n === 'MotivoRecusaObrigatorio' ? 400 : 409;
+      return reply.code(code).send({ codigo: n, mensagem: (e as Error).message });
+    }
   });
 
   app.post('/titular/solicitacoes/:id/descartar', async (req, reply) => {

@@ -73,9 +73,10 @@ import { MaloteRepositoryPg } from './malote/adapters/malote-repository-pg.js';
 import { registrarRotasMalote } from './malote/adapters/malote-controller.js';
 import { FilaMaloteMemory } from './malote/application/fila-malote.js';
 import { FilaMalotePg } from './malote/adapters/fila-malote-pg.js';
-import { GerirDireitosTitular } from './titular/application/gerir-direitos.js';
+import { GerirDireitosTitular, type SolicitacaoRepository } from './titular/application/gerir-direitos.js';
 import { ConsolidarPendencias } from './titular/application/consolidar-pendencias.js';
 import { SolicitacaoRepositoryMemory } from './titular/adapters/solicitacao-repository-memory.js';
+import { SolicitacaoRepositoryPg } from './titular/adapters/solicitacao-repository-pg.js';
 import { registrarRotasTitular } from './titular/adapters/titular-controller.js';
 import { DashboardAdmin, Transparencia } from './paineis/application/paineis.js';
 import { registrarRotasPaineis } from './paineis/adapters/paineis-controller.js';
@@ -262,8 +263,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Recuperação no boot: reprocessa jobs pendentes/órfãos que sobreviveram a um restart (durabilidade FR-002).
   if (filaMalote instanceof FilaMalotePg) await filaMalote.recuperar();
 
-  // Tela única + Direitos do titular LGPD (006 / Épico 7)
-  const solicitacoesRepo = new SolicitacaoRepositoryMemory();
+  // Tela única + Direitos do titular LGPD (UC017 / Épico 7). Persistência durável em Postgres quando
+  // disponível (como `editais`/`bloqueios`); senão memória (testes sem banco). Antes era SEMPRE memória
+  // → o pedido de direito protocolado pelo titular se perdia no restart, esvaziando a fila do DPO.
+  const solicitacoesRepo: SolicitacaoRepository = pool ? new SolicitacaoRepositoryPg(pool) : new SolicitacaoRepositoryMemory();
   const direitosTitular = new GerirDireitosTitular(solicitacoesRepo, bus);
   const consolidar = new ConsolidarPendencias({
     documentosReprovados: async (id) => (await docRepo.listar(id)).filter((d) => d.status === 'reprovado').map((d) => ({ id: d.id, motivo: d.motivoReprovacao })),

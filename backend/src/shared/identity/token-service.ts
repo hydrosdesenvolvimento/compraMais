@@ -17,6 +17,7 @@ export class JwtTokenService implements TokenService {
   emitir(id: Identidade): { token: string; expiraEm: number } {
     const claims: Record<string, unknown> = { papel: id.papel };
     if (id.empresaId) claims.empresaId = id.empresaId;
+    if (id.nome) claims.nome = id.nome;
     const token = jwt.sign(claims, this.segredo, { subject: id.userId, expiresIn: this.expiraEmSeg, issuer: 'compramais' });
     return { token, expiraEm: this.expiraEmSeg };
   }
@@ -25,7 +26,7 @@ export class JwtTokenService implements TokenService {
     try {
       const d = jwt.verify(token, this.segredo, { issuer: 'compramais' }) as jwt.JwtPayload;
       if (!d.sub || !d.papel) return null;
-      return { userId: String(d.sub), papel: d.papel as Papel, empresaId: d.empresaId ? String(d.empresaId) : undefined };
+      return { userId: String(d.sub), papel: d.papel as Papel, empresaId: d.empresaId ? String(d.empresaId) : undefined, nome: d.nome ? String(d.nome) : undefined };
     } catch {
       return null;
     }

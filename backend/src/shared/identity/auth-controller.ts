@@ -7,7 +7,7 @@ import type { Identidade } from './identity-provider.js';
 // --- Schemas (OpenAPI / @fastify/swagger). `format: email` é documentação (ajv-formats não registrado);
 //     a validação forte (senha, e-mail) fica no domínio, preservando os códigos 422 específicos. ---
 const ERRO = { type: 'object', properties: { codigo: { type: 'string' }, mensagem: { type: 'string' } } } as const;
-const IDENTIDADE = { type: 'object', properties: { userId: { type: 'string' }, papel: { type: 'string' }, empresaId: { type: 'string' } } } as const;
+const IDENTIDADE = { type: 'object', properties: { userId: { type: 'string' }, papel: { type: 'string' }, empresaId: { type: 'string' }, nome: { type: 'string' } } } as const;
 const PAPEIS = ['titular', 'procurador', 'administrador', 'cpl', 'smga', 'auditor', 'dpo', 'leitura'] as const;
 
 /**

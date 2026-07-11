@@ -34,7 +34,8 @@
       "myAccount": "My account",
       "logout": "Sign out",
       "footerFornecedor": "Version 2.0 · MVP FIEAC",
-      "footerAdmin": "Administrative panel · CPL / SMGA"
+      "footerAdmin": "Administrative panel · CPL / SMGA",
+      "userGeneric": "Guest"
     },
     "language": {
       "label": "Language",
@@ -45,6 +46,16 @@
       "highContrast": "High contrast",
       "increaseFont": "Increase font",
       "decreaseFont": "Decrease font"
+    },
+    "papel": {
+      "titular": "Account holder",
+      "procurador": "Attorney",
+      "administrador": "Administrator",
+      "cpl": "CPL Analyst",
+      "smga": "Department / Manager",
+      "auditor": "Auditor",
+      "dpo": "Data Protection Officer",
+      "leitura": "Read-only"
     }
   },
   "auth": {

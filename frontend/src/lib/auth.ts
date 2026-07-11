@@ -7,6 +7,7 @@ export interface Usuario {
   userId: string;
   papel: string;
   empresaId?: string;
+  nome?: string;
 }
 
 /** Persiste token + identidade após o login/cadastro. */

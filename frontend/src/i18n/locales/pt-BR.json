@@ -20,7 +20,8 @@
       "usuarios": "Usuários",
       "malote": "Malote SEI",
       "privacidade": "Privacidade",
-      "lgpd": "Atendimento LGPD"
+      "lgpd": "Atendimento LGPD",
+      "perfis": "Telas por perfil"
     },
     "shell": {
       "menu": "MENU",
@@ -153,6 +154,16 @@
     }
   },
   "admin": {
+    "perfis": {
+      "titulo": "Administração de telas por perfil",
+      "subtitulo": "Defina quais telas do Painel Admin cada papel enxerga. O Administrador vê todas.",
+      "colPerfil": "Perfil (papel)",
+      "superusuario": "vê todas",
+      "customizado": "personalizado",
+      "salvar": "Salvar",
+      "salvo": "Visibilidade atualizada.",
+      "erro": "Não foi possível salvar. Verifique suas permissões."
+    },
     "dashboard": {
       "carregando": "Carregando…",
       "titulo": "Painel administrativo",

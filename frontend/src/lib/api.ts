@@ -78,6 +78,12 @@ export interface UsuarioInternoView {
   id: string; nome: string; email: string; cargo: string | null; papel: string; ativo: boolean;
   registerDate: string; updateDate: string;
 }
+/** Telas do Painel Admin visíveis ao papel do próprio requisitante (GET /permissoes/telas/me). */
+export interface TelasVisiveisView { papel: string; telas: string[] }
+/** Uma linha da matriz de "telas por perfil": o papel, suas telas visíveis e se é editável/customizado. */
+export interface LinhaMatrizTelas { papel: string; telasVisiveis: string[]; editavel: boolean; customizado: boolean }
+/** Matriz completa (catálogo de telas + linha por papel) — GET /permissoes/telas (Administrador). */
+export interface MatrizTelasView { telas: string[]; linhas: LinhaMatrizTelas[] }
 /** UC021 — opção de cargo do seletor (rótulo → papel RBAC efetivo). */
 export interface CargoOpcao { cargo: string; papel: string }
 /** UC010 — peça do malote SEI (documento aprovado): ordem legal CNPJ→Pessoal→Anexos→Certidões (RN008). */
@@ -194,4 +200,11 @@ export const api = {
   usuarioResetarSenha: (id: string, novaSenha: string) => send<{ ok: boolean }>(`/admin/usuarios/${id}/resetar-senha`, 'POST', { novaSenha }),
   usuarioInativar: (id: string) => send<{ situacao: string }>(`/admin/usuarios/${id}/inativar`, 'POST'),
   usuarioReativar: (id: string) => send<{ situacao: string }>(`/admin/usuarios/${id}/reativar`, 'POST'),
+
+  // Administração de telas por perfil (§15/AD-35): visibilidade do Painel Admin por papel.
+  // `/me` alimenta o menu e as guardas de rota (aberto à sessão); a matriz e o PUT exigem administrador.
+  telasVisiveis: () => get<TelasVisiveisView>('/permissoes/telas/me'),
+  matrizTelas: () => get<MatrizTelasView>('/permissoes/telas'),
+  salvarTelasPapel: (papel: string, telas: string[]) =>
+    send<{ papel: string; telas: string[] }>(`/permissoes/telas/${encodeURIComponent(papel)}`, 'PUT', { telas }),
 };

@@ -21,6 +21,7 @@ export interface Identidade {
   readonly userId: string;
   readonly papel: Papel;
   readonly empresaId?: string; // para titular/procurador
+  readonly nome?: string; // nome de exibição do usuário (chip da topbar); opcional para tokens legados
 }
 
 export interface IdentityProvider {

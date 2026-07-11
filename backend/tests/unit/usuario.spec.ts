@@ -31,6 +31,6 @@ describe('Usuario (domínio de autenticação)', () => {
 
   it('toIdentidade reflete papel e empresa (fornecedorId)', () => {
     const u = Usuario.criarLocal({ id: 'u4', email: 'a@b.com', senha: 'segredo12', nome: 'x', papel: 'procurador', fornecedorId: 'f1' });
-    expect(u.toIdentidade()).toEqual({ userId: 'u4', papel: 'procurador', empresaId: 'f1' });
+    expect(u.toIdentidade()).toEqual({ userId: 'u4', papel: 'procurador', empresaId: 'f1', nome: 'x' });
   });
 });

@@ -23,6 +23,13 @@ describe('Autenticação (integração — memória + JWT)', () => {
     expect(tokens.verificar(out.token)?.userId).toBe(out.usuario.userId);
   });
 
+  it('a identidade do login e do token carregam o nome de exibição (chip da topbar)', async () => {
+    await registrar.executar({ email: 'marcos@vale.com', senha: 'segredo12', nome: 'Marcos Albuquerque', papel: 'procurador' });
+    const out = await login.executar({ email: 'marcos@vale.com', senha: 'segredo12' });
+    expect(out.usuario.nome).toBe('Marcos Albuquerque');
+    expect(tokens.verificar(out.token)?.nome).toBe('Marcos Albuquerque'); // sobrevive ao round-trip do JWT
+  });
+
   it('emite evento UsuarioAutenticado no login', async () => {
     let visto = '';
     bus.subscribe('UsuarioAutenticado', async (e) => { visto = e.eventName; });

@@ -118,7 +118,7 @@ export async function cadastrarFornecedor(body: CadastroFornecedorInput): Promis
   return (await r.json()) as { fornecedorId: string; status: string; origem: string };
 }
 
-export interface ResultadoLogin { token: string; expiraEm: number; usuario: { userId: string; papel: string; empresaId?: string } }
+export interface ResultadoLogin { token: string; expiraEm: number; usuario: { userId: string; papel: string; empresaId?: string; nome?: string } }
 
 /** Login local (POST /auth/login → JWT). Lança CredenciaisInvalidas em 401. */
 export async function login(email: string, senha: string): Promise<ResultadoLogin> {

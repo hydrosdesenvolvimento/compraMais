@@ -34,7 +34,8 @@
       "myAccount": "Minha conta",
       "logout": "Sair",
       "footerFornecedor": "Versão 2.0 · MVP FIEAC",
-      "footerAdmin": "Painel administrativo · CPL / SMGA"
+      "footerAdmin": "Painel administrativo · CPL / SMGA",
+      "userGeneric": "Visitante"
     },
     "language": {
       "label": "Idioma",
@@ -45,6 +46,16 @@
       "highContrast": "Alto contraste",
       "increaseFont": "Aumentar fonte",
       "decreaseFont": "Diminuir fonte"
+    },
+    "papel": {
+      "titular": "Titular",
+      "procurador": "Procurador",
+      "administrador": "Administrador",
+      "cpl": "Analista CPL",
+      "smga": "Secretaria / Gestor",
+      "auditor": "Auditor",
+      "dpo": "Encarregado (DPO)",
+      "leitura": "Somente leitura"
     }
   },
   "auth": {

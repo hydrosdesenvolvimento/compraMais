@@ -1,5 +1,6 @@
-import { createRouter, createRootRoute, createRoute, redirect, createHashHistory, Outlet } from '@tanstack/react-router';
-import { AppShell, type ItemMenu, type UsuarioChip } from './design-system/AppShell';
+import { createRouter, createRootRoute, createRoute, redirect, createHashHistory } from '@tanstack/react-router';
+import { type ItemMenu } from './design-system/AppShell';
+import { ShellFornecedor, ShellAdmin } from './design-system/ShellConectado';
 import { AuthLayout } from './design-system/AuthLayout';
 import { IconeInicio, IconeEditais, IconeCredenciamentos, IconeDocumentos, IconeDemandas, IconeUsuario } from './design-system/icons';
 
@@ -38,7 +39,6 @@ const MENU_FORNECEDOR: ItemMenu[] = [
   { rotuloKey: 'common.nav.demandas', href: '/transparencia', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
   { rotuloKey: 'common.nav.procuradores', href: '/procuradores', cy: 'nav-procuradores', icone: <IconeUsuario {...ico} /> },
 ];
-const USUARIO_FORNECEDOR: UsuarioChip = { nome: 'Marcos Albuquerque', papel: 'Procurador', iniciais: 'VA', fantasia: 'Vale do Acre Uniformes' };
 
 const MENU_ADMIN: ItemMenu[] = [
   { rotuloKey: 'common.nav.painel', href: '/admin/dashboard', cy: 'nav-admin', icone: <IconeInicio {...ico} /> },
@@ -50,7 +50,6 @@ const MENU_ADMIN: ItemMenu[] = [
   { rotuloKey: 'common.nav.usuarios', href: '/admin/usuarios', cy: 'nav-usuarios', icone: <IconeUsuario {...ico} /> },
   { rotuloKey: 'common.nav.auditoria', href: '/admin/auditoria', cy: 'nav-auditoria', icone: <IconeDocumentos {...ico} /> },
 ];
-const USUARIO_ADMIN: UsuarioChip = { nome: 'CPL — Compra Mais', papel: 'Controle / SMGA', iniciais: 'CP' };
 
 const rootRoute = createRootRoute();
 
@@ -58,7 +57,7 @@ const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: '/', bef
 const cadastroRoute = createRoute({ getParentRoute: () => rootRoute, path: '/cadastro', component: () => <AuthLayout><AuthPanel /></AuthLayout> });
 const redefinirSenhaRoute = createRoute({ getParentRoute: () => rootRoute, path: '/redefinir-senha', component: () => <AuthLayout><RedefinirSenha /></AuthLayout> });
 
-const fornecedorLayout = createRoute({ getParentRoute: () => rootRoute, id: 'fornecedor', component: () => <AppShell menu={MENU_FORNECEDOR} usuario={USUARIO_FORNECEDOR}><Outlet /></AppShell> });
+const fornecedorLayout = createRoute({ getParentRoute: () => rootRoute, id: 'fornecedor', component: () => <ShellFornecedor menu={MENU_FORNECEDOR} /> });
 const rInicio = createRoute({ getParentRoute: () => fornecedorLayout, path: '/inicio', component: Inicio });
 const rMinhaConta = createRoute({ getParentRoute: () => fornecedorLayout, path: '/minha-conta', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: MinhaContaConectada });
 const rProcuradores = createRoute({ getParentRoute: () => fornecedorLayout, path: '/procuradores', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: ProcuradoresConectada });
@@ -70,7 +69,7 @@ const rDocumentos = createRoute({ getParentRoute: () => fornecedorLayout, path: 
 const rTransparencia = createRoute({ getParentRoute: () => fornecedorLayout, path: '/transparencia', component: Transparencia });
 const rTitular = createRoute({ getParentRoute: () => fornecedorLayout, path: '/titular', component: () => <PainelTitular fornecedorId={DEMO_FORNECEDOR_ID} /> });
 
-const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <AppShell menu={MENU_ADMIN} usuario={USUARIO_ADMIN} rodapeKey="common.shell.footerAdmin" notificacoes={[]} contaHref="/admin/dashboard"><Outlet /></AppShell> });
+const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <ShellAdmin menu={MENU_ADMIN} /> });
 const rAdminIndex = createRoute({ getParentRoute: () => adminLayout, path: '/admin', beforeLoad: () => { throw redirect({ to: '/admin/dashboard' }); } });
 const rAdminDash = createRoute({ getParentRoute: () => adminLayout, path: '/admin/dashboard', component: Dashboard });
 const rAdminCoval = createRoute({ getParentRoute: () => adminLayout, path: '/admin/covalidacao', component: () => <FilaCovalidacao fornecedorId={DEMO_FORNECEDOR_ID} /> });

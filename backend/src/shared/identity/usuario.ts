@@ -143,7 +143,7 @@ export class Usuario extends EntidadeBase {
   }
 
   toIdentidade(): Identidade {
-    return { userId: this.id, papel: this._papel, empresaId: this.fornecedorId ?? undefined };
+    return { userId: this.id, papel: this._papel, empresaId: this.fornecedorId ?? undefined, nome: this._nome };
   }
 
   estado(): UsuarioState {

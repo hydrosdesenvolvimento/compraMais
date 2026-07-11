@@ -23,6 +23,7 @@ import { FilaContestacoes } from './pages/admin/FilaContestacoes';
 import { ConsultaAuditoria } from './pages/admin/ConsultaAuditoria';
 import { ManterCatalogos } from './pages/admin/ManterCatalogos';
 import { GerirUsuarios } from './pages/admin/GerirUsuarios';
+import { GerarMalote } from './pages/admin/GerarMalote';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
 const DEMO_EDITAL_ID = 'demo-edital';
@@ -44,6 +45,7 @@ const MENU_ADMIN: ItemMenu[] = [
   { rotuloKey: 'common.nav.covalidacao', href: '/admin/covalidacao', cy: 'nav-covalidacao', icone: <IconeCredenciamentos {...ico} /> },
   { rotuloKey: 'common.nav.gestaoEditais', href: '/admin/editais', cy: 'nav-gestao-editais', icone: <IconeEditais {...ico} /> },
   { rotuloKey: 'common.nav.contestacoes', href: '/admin/contestacoes', cy: 'nav-contestacoes', icone: <IconeEditais {...ico} /> },
+  { rotuloKey: 'common.nav.malote', href: '/admin/malote', cy: 'nav-malote', icone: <IconeDemandas {...ico} /> },
   { rotuloKey: 'common.nav.catalogos', href: '/admin/catalogos', cy: 'nav-catalogos', icone: <IconeDocumentos {...ico} /> },
   { rotuloKey: 'common.nav.usuarios', href: '/admin/usuarios', cy: 'nav-usuarios', icone: <IconeUsuario {...ico} /> },
   { rotuloKey: 'common.nav.auditoria', href: '/admin/auditoria', cy: 'nav-auditoria', icone: <IconeDocumentos {...ico} /> },
@@ -74,6 +76,7 @@ const rAdminDash = createRoute({ getParentRoute: () => adminLayout, path: '/admi
 const rAdminCoval = createRoute({ getParentRoute: () => adminLayout, path: '/admin/covalidacao', component: () => <FilaCovalidacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
 const rAdminEditais = createRoute({ getParentRoute: () => adminLayout, path: '/admin/editais', component: () => <GerirEditais secretariaId={DEMO_SECRETARIA_ID} /> });
 const rAdminContest = createRoute({ getParentRoute: () => adminLayout, path: '/admin/contestacoes', component: () => <FilaContestacoes editalId={DEMO_EDITAL_ID} /> });
+const rAdminMalote = createRoute({ getParentRoute: () => adminLayout, path: '/admin/malote', component: GerarMalote });
 const rAdminCatalogos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/catalogos', component: ManterCatalogos });
 const rAdminUsuarios = createRoute({ getParentRoute: () => adminLayout, path: '/admin/usuarios', component: GerirUsuarios });
 const rAdminAudit = createRoute({ getParentRoute: () => adminLayout, path: '/admin/auditoria', component: ConsultaAuditoria });
@@ -85,7 +88,7 @@ const routeTree = rootRoute.addChildren([
   cadastroRoute,
   redefinirSenhaRoute,
   fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rEditais, rCredenciamento, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
-  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminCatalogos, rAdminUsuarios, rAdminAudit]),
+  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos, rAdminUsuarios, rAdminAudit]),
   naoEncontrada,
 ]);
 

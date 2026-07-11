@@ -40,4 +40,17 @@ describe('Malote (Épico 6)', () => {
     expect(fragGigante?.acimaLimite).toBe(true);
     expect(fragGigante?.pecasRefs).toEqual(['gigante']); // isolada, sem split binário
   });
+
+  it('round-trip estado()/deEstado() preserva o agregado (durabilidade, AD-33)', () => {
+    const original = malote(250); original.montar(pecas); original.marcarExportado();
+    const reconstruido = Malote.deEstado(original.estado());
+    expect(reconstruido.id).toBe(original.id);
+    expect(reconstruido.status).toBe('exportado');
+    expect(reconstruido.fornecedorId).toBe('f1');
+    expect(reconstruido.editalId).toBe('e1');
+    expect(reconstruido.limiteBytes).toBe(250);
+    expect(reconstruido.pecas.map((p) => p.tipo)).toEqual(['cnpj', 'pessoal', 'anexo', 'certidao']);
+    expect(reconstruido.fragmentos).toHaveLength(original.fragmentos.length);
+    expect(reconstruido.temPecaAcimaLimite).toBe(original.temPecaAcimaLimite);
+  });
 });

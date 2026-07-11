@@ -17,7 +17,8 @@
       "contestacoes": "Contestações",
       "auditoria": "Auditoria",
       "catalogos": "Catálogos",
-      "usuarios": "Usuários"
+      "usuarios": "Usuários",
+      "malote": "Malote SEI"
     },
     "shell": {
       "menu": "MENU",
@@ -266,6 +267,51 @@
       "inativar": "Inativar",
       "reativar": "Reativar",
       "vazio": "Nenhum servidor cadastrado ainda."
+    },
+    "malote": {
+      "titulo": "Malote SEI",
+      "subtitulo": "Consolide a documentação aprovada de um fornecedor em um dossiê ordenado (CNPJ → Pessoal → Anexos → Certidões) e otimizado para upload no SEI. A geração é assíncrona e durável; peça indivisível acima do limite é sinalizada para tratamento manual.",
+      "gerar": {
+        "titulo": "Gerar novo malote",
+        "fornecedorId": "ID do fornecedor",
+        "editalId": "ID do edital",
+        "pecas": "Peças (documentos aprovados)",
+        "ref": "Referência",
+        "tamanho": "Tamanho (bytes)",
+        "adicionarPeca": "Adicionar peça",
+        "semPecas": "Nenhuma peça adicionada.",
+        "enviar": "Gerar malote",
+        "enviado": "Geração solicitada — processando em segundo plano.",
+        "erro": "Não foi possível solicitar a geração. Verifique os campos e o papel de acesso."
+      },
+      "tipos": {
+        "cnpj": "CNPJ",
+        "pessoal": "Documento pessoal",
+        "anexo": "Anexo do edital",
+        "certidao": "Certidão"
+      },
+      "filtros": {
+        "titulo": "Filtros",
+        "fornecedorId": "Fornecedor",
+        "editalId": "Edital",
+        "status": "Status",
+        "todos": "Todos",
+        "aplicar": "Filtrar"
+      },
+      "status": {
+        "pendente": "Pendente",
+        "gerado": "Gerado",
+        "exportado": "Exportado"
+      },
+      "lista": {
+        "fragmentos": "{{n}} fragmento(s)",
+        "acimaLimite": "Peça acima do limite — tratar manualmente",
+        "exportar": "Exportar",
+        "exportado": "Exportado.",
+        "jaExportado": "Já exportado (idempotente).",
+        "atualizar": "Atualizar",
+        "vazio": "Nenhum malote encontrado."
+      }
     }
   },
   "contestacao": {

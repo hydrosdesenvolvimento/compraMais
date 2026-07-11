@@ -15,7 +15,8 @@
       "covalidacao": "Covalidación",
       "gestaoEditais": "Gestión de licitaciones",
       "contestacoes": "Impugnaciones",
-      "auditoria": "Auditoría"
+      "auditoria": "Auditoría",
+      "catalogos": "Catálogos"
     },
     "shell": {
       "menu": "MENÚ",
@@ -199,6 +200,39 @@
       "colAcao": "Acción",
       "colIp": "IP",
       "vazio": "Ningún registro para los filtros actuales."
+    },
+    "catalogos": {
+      "titulo": "Catálogos base",
+      "subtitulo": "Mantenga secretarías, sectores (CNAE) y tipos de documento. La eliminación es lógica: el ítem inactivado sale de las listas pero conserva sus vínculos.",
+      "tabs": {
+        "secretarias": "Secretarías",
+        "setores": "Sectores (CNAE)",
+        "tiposDoc": "Tipos de documento"
+      },
+      "campos": {
+        "nome": "Nombre",
+        "sigla": "Sigla",
+        "responsavel": "Responsable",
+        "codigo": "Código CNAE (7 dígitos)",
+        "descricao": "Descripción",
+        "nomeTipo": "Nombre del tipo",
+        "formato": "Formato aceptado (ej.: pdf)",
+        "categoria": "Categoría",
+        "exigeValidade": "Exige fecha de vencimiento",
+        "exigeExercicio": "Exige ejercicio (ej.: Balance)"
+      },
+      "categorias": {
+        "cadastral": "Registral",
+        "fiscal": "Fiscal",
+        "contratual": "Contractual"
+      },
+      "criar": "Agregar ítem",
+      "erroCriar": "No se pudo guardar. Verifique si la clave ya existe o si los campos son válidos.",
+      "mostrarInativos": "Mostrar inactivos",
+      "situacaoInativo": "inactivo",
+      "inativar": "Inactivar",
+      "reativar": "Reactivar",
+      "vazio": "Aún no hay ítems registrados."
     }
   },
   "contestacao": {

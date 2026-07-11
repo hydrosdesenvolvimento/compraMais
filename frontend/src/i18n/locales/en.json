@@ -15,7 +15,8 @@
       "covalidacao": "Co-validation",
       "gestaoEditais": "Tender management",
       "contestacoes": "Disputes",
-      "auditoria": "Audit"
+      "auditoria": "Audit",
+      "catalogos": "Catalogs"
     },
     "shell": {
       "menu": "MENU",
@@ -199,6 +200,39 @@
       "colAcao": "Action",
       "colIp": "IP",
       "vazio": "No records for the current filters."
+    },
+    "catalogos": {
+      "titulo": "Base catalogs",
+      "subtitulo": "Maintain departments, sectors (CNAE) and document types. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
+      "tabs": {
+        "secretarias": "Departments",
+        "setores": "Sectors (CNAE)",
+        "tiposDoc": "Document types"
+      },
+      "campos": {
+        "nome": "Name",
+        "sigla": "Acronym",
+        "responsavel": "Responsible",
+        "codigo": "CNAE code (7 digits)",
+        "descricao": "Description",
+        "nomeTipo": "Type name",
+        "formato": "Accepted format (e.g. pdf)",
+        "categoria": "Category",
+        "exigeValidade": "Requires expiry date",
+        "exigeExercicio": "Requires fiscal year (e.g. Balance sheet)"
+      },
+      "categorias": {
+        "cadastral": "Registration",
+        "fiscal": "Fiscal",
+        "contratual": "Contractual"
+      },
+      "criar": "Add item",
+      "erroCriar": "Could not save. Check whether the key already exists or the fields are valid.",
+      "mostrarInativos": "Show inactive",
+      "situacaoInativo": "inactive",
+      "inativar": "Deactivate",
+      "reativar": "Reactivate",
+      "vazio": "No items registered yet."
     }
   },
   "contestacao": {

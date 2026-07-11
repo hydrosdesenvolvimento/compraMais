@@ -49,6 +49,17 @@ export interface Transparencia { editaisVigentes: number; secretarias: string[];
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
+/** UC020 — item de catálogo base (superset: cada catálogo acrescenta seus campos). */
+export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento';
+export interface CatalogoItemView {
+  id: string; ativo: boolean; situacao: 'ativo' | 'inativo';
+  // Secretaria
+  nome?: string; sigla?: string; responsavel?: string;
+  // Setor/CNAE
+  codigo?: string; descricao?: string;
+  // Tipo de documento
+  formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean;
+}
 /** UC018: resultado da re-sincronização — status + proveniência `{quando, fonte}` da consulta oficial. */
 export interface SincronizacaoResultado { status: 'sucesso' | 'revisao' | 'erro'; quando?: string; fonte?: string }
 export interface EnderecoView { logradouro: string; numero: string; complemento?: string; bairro: string; cidade: string; uf: string; cep: string }
@@ -111,4 +122,12 @@ export const api = {
   acatarContestacao: (id: string, novoCnaes: string[]) => send(`/contestacoes-cnae/${id}/acatar`, 'POST', { novoCnaes }),
   recusarContestacao: (id: string, motivo: string) => send(`/contestacoes-cnae/${id}/recusar`, 'POST', { motivo }),
   auditoria: (params: URLSearchParams) => get<RegistroAuditoria[]>(`/auditoria?${params.toString()}`),
+
+  // UC020 — Catálogos base (Administrador). Leitura aberta; escritas exigem x-papel administrador.
+  catalogoListar: (slug: CatalogoSlug, incluirInativos = false) =>
+    get<CatalogoItemView[]>(`/catalogos/${slug}${incluirInativos ? '?incluirInativos=true' : ''}`),
+  catalogoCriar: (slug: CatalogoSlug, body: Record<string, unknown>) => send<{ id: string }>(`/catalogos/${slug}`, 'POST', body),
+  catalogoEditar: (slug: CatalogoSlug, id: string, body: Record<string, unknown>) => send<{ ok: boolean }>(`/catalogos/${slug}/${id}`, 'PATCH', body),
+  catalogoInativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/inativar`, 'POST'),
+  catalogoReativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/reativar`, 'POST'),
 };

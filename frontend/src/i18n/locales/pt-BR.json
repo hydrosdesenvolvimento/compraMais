@@ -15,7 +15,8 @@
       "covalidacao": "Covalidação",
       "gestaoEditais": "Gestão de editais",
       "contestacoes": "Contestações",
-      "auditoria": "Auditoria"
+      "auditoria": "Auditoria",
+      "catalogos": "Catálogos"
     },
     "shell": {
       "menu": "MENU",
@@ -199,6 +200,39 @@
       "colAcao": "Ação",
       "colIp": "IP",
       "vazio": "Nenhum registro para os filtros atuais."
+    },
+    "catalogos": {
+      "titulo": "Catálogos base",
+      "subtitulo": "Mantenha secretarias, setores (CNAE) e tipos de documento. A exclusão é lógica: o item inativado sai das listas mas preserva os vínculos.",
+      "tabs": {
+        "secretarias": "Secretarias",
+        "setores": "Setores (CNAE)",
+        "tiposDoc": "Tipos de documento"
+      },
+      "campos": {
+        "nome": "Nome",
+        "sigla": "Sigla",
+        "responsavel": "Responsável",
+        "codigo": "Código CNAE (7 dígitos)",
+        "descricao": "Descrição",
+        "nomeTipo": "Nome do tipo",
+        "formato": "Formato aceito (ex.: pdf)",
+        "categoria": "Categoria",
+        "exigeValidade": "Exige data de validade",
+        "exigeExercicio": "Exige exercício (ex.: Balanço)"
+      },
+      "categorias": {
+        "cadastral": "Cadastral",
+        "fiscal": "Fiscal",
+        "contratual": "Contratual"
+      },
+      "criar": "Adicionar item",
+      "erroCriar": "Não foi possível salvar. Verifique se a chave já existe ou se os campos são válidos.",
+      "mostrarInativos": "Mostrar inativos",
+      "situacaoInativo": "inativo",
+      "inativar": "Inativar",
+      "reativar": "Reativar",
+      "vazio": "Nenhum item cadastrado ainda."
     }
   },
   "contestacao": {

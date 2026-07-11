@@ -75,6 +75,14 @@ import { SolicitacaoRepositoryMemory } from './titular/adapters/solicitacao-repo
 import { registrarRotasTitular } from './titular/adapters/titular-controller.js';
 import { DashboardAdmin, Transparencia } from './paineis/application/paineis.js';
 import { registrarRotasPaineis } from './paineis/adapters/paineis-controller.js';
+import { ManterCatalogos } from './catalogos/application/manter-catalogos.js';
+import { CatalogoRepositoryMemory } from './catalogos/adapters/catalogo-repository-memory.js';
+import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg } from './catalogos/adapters/catalogo-repository-pg.js';
+import type { Secretaria } from './catalogos/domain/secretaria.js';
+import type { SetorCnae } from './catalogos/domain/setor-cnae.js';
+import type { TipoDocumento } from './catalogos/domain/tipo-documento.js';
+import type { CatalogoRepository } from './catalogos/application/catalogo-repository.js';
+import { registrarRotasCatalogos } from './catalogos/adapters/catalogos-controller.js';
 
 /**
  * Bootstrap (camada de INFRA) + composition root. O Fastify é detalhe plugável: o domínio e os
@@ -116,6 +124,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'DireitoTitularSolicitado', 'DireitoTitularAtendido',
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
     'SenhaAlterada', 'ResetSenhaSolicitado', 'SenhaRedefinida',
+    'CatalogoItemCriado', 'CatalogoItemEditado', 'CatalogoItemInativado', 'CatalogoItemReativado',
   ]);
 
   // Identidade (US1): contas + procuradores. Persistência durável em Postgres quando disponível (como
@@ -257,6 +266,16 @@ export async function buildServer(): Promise<FastifyInstance> {
     editaisPublicados: async () => (await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })).map((e) => ({ secretariaId: e.secretariaId, cnaesAlvo: e.cnaesAlvo })),
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
+
+  // Catálogos base (UC020 / RF020-RF022): Secretarias + Setores/CNAE + Tipos de Documento. CRUD com
+  // inativação lógica (RN015), mantido pelo Administrador. Durável em Postgres quando disponível (como
+  // `editais`/`fornecedores`); senão memória (testes sem banco). Alimenta editais (secretaria/CNAE) e
+  // o upload/covalidação (tipos de documento).
+  const secretariasRepo: CatalogoRepository<Secretaria> = pool ? new SecretariaRepositoryPg(pool) : new CatalogoRepositoryMemory<Secretaria>();
+  const setoresRepo: CatalogoRepository<SetorCnae> = pool ? new SetorCnaeRepositoryPg(pool) : new CatalogoRepositoryMemory<SetorCnae>();
+  const tiposDocRepo: CatalogoRepository<TipoDocumento> = pool ? new TipoDocumentoRepositoryPg(pool) : new CatalogoRepositoryMemory<TipoDocumento>();
+  const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);
+  registrarRotasCatalogos(app, { manter: manterCatalogos });
 
   // Observabilidade base (AD-22): instrumentar timeouts/circuit-breaker dos adaptadores — pendente.
   return app;

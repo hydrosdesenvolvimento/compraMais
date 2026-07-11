@@ -50,3 +50,4 @@ _bmad/
 _bmad-output/
 
 dev.yml
+deploy.sh

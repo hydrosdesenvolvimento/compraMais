@@ -60,6 +60,13 @@ export interface CatalogoItemView {
   // Tipo de documento
   formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean;
 }
+/** UC021 — servidor interno exibido no Painel Admin de usuários (sem segredos). */
+export interface UsuarioInternoView {
+  id: string; nome: string; email: string; cargo: string | null; papel: string; ativo: boolean;
+  registerDate: string; updateDate: string;
+}
+/** UC021 — opção de cargo do seletor (rótulo → papel RBAC efetivo). */
+export interface CargoOpcao { cargo: string; papel: string }
 /** UC018: resultado da re-sincronização — status + proveniência `{quando, fonte}` da consulta oficial. */
 export interface SincronizacaoResultado { status: 'sucesso' | 'revisao' | 'erro'; quando?: string; fonte?: string }
 export interface EnderecoView { logradouro: string; numero: string; complemento?: string; bairro: string; cidade: string; uf: string; cep: string }
@@ -130,4 +137,14 @@ export const api = {
   catalogoEditar: (slug: CatalogoSlug, id: string, body: Record<string, unknown>) => send<{ ok: boolean }>(`/catalogos/${slug}/${id}`, 'PATCH', body),
   catalogoInativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/inativar`, 'POST'),
   catalogoReativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/reativar`, 'POST'),
+
+  // UC021 — Gestão de usuários internos/servidores (Administrador). Todas exigem x-papel administrador.
+  cargos: () => get<CargoOpcao[]>('/admin/cargos'),
+  usuariosListar: (incluirInativos = false) =>
+    get<UsuarioInternoView[]>(`/admin/usuarios${incluirInativos ? '?incluirInativos=true' : ''}`),
+  usuarioCriar: (body: { nome: string; email: string; cargo: string; senha: string }) => send<{ usuarioId: string }>('/admin/usuarios', 'POST', body),
+  usuarioEditar: (id: string, body: { nome?: string; cargo?: string }) => send<{ ok: boolean }>(`/admin/usuarios/${id}`, 'PATCH', body),
+  usuarioResetarSenha: (id: string, novaSenha: string) => send<{ ok: boolean }>(`/admin/usuarios/${id}/resetar-senha`, 'POST', { novaSenha }),
+  usuarioInativar: (id: string) => send<{ situacao: string }>(`/admin/usuarios/${id}/inativar`, 'POST'),
+  usuarioReativar: (id: string) => send<{ situacao: string }>(`/admin/usuarios/${id}/reativar`, 'POST'),
 };

@@ -70,3 +70,49 @@ export class SenhaRedefinida extends DomainEvent<{ metodo: 'reset' }> {
     super(aggregateId, payload, actor);
   }
 }
+
+// --- Gestão de usuários internos (UC021 / RF023, §15/AD-35). Consumidos pela auditoria (AD-18). ---
+
+/** Servidor interno criado pelo Administrador (cargo → papel RBAC). */
+export class UsuarioInternoCriado extends DomainEvent<{ email: string; cargo: string; papel: string }> {
+  readonly eventName = 'UsuarioInternoCriado';
+  readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { email: string; cargo: string; papel: string }, actor?: { userId: string; empresaId?: string }) {
+    super(aggregateId, payload, actor);
+  }
+}
+
+/** Edição administrativa do servidor (nome e/ou cargo→papel). */
+export class UsuarioInternoEditado extends DomainEvent<{ cargo: string | null; papel: string }> {
+  readonly eventName = 'UsuarioInternoEditado';
+  readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { cargo: string | null; papel: string }, actor?: { userId: string; empresaId?: string }) {
+    super(aggregateId, payload, actor);
+  }
+}
+
+/** Senha do servidor redefinida pelo Administrador (o usuário troca a própria depois — UC015). */
+export class UsuarioSenhaResetada extends DomainEvent<{ metodo: 'admin-reset' }> {
+  readonly eventName = 'UsuarioSenhaResetada';
+  readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { metodo: 'admin-reset' }, actor?: { userId: string; empresaId?: string }) {
+    super(aggregateId, payload, actor);
+  }
+}
+
+/** RN015 — servidor desligado é inativado (autoria histórica preservada, AD-38). */
+export class UsuarioInternoInativado extends DomainEvent<Record<string, never>> {
+  readonly eventName = 'UsuarioInternoInativado';
+  readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: Record<string, never>, actor?: { userId: string; empresaId?: string }) {
+    super(aggregateId, payload, actor);
+  }
+}
+
+export class UsuarioInternoReativado extends DomainEvent<Record<string, never>> {
+  readonly eventName = 'UsuarioInternoReativado';
+  readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: Record<string, never>, actor?: { userId: string; empresaId?: string }) {
+    super(aggregateId, payload, actor);
+  }
+}

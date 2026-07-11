@@ -16,7 +16,8 @@
       "gestaoEditais": "Gestión de licitaciones",
       "contestacoes": "Impugnaciones",
       "auditoria": "Auditoría",
-      "catalogos": "Catálogos"
+      "catalogos": "Catálogos",
+      "usuarios": "Usuarios"
     },
     "shell": {
       "menu": "MENÚ",
@@ -233,6 +234,38 @@
       "inativar": "Inactivar",
       "reativar": "Reactivar",
       "vazio": "Aún no hay ítems registrados."
+    },
+    "usuarios": {
+      "titulo": "Usuarios internos",
+      "subtitulo": "Registre al personal del Municipio y asigne un cargo — el cargo define el acceso (RBAC). La eliminación es lógica: un usuario inactivado no accede, pero se conserva el historial de sus acciones.",
+      "campos": {
+        "nome": "Nombre",
+        "email": "Correo electrónico",
+        "cargo": "Cargo",
+        "senha": "Contraseña inicial (mín. 8 caracteres)"
+      },
+      "cargos": {
+        "administrador": "Administrador",
+        "analistaCpl": "Analista CPL",
+        "coordenadorCpl": "Coordinador(a) CPL",
+        "secretario": "Secretario(a)",
+        "gestor": "Gestor",
+        "auditor": "Auditor",
+        "dpo": "DPO / Encargado"
+      },
+      "selecioneCargo": "Seleccione un cargo",
+      "criar": "Agregar usuario",
+      "erroCriar": "No se pudo guardar. Verifique si el correo ya existe, el cargo y la contraseña (mín. 8 caracteres).",
+      "mostrarInativos": "Mostrar inactivos",
+      "situacaoInativo": "inactivo",
+      "resetarSenha": "Restablecer contraseña",
+      "novaSenha": "Nueva contraseña (mín. 8)",
+      "confirmarReset": "Confirmar",
+      "resetOk": "Contraseña restablecida.",
+      "erroReset": "No se pudo restablecer. Verifique la contraseña (mín. 8).",
+      "inativar": "Inactivar",
+      "reativar": "Reactivar",
+      "vazio": "Aún no hay personal registrado."
     }
   },
   "contestacao": {

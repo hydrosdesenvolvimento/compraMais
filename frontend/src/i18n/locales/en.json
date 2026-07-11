@@ -16,7 +16,8 @@
       "gestaoEditais": "Tender management",
       "contestacoes": "Disputes",
       "auditoria": "Audit",
-      "catalogos": "Catalogs"
+      "catalogos": "Catalogs",
+      "usuarios": "Users"
     },
     "shell": {
       "menu": "MENU",
@@ -233,6 +234,38 @@
       "inativar": "Deactivate",
       "reativar": "Reactivate",
       "vazio": "No items registered yet."
+    },
+    "usuarios": {
+      "titulo": "Internal users",
+      "subtitulo": "Register City Hall staff and assign a role — the role defines RBAC access. Deletion is logical: a deactivated user cannot sign in, but their action history is preserved.",
+      "campos": {
+        "nome": "Name",
+        "email": "E-mail",
+        "cargo": "Role",
+        "senha": "Initial password (min. 8 characters)"
+      },
+      "cargos": {
+        "administrador": "Administrator",
+        "analistaCpl": "CPL Analyst",
+        "coordenadorCpl": "CPL Coordinator",
+        "secretario": "Secretary",
+        "gestor": "Manager",
+        "auditor": "Auditor",
+        "dpo": "DPO / Data Officer"
+      },
+      "selecioneCargo": "Select a role",
+      "criar": "Add user",
+      "erroCriar": "Could not save. Check if the e-mail already exists, the role and the password (min. 8 characters).",
+      "mostrarInativos": "Show inactive",
+      "situacaoInativo": "inactive",
+      "resetarSenha": "Reset password",
+      "novaSenha": "New password (min. 8)",
+      "confirmarReset": "Confirm",
+      "resetOk": "Password reset.",
+      "erroReset": "Could not reset. Check the password (min. 8).",
+      "inativar": "Deactivate",
+      "reativar": "Reactivate",
+      "vazio": "No staff registered yet."
     }
   },
   "contestacao": {

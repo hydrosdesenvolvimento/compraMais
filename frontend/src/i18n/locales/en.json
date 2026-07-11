@@ -17,7 +17,8 @@
       "contestacoes": "Disputes",
       "auditoria": "Audit",
       "catalogos": "Catalogs",
-      "usuarios": "Users"
+      "usuarios": "Users",
+      "malote": "SEI Package"
     },
     "shell": {
       "menu": "MENU",
@@ -266,6 +267,51 @@
       "inativar": "Deactivate",
       "reativar": "Reactivate",
       "vazio": "No staff registered yet."
+    },
+    "malote": {
+      "titulo": "SEI Package",
+      "subtitulo": "Consolidate a supplier's approved documents into an ordered dossier (Company ID → Personal → Attachments → Certificates) optimized for SEI upload. Generation is asynchronous and durable; an indivisible piece above the limit is flagged for manual handling.",
+      "gerar": {
+        "titulo": "Generate new package",
+        "fornecedorId": "Supplier ID",
+        "editalId": "Notice ID",
+        "pecas": "Pieces (approved documents)",
+        "ref": "Reference",
+        "tamanho": "Size (bytes)",
+        "adicionarPeca": "Add piece",
+        "semPecas": "No pieces added.",
+        "enviar": "Generate package",
+        "enviado": "Generation requested — processing in the background.",
+        "erro": "Could not request generation. Check the fields and your access role."
+      },
+      "tipos": {
+        "cnpj": "Company ID",
+        "pessoal": "Personal document",
+        "anexo": "Notice attachment",
+        "certidao": "Certificate"
+      },
+      "filtros": {
+        "titulo": "Filters",
+        "fornecedorId": "Supplier",
+        "editalId": "Notice",
+        "status": "Status",
+        "todos": "All",
+        "aplicar": "Filter"
+      },
+      "status": {
+        "pendente": "Pending",
+        "gerado": "Generated",
+        "exportado": "Exported"
+      },
+      "lista": {
+        "fragmentos": "{{n}} fragment(s)",
+        "acimaLimite": "Piece above the limit — handle manually",
+        "exportar": "Export",
+        "exportado": "Exported.",
+        "jaExportado": "Already exported (idempotent).",
+        "atualizar": "Refresh",
+        "vazio": "No packages found."
+      }
     }
   },
   "contestacao": {

@@ -67,10 +67,12 @@ import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
 import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
 import { registrarRotasAuditoria } from './auditoria/adapters/auditoria-controller.js';
-import { GerarMalote } from './malote/application/gerar-malote.js';
+import { GerarMalote, type MaloteRepository } from './malote/application/gerar-malote.js';
 import { MaloteRepositoryMemory } from './malote/adapters/malote-repository-memory.js';
+import { MaloteRepositoryPg } from './malote/adapters/malote-repository-pg.js';
 import { registrarRotasMalote } from './malote/adapters/malote-controller.js';
 import { FilaMaloteMemory } from './malote/application/fila-malote.js';
+import { FilaMalotePg } from './malote/adapters/fila-malote-pg.js';
 import { GerirDireitosTitular } from './titular/application/gerir-direitos.js';
 import { ConsolidarPendencias } from './titular/application/consolidar-pendencias.js';
 import { SolicitacaoRepositoryMemory } from './titular/adapters/solicitacao-repository-memory.js';
@@ -245,11 +247,18 @@ export async function buildServer(): Promise<FastifyInstance> {
   const exportarTrilha = new ExportarTrilha(consultarTrilha);
   registrarRotasAuditoria(app, { consultar: consultarTrilha, exportar: exportarTrilha });
 
-  // Malote SEI (005 / Épico 6): geração assíncrona DURÁVEL (fila + retry, FR-002) + fragmentação + export idempotente
+  // Malote SEI (005 / Épico 6): geração assíncrona DURÁVEL (fila + retry, FR-002) + fragmentação + export idempotente.
+  // Persistência durável em Postgres quando disponível (agregado + fila em tabela); senão memória (testes sem banco).
+  // Antes era SEMPRE memória → malote e jobs enfileirados se perdiam no restart (perda silenciosa das Stories 6.1/6.2).
   let gerarMalote: GerarMalote;
-  const filaMalote = new FilaMaloteMemory((job) => gerarMalote.processarJob(job)); // adaptador pg/redis na infra
-  gerarMalote = new GerarMalote(new MaloteRepositoryMemory(), bus, filaMalote); // limite global SEI_MALOTE_LIMITE_MB
+  const maloteRepo: MaloteRepository = pool ? new MaloteRepositoryPg(pool) : new MaloteRepositoryMemory();
+  const filaMalote = pool
+    ? new FilaMalotePg(pool, (job) => gerarMalote.processarJob(job))
+    : new FilaMaloteMemory((job) => gerarMalote.processarJob(job));
+  gerarMalote = new GerarMalote(maloteRepo, bus, filaMalote); // limite global SEI_MALOTE_LIMITE_MB
   registrarRotasMalote(app, { gerar: gerarMalote });
+  // Recuperação no boot: reprocessa jobs pendentes/órfãos que sobreviveram a um restart (durabilidade FR-002).
+  if (filaMalote instanceof FilaMalotePg) await filaMalote.recuperar();
 
   // Tela única + Direitos do titular LGPD (006 / Épico 7)
   const solicitacoesRepo = new SolicitacaoRepositoryMemory();

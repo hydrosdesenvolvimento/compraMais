@@ -67,6 +67,13 @@ export interface UsuarioInternoView {
 }
 /** UC021 — opção de cargo do seletor (rótulo → papel RBAC efetivo). */
 export interface CargoOpcao { cargo: string; papel: string }
+/** UC010 — peça do malote SEI (documento aprovado): ordem legal CNPJ→Pessoal→Anexos→Certidões (RN008). */
+export type TipoPecaMalote = 'cnpj' | 'pessoal' | 'anexo' | 'certidao';
+export interface PecaMalote { tipo: TipoPecaMalote; ref: string; tamanhoBytes: number }
+/** UC010 — malote listado (QBE, FR-007). */
+export interface MaloteListaView { id: string; fornecedorId: string; editalId: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number }
+/** UC010 — detalhe do malote: status + contagem de peças/fragmentos + flag de peça indivisível acima do limite (FR-009). */
+export interface MaloteDetalheView { id: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number; pecas: number; pecaAcimaLimite: boolean }
 /** UC018: resultado da re-sincronização — status + proveniência `{quando, fonte}` da consulta oficial. */
 export interface SincronizacaoResultado { status: 'sucesso' | 'revisao' | 'erro'; quando?: string; fonte?: string }
 export interface EnderecoView { logradouro: string; numero: string; complemento?: string; bairro: string; cidade: string; uf: string; cep: string }
@@ -129,6 +136,12 @@ export const api = {
   acatarContestacao: (id: string, novoCnaes: string[]) => send(`/contestacoes-cnae/${id}/acatar`, 'POST', { novoCnaes }),
   recusarContestacao: (id: string, motivo: string) => send(`/contestacoes-cnae/${id}/recusar`, 'POST', { motivo }),
   auditoria: (params: URLSearchParams) => get<RegistroAuditoria[]>(`/auditoria?${params.toString()}`),
+
+  // UC010 — Malote SEI (CPL/Administrador). Geração assíncrona (202), QBE, exportação idempotente.
+  malotesListar: (params: URLSearchParams) => get<MaloteListaView[]>(`/malotes?${params.toString()}`),
+  maloteDetalhe: (id: string) => get<MaloteDetalheView>(`/malotes/${id}`),
+  maloteGerar: (body: { fornecedorId: string; editalId: string; pecas: PecaMalote[] }) => send<{ maloteId: string; status: string }>('/malotes', 'POST', body),
+  maloteExportar: (id: string) => send<{ status: string; jaExportado: boolean }>(`/malotes/${id}/exportar`, 'POST'),
 
   // UC020 — Catálogos base (Administrador). Leitura aberta; escritas exigem x-papel administrador.
   catalogoListar: (slug: CatalogoSlug, incluirInativos = false) =>

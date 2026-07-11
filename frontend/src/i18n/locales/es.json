@@ -17,7 +17,8 @@
       "contestacoes": "Impugnaciones",
       "auditoria": "Auditoría",
       "catalogos": "Catálogos",
-      "usuarios": "Usuarios"
+      "usuarios": "Usuarios",
+      "malote": "Valija SEI"
     },
     "shell": {
       "menu": "MENÚ",
@@ -266,6 +267,51 @@
       "inativar": "Inactivar",
       "reativar": "Reactivar",
       "vazio": "Aún no hay personal registrado."
+    },
+    "malote": {
+      "titulo": "Valija SEI",
+      "subtitulo": "Consolide la documentación aprobada de un proveedor en un expediente ordenado (CNPJ → Personal → Anexos → Certificados) y optimizado para la carga en el SEI. La generación es asíncrona y durable; una pieza indivisible por encima del límite se señala para tratamiento manual.",
+      "gerar": {
+        "titulo": "Generar nueva valija",
+        "fornecedorId": "ID del proveedor",
+        "editalId": "ID de la convocatoria",
+        "pecas": "Piezas (documentos aprobados)",
+        "ref": "Referencia",
+        "tamanho": "Tamaño (bytes)",
+        "adicionarPeca": "Agregar pieza",
+        "semPecas": "Ninguna pieza agregada.",
+        "enviar": "Generar valija",
+        "enviado": "Generación solicitada — procesando en segundo plano.",
+        "erro": "No se pudo solicitar la generación. Verifique los campos y su rol de acceso."
+      },
+      "tipos": {
+        "cnpj": "CNPJ",
+        "pessoal": "Documento personal",
+        "anexo": "Anexo de la convocatoria",
+        "certidao": "Certificado"
+      },
+      "filtros": {
+        "titulo": "Filtros",
+        "fornecedorId": "Proveedor",
+        "editalId": "Convocatoria",
+        "status": "Estado",
+        "todos": "Todos",
+        "aplicar": "Filtrar"
+      },
+      "status": {
+        "pendente": "Pendiente",
+        "gerado": "Generada",
+        "exportado": "Exportada"
+      },
+      "lista": {
+        "fragmentos": "{{n}} fragmento(s)",
+        "acimaLimite": "Pieza por encima del límite — tratar manualmente",
+        "exportar": "Exportar",
+        "exportado": "Exportada.",
+        "jaExportado": "Ya exportada (idempotente).",
+        "atualizar": "Actualizar",
+        "vazio": "No se encontraron valijas."
+      }
     }
   },
   "contestacao": {

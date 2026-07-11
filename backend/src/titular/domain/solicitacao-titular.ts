@@ -4,6 +4,17 @@ export type TipoDireito = 'acesso' | 'correcao' | 'exclusao';
 export type StatusSolicitacao = 'pendente' | 'atendida' | 'recusada';
 export type CategoriaDado = 'cadastral' | 'fiscal' | 'contratual';
 
+/** Snapshot de persistência (AD-33): estado plano gravado/reconstituído pelos adaptadores (memória/pg). */
+export interface SolicitacaoTitularState {
+  meta: MetadadosBase;
+  titularId: string;
+  tipo: TipoDireito;
+  detalhe: string | null;
+  categoria: CategoriaDado | null;
+  status: StatusSolicitacao;
+  resultado: string | null;
+}
+
 /**
  * Solicitação de direito do titular (LGPD art. 18, Constituição §V) — entidade rica (AD-33).
  * Exercida pelo PRÓPRIO titular (não por procurador — regra aplicada na borda/RBAC).
@@ -23,6 +34,20 @@ export class SolicitacaoTitular extends EntidadeBase {
 
   static solicitar(input: { id: string; titularId: string; tipo: TipoDireito; detalhe?: string | null; categoria?: CategoriaDado | null }): SolicitacaoTitular {
     return new SolicitacaoTitular(EntidadeBase.metaNova(input.id, input.titularId), input.titularId, input.tipo, input.detalhe ?? null, input.categoria ?? null, 'pendente', null);
+  }
+
+  /** Reconstitui a entidade a partir do snapshot persistido (adaptadores pg/memória). */
+  static deEstado(s: SolicitacaoTitularState): SolicitacaoTitular {
+    return new SolicitacaoTitular(s.meta, s.titularId, s.tipo, s.detalhe, s.categoria, s.status, s.resultado);
+  }
+
+  /** Snapshot plano para persistência (não expõe os campos privados diretamente). */
+  estado(): SolicitacaoTitularState {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      titularId: this.titularId, tipo: this.tipo, detalhe: this.detalhe, categoria: this.categoria,
+      status: this._status, resultado: this._resultado,
+    };
   }
 
   get status(): StatusSolicitacao { return this._status; }

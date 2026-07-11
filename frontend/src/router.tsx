@@ -14,6 +14,8 @@ import { Documentos } from './pages/publico/Documentos';
 import { Contestacao } from './pages/publico/Contestacao';
 import { MinhaContaConectada } from './pages/publico/MinhaContaConectada';
 import { ProcuradoresConectada } from './pages/publico/ProcuradoresConectada';
+import { PrivacidadeConectada } from './pages/publico/PrivacidadeConectada';
+import { AtendimentoLgpd } from './pages/admin/AtendimentoLgpd';
 import { estaAutenticado } from './lib/auth';
 import { PainelTitular } from './pages/publico/PainelTitular';
 import { Transparencia } from './pages/publico/Transparencia';
@@ -38,6 +40,7 @@ const MENU_FORNECEDOR: ItemMenu[] = [
   { rotuloKey: 'common.nav.documentos', href: '/documentos', cy: 'nav-documentos', icone: <IconeDocumentos {...ico} /> },
   { rotuloKey: 'common.nav.demandas', href: '/transparencia', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
   { rotuloKey: 'common.nav.procuradores', href: '/procuradores', cy: 'nav-procuradores', icone: <IconeUsuario {...ico} /> },
+  { rotuloKey: 'common.nav.privacidade', href: '/privacidade', cy: 'nav-privacidade', icone: <IconeDocumentos {...ico} /> },
 ];
 
 const MENU_ADMIN: ItemMenu[] = [
@@ -48,6 +51,7 @@ const MENU_ADMIN: ItemMenu[] = [
   { rotuloKey: 'common.nav.malote', href: '/admin/malote', cy: 'nav-malote', icone: <IconeDemandas {...ico} /> },
   { rotuloKey: 'common.nav.catalogos', href: '/admin/catalogos', cy: 'nav-catalogos', icone: <IconeDocumentos {...ico} /> },
   { rotuloKey: 'common.nav.usuarios', href: '/admin/usuarios', cy: 'nav-usuarios', icone: <IconeUsuario {...ico} /> },
+  { rotuloKey: 'common.nav.lgpd', href: '/admin/lgpd', cy: 'nav-lgpd', icone: <IconeCredenciamentos {...ico} /> },
   { rotuloKey: 'common.nav.auditoria', href: '/admin/auditoria', cy: 'nav-auditoria', icone: <IconeDocumentos {...ico} /> },
 ];
 
@@ -61,6 +65,7 @@ const fornecedorLayout = createRoute({ getParentRoute: () => rootRoute, id: 'for
 const rInicio = createRoute({ getParentRoute: () => fornecedorLayout, path: '/inicio', component: Inicio });
 const rMinhaConta = createRoute({ getParentRoute: () => fornecedorLayout, path: '/minha-conta', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: MinhaContaConectada });
 const rProcuradores = createRoute({ getParentRoute: () => fornecedorLayout, path: '/procuradores', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: ProcuradoresConectada });
+const rPrivacidade = createRoute({ getParentRoute: () => fornecedorLayout, path: '/privacidade', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: PrivacidadeConectada });
 const rEditais = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais', component: Editais });
 const rCredenciamento = createRoute({ getParentRoute: () => fornecedorLayout, path: '/credenciamento/$editalId', component: Credenciamento });
 const rContestarCnae = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais/contestar', component: () => <ContestarCnae editalId={DEMO_EDITAL_ID} /> });
@@ -78,6 +83,7 @@ const rAdminContest = createRoute({ getParentRoute: () => adminLayout, path: '/a
 const rAdminMalote = createRoute({ getParentRoute: () => adminLayout, path: '/admin/malote', component: GerarMalote });
 const rAdminCatalogos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/catalogos', component: ManterCatalogos });
 const rAdminUsuarios = createRoute({ getParentRoute: () => adminLayout, path: '/admin/usuarios', component: GerirUsuarios });
+const rAdminLgpd = createRoute({ getParentRoute: () => adminLayout, path: '/admin/lgpd', component: AtendimentoLgpd });
 const rAdminAudit = createRoute({ getParentRoute: () => adminLayout, path: '/admin/auditoria', component: ConsultaAuditoria });
 
 const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '*', beforeLoad: () => { throw redirect({ to: '/cadastro' }); } });
@@ -86,8 +92,8 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   cadastroRoute,
   redefinirSenhaRoute,
-  fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rEditais, rCredenciamento, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
-  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos, rAdminUsuarios, rAdminAudit]),
+  fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
+  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos, rAdminUsuarios, rAdminLgpd, rAdminAudit]),
   naoEncontrada,
 ]);
 

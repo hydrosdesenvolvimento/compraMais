@@ -28,8 +28,8 @@ describe('Editais — Vitrine filtrada por CNAE (UC003)', () => {
 
   it('lista os editais compatíveis recebidos, marcados como compatíveis', async () => {
     editaisCompativeis.mockResolvedValue([
-      { id: 'e1', objeto: 'Merenda escolar' },
-      { id: 'e2', objeto: 'Uniformes' },
+      { id: 'e1', objeto: 'Merenda escolar', secretariaId: 's1', prazoVigencia: '2099-12-31', quantitativos: 100 },
+      { id: 'e2', objeto: 'Uniformes', secretariaId: 's2', prazoVigencia: null, quantitativos: 50 },
     ]);
     renderVitrine();
 

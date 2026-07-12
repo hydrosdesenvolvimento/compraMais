@@ -515,38 +515,61 @@
     }
   },
   "inicio": {
+    "estado": {
+      "carregando": "Carregando seu painel…",
+      "semEmpresa": "Nenhuma empresa vinculada à sua sessão.",
+      "erro": "Não foi possível carregar os dados do painel."
+    },
     "cabecalho": {
       "bemVindo": "Bem-vindo, {{nome}}",
       "cnpjCidade": "CNPJ {{cnpj}} · {{cidade}}",
-      "statusCredenciado": "Status: Credenciado"
+      "status": "Status: {{status}}"
+    },
+    "statusFornecedor": {
+      "requerente": "Requerente",
+      "pendente_analise": "Pendente de análise",
+      "credenciado": "Credenciado",
+      "apto": "Apto",
+      "em_correcao": "Em correção"
     },
     "alertaErro": {
       "titulo_one": "{{count}} documento vencido",
       "titulo_other": "{{count}} documentos vencidos",
-      "descricao": "A <b>Certidão Municipal (PGM)</b> e o <b>Alvará de Funcionamento</b> estão vencidos. Editais que exigem esses documentos ficam bloqueados até a regularização.",
+      "descricao": "Documentos vencidos: <b>{{tipos}}</b>. Editais que exigem esses documentos ficam bloqueados até a regularização.",
       "botao": "Regularizar agora"
     },
     "alertaAtencao": {
       "titulo": "Uma certidão vence em breve",
-      "descricao": "Certidão Negativa de Débitos Federais vence em <b>{{dias}} dias</b> ({{data}}). A varredura diária do sistema já enviou aviso por <c>SMS e e-mail</c>. Atualize para não perder editais.",
+      "descricao": "O documento <b>{{tipo}}</b> vence em {{dias}} dias ({{data}}). Atualize para não perder editais.",
       "botao": "Atualizar documento"
     },
     "kpis": {
       "editaisCompativeis": "Editais compatíveis abertos",
-      "novos": "novos",
       "credenciamentosAndamento": "Credenciamentos em andamento",
       "documentosAprovados": "Documentos aprovados",
-      "demandaDistribuida": "Demanda distribuída ativa"
+      "demandaDistribuida": "Demanda distribuída ativa",
+      "demandaNaoAtiva": "Distribuição ainda não ativada"
     },
     "painelEditais": {
       "titulo": "Editais abertos compatíveis",
       "verTodos": "Ver todos",
       "iniciar": "Iniciar",
-      "mostrando": "Mostrando {{atual}} de {{total}} editais compatíveis"
+      "mostrando": "Mostrando {{atual}} de {{total}} editais compatíveis",
+      "vazio": "Nenhum edital compatível aberto no momento.",
+      "prazo_one": "Encerra em {{count}} dia",
+      "prazo_other": "Encerra em {{count}} dias",
+      "prazoHoje": "Encerra hoje",
+      "prazoEncerrado": "Prazo encerrado"
     },
     "painelCredenciamentos": {
       "titulo": "Credenciamentos em andamento",
-      "verMeus": "Ver meus credenciamentos"
+      "verMeus": "Ver meus credenciamentos",
+      "vazio": "Você não tem credenciamentos em andamento."
+    },
+    "credStatus": {
+      "iniciado": "Em análise",
+      "aceito": "Termo aceito",
+      "cancelado": "Cancelado"
     }
   },
   "minhaConta": {

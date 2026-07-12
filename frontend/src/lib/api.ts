@@ -21,7 +21,7 @@ function headers(extra?: Record<string, string>): Record<string, string> | undef
 
 async function get<T>(url: string): Promise<T> {
   const r = await fetch(url, { headers: headers() });
-  if (!r.ok) throw new HttpError(r.status, url);
+  if (!r.ok) throw await HttpError.de(r, url);
   return (await r.json()) as T;
 }
 
@@ -31,12 +31,37 @@ async function send<T>(url: string, method: string, body?: unknown): Promise<T> 
     headers: headers(body !== undefined ? { 'content-type': 'application/json' } : undefined),
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  if (!r.ok) throw new HttpError(r.status, url);
+  if (!r.ok) throw await HttpError.de(r, url);
   return (r.status === 204 ? undefined : await r.json()) as T;
 }
 
+/**
+ * Erro HTTP que preserva o corpo de erro padrão do backend (`{ codigo, mensagem }`). O `codigo` é um
+ * identificador estável (mapeável a texto localizado — ver `lib/erros.ts`); a `mensagem` vem em inglês
+ * (o backend não localiza) e serve de fallback. Sem esses campos, o front não tinha como dar feedback.
+ */
 export class HttpError extends Error {
-  constructor(readonly status: number, url: string) { super(`HTTP ${status} em ${url}`); this.name = 'HttpError'; }
+  constructor(
+    readonly status: number,
+    readonly url: string,
+    readonly codigo?: string,
+    readonly mensagem?: string,
+  ) {
+    super(mensagem ?? `HTTP ${status} em ${url}`);
+    this.name = 'HttpError';
+  }
+
+  /** Constrói a partir da Response, lendo o corpo `{ codigo, mensagem }` quando houver (JSON). */
+  static async de(r: Response, url: string): Promise<HttpError> {
+    let codigo: string | undefined;
+    let mensagem: string | undefined;
+    try {
+      const corpo = (await r.json()) as { codigo?: unknown; mensagem?: unknown };
+      if (typeof corpo?.codigo === 'string') codigo = corpo.codigo;
+      if (typeof corpo?.mensagem === 'string') mensagem = corpo.mensagem;
+    } catch { /* corpo vazio ou não-JSON: fica só o status */ }
+    return new HttpError(r.status, url, codigo, mensagem);
+  }
 }
 
 /**
@@ -46,7 +71,7 @@ export class HttpError extends Error {
  */
 export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: string }> {
   const r = await fetch(url, { headers: headers() });
-  if (!r.ok) throw new HttpError(r.status, url);
+  if (!r.ok) throw await HttpError.de(r, url);
   const disp = r.headers.get('content-disposition') ?? '';
   const m = /filename="?([^"]+?)"?(?:;|$)/.exec(disp);
   return { blob: await r.blob(), nome: m?.[1] ?? 'download' };

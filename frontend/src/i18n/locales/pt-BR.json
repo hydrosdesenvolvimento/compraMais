@@ -59,6 +59,9 @@
       "auditor": "Auditor",
       "dpo": "Encarregado (DPO)",
       "leitura": "Somente leitura"
+    },
+    "toast": {
+      "fechar": "Fechar"
     }
   },
   "auth": {
@@ -338,6 +341,37 @@
         "vazio": "Nenhum malote encontrado."
       }
     }
+  },
+  "erros": {
+    "status": "Erro inesperado (status {{status}}).",
+    "rede": "Falha de conexão. Verifique sua internet e tente novamente.",
+    "RBAC": "Você não tem permissão para esta ação.",
+    "NAO_AUTENTICADO": "Sessão expirada. Entre novamente.",
+    "FornecedorNaoEncontrado": "Fornecedor não encontrado.",
+    "EditalNaoEncontrado": "Edital não encontrado.",
+    "DocumentoNaoEncontrado": "Documento não encontrado.",
+    "CredenciamentoNaoEncontrado": "Credenciamento não encontrado.",
+    "ContestacaoNaoEncontrada": "Contestação não encontrada.",
+    "MaloteNaoEncontrado": "Malote não encontrado.",
+    "SolicitacaoNaoEncontrada": "Solicitação não encontrada.",
+    "UsuarioNaoEncontrado": "Usuário não encontrado.",
+    "ProcuradorNaoEncontrado": "Procurador não encontrado.",
+    "ItemCatalogoNaoEncontrado": "Item de catálogo não encontrado.",
+    "TitularNaoEncontrado": "Titular não encontrado.",
+    "SenhaAtualIncorreta": "Senha atual incorreta.",
+    "SenhaFraca": "A nova senha não atende aos requisitos de segurança.",
+    "CredenciaisInvalidas": "E-mail ou senha inválidos.",
+    "EmailJaCadastrado": "Este e-mail já está cadastrado.",
+    "CnpjJaCadastrado": "Este CNPJ já está cadastrado.",
+    "TokenResetInvalido": "Link de redefinição inválido ou expirado.",
+    "ApenasTitularConvida": "Apenas o titular pode convidar procuradores.",
+    "ApenasTitularGere": "Apenas o titular pode gerir procuradores.",
+    "LGPDTitular": "Apenas o próprio titular pode exercer este direito.",
+    "DescarteRetido": "Descarte bloqueado: o dado ainda está em retenção legal.",
+    "JustificativaObrigatoria": "Informe a justificativa.",
+    "MotivoRecusaObrigatorio": "Informe o motivo da recusa.",
+    "CampoNaoEditavel": "Este campo não pode ser editado.",
+    "TransicaoInvalida": "Operação não permitida no estado atual."
   },
   "contestacao": {
     "titulo": "Meus Credenciamentos",

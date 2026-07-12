@@ -23,16 +23,19 @@ export function AtendimentoLgpd() {
   const ok = (texto: string) => { setFeedback({ tom: 'ok', texto }); void invalidar(); };
 
   const atender = useMutation({
+    meta: { semToast: true }, // esta tela já dá feedback inline — evita toast duplicado
     mutationFn: ({ id, r }: { id: string; r: string }) => api.atenderSolicitacao(id, r || t('adminLgpd.atendidaPadrao')),
     onSuccess: () => ok(t('adminLgpd.feedback.atendida')),
     onError: () => setFeedback({ tom: 'erro', texto: t('adminLgpd.feedback.erro') }),
   });
   const recusar = useMutation({
+    meta: { semToast: true }, // idem: feedback inline
     mutationFn: ({ id, m }: { id: string; m: string }) => api.recusarSolicitacao(id, m),
     onSuccess: () => ok(t('adminLgpd.feedback.recusada')),
     onError: () => setFeedback({ tom: 'erro', texto: t('adminLgpd.feedback.erro') }),
   });
   const descartar = useMutation({
+    meta: { semToast: true }, // idem: trata 409 (retido) inline com mensagem específica
     mutationFn: (id: string) => api.descartarSolicitacao(id, new Date().toISOString()),
     onSuccess: () => ok(t('adminLgpd.feedback.descartada')),
     // 409 = retido pela política de retenção legal (FR-008).

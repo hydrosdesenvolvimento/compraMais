@@ -59,6 +59,9 @@
       "auditor": "Auditor",
       "dpo": "Encargado (DPO)",
       "leitura": "Solo lectura"
+    },
+    "toast": {
+      "fechar": "Cerrar"
     }
   },
   "auth": {
@@ -338,6 +341,37 @@
         "vazio": "No se encontraron valijas."
       }
     }
+  },
+  "erros": {
+    "status": "Error inesperado (estado {{status}}).",
+    "rede": "Fallo de conexión. Verifica tu internet e inténtalo de nuevo.",
+    "RBAC": "No tienes permiso para esta acción.",
+    "NAO_AUTENTICADO": "Sesión expirada. Inicia sesión nuevamente.",
+    "FornecedorNaoEncontrado": "Proveedor no encontrado.",
+    "EditalNaoEncontrado": "Convocatoria no encontrada.",
+    "DocumentoNaoEncontrado": "Documento no encontrado.",
+    "CredenciamentoNaoEncontrado": "Acreditación no encontrada.",
+    "ContestacaoNaoEncontrada": "Impugnación no encontrada.",
+    "MaloteNaoEncontrado": "Paquete no encontrado.",
+    "SolicitacaoNaoEncontrada": "Solicitud no encontrada.",
+    "UsuarioNaoEncontrado": "Usuario no encontrado.",
+    "ProcuradorNaoEncontrado": "Apoderado no encontrado.",
+    "ItemCatalogoNaoEncontrado": "Elemento de catálogo no encontrado.",
+    "TitularNaoEncontrado": "Titular no encontrado.",
+    "SenhaAtualIncorreta": "La contraseña actual es incorrecta.",
+    "SenhaFraca": "La nueva contraseña no cumple los requisitos de seguridad.",
+    "CredenciaisInvalidas": "Correo o contraseña inválidos.",
+    "EmailJaCadastrado": "Este correo ya está registrado.",
+    "CnpjJaCadastrado": "Esta empresa (CNPJ) ya está registrada.",
+    "TokenResetInvalido": "El enlace de restablecimiento es inválido o expiró.",
+    "ApenasTitularConvida": "Solo el titular puede invitar apoderados.",
+    "ApenasTitularGere": "Solo el titular puede gestionar apoderados.",
+    "LGPDTitular": "Solo el propio titular puede ejercer este derecho.",
+    "DescarteRetido": "Descarte bloqueado: el dato aún está en retención legal.",
+    "JustificativaObrigatoria": "Indica la justificación.",
+    "MotivoRecusaObrigatorio": "Indica el motivo del rechazo.",
+    "CampoNaoEditavel": "Este campo no se puede editar.",
+    "TransicaoInvalida": "Operación no permitida en el estado actual."
   },
   "contestacao": {
     "titulo": "Mis Acreditaciones",

@@ -22,11 +22,13 @@ export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
   const invalidar = () => { void qc.invalidateQueries({ queryKey: ['pendencias-consolidadas', fornecedorId] }); };
 
   const reenviar = useMutation({
+    meta: { semToast: true }, // esta tela já exibe feedback inline (pill) — evita toast duplicado
     mutationFn: (docId: string) => api.reenviarDocumento(docId),
     onSuccess: () => { setFeedback({ tom: 'ok', texto: t('contestacao.acao.sucesso') }); invalidar(); },
     onError: () => setFeedback({ tom: 'erro', texto: t('contestacao.acao.erro') }),
   });
   const reconsultar = useMutation({
+    meta: { semToast: true }, // idem: feedback inline nesta tela
     mutationFn: () => api.reconsultarElegibilidade(fornecedorId, perfil?.cnpj ?? ''),
     onSuccess: () => { setFeedback({ tom: 'ok', texto: t('contestacao.acao.sucesso') }); invalidar(); },
     onError: () => setFeedback({ tom: 'erro', texto: t('contestacao.acao.erro') }),

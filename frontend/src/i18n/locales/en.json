@@ -59,6 +59,9 @@
       "auditor": "Auditor",
       "dpo": "Data Protection Officer",
       "leitura": "Read-only"
+    },
+    "toast": {
+      "fechar": "Close"
     }
   },
   "auth": {
@@ -338,6 +341,37 @@
         "vazio": "No packages found."
       }
     }
+  },
+  "erros": {
+    "status": "Unexpected error (status {{status}}).",
+    "rede": "Connection failed. Check your internet and try again.",
+    "RBAC": "You don't have permission for this action.",
+    "NAO_AUTENTICADO": "Session expired. Please sign in again.",
+    "FornecedorNaoEncontrado": "Supplier not found.",
+    "EditalNaoEncontrado": "Notice not found.",
+    "DocumentoNaoEncontrado": "Document not found.",
+    "CredenciamentoNaoEncontrado": "Accreditation not found.",
+    "ContestacaoNaoEncontrada": "Challenge not found.",
+    "MaloteNaoEncontrado": "Bundle not found.",
+    "SolicitacaoNaoEncontrada": "Request not found.",
+    "UsuarioNaoEncontrado": "User not found.",
+    "ProcuradorNaoEncontrado": "Attorney not found.",
+    "ItemCatalogoNaoEncontrado": "Catalog item not found.",
+    "TitularNaoEncontrado": "Data subject not found.",
+    "SenhaAtualIncorreta": "Current password is incorrect.",
+    "SenhaFraca": "The new password doesn't meet the security requirements.",
+    "CredenciaisInvalidas": "Invalid email or password.",
+    "EmailJaCadastrado": "This email is already registered.",
+    "CnpjJaCadastrado": "This company (CNPJ) is already registered.",
+    "TokenResetInvalido": "Reset link is invalid or expired.",
+    "ApenasTitularConvida": "Only the account holder can invite attorneys.",
+    "ApenasTitularGere": "Only the account holder can manage attorneys.",
+    "LGPDTitular": "Only the data subject can exercise this right.",
+    "DescarteRetido": "Disposal blocked: the data is still under legal retention.",
+    "JustificativaObrigatoria": "Please provide a justification.",
+    "MotivoRecusaObrigatorio": "Please provide a reason for the rejection.",
+    "CampoNaoEditavel": "This field can't be edited.",
+    "TransicaoInvalida": "This operation isn't allowed in the current state."
   },
   "contestacao": {
     "titulo": "My Accreditations",

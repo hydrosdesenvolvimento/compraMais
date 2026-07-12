@@ -17,4 +17,11 @@ export class CredenciamentoRepositoryMemory implements CredenciamentoRepository 
     }
     return cancelado;
   }
+
+  /** Todos os credenciamentos do fornecedor, do mais recente ao mais antigo (registerDate desc). */
+  async listarPorFornecedor(fornecedorId: string): Promise<Credenciamento[]> {
+    return [...this.map.values()]
+      .filter((c) => c.fornecedorId === fornecedorId)
+      .sort((a, b) => b.registerDate.localeCompare(a.registerDate));
+  }
 }

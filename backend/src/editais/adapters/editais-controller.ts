@@ -6,7 +6,13 @@ export function registrarRotasEditais(app: FastifyInstance, deps: { vitrine: Lis
   app.get('/editais', async (req, reply) => {
     const fornecedorId = String((req.headers['x-empresa-id'] ?? ''));
     const lista = await deps.vitrine.listar(fornecedorId);
-    return reply.send(lista.map((e) => ({ id: e.id, objeto: e['objeto'] })));
+    // Projeção da vitrine (FR-009): além de id/objeto, expõe a secretaria demandante e o prazo de
+    // vigência para o portal do fornecedor (home) montar o painel de editais com prazo e origem, sem
+    // um segundo round-trip. `secretariaId` é resolvido para sigla no front (catálogo de secretarias).
+    return reply.send(lista.map((e) => ({
+      id: e.id, objeto: e.objeto, secretariaId: e.secretariaId,
+      prazoVigencia: e.prazoVigencia, quantitativos: e.quantitativos,
+    })));
   });
 
   app.get('/editais/:id', async (req, reply) => {

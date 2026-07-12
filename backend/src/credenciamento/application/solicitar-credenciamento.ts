@@ -10,6 +10,8 @@ export interface CredenciamentoRepository {
   salvar(c: Credenciamento): Promise<void>;
   porId(id: string): Promise<Credenciamento | null>;
   porFornecedorEEdital(fornecedorId: string, editalId: string): Promise<Credenciamento | null>;
+  /** Todos os credenciamentos do fornecedor (qualquer estado), do mais recente ao mais antigo. */
+  listarPorFornecedor(fornecedorId: string): Promise<Credenciamento[]>;
 }
 
 export type Actor = { userId: string; empresaId?: string };

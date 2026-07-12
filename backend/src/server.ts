@@ -60,6 +60,7 @@ import { DividaMockGateway } from './shared/acl/divida/divida-mock.js';
 import { registrarRotasElegibilidade } from './credenciamento/adapters/elegibilidade-controller.js';
 import { registrarRotasRegularizacao } from './credenciamento/adapters/regularizacao-controller.js';
 import { SolicitarCredenciamento, type CredenciamentoRepository } from './credenciamento/application/solicitar-credenciamento.js';
+import { ListarCredenciamentos } from './credenciamento/application/listar-credenciamentos.js';
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
@@ -233,7 +234,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   // `pendente_analise`; o cancelamento (A2) é permitido antes da distribuição.
   const credRepo: CredenciamentoRepository = pool ? new CredenciamentoRepositoryPg(pool) : new CredenciamentoRepositoryMemory();
   const solicitarCredenciamento = new SolicitarCredenciamento(credRepo, vitrine, fornecedores, bus);
-  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento });
+  // Leitura da home do fornecedor: lista seus credenciamentos enriquecidos com objeto/secretaria do
+  // edital (reusa o `editaisRepo` já definido acima). Somente leitura — não altera o domínio.
+  const listarCredenciamentos = new ListarCredenciamentos(credRepo, editaisRepo);
+  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();

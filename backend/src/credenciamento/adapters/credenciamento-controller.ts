@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { SolicitarCredenciamento, Actor } from '../application/solicitar-credenciamento.js';
+import type { ListarCredenciamentos } from '../application/listar-credenciamentos.js';
 
 /** Papéis do próprio fornecedor autorizados a operar o credenciamento (dono do vínculo). */
 const PERFIS_FORNECEDOR = ['titular', 'procurador'];
@@ -8,7 +9,14 @@ const PERFIS_FORNECEDOR = ['titular', 'procurador'];
  * Controller do credenciamento (UC004). O fornecedor é resolvido por `x-empresa-id`; `x-user-id` é o
  * ator (rastro AD-30). Conclusão por Termo de Aceite (RN016) e cancelamento antes da distribuição (A2).
  */
-export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento }): void {
+export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento; listar: ListarCredenciamentos }): void {
+  // Leitura: credenciamentos do fornecedor para o portal (home). Somente "em andamento" por padrão
+  // (não cancelados); resolvido por `:id` como as demais rotas de leitura do fornecedor (documentos).
+  app.get('/fornecedores/:id/credenciamentos', async (req, reply) => {
+    const { id } = req.params as { id: string };
+    return reply.send(await deps.listar.doFornecedor(id));
+  });
+
   app.post('/editais/:id/credenciamentos', async (req, reply) => {
     if (!fornecedor(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only the supplier (titular/procurador) can start a credenciamento.' });
     const empresaId = String(req.headers['x-empresa-id'] ?? '');

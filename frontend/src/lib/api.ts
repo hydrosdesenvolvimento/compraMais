@@ -78,9 +78,14 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 }
 
 // --- Tipos de leitura ---
-export interface EditalItem { id: string; objeto: string }
+export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null; quantitativos: number }
 export interface EditalGestao { id: string; objeto: string; secretariaId: string; situacao: string }
-export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado' }
+export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: 'pendente' | 'aprovado' | 'reprovado'; dataValidade: string | null }
+/** Resumo de um credenciamento do fornecedor (home) — estado + objeto/secretaria do edital vinculado. */
+export interface CredenciamentoResumoView {
+  id: string; editalId: string; estado: 'iniciado' | 'aceito' | 'cancelado';
+  objeto: string | null; secretariaId: string | null;
+}
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
 export interface Transparencia { editaisVigentes: number; secretarias: string[]; segmentos: string[] }
@@ -152,6 +157,8 @@ export const api = {
   editaisCompativeis: () => get<EditalItem[]>('/editais'),
   transparencia: () => get<Transparencia>('/transparencia'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
+  // Home do fornecedor — seus credenciamentos "em andamento" (o backend exclui os cancelados).
+  meusCredenciamentos: (fid: string) => get<CredenciamentoResumoView[]>(`/fornecedores/${fid}/credenciamentos`),
   pendencias: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias`),
   pendenciasConsolidadas: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias-consolidadas`),
   // UC016 (tela única) — ações delegadas aos módulos donos:

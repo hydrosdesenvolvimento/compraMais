@@ -515,38 +515,61 @@
     }
   },
   "inicio": {
+    "estado": {
+      "carregando": "Loading your dashboard…",
+      "semEmpresa": "No company linked to your session.",
+      "erro": "Could not load dashboard data."
+    },
     "cabecalho": {
       "bemVindo": "Welcome, {{nome}}",
       "cnpjCidade": "CNPJ {{cnpj}} · {{cidade}}",
-      "statusCredenciado": "Status: Accredited"
+      "status": "Status: {{status}}"
+    },
+    "statusFornecedor": {
+      "requerente": "Applicant",
+      "pendente_analise": "Pending review",
+      "credenciado": "Accredited",
+      "apto": "Eligible",
+      "em_correcao": "Under correction"
     },
     "alertaErro": {
       "titulo_one": "{{count}} expired document",
       "titulo_other": "{{count}} expired documents",
-      "descricao": "The <b>Municipal Clearance Certificate (PGM)</b> and the <b>Operating License</b> have expired. Notices requiring these documents remain blocked until they are brought up to date.",
-      "botao": "Resolve now"
+      "descricao": "Expired documents: <b>{{tipos}}</b>. Notices requiring these documents stay blocked until they are renewed.",
+      "botao": "Fix now"
     },
     "alertaAtencao": {
       "titulo": "A certificate expires soon",
-      "descricao": "The Federal Tax Clearance Certificate expires in <b>{{dias}} days</b> ({{data}}). The system's daily scan has already sent a notice by <c>SMS and email</c>. Update it so you don't miss any notices.",
+      "descricao": "The <b>{{tipo}}</b> document expires in {{dias}} days ({{data}}). Renew it so you don't miss notices.",
       "botao": "Update document"
     },
     "kpis": {
       "editaisCompativeis": "Open compatible notices",
-      "novos": "new",
       "credenciamentosAndamento": "Accreditations in progress",
       "documentosAprovados": "Approved documents",
-      "demandaDistribuida": "Active distributed demand"
+      "demandaDistribuida": "Active distributed demand",
+      "demandaNaoAtiva": "Distribution not active yet"
     },
     "painelEditais": {
       "titulo": "Open compatible notices",
-      "verTodos": "View all",
+      "verTodos": "See all",
       "iniciar": "Start",
-      "mostrando": "Showing {{atual}} of {{total}} compatible notices"
+      "mostrando": "Showing {{atual}} of {{total}} compatible notices",
+      "vazio": "No compatible open notices at the moment.",
+      "prazo_one": "Closes in {{count}} day",
+      "prazo_other": "Closes in {{count}} days",
+      "prazoHoje": "Closes today",
+      "prazoEncerrado": "Deadline passed"
     },
     "painelCredenciamentos": {
       "titulo": "Accreditations in progress",
-      "verMeus": "View my accreditations"
+      "verMeus": "See my accreditations",
+      "vazio": "You have no accreditations in progress."
+    },
+    "credStatus": {
+      "iniciado": "Under review",
+      "aceito": "Term accepted",
+      "cancelado": "Canceled"
     }
   },
   "minhaConta": {

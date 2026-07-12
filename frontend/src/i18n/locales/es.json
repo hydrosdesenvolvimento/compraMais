@@ -515,38 +515,61 @@
     }
   },
   "inicio": {
+    "estado": {
+      "carregando": "Cargando tu panel…",
+      "semEmpresa": "Ninguna empresa vinculada a tu sesión.",
+      "erro": "No se pudieron cargar los datos del panel."
+    },
     "cabecalho": {
       "bemVindo": "Bienvenido, {{nome}}",
       "cnpjCidade": "CNPJ {{cnpj}} · {{cidade}}",
-      "statusCredenciado": "Estado: Acreditado"
+      "status": "Estado: {{status}}"
+    },
+    "statusFornecedor": {
+      "requerente": "Solicitante",
+      "pendente_analise": "Pendiente de análisis",
+      "credenciado": "Acreditado",
+      "apto": "Apto",
+      "em_correcao": "En corrección"
     },
     "alertaErro": {
       "titulo_one": "{{count}} documento vencido",
       "titulo_other": "{{count}} documentos vencidos",
-      "descricao": "El <b>Certificado Municipal (PGM)</b> y la <b>Licencia de Funcionamiento</b> están vencidos. Las convocatorias que exigen estos documentos permanecen bloqueadas hasta su regularización.",
+      "descricao": "Documentos vencidos: <b>{{tipos}}</b>. Las convocatorias que exigen estos documentos quedan bloqueadas hasta su regularización.",
       "botao": "Regularizar ahora"
     },
     "alertaAtencao": {
       "titulo": "Un certificado vence pronto",
-      "descricao": "El Certificado de Regularidad de Deudas Federales vence en <b>{{dias}} días</b> ({{data}}). El barrido diario del sistema ya envió un aviso por <c>SMS y correo electrónico</c>. Actualízalo para no perder convocatorias.",
+      "descricao": "El documento <b>{{tipo}}</b> vence en {{dias}} días ({{data}}). Actualízalo para no perder convocatorias.",
       "botao": "Actualizar documento"
     },
     "kpis": {
       "editaisCompativeis": "Convocatorias compatibles abiertas",
-      "novos": "nuevos",
       "credenciamentosAndamento": "Acreditaciones en curso",
       "documentosAprovados": "Documentos aprobados",
-      "demandaDistribuida": "Demanda distribuida activa"
+      "demandaDistribuida": "Demanda distribuida activa",
+      "demandaNaoAtiva": "Distribución aún no activada"
     },
     "painelEditais": {
-      "titulo": "Convocatorias compatibles abiertas",
+      "titulo": "Convocatorias abiertas compatibles",
       "verTodos": "Ver todas",
       "iniciar": "Iniciar",
-      "mostrando": "Mostrando {{atual}} de {{total}} convocatorias compatibles"
+      "mostrando": "Mostrando {{atual}} de {{total}} convocatorias compatibles",
+      "vazio": "No hay convocatorias compatibles abiertas por el momento.",
+      "prazo_one": "Cierra en {{count}} día",
+      "prazo_other": "Cierra en {{count}} días",
+      "prazoHoje": "Cierra hoy",
+      "prazoEncerrado": "Plazo cerrado"
     },
     "painelCredenciamentos": {
       "titulo": "Acreditaciones en curso",
-      "verMeus": "Ver mis acreditaciones"
+      "verMeus": "Ver mis acreditaciones",
+      "vazio": "No tienes acreditaciones en curso."
+    },
+    "credStatus": {
+      "iniciado": "En análisis",
+      "aceito": "Término aceptado",
+      "cancelado": "Cancelado"
     }
   },
   "minhaConta": {

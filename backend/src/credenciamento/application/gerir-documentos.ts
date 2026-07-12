@@ -48,9 +48,16 @@ export class GerirDocumentos {
     return { documentoId: id };
   }
 
-  /** Lista com situação vigente|expirado; só vigentes são reutilizáveis. */
-  async listar(fornecedorId: string): Promise<Array<{ id: string; tipo: string; situacao: 'vigente' | 'expirado' }>> {
+  /**
+   * Lista com situação vigente|expirado; só vigentes são reutilizáveis. Expõe também o `status` de
+   * covalidação (pendente|aprovado|reprovado) e a `dataValidade`, para o portal do fornecedor derivar
+   * indicadores (aprovados/total) e alertas (vencidos, a vencer em breve) sem novos endpoints.
+   */
+  async listar(fornecedorId: string): Promise<Array<{ id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: StatusDoc; dataValidade: string | null }>> {
     const hoje = this.hoje();
-    return (await this.repo.listar(fornecedorId)).map((d) => ({ id: d.id, tipo: d.tipo, situacao: d.estaVigente(hoje) ? 'vigente' : 'expirado' }));
+    return (await this.repo.listar(fornecedorId)).map((d) => ({
+      id: d.id, tipo: d.tipo, situacao: d.estaVigente(hoje) ? 'vigente' : 'expirado',
+      status: d.status, dataValidade: d.dataValidade,
+    }));
   }
 }

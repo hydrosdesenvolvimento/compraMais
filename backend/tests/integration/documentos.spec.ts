@@ -10,7 +10,7 @@ describe('Repositório documental (US3 / FR-007-008)', () => {
   it('faz upload (cifrado) e lista como vigente', async () => {
     const { documentoId } = await g.enviar({ fornecedorId: 'f1', tipo: 'contratoSocial', formato: 'pdf', conteudo: 'X' });
     const lista = await g.listar('f1');
-    expect(lista).toContainEqual({ id: documentoId, tipo: 'contratoSocial', situacao: 'vigente' });
+    expect(lista).toContainEqual({ id: documentoId, tipo: 'contratoSocial', situacao: 'vigente', status: 'pendente', dataValidade: null });
   });
 
   it('sinaliza expirado quando a validade passou', async () => {

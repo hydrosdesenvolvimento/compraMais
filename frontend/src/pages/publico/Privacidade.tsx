@@ -21,6 +21,7 @@ export function Privacidade({ titularId }: { titularId: string }) {
   const { data: solicitacoes = [], isLoading } = useQuery({ queryKey: chave, queryFn: () => api.minhasSolicitacoes(titularId) });
 
   const solicitar = useMutation({
+    meta: { semToast: true }, // feedback de erro é inline nesta tela — evita toast duplicado
     mutationFn: () => api.solicitarDireito(tipo, detalhe.trim() || undefined, tipo === 'exclusao' && categoria ? categoria : undefined),
     onSuccess: () => { setDetalhe(''); setCategoria(''); setErro(null); void qc.invalidateQueries({ queryKey: chave }); },
     onError: () => setErro(t('privacidade.erro')),

@@ -25,6 +25,7 @@ export function ProcuradoresConectada() {
   });
 
   const convidar = useMutation({
+    meta: { semToast: true }, // erro do convite é exibido inline — evita toast duplicado
     mutationFn: (identificador: string) => api.convidarProcurador(fornecedorId as string, identificador),
     onSuccess: () => { setErroConvite(null); void qc.invalidateQueries({ queryKey: ['procuradores', fornecedorId] }); },
     onError: () => setErroConvite(t('procuradores.convite.erro')),

@@ -1,10 +1,76 @@
 ---
 name: 'Compra Mais — Arbitragem 01'
 type: decision-request
-status: aberto
+status: respondido-parcialmente
 created: '2026-07-16'
+respondido: '2026-07-16'
+respondente: 'Prefeitura de Rio Branco'
+fechadas: [1, 2, 3, 4, 7]
+pendentes-de-parecer: [5, 6]
 destinatarios: [Prefeitura de Rio Branco, Procuradoria, DPO, SMGA]
 bloqueia: ['spec/docs/epics.md', 'spec/docs/casos-de-uso.md', 'spec/docs/prd.md']
+---
+
+# ⬛ RESPOSTA — 2026-07-16
+
+**Respondente:** Prefeitura de Rio Branco (via solicitante).
+
+| # | Pergunta | Resposta | Estado |
+|---|---|---|---|
+| **1** | Cor do sistema | **B** — azul institucional `#0061AE` (manual da Prefeitura) | ✅ **Fechada** |
+| **2** | Qual conjunto é o contrato | **B** — conjunto validado (3 de julho, 17 requisitos) | ✅ **Fechada** |
+| **3** | Identificadores colididos | **B** — renumerar o conjunto técnico | ✅ **Fechada** |
+| **4** | Prova de vida | **A** — fica fora desta entrega | ✅ **Fechada** |
+| **5** | Impedimento por dívida | **B** — permanente ("Tolerância Zero") | 🟡 **Posição do cliente** — pendente de parecer da Procuradoria |
+| **6** | Regras de proteção de dados | **B** — remover | 🟡 **Posição do cliente** — pendente de parecer do encarregado (a designar) |
+| **7** | Distribuição | **A** — por **item** | ✅ **Fechada** |
+
+## Por que 5 e 6 não estão fechadas
+
+**Não é recusa da resposta. É registro dela no lugar certo.**
+
+Este documento roteou a **5 à Procuradoria** (Envelope 2) e a **6 ao encarregado de dados**
+(Envelope 3) porque nenhuma das duas é escolha de gestão — as duas são **mérito jurídico**. As sete
+foram respondidas pela Prefeitura, inclusive as duas endereçadas a outros. A 6, em particular, foi
+endereçada a um cargo que **ainda não foi designado** (a designação é ela própria exigência da Lei
+13.709/2018, art. 41).
+
+**O cliente pode e deve ter posição.** A posição vira regra **depois** do parecer, não antes.
+Enquanto isso:
+
+- **5 e 6 seguem para parecer** com a posição do cliente declarada — não como pergunta em aberto,
+  mas como *"a Prefeitura se posiciona por B; a Procuradoria/o encarregado se manifestam sobre o mérito."*
+- **Nenhum código de conformidade é removido antes do parecer.** Se o parecer confirmar B, remover
+  leva um dia. Se recusar, ter removido custa meses. A assimetria decide, não a opinião.
+
+## ⚠️ Contradição a levar de volta ao cliente
+
+O protótipo aprovado pela Prefeitura (`spec/Prototipo/index.html`, a landing) anuncia, em destaque:
+
+> *"O Compra Mais conecta o **comércio local** às demandas da cidade."*
+> *"**42%** são MEIs locais"*
+
+A resposta **5 = B** expulsa permanentemente da plataforma qualquer empresa com débito ativo
+detectado. Um MEI é, por definição, a empresa mais propensa a um débito transitório — a regra não
+filtra fraude; filtra o **público-alvo declarado do programa**.
+
+**As duas coisas estão assinadas pela mesma parte.** Não cabe a esta equipe escolher qual vale.
+Cabe apontar que elas não podem valer juntas.
+
+## Parecer contrário — Business Analyst (registrado a pedido, 2026-07-16)
+
+Sobre a **5 (LAC-08)**: a redação "impedir permanentemente" conflita, na avaliação interna, com a
+**LC 123/2006** e a **Lei 14.133/2021**, e com o objetivo declarado do programa. **Mérito jurídico 🔴.**
+
+Sobre a **6 (LAC-09)**: a **Lei 13.709/2018** aplica-se ao tratamento independentemente do que a
+documentação do projeto diga. O sistema trata nome, e-mail, telefone e **CPF** (`cpfResponsavel`) de
+pessoas naturais — titulares e procuradores. Remover as regras do documento **não remove a obrigação**:
+remove a base legal mapeada, o relatório de impacto, a retenção por categoria e o encarregado — isto é,
+remove a **defesa**, não o **dever**. O sistema já tem a conformidade construída e em funcionamento
+(painel do titular, atendimento de solicitações, trilha de auditoria, papel `dpo`, AD-19).
+
+**Recomendação mantida: A nas duas.** Registrado sob responsabilidade da Business Analyst.
+
 ---
 
 # Compra Mais — 7 definições pendentes
@@ -184,6 +250,74 @@ O cálculo de rateio foi construído assumindo **item**. Se o funcionamento real
 > **É a resposta que destrava mais trabalho por menos esforço.**
 
 ---
+---
+
+# Consequências das respostas fechadas
+
+> Escrito em 2026-07-16, depois da resposta. **Isto não é a decisão — é a conta dela.**
+
+## 7 = Item 🟢 — o maior desbloqueio do projeto
+
+O **Épico 5 sai do gelo depois de um mês.** `backend/src/distribuicao/domain/motor.ts` assume item,
+é função pura (AD-7), determinístico, com serialização canônica (AD-24) e teste unitário. **Está pronto.**
+
+Destrava, em ordem de dependência:
+
+1. `SituacaoEdital` **3 → 6 estados** (AD-37: `Rascunho → Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`). O código tem `rascunho|publicado|encerrado`. **Pré-condição de tudo abaixo** — as telas leem estados que o domínio hoje rejeita com `TransicaoInvalida`.
+2. Controller + rota para o motor (hoje: `grep` por quem importa `motor.ts` = **zero**).
+3. Tela **Distribuição** (admin) — rateio + `Homologar distribuição`.
+4. Tela **Demandas distribuídas** (fornecedor) — rateio, teto, reserva. ⚠️ o menu hoje aponta para `/transparencia`, que copiou o subtítulo do spec e mostra outra coisa.
+5. **Cadastro de Reserva** (UC009) e **Desistências**.
+
+`encerrado` **não tem contrapartida** nos 6 estados — decidir se some ou vira o 7º.
+
+## 1 = Azul institucional 🔴 — repintura, não ajuste
+
+O ofício dizia *"custo: ajuste de cores"*. **Subestimado — corrigir na próxima rodada.** O real:
+
+`frontend/src/index.css` · `design-system/tokens.ts` · escala de 8 azuis · contraste WCAG AA
+recalculado · `outline` de foco · **os 3 bundles de `spec/Prototipo/`, que hoje são navy**.
+
+**Inverte a divergência D1:** hoje o código bate com o protótipo e erra a marca; depois, bate com a
+marca e **erra o protótipo que o cliente aprovou**. A metade "artefato" do contrato de UX passa a
+brigar com a metade "escrita" (AD-39) — os bundles precisam ser redesenhados **ou** declarados
+desatualizados de propósito. **Story 9.3 desbloqueada** (a paleta agora tem dono), mas o critério de
+aceite muda para `#0061AE`.
+
+## 2 = Conjunto validado 🟡 — seis telas caem fora do contrato
+
+O contrato passa a ter **17 requisitos**; o código implementa o de **23**. Ficam **fora do contrato**,
+sem deixar de existir (régua vigente: *o que está implementado permanece*):
+
+Contestação · Contestar CNAE · Procuradores · Privacidade · LGPD/DPO · Perfis de tela · Redefinir senha
+
+Não estão adiantadas — estão **fora de escopo**, com ~350 testes verdes cobrindo o que o contrato
+não pede. Precisam ser **reclassificadas** (implementado além do contrato) ou **reincorporadas**.
+
+Entram no contrato, sem código: **Termo de Responsabilidade Legal** · **download do edital em PDF** ·
+**desistência covalidada** · **vedação de edição manual de cotas** · **ocultação do rateio global** ·
+landing "Compra Mais Rio Branco".
+
+## 3 = Renumerar o conjunto técnico 🟡 — remapeamento amplo
+
+O conjunto validado mantém seus números; `spec/docs/` cede os dele. **Mas o código usa os números do
+conjunto técnico** — `RF016` = contestação está implementado, testado e citado em comentários,
+testes e registros de `docs/dev/`.
+
+Remapear: **RF015, RF016, RF017, RN002, RN009, RN010, UC015, UC016** — em `prd.md`,
+`casos-de-uso.md`, `epics.md`, `ARCHITECTURE-SPINE.md`, comentários de rastreabilidade do código e
+nomes de teste. Mecânico, amplo, e **precisa de uma tabela de-para versionada** antes da primeira
+edição — sob pena de reabrir a colisão que a pergunta 3 fechou.
+
+⚠️ **Registros datados não se tocam** (AD-39, exceção): `docs/dev/`, `docs/prompts/`, `docs/qa/`
+descrevem o que era verdade na data.
+
+## 4 = Prova de vida fora 🟢 — custo zero
+
+O código já é assim (`Credenciamento.tsx`: wizard de 4 passos, UC007 fora do MVP, documentado).
+**Fecha o G5** da validação de mockups. Consequência aceita: os bundles mostram uma etapa
+(`facialChecking`/`facialDone`) que o sistema não terá.
+
 ---
 
 # Anexo técnico

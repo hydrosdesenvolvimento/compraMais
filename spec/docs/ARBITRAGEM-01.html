@@ -112,6 +112,44 @@
   }
   .chamada strong { color: var(--tinta); font-weight: 700; }
 
+  /* ── Selo de respondido ────────────────────────────── */
+  .respondido {
+    border: 2px solid var(--tinta);
+    background: var(--superficie);
+    padding: 1.3rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .respondido-selo {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--tinta);
+    font-weight: 700;
+  }
+  .placar { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .voto {
+    font-family: var(--mono);
+    font-size: .95rem;
+    border: 1px solid var(--linha-forte);
+    padding: .35rem .6rem;
+    display: flex;
+    gap: .45rem;
+    align-items: baseline;
+    font-variant-numeric: tabular-nums;
+  }
+  .voto b { color: var(--fantasma); font-weight: 400; font-size: .72rem; }
+  .voto--pendente {
+    border-color: var(--sinal);
+    background: var(--sinal-fundo);
+    color: var(--sinal);
+  }
+  .voto--pendente b { color: var(--sinal); opacity: .7; }
+  .respondido-nota { font-size: .88rem; color: var(--grafite); line-height: 1.6; max-width: 40rem; }
+  .respondido-nota strong { color: var(--tinta); }
+
   /* ── Roteamento ────────────────────────────────────── */
   .roteiro {
     border: 1px solid var(--linha);
@@ -370,6 +408,31 @@
       São 7 perguntas. Cada uma tem 2 opções. Marque um X.
     </p>
   </header>
+
+  <section class="respondido" aria-label="Situação">
+    <p class="respondido-selo">Respondido &middot; 16 jul 2026 &middot; Prefeitura de Rio Branco</p>
+    <div class="placar">
+      <span class="voto"><b>1</b> B</span>
+      <span class="voto"><b>2</b> B</span>
+      <span class="voto"><b>3</b> B</span>
+      <span class="voto"><b>4</b> A</span>
+      <span class="voto voto--pendente"><b>5</b> B</span>
+      <span class="voto voto--pendente"><b>6</b> B</span>
+      <span class="voto"><b>7</b> A</span>
+    </div>
+    <p class="respondido-nota">
+      <strong>1, 2, 3, 4 e 7 estão fechadas</strong> — são decisão da Prefeitura e viraram trabalho.
+      <br>
+      <strong>5 e 6 seguem para parecer.</strong> Foram endereçadas à Procuradoria (envelope 2) e ao
+      encarregado de dados (envelope 3) por serem mérito jurídico, e foram respondidas pela
+      Prefeitura. A posição do cliente está registrada; a regra se fecha com o parecer. O encarregado
+      de dados <strong>ainda precisa ser designado</strong> — exigência da Lei 13.709/2018, art. 41.
+    </p>
+    <p class="respondido-nota">
+      Registro completo, consequências e parecer contrário da equipe:
+      <strong>spec/docs/ARBITRAGEM-01.md</strong>
+    </p>
+  </section>
 
   <section class="roteiro" aria-label="Roteamento das perguntas">
     <p class="roteiro-titulo">As perguntas vão para 4 destinatários e podem ser respondidas em paralelo</p>

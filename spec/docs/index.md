@@ -27,7 +27,7 @@
 | [plano-releases.md](plano-releases.md) | Sequenciamento em 3 ondas + 4 gates |
 | [matriz-lacunas.md](matriz-lacunas.md) | Lacunas catalogadas e suas resoluções |
 | [implementation-readiness-report.md](implementation-readiness-report.md) | ⚠️ **OBSOLETO (2026-07-16)** — avaliou PRD v2.2 / 33 AD / 18 RF; a realidade é v2.4 / 39 AD / 23 RF. Mantido como registro histórico; **não citar como prontidão atual** |
-| [**ARBITRAGEM-01.md**](ARBITRAGEM-01.md) | 🔴 **7 definições pendentes (2026-07-16)** — 4 destinatários (Prefeitura · Procuradoria · DPO · SMGA). **Bloqueia epics/casos-de-uso/prd.** Instrumento de assinatura: [ARBITRAGEM-01.html](ARBITRAGEM-01.html) |
+| [**ARBITRAGEM-01.md**](ARBITRAGEM-01.md) | ⬛ **RESPONDIDA pela Prefeitura em 2026-07-16.** Fechadas: 1B (azul oficial `#0061AE`) · 2B (contrato = conjunto validado) · 3B (renumerar o técnico) · 4A (prova de vida fora) · **7A (item — Épico 5 destravado)**. 🟡 **5B e 6B são posição do cliente, pendentes de parecer** (Procuradoria / encarregado a designar). Consequências e parecer contrário registrados no documento |
 | [CONVERGENCIA.md](CONVERGENCIA.md) | **Registro da convergência 2026-07-02** — regras, resgate das 13 decisões, rastreabilidade |
 | [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md) | **Validação mockups × doc (2026-07-02)** — 10 gaps do Painel Admin/wizard e suas correções |
 
@@ -69,10 +69,11 @@ fora do git — não usar). O sequenciamento de sprint segue [plano-releases.md]
 
 ## ⚠️ Pendências que a equipe precisa observar
 
-- 🔴 **[ARBITRAGEM-01](ARBITRAGEM-01.md) — 7 definições pendentes.** Bloqueia a fila. Nada de spec×código é escrevível antes da 2 (qual conjunto é o contrato).
-- 🔒 **Épico 5 (Motor)** bloqueado até a ratificação de **Item × Lote** (SMGA) — **arbitragem 7**. Não iniciar suas histórias antes disso.
+- ⬛ **[ARBITRAGEM-01](ARBITRAGEM-01.md) respondida (2026-07-16).** O contrato passa a ser o **conjunto validado** (17 requisitos) — ver consequências no documento antes de escrever história.
+- 🟢 **Épico 5 (Motor) DESTRAVADO** — Item × Lote resolvido: **item**. Pré-condição: alargar `SituacaoEdital` de 3 para 6 estados (AD-37).
+- 🟡 **5B (impedimento permanente) e 6B (remover LGPD)** são posição do cliente, **pendentes de parecer**. Nenhum código de conformidade é removido antes disso.
 - ⚖️ Parâmetros a ratificar (isolados como config, não bloqueiam o início amplo): default do desempate do motor, política de indisponibilidade de API, retenção LGPD por categoria, limite em MB do SEI (`SEI_MALOTE_LIMITE_MB`), teto de export de auditoria. Ver catálogo no [prd.md](prd.md) §16.
-- 🎨 Decisões de UI: **LAYOUT A vs B** do login (UX) e **cor azul oficial** — a paleta é a **arbitragem 1** (D1: brandbook `#0061AE` × navy implementada). **Story 9.3 bloqueada** até a resposta.
+- 🎨 **D1 resolvida (arbitragem 1): azul institucional `#0061AE`.** Story 9.3 desbloqueada com o critério de aceite novo. **Repintura real** — `index.css`, `tokens.ts`, contraste AA e os 3 bundles de `Prototipo/` (hoje navy). **LAYOUT A vs B** do login segue pendente (UX).
 
 ---
 *Snapshot canônico consolidado em 2026-07-02 pela operação de convergência ([CONVERGENCIA.md](CONVERGENCIA.md)). Este diretório é versionado; é a fonte de verdade do projeto.*

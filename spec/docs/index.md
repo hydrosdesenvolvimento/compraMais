@@ -26,7 +26,7 @@
 | [epics.md](epics.md) | **9 épicos / 31 histórias** com critérios de aceite (Given/When/Then) — **é a fila de histórias canônica** |
 | [plano-releases.md](plano-releases.md) | Sequenciamento em 3 ondas + 4 gates |
 | [matriz-lacunas.md](matriz-lacunas.md) | Lacunas catalogadas e suas resoluções |
-| [implementation-readiness-report.md](implementation-readiness-report.md) | ⚠️ **OBSOLETO (2026-07-16)** — avaliou PRD v2.2 / 33 AD / 18 RF; a realidade é v2.4 / 38 AD / 23 RF. Mantido como registro histórico; **não citar como prontidão atual** |
+| [implementation-readiness-report.md](implementation-readiness-report.md) | ⚠️ **OBSOLETO (2026-07-16)** — avaliou PRD v2.2 / 33 AD / 18 RF; a realidade é v2.4 / 39 AD / 23 RF. Mantido como registro histórico; **não citar como prontidão atual** |
 | [**ARBITRAGEM-01.md**](ARBITRAGEM-01.md) | 🔴 **7 definições pendentes (2026-07-16)** — 4 destinatários (Prefeitura · Procuradoria · DPO · SMGA). **Bloqueia epics/casos-de-uso/prd.** Instrumento de assinatura: [ARBITRAGEM-01.html](ARBITRAGEM-01.html) |
 | [CONVERGENCIA.md](CONVERGENCIA.md) | **Registro da convergência 2026-07-02** — regras, resgate das 13 decisões, rastreabilidade |
 | [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md) | **Validação mockups × doc (2026-07-02)** — 10 gaps do Painel Admin/wizard e suas correções |
@@ -69,9 +69,10 @@ fora do git — não usar). O sequenciamento de sprint segue [plano-releases.md]
 
 ## ⚠️ Pendências que a equipe precisa observar
 
-- 🔒 **Épico 5 (Motor)** bloqueado até a ratificação de **Item × Lote** (SMGA/TCE). Não iniciar suas histórias antes disso.
+- 🔴 **[ARBITRAGEM-01](ARBITRAGEM-01.md) — 7 definições pendentes.** Bloqueia a fila. Nada de spec×código é escrevível antes da 2 (qual conjunto é o contrato).
+- 🔒 **Épico 5 (Motor)** bloqueado até a ratificação de **Item × Lote** (SMGA) — **arbitragem 7**. Não iniciar suas histórias antes disso.
 - ⚖️ Parâmetros a ratificar (isolados como config, não bloqueiam o início amplo): default do desempate do motor, política de indisponibilidade de API, retenção LGPD por categoria, limite em MB do SEI (`SEI_MALOTE_LIMITE_MB`), teto de export de auditoria. Ver catálogo no [prd.md](prd.md) §16.
-- 🎨 Decisões de UI: **LAYOUT A vs B** do login e **cor azul oficial** (brandbook) — ratificar antes do polimento de frontend.
+- 🎨 Decisões de UI: **LAYOUT A vs B** do login (UX) e **cor azul oficial** — a paleta é a **arbitragem 1** (D1: brandbook `#0061AE` × navy implementada). **Story 9.3 bloqueada** até a resposta.
 
 ---
 *Snapshot canônico consolidado em 2026-07-02 pela operação de convergência ([CONVERGENCIA.md](CONVERGENCIA.md)). Este diretório é versionado; é a fonte de verdade do projeto.*

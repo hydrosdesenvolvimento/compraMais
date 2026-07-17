@@ -83,6 +83,11 @@ services:
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      # Prazos de retencao por categoria em dias (FR-008 / AD-36 / RNF007); defaults conservadores.
+      RETENCAO_CADASTRAL_DIAS: ${RETENCAO_CADASTRAL_DIAS:-730}
+      RETENCAO_FISCAL_DIAS: ${RETENCAO_FISCAL_DIAS:-1825}
+      RETENCAO_CONTRATUAL_DIAS: ${RETENCAO_CONTRATUAL_DIAS:-1825}
+      RETENCAO_PADRAO_DIAS: ${RETENCAO_PADRAO_DIAS:-1825}
       # Autenticacao (FR-015 / AD-20). Em DEV o JWT_SECRET vem do .env; em prod via Docker secret.
       JWT_SECRET: ${JWT_SECRET:-dev-secret-inseguro-trocar-em-producao}
       JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-3600}
@@ -189,6 +194,11 @@ services:
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      # Prazos de retencao por categoria em dias (FR-008 / AD-36 / RNF007); defaults conservadores.
+      RETENCAO_CADASTRAL_DIAS: ${RETENCAO_CADASTRAL_DIAS:-730}
+      RETENCAO_FISCAL_DIAS: ${RETENCAO_FISCAL_DIAS:-1825}
+      RETENCAO_CONTRATUAL_DIAS: ${RETENCAO_CONTRATUAL_DIAS:-1825}
+      RETENCAO_PADRAO_DIAS: ${RETENCAO_PADRAO_DIAS:-1825}
       # Autenticacao: segredo do JWT via Docker secret (nunca em texto). TTL e Google por env.
       # OBRIGATORIO em prod (AD-20/AD-29): sem ele o backend RECUSA subir. O token e a autorizacao —
       # assinar com o segredo de dev (versionado) deixaria qualquer um forjar um administrador.

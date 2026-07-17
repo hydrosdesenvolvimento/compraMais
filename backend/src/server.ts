@@ -83,6 +83,7 @@ import { registrarRotasMalote } from './malote/adapters/malote-controller.js';
 import { FilaMaloteMemory } from './malote/application/fila-malote.js';
 import { FilaMalotePg } from './malote/adapters/fila-malote-pg.js';
 import { GerirDireitosTitular, type SolicitacaoRepository } from './titular/application/gerir-direitos.js';
+import { PoliticaRetencao } from './titular/domain/solicitacao-titular.js';
 import { ConsolidarPendencias } from './titular/application/consolidar-pendencias.js';
 import { SolicitacaoRepositoryMemory } from './titular/adapters/solicitacao-repository-memory.js';
 import { SolicitacaoRepositoryPg } from './titular/adapters/solicitacao-repository-pg.js';
@@ -319,7 +320,13 @@ export async function buildServer(): Promise<FastifyInstance> {
   // disponível (como `editais`/`bloqueios`); senão memória (testes sem banco). Antes era SEMPRE memória
   // → o pedido de direito protocolado pelo titular se perdia no restart, esvaziando a fila do DPO.
   const solicitacoesRepo: SolicitacaoRepository = pool ? new SolicitacaoRepositoryPg(pool) : new SolicitacaoRepositoryMemory();
-  const direitosTitular = new GerirDireitosTitular(solicitacoesRepo, bus);
+  // Prazos de retenção por categoria externalizados (AD-36 / RNF007 — NIV-06): política pública
+  // configurável por ambiente (RETENCAO_*_DIAS), não mais hardcoded no construtor do caso de uso.
+  const politicaRetencao = new PoliticaRetencao(
+    { cadastral: config.retencaoDias.cadastral, fiscal: config.retencaoDias.fiscal, contratual: config.retencaoDias.contratual },
+    config.retencaoDias.padrao,
+  );
+  const direitosTitular = new GerirDireitosTitular(solicitacoesRepo, bus, politicaRetencao);
   const consolidar = new ConsolidarPendencias({
     documentosReprovados: async (id) => (await docRepo.listar(id)).filter((d) => d.status === 'reprovado').map((d) => ({ id: d.id, motivo: d.motivoReprovacao })),
     bloqueiosAtivos: async (id) => (await bloqueios.ativosDe(id)).map((b) => ({ id: b.id, motivo: b.motivo })),

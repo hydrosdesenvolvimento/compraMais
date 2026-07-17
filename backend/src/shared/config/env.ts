@@ -29,6 +29,11 @@ export interface AppConfig {
     frontendRedirect: string;
   };
   crypto: { piiKey: Buffer };
+  /**
+   * Prazos de retenção por categoria em dias (FR-008 / AD-36 / RNF007). Política pública configurável
+   * por ambiente; `padrao` é o fallback para categorias sem prazo próprio. Defaults conservadores.
+   */
+  retencaoDias: { cadastral: number; fiscal: number; contratual: number; padrao: number };
 }
 
 /** Segredo de assinatura usado fora de produção, quando `JWT_SECRET` não foi informado. */
@@ -131,5 +136,11 @@ export function loadConfig(): AppConfig {
       frontendRedirect: process.env.AUTH_FRONTEND_REDIRECT ?? 'http://localhost:5173/#/cadastro',
     },
     crypto: { piiKey: exigirChavePii(process.env.NODE_ENV ?? 'development') },
+    retencaoDias: {
+      cadastral: toInt(process.env.RETENCAO_CADASTRAL_DIAS, 730),
+      fiscal: toInt(process.env.RETENCAO_FISCAL_DIAS, 1825),
+      contratual: toInt(process.env.RETENCAO_CONTRATUAL_DIAS, 1825),
+      padrao: toInt(process.env.RETENCAO_PADRAO_DIAS, 1825),
+    },
   };
 }

@@ -76,7 +76,7 @@ Da Espinha de Arquitetura (33 ADs):
 - AD-3: dois bundles SPA com design system + IA do contrato de UX.
 - AD-30 [NOVO]: papel Procurador (sub-papel de fornecedor); ação registra ator + empresa representada; liga antifraude.
 - AD-31 [NOVO]: dados originados na Receita read-only; só Nome Fantasia/Endereço/Telefone editáveis; mudam por re-sync (RF018).
-- QUESTÃO ABERTA BLOQUEANTE: Item × Lote — fechar antes de congelar o motor.
+- Item × Lote: **RESOLVIDO** — ARBITRAGEM-01 (2026-07-16), resposta 7 = **item**. O motor já assumia item; sem revisão estrutural.
 - Parâmetros a ratificar: default do desempate, default da política de indisponibilidade, retenção LGPD, limite MB do SEI.
 ```
 
@@ -127,8 +127,8 @@ Editais 1=1 secretaria; vitrine filtrada por CNAE; micro-fluxo de correção de 
 Inadimplência com bloqueio transitório (fail-open + flag); micro-fluxo de regularização.
 **FRs covered:** RF011 *(AD-11/12/27; UX-DR9)*
 
-### Épico 5: Motor de Distribuição e Cadastro de Reserva ⚠️
-Distribuição determinística + Reserva + substituição. **Bloqueado** até ratificar Item × Lote.
+### Épico 5: Motor de Distribuição e Cadastro de Reserva
+Distribuição determinística + Reserva + substituição. **Desbloqueado** — Item × Lote ratificado como **item** (ARBITRAGEM-01, 2026-07-16). Stories 5.1 (kernel) e 5.2 (persistência canônica) implementadas; 5.3 (Reserva) e 5.4 (substituição) pendentes.
 **FRs covered:** RF005, RF006 *(AD-7/8/9/10/24/25)*
 
 ### Épico 6: Malote SEI
@@ -148,7 +148,7 @@ Dashboard administrativo + portal público; herdam o design system.
 **FRs covered:** RF013, RF010 *(AD-3; UX-DR5/10)*
 
 > **Fora do MVP:** RF009 (notificações — R2), RF012 (biometria — R2 condicional).
-> **Pré-condição bloqueante do Épico 5:** fechar Item × Lote com SMGA/TCE.
+> **Pré-condição do Épico 5:** Item × Lote — **fechada** como **item** (ARBITRAGEM-01, 2026-07-16).
 > **Contestação:** micro-fluxos em E2/E3/E4; consolidação no E7.
 
 ## Épico 1: Fundação Técnica + Onboarding do Fornecedor
@@ -335,9 +335,9 @@ So that eu volte a ser elegível ao quitar (parte de RF016, UX-DR9).
 **Then** vejo o aviso com CTA "Regularizar agora" (motivo + fonte + data),
 **And** a reconsulta na próxima porta libera se o débito sumiu.
 
-## Épico 5: Motor de Distribuição e Cadastro de Reserva ⚠️
+## Épico 5: Motor de Distribuição e Cadastro de Reserva
 
-> **Bloqueado:** não agendar antes de fechar Item × Lote (SMGA/TCE).
+> **Desbloqueado:** Item × Lote ratificado como **item** (ARBITRAGEM-01, 2026-07-16). Stories 5.1 e 5.2 implementadas (kernel + persistência canônica append-only com hash); 5.3 (Cadastro de Reserva) e 5.4 (substituição) seguem pendentes.
 
 ### Story 5.1: Motor de rateio puro e determinístico
 As a CPL,
@@ -515,7 +515,7 @@ So that a experiência seja coerente e acessível (UX-DR1/7/8/10, RNF006, AD-3).
 **And** a acessibilidade atende e-MAG/WCAG 2.1 AA (foco visível âmbar 3px, alto contraste, teclado),
 **And** a IA segue [EXPERIENCE.md](ux/EXPERIENCE.md) e os bundles (Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas).
 
-> ⚠️ **Bloqueada pela arbitragem 0.7.** Esta história não é testável antes da Prefeitura decidir a paleta: o brandbook oficial diz `#0061AE`/`#003A68`, os bundles e a implementação dizem navy `#0A2A52`/`#0E3A6E`/`#14467F`.
+> **Desbloqueada.** A ARBITRAGEM-01 (2026-07-16, resposta 1 = **B**) decidiu a paleta a favor do **azul institucional `#0061AE`** (manual da Prefeitura), não do navy `#0A2A52` da implementação. Migração da paleta = trabalho definido (resolve a divergência D1); o âmbar de acento/foco permanece.
 
 ---
 

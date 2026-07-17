@@ -353,7 +353,7 @@ erDiagram
 
 ## Questões Abertas (bloqueiam o build do módulo afetado)
 
-- **Item × Lote** (LAC-16): a granularidade do motor (AD-7/AD-24) e do malote (AD-21) assume **item**. Se o MVP exigir **lote**, é revisão estrutural — não troca de parâmetro. Fechar com SMGA/TCE **antes** de congelar o motor.
+- ~~**Item × Lote** (LAC-16)~~ — **RESOLVIDO** por ARBITRAGEM-01 (2026-07-16), resposta 7 = **item**. A granularidade do motor (AD-7/AD-24) e do malote (AD-21) já assumia item; nenhuma revisão estrutural foi necessária, e o motor (Stories 5.1/5.2) foi implementado. Sem questões abertas bloqueantes pendentes.
 
 ## Deferred
 
@@ -362,4 +362,4 @@ erDiagram
 - **Notificações SMS/e-mail** (RF009) = Release 2, atrás de adaptador (gateway pendente — LAC-07).
 - **Biometria facial** (RF012) = condicional Release 2, somente com RIPD.
 - **Decisões de negócio que parametrizam invariantes (não bloqueiam a arquitetura):** default do desempate do motor (AD-8, SMGA/TCE), default da política de indisponibilidade (AD-12, Procuradoria), número de retenção LGPD (AD-19), limite em MB do SEI (AD-21, TI). Cada um é valor de parâmetro, não mudança estrutural.
-- *(Item × Lote movido para Questões Abertas — é divergência estrutural bloqueante, não parâmetro.)*
+- *(Item × Lote — RESOLVIDO como **item** pela ARBITRAGEM-01, 2026-07-16; ver Questões Abertas.)*

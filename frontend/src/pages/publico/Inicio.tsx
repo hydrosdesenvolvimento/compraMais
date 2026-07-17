@@ -5,23 +5,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { IconeAlerta, IconeRelogio, IconeSeta } from '../../design-system/icons';
 import { api, type EditalItem, type DocItem, type CredenciamentoResumoView, type CatalogoItemView } from '../../lib/api';
 import { obterUsuario } from '../../lib/auth';
-
-/* ---- Prazos (cores por urgência, iguais ao design system) ---- */
-const prazoUrgente: CSSProperties = { color: 'var(--erro-700)', background: 'var(--erro-bg)' };
-const prazoAtencao: CSSProperties = { color: '#8A5410', background: 'var(--atencao-bg)' };
-const prazoNormal: CSSProperties = { color: 'var(--sucesso)', background: 'var(--sucesso-bg)' };
+import { diasAte, tomPrazo, CORES_PRAZO } from '../../lib/prazos';
 
 const secTagStyle: CSSProperties = {
   font: '600 9.5px var(--font-body)', letterSpacing: '.06em', color: 'var(--cinza-500)',
   background: 'var(--cinza-100)', padding: '2px 7px', borderRadius: 5,
 };
-
-/** Diferença em dias inteiros entre hoje e uma data ISO (só a parte de data). Negativo = já passou. */
-function diasAte(dataIso: string): number {
-  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
-  const alvo = new Date(`${dataIso.slice(0, 10)}T00:00:00`);
-  return Math.round((alvo.getTime() - hoje.getTime()) / 86_400_000);
-}
 
 /**
  * Home do fornecedor (Épico 1) — dados REAIS via TanStack Query (sem mocks): perfil da empresa,
@@ -269,8 +258,7 @@ function formatarData(dataIso: string, lang: string): string {
 function descreverPrazo(prazoVigencia: string | null, t: (k: string, o?: Record<string, unknown>) => string): { texto: string; style: CSSProperties } | null {
   if (!prazoVigencia) return null;
   const dias = diasAte(prazoVigencia);
-  if (dias < 0) return { texto: t('inicio.painelEditais.prazoEncerrado'), style: prazoUrgente };
+  if (dias < 0) return { texto: t('inicio.painelEditais.prazoEncerrado'), style: CORES_PRAZO.urgente };
   const texto = dias === 0 ? t('inicio.painelEditais.prazoHoje') : t('inicio.painelEditais.prazo', { count: dias });
-  const style = dias <= 3 ? prazoUrgente : dias <= 7 ? prazoAtencao : prazoNormal;
-  return { texto, style };
+  return { texto, style: CORES_PRAZO[tomPrazo(dias)] };
 }

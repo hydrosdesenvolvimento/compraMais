@@ -27,6 +27,7 @@
 | [plano-releases.md](plano-releases.md) | Sequenciamento em 3 ondas + 4 gates |
 | [matriz-lacunas.md](matriz-lacunas.md) | Lacunas catalogadas e suas resoluções |
 | [implementation-readiness-report.md](implementation-readiness-report.md) | ⚠️ **OBSOLETO (2026-07-16)** — avaliou PRD v2.2 / 33 AD / 18 RF; a realidade é v2.4 / 38 AD / 23 RF. Mantido como registro histórico; **não citar como prontidão atual** |
+| [**ARBITRAGEM-01.md**](ARBITRAGEM-01.md) | 🔴 **7 definições pendentes (2026-07-16)** — 4 destinatários (Prefeitura · Procuradoria · DPO · SMGA). **Bloqueia epics/casos-de-uso/prd.** Instrumento de assinatura: [ARBITRAGEM-01.html](ARBITRAGEM-01.html) |
 | [CONVERGENCIA.md](CONVERGENCIA.md) | **Registro da convergência 2026-07-02** — regras, resgate das 13 decisões, rastreabilidade |
 | [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md) | **Validação mockups × doc (2026-07-02)** — 10 gaps do Painel Admin/wizard e suas correções |
 

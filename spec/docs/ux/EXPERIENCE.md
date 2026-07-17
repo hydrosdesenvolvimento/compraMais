@@ -5,7 +5,7 @@ part: EXPERIENCE
 scope: 'Arquitetura de informação, comportamento, estados, interações, acessibilidade e jornadas do Portal do Fornecedor'
 status: ratified
 created: '2026-06-29'
-updated: '2026-07-02'
+updated: '2026-07-16'
 source: 'spec/AI-UI-Design/ (Portal do Fornecedor + Painel Administrativo + AuthPanel + screenshots)'
 companions: ['DESIGN.md']
 ---
@@ -13,8 +13,8 @@ companions: ['DESIGN.md']
 # Compra Mais — Experience (IA, Comportamento, Jornadas)
 
 > Destilado das telas reais em [`../../AI-UI-Design/`](../../AI-UI-Design/). **Cobre o Portal do Fornecedor**
-> ([portal-fornecedor.html](../../AI-UI-Design/portal-fornecedor.html)) e agora o **Painel Administrativo**
-> ([painel-administrativo.html](../../AI-UI-Design/painel-administrativo.html), mockup ratificado —
+> ([portal-fornecedor.html](../../Prototipo/portal-fornecedor.html)) e agora o **Painel Administrativo**
+> ([painel-administrativo.html](../../Prototipo/painel-administrativo.html), mockup ratificado —
 > convergência 2026-07-02). O **Portal Público de Transparência** ainda herda o design system sem tela própria
 > (derivar quando priorizado). **UX-DR10: metade Admin fechada; Público pendente.**
 
@@ -74,11 +74,11 @@ AA/AAA, foco visível (âmbar), navegação por teclado, alto contraste e ajuste
 
 **UJ-2 — Raimundo regulariza um bloqueio:** no Início vê o aviso de bloqueio fiscal → clica **"Regularizar agora"** → vê motivo (fonte + data) e o caminho → regulariza → reconsulta libera na próxima porta.
 
-**UJ-3 — Silas (CPL) covalida** *(Painel Admin — [painel-administrativo.html](../../AI-UI-Design/painel-administrativo.html)):* abre documento Pendente → visualiza PDF → aprova ou reprova com justificativa obrigatória. Exibe a **fila de pendências com tempo decorrido** por documento, sem SLA fixo (PRD RN011).
+**UJ-3 — Silas (CPL) covalida** *(Painel Admin — [painel-administrativo.html](../../Prototipo/painel-administrativo.html)):* abre documento Pendente → visualiza PDF → aprova ou reprova com justificativa obrigatória. Exibe a **fila de pendências com tempo decorrido** por documento, sem SLA fixo (PRD RN011).
 
 ## Painel Administrativo (mockup ratificado 2026-07-02)
 
-Fonte: [painel-administrativo.html](../../AI-UI-Design/painel-administrativo.html). Herda o design system (DESIGN.md).
+Fonte: [painel-administrativo.html](../../Prototipo/painel-administrativo.html). Herda o design system (DESIGN.md).
 Acesso segrega por RBAC (PRD §15): `CPL`/`Administrador` operam; `auditor` só lê/exporta a trilha.
 
 **Telas do Painel Admin** (validadas no mockup — ver [VALIDACAO-MOCKUPS.md](../VALIDACAO-MOCKUPS.md)):

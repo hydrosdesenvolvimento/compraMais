@@ -8,7 +8,29 @@ filesIncluded:
   - epics.md (9 épicos, 31 histórias)
 filesExcluded:
   - epics.backup-2026-06-29.md.bak (backup, fora do padrão)
+status: OBSOLETO
+obsoletedOn: '2026-07-16'
 ---
+
+> ## ⚠️ DOCUMENTO OBSOLETO — registro histórico, não citar como prontidão atual
+>
+> **Carimbado em 2026-07-16 (AD-39).** Este relatório avaliou uma versão da documentação que **não existe mais**:
+>
+> | Ele avaliou | Realidade em 2026-07-16 |
+> |---|---|
+> | PRD **v2.2** | PRD **v2.4** |
+> | **33** ADs | **39** ADs |
+> | **18** RFs | **23** RFs (RF019–RF023 vieram depois) |
+> | `ux-designs/…/DESIGN.md` + `EXPERIENCE.md` | **nunca existiram** — o contrato de UX são os bundles de [`../Prototipo/`](../Prototipo/) |
+> | `architecture/architecture-comparMaisSpec-2026-06-29/` | caminho inexistente |
+>
+> É **anterior** à convergência ([CONVERGENCIA.md](CONVERGENCIA.md), 2026-07-02) e à validação de mockups
+> ([VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md), 2026-07-02). Seu veredito *"PRONTO COM RESSALVAS"* e sua
+> cobertura *"16/16 = 100%"* **não valem** para o escopo atual.
+>
+> **Preservado deliberadamente** como registro do que se sabia em 2026-06-29. Uma nova avaliação de prontidão
+> depende da arbitragem entre `spec/docs/` e a linhagem v2 (`Requisitos/`, `CasosUso/`, `Backlog/`) — ver
+> [index.md](index.md).
 
 # Implementation Readiness Assessment Report
 

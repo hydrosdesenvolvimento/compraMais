@@ -2,19 +2,19 @@
 
 export interface FunilAdmin {
   documentosPendentes: number;
-  editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number };
+  editaisPorSituacao: { rascunho: number; aberto: number; encerrado: number };
   bloqueiosAtivos: number;
 }
 export interface TransparenciaPublica {
   editaisVigentes: number;
   secretarias: string[];
-  segmentos: string[]; // CNAEs alvo dos editais publicados
+  segmentos: string[]; // CNAEs alvo dos editais abertos (na vitrine, AD-37)
 }
 
 /** Fontes de leitura (portas) — reusam 002/003/004 sem expor dados restritos. */
 export interface PaineisFonte {
   contarDocumentosPendentes(): Promise<number>;
-  contarEditaisPorSituacao(): Promise<{ rascunho: number; publicado: number; encerrado: number }>;
+  contarEditaisPorSituacao(): Promise<{ rascunho: number; aberto: number; encerrado: number }>;
   contarBloqueiosAtivos(): Promise<number>;
   editaisPublicados(): Promise<Array<{ secretariaId: string; cnaesAlvo: readonly string[] }>>;
 }

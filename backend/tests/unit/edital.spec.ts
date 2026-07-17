@@ -30,10 +30,37 @@ describe('Edital (US1)', () => {
     expect(() => rascunho({ cnaesAlvo: [] }).publicar()).toThrow(EditalIncompleto);
   });
 
-  it('ciclo rascunho→publicado→encerrado; transições inválidas barradas', () => {
+  it('percorre o caminho feliz do AD-37 (rascunho→aberto→em_analise→em_distribuicao→homologado→em_execucao)', () => {
     const e = rascunho();
-    e.publicar('gestor1'); expect(e.situacao).toBe('publicado');
-    e.encerrar('gestor1'); expect(e.situacao).toBe('encerrado');
+    e.publicar('g'); expect(e.situacao).toBe('aberto'); expect(e.naVitrine).toBe(true);
+    e.iniciarAnalise('g'); expect(e.situacao).toBe('em_analise');
+    e.iniciarDistribuicao('g'); expect(e.situacao).toBe('em_distribuicao'); expect(e.podeDistribuir).toBe(true);
+    e.homologar('g'); expect(e.situacao).toBe('homologado'); expect(e.congelado).toBe(true);
+    e.iniciarExecucao('g'); expect(e.situacao).toBe('em_execucao'); expect(e.congelado).toBe(true);
+  });
+
+  it('só `aberto` entra na vitrine e só `em_distribuicao` distribui (guardas AD-37)', () => {
+    const e = rascunho();
+    expect(e.naVitrine).toBe(false); expect(e.podeDistribuir).toBe(false);
+    e.publicar('g'); expect(e.naVitrine).toBe(true); expect(e.podeDistribuir).toBe(false);
+    e.iniciarAnalise('g'); expect(e.naVitrine).toBe(false);
+    e.iniciarDistribuicao('g'); expect(e.podeDistribuir).toBe(true);
+  });
+
+  it('transições fora de ordem são barradas (TransicaoInvalida)', () => {
+    expect(() => rascunho().iniciarAnalise()).toThrow(TransicaoInvalida); // pula publicar
+    const e = rascunho(); e.publicar('g');
+    expect(() => e.iniciarDistribuicao()).toThrow(TransicaoInvalida); // pula analise
+    expect(() => e.homologar()).toThrow(TransicaoInvalida);
+    expect(() => e.iniciarExecucao()).toThrow(TransicaoInvalida);
+  });
+
+  it('encerrar é terminal ortogonal: alcançável dos estados ativos, não de rascunho, e não re-encerra', () => {
+    expect(() => rascunho().encerrar()).toThrow(TransicaoInvalida); // rascunho abandonado é exclusão lógica (AD-38), não encerramento
+    const e = rascunho(); e.publicar('g');
+    e.iniciarAnalise('g'); e.iniciarDistribuicao('g');
+    e.encerrar('gestor1'); expect(e.situacao).toBe('encerrado'); // encerra em plena distribuição
+    expect(() => e.encerrar()).toThrow(TransicaoInvalida);
     expect(() => e.publicar()).toThrow(TransicaoInvalida);
   });
 
@@ -54,10 +81,10 @@ describe('Edital (US1)', () => {
     const clone = Edital.deEstado(e.estado());
     expect(clone.estado()).toEqual(e.estado());
     expect(clone.id).toBe(e.id);
-    expect(clone.situacao).toBe('publicado');
+    expect(clone.situacao).toBe('aberto');
     expect([...clone.cnaesAlvo]).toEqual([...e.cnaesAlvo]);
     expect(clone.lastUserUpdate).toBe('gestor1');
-    // deEstado reconstrói fora das regras de criação (aceita já-publicado, sem revalidar completude)
+    // deEstado reconstrói fora das regras de criação (aceita já-aberto, sem revalidar completude)
     clone.encerrar('gestor2');
     expect(clone.situacao).toBe('encerrado');
   });

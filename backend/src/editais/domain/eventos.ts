@@ -15,6 +15,23 @@ export class EditalEncerrado extends DomainEvent<{ editalId: string }> {
   readonly eventName = 'EditalEncerrado'; readonly eventVersion = 1;
   constructor(aggregateId: string, payload: { editalId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
 }
+// Transições AD-37 (auditadas — AD-18/AD-23). O `situacao` novo é implícito no nome do evento.
+export class EditalEmAnalise extends DomainEvent<{ editalId: string }> {
+  readonly eventName = 'EditalEmAnalise'; readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { editalId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}
+export class EditalEmDistribuicao extends DomainEvent<{ editalId: string }> {
+  readonly eventName = 'EditalEmDistribuicao'; readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { editalId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}
+export class EditalHomologado extends DomainEvent<{ editalId: string }> {
+  readonly eventName = 'EditalHomologado'; readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { editalId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}
+export class EditalEmExecucao extends DomainEvent<{ editalId: string }> {
+  readonly eventName = 'EditalEmExecucao'; readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { editalId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}
 export class EditalEditado extends DomainEvent<{ editalId: string; diff: CampoDiff[] }> {
   readonly eventName = 'EditalEditado'; readonly eventVersion = 1; // antes/depois — FR-013/auditoria
   constructor(aggregateId: string, payload: { editalId: string; diff: CampoDiff[] }, actor?: Actor) { super(aggregateId, payload, actor); }

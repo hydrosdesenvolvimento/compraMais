@@ -38,9 +38,26 @@ export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir:
     const ator = exigirPapel(req, reply, PERFIS_GESTAO);
     if (!ator) return reply;
     const { id } = req.params as { id: string };
-    try { await deps.gerir.publicar(id, { userId: ator.userId }); return reply.send({ situacao: 'publicado' }); }
+    try { await deps.gerir.publicar(id, { userId: ator.userId }); return reply.send({ situacao: 'aberto' }); }
     catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
   });
+
+  // Avanço do ciclo AD-37 (aberto → em_analise → em_distribuicao → homologado → em_execucao). Cada
+  // passo é uma transição auditada; transição inválida → 409 (TransicaoInvalida).
+  for (const t of [
+    { rota: 'iniciar-analise', fn: (id: string, a: { userId: string }) => deps.gerir.iniciarAnalise(id, a), situacao: 'em_analise' },
+    { rota: 'iniciar-distribuicao', fn: (id: string, a: { userId: string }) => deps.gerir.iniciarDistribuicao(id, a), situacao: 'em_distribuicao' },
+    { rota: 'homologar', fn: (id: string, a: { userId: string }) => deps.gerir.homologar(id, a), situacao: 'homologado' },
+    { rota: 'iniciar-execucao', fn: (id: string, a: { userId: string }) => deps.gerir.iniciarExecucao(id, a), situacao: 'em_execucao' },
+  ] as const) {
+    app.post(`/editais/:id/${t.rota}`, async (req, reply) => {
+      const ator = exigirPapel(req, reply, PERFIS_GESTAO);
+      if (!ator) return reply;
+      const { id } = req.params as { id: string };
+      try { await t.fn(id, { userId: ator.userId }); return reply.send({ situacao: t.situacao }); }
+      catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
+    });
+  }
 
   app.patch('/editais/:id', async (req, reply) => {
     const ator = exigirPapel(req, reply, PERFIS_GESTAO);

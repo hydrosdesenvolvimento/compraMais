@@ -34,9 +34,9 @@ export class EditalRepositoryPg implements EditalRepository {
     return row ? mapear(row) : null;
   }
 
-  /** Editais abertos a candidatura = situação `publicado` (consumido pela vitrine). */
+  /** Editais abertos a candidatura = situação `aberto` (AD-37; consumido pela vitrine, RF003). */
   async abertos(): Promise<Edital[]> {
-    const r = await this.pool.query(`SELECT * FROM editais WHERE situacao = 'publicado' ORDER BY register_date`);
+    const r = await this.pool.query(`SELECT * FROM editais WHERE situacao = 'aberto' ORDER BY register_date`);
     return (r.rows as Record<string, unknown>[]).map(mapear);
   }
 

@@ -13,7 +13,7 @@ describe('Busca de editais — QBE (US3 / FR-011)', () => {
     const gerir = new GerirEditais(repo, new InMemoryEventBus());
     const a = { userId: 'g' };
     const e1 = await gerir.criar({ secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], quantitativos: 5, prazoVigencia: '2099-12-31' }, a);
-    await gerir.publicar(e1.editalId, a); // publicado
+    await gerir.publicar(e1.editalId, a); // aberto
     await gerir.criar({ secretariaId: 's1', objeto: 'limpeza', cnaesAlvo: ['8121400'], quantitativos: 5, prazoVigencia: '2099-12-31' }, a); // rascunho
     const e3 = await gerir.criar({ secretariaId: 's2', objeto: 'mobiliario', cnaesAlvo: ['3101200'], quantitativos: 5, prazoVigencia: '2099-12-31' }, a);
     await gerir.publicar(e3.editalId, a);
@@ -21,12 +21,12 @@ describe('Busca de editais — QBE (US3 / FR-011)', () => {
   });
 
   it('probe AND (secretaria + situação)', async () => {
-    const r = await buscar.buscar({ secretariaId: 's1', situacao: 'publicado' });
+    const r = await buscar.buscar({ secretariaId: 's1', situacao: 'aberto' });
     expect(r.map((e) => e.objeto)).toEqual(['merenda']);
   });
 
   it('campos ausentes ignorados (só situação)', async () => {
-    const r = await buscar.buscar({ situacao: 'publicado' });
+    const r = await buscar.buscar({ situacao: 'aberto' });
     expect(r.map((e) => e.objeto).sort()).toEqual(['merenda', 'mobiliario']);
   });
 
@@ -36,7 +36,7 @@ describe('Busca de editais — QBE (US3 / FR-011)', () => {
   });
 
   it('paginação fora do probe', async () => {
-    const r = await buscar.buscar({ situacao: 'publicado' }, { page: 1, size: 1 });
+    const r = await buscar.buscar({ situacao: 'aberto' }, { page: 1, size: 1 });
     expect(r).toHaveLength(1);
   });
 });

@@ -19,7 +19,7 @@ export function Dashboard() {
       <div><h1 className="page-title">{t('admin.dashboard.titulo')}</h1><p className="page-sub">{t('admin.dashboard.subtitulo')}</p></div>
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <CardKpi titulo={t('admin.dashboard.documentosPendentes')} valor={f.documentosPendentes} />
-        <CardKpi titulo={t('admin.dashboard.editaisPublicados')} valor={f.editaisPorSituacao.publicado} />
+        <CardKpi titulo={t('admin.dashboard.editaisPublicados')} valor={f.editaisPorSituacao.aberto} />
         <CardKpi titulo={t('admin.dashboard.editaisRascunho')} valor={f.editaisPorSituacao.rascunho} />
         <CardKpi titulo={t('admin.dashboard.bloqueiosAtivos')} valor={f.bloqueiosAtivos} />
       </div>

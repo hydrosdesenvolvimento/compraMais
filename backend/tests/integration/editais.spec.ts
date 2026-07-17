@@ -36,10 +36,26 @@ describe('Gestão de editais (US1)', () => {
     expect(eventos).toContain('PublicoAlvoAmpliado'); // ampliou alvo (FR-014)
   });
 
-  it('encerrar publicado → sai de abertos', async () => {
+  it('encerrar aberto → sai de abertos', async () => {
     const { editalId } = await uc.criar(base, actor);
     await uc.publicar(editalId, actor);
     await uc.encerrar(editalId, actor);
     expect((await repo.abertos()).map((e) => e.id)).not.toContain(editalId);
+  });
+
+  it('avança o ciclo AD-37 emitindo os eventos de transição (auditoria AD-18)', async () => {
+    const eventos: string[] = [];
+    for (const nome of ['EditalEmAnalise', 'EditalEmDistribuicao', 'EditalHomologado', 'EditalEmExecucao']) {
+      bus.subscribe(nome, async () => { eventos.push(nome); });
+    }
+    const { editalId } = await uc.criar(base, actor);
+    await uc.publicar(editalId, actor);
+    await uc.iniciarAnalise(editalId, actor);
+    await uc.iniciarDistribuicao(editalId, actor);
+    expect((await repo.porId(editalId))?.podeDistribuir).toBe(true); // guarda do motor (Épico 5)
+    await uc.homologar(editalId, actor);
+    await uc.iniciarExecucao(editalId, actor);
+    expect((await repo.porId(editalId))?.situacao).toBe('em_execucao');
+    expect(eventos).toEqual(['EditalEmAnalise', 'EditalEmDistribuicao', 'EditalHomologado', 'EditalEmExecucao']);
   });
 });

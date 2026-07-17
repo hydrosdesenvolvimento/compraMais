@@ -207,12 +207,21 @@
       "listaTitulo": "Editais",
       "filtrarSituacao": "Filtrar situação",
       "situacaoRascunho": "Rascunho",
-      "situacaoPublicado": "Publicado",
+      "situacaoAberto": "Aberto",
+      "situacaoEmAnalise": "Em análise",
+      "situacaoEmDistribuicao": "Em distribuição",
+      "situacaoHomologado": "Homologado",
+      "situacaoEmExecucao": "Em execução",
       "situacaoEncerrado": "Encerrado",
       "carregando": "Carregando editais…",
       "vazioTitulo": "Nenhum edital nesta situação",
       "vazioDica": "Ajuste o filtro acima ou crie um novo edital.",
       "publicar": "Publicar",
+      "iniciarAnalise": "Iniciar análise",
+      "iniciarDistribuicao": "Iniciar distribuição",
+      "homologar": "Homologar",
+      "iniciarExecucao": "Iniciar execução",
+      "distribuir": "Distribuir",
       "encerrar": "Encerrar"
     },
     "contestacoes": {
@@ -502,6 +511,18 @@
     "kpiSegmentos": "Segmentos (CNAE) atendidos",
     "painelSecretarias": "Secretarias atendidas",
     "painelSegmentos": "Segmentos (CNAE) atendidos"
+  },
+  "demandasDistribuidas": {
+    "titulo": "Demandas distribuídas",
+    "subtitulo": "As cotas que o Motor de Distribuição atribuiu à sua empresa. O rateio é igualitário entre os aptos e limitado ao teto que você declarou.",
+    "carregando": "Carregando suas cotas…",
+    "vazioTitulo": "Nenhuma demanda distribuída ainda",
+    "vazioDica": "Quando um edital em que você está credenciado for distribuído, sua cota aparece aqui.",
+    "editalRemovido": "Edital removido",
+    "geradoEm": "Distribuído em {{data}}",
+    "protocolo": "protocolo {{hash}}",
+    "unidades": "unidades",
+    "semEmpresa": "Sua conta não representa uma empresa fornecedora."
   },
   "editais": {
     "vitrine": {

@@ -207,12 +207,21 @@
       "listaTitulo": "Licitaciones",
       "filtrarSituacao": "Filtrar estado",
       "situacaoRascunho": "Borrador",
-      "situacaoPublicado": "Publicado",
+      "situacaoAberto": "Abierto",
+      "situacaoEmAnalise": "En análisis",
+      "situacaoEmDistribuicao": "En distribución",
+      "situacaoHomologado": "Homologado",
+      "situacaoEmExecucao": "En ejecución",
       "situacaoEncerrado": "Cerrado",
       "carregando": "Cargando licitaciones…",
       "vazioTitulo": "Ninguna licitación con este estado",
       "vazioDica": "Ajuste el filtro de arriba o cree una nueva licitación.",
       "publicar": "Publicar",
+      "iniciarAnalise": "Iniciar análisis",
+      "iniciarDistribuicao": "Iniciar distribución",
+      "homologar": "Homologar",
+      "iniciarExecucao": "Iniciar ejecución",
+      "distribuir": "Distribuir",
       "encerrar": "Cerrar"
     },
     "contestacoes": {
@@ -502,6 +511,18 @@
     "kpiSegmentos": "Segmentos (CNAE) atendidos",
     "painelSecretarias": "Secretarías atendidas",
     "painelSegmentos": "Segmentos (CNAE) atendidos"
+  },
+  "demandasDistribuidas": {
+    "titulo": "Demandas distribuidas",
+    "subtitulo": "Las cuotas que el Motor de Distribución asignó a su empresa. El reparto es igualitario entre los aptos y limitado al tope que usted declaró.",
+    "carregando": "Cargando sus cuotas…",
+    "vazioTitulo": "Aún no hay demanda distribuida",
+    "vazioDica": "Cuando se distribuya una licitación en la que está acreditado, su cuota aparecerá aquí.",
+    "editalRemovido": "Licitación eliminada",
+    "geradoEm": "Distribuido el {{data}}",
+    "protocolo": "protocolo {{hash}}",
+    "unidades": "unidades",
+    "semEmpresa": "Su cuenta no representa a una empresa proveedora."
   },
   "editais": {
     "vitrine": {

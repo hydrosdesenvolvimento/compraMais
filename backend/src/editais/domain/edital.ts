@@ -1,7 +1,19 @@
 import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-base.js';
 import { exigirNumeroEdital } from './numero-edital.js';
 
-export type SituacaoEdital = 'rascunho' | 'publicado' | 'encerrado';
+/**
+ * Ciclo de vida do Edital (AD-37). Máquina de 6 estados do caminho feliz —
+ * `rascunho → aberto → em_analise → em_distribuicao → homologado → em_execucao` — mais o terminal
+ * ortogonal `encerrado` (encerramento/cancelamento alcançável dos estados ativos; decisão do
+ * solicitante 2026-07-17). Guardas AD-37: só `aberto` entra na vitrine (RF003); a Distribuição
+ * (AD-7/Épico 5) só roda a partir de `em_distribuicao`; `homologado` congela a alocação (AD-10).
+ * `publicado` foi renomeado para `aberto` para casar com o vocabulário canônico do AD-37.
+ */
+export type SituacaoEdital =
+  | 'rascunho' | 'aberto' | 'em_analise' | 'em_distribuicao' | 'homologado' | 'em_execucao' | 'encerrado';
+
+/** Estados ativos a partir dos quais um edital pode ser encerrado (terminal `encerrado`, AD-37). */
+const ESTADOS_ATIVOS: readonly SituacaoEdital[] = ['aberto', 'em_analise', 'em_distribuicao', 'homologado', 'em_execucao'];
 export interface CampoDiff { campo: string; antes: unknown; depois: unknown }
 
 /** Snapshot plano do agregado para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
@@ -18,8 +30,9 @@ export interface EditalState {
 
 /**
  * Edital — entidade rica que estende EntidadeBase (AD-33). Invariante RN007/AD-11: UMA secretaria,
- * UMA demanda (inacumulável). Ciclo de vida: rascunho → publicado → encerrado (research D2; o estado
- * legado `aberto`/`distribuido` foi reconciliado — `distribuido` fica reservado ao Épico 5/motor).
+ * UMA demanda (inacumulável). Ciclo de vida AD-37 (ver `SituacaoEdital`): a vitrine (RF003) só vê
+ * `aberto`; o Motor de Distribuição (Épico 5) só roda em `em_distribuicao`; `homologado` congela a
+ * alocação (AD-10). Toda transição é auditada por evento de domínio (AD-18/AD-23).
  */
 export class Edital extends EntidadeBase {
   private constructor(
@@ -76,6 +89,13 @@ export class Edital extends EntidadeBase {
   get prazoVigencia(): string | null { return this._prazoVigencia; }
   get situacao(): SituacaoEdital { return this._situacao; }
 
+  /** Guarda AD-37: só editais `aberto` entram na vitrine do fornecedor (RF003). */
+  get naVitrine(): boolean { return this._situacao === 'aberto'; }
+  /** Guarda AD-37: o Motor de Distribuição (AD-7/Épico 5) só roda a partir de `em_distribuicao`. */
+  get podeDistribuir(): boolean { return this._situacao === 'em_distribuicao'; }
+  /** Guarda AD-37/AD-10: da homologação em diante a alocação está congelada. */
+  get congelado(): boolean { return this._situacao === 'homologado' || this._situacao === 'em_execucao'; }
+
   /** Completude obrigatória para publicar (FR-004). */
   private validarParaPublicacao(): void {
     const faltas: string[] = [];
@@ -86,15 +106,50 @@ export class Edital extends EntidadeBase {
     if (faltas.length) throw new EditalIncompleto(faltas);
   }
 
+  /** Guarda genérica de transição (AD-37): exige um estado de origem válido, senão barra com rastro. */
+  private exigirOrigem(origens: readonly SituacaoEdital[], destino: SituacaoEdital): void {
+    if (!origens.includes(this._situacao)) throw new TransicaoInvalida(this._situacao, destino);
+  }
+
+  /** rascunho → aberto (FR-004: exige completude). Entra na vitrine (RF003). */
   publicar(userName = 'sistema'): void {
-    if (this._situacao === 'encerrado') throw new TransicaoInvalida(this._situacao, 'publicado');
+    this.exigirOrigem(['rascunho'], 'aberto');
     this.validarParaPublicacao();
-    this._situacao = 'publicado';
+    this._situacao = 'aberto';
     this.marcarAtualizacao(userName);
   }
 
+  /** aberto → em_analise: encerrada a candidatura, a CPL analisa os credenciados (AD-37). */
+  iniciarAnalise(userName = 'sistema'): void {
+    this.exigirOrigem(['aberto'], 'em_analise');
+    this._situacao = 'em_analise';
+    this.marcarAtualizacao(userName);
+  }
+
+  /** em_analise → em_distribuicao: habilita o Motor de Distribuição (AD-7/Épico 5). */
+  iniciarDistribuicao(userName = 'sistema'): void {
+    this.exigirOrigem(['em_analise'], 'em_distribuicao');
+    this._situacao = 'em_distribuicao';
+    this.marcarAtualizacao(userName);
+  }
+
+  /** em_distribuicao → homologado: congela a alocação produzida pelo motor (AD-10). */
+  homologar(userName = 'sistema'): void {
+    this.exigirOrigem(['em_distribuicao'], 'homologado');
+    this._situacao = 'homologado';
+    this.marcarAtualizacao(userName);
+  }
+
+  /** homologado → em_execucao: contratação/execução dos quantitativos alocados (AD-37). */
+  iniciarExecucao(userName = 'sistema'): void {
+    this.exigirOrigem(['homologado'], 'em_execucao');
+    this._situacao = 'em_execucao';
+    this.marcarAtualizacao(userName);
+  }
+
+  /** {ativo} → encerrado: terminal ortogonal de encerramento/cancelamento (AD-37, decisão 2026-07-17). */
   encerrar(userName = 'sistema'): void {
-    if (this._situacao !== 'publicado') throw new TransicaoInvalida(this._situacao, 'encerrado');
+    this.exigirOrigem(ESTADOS_ATIVOS, 'encerrado');
     this._situacao = 'encerrado';
     this.marcarAtualizacao(userName);
   }

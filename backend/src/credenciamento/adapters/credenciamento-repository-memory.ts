@@ -24,4 +24,11 @@ export class CredenciamentoRepositoryMemory implements CredenciamentoRepository 
       .filter((c) => c.fornecedorId === fornecedorId)
       .sort((a, b) => b.registerDate.localeCompare(a.registerDate));
   }
+
+  /** Todos os credenciamentos de um edital, do mais antigo ao mais recente (ordem de credenciamento). */
+  async listarPorEdital(editalId: string): Promise<Credenciamento[]> {
+    return [...this.map.values()]
+      .filter((c) => c.editalId === editalId)
+      .sort((a, b) => a.registerDate.localeCompare(b.registerDate));
+  }
 }

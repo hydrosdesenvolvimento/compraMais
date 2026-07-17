@@ -6,20 +6,39 @@ import { api } from '../../lib/api';
 import { Card, Botao, Campo } from '../../design-system/components';
 import { IconeEditais } from '../../design-system/icons';
 
-/** Mapeia a situação do edital para o tom da pill de status (design system). */
+/** Mapeia a situação do edital (AD-37) para o tom da pill de status (design system). */
 const PILL_SITUACAO: Record<string, string> = {
   rascunho: 'pill-warn',
-  publicado: 'pill-success',
+  aberto: 'pill-success',
+  em_analise: 'pill-info',
+  em_distribuicao: 'pill-info',
+  homologado: 'pill-info',
+  em_execucao: 'pill-info',
   encerrado: 'pill-info',
 };
 
+/** i18n key do rótulo de cada estado — o estado é snake_case, a chave é camelCase por área. */
+const LABEL_SITUACAO: Record<string, string> = {
+  rascunho: 'situacaoRascunho',
+  aberto: 'situacaoAberto',
+  em_analise: 'situacaoEmAnalise',
+  em_distribuicao: 'situacaoEmDistribuicao',
+  homologado: 'situacaoHomologado',
+  em_execucao: 'situacaoEmExecucao',
+  encerrado: 'situacaoEncerrado',
+};
+
+/** Estados ativos dos quais o edital ainda pode ser encerrado (espelha ESTADOS_ATIVOS do domínio, AD-37). */
+const ESTADOS_ATIVOS = ['aberto', 'em_analise', 'em_distribuicao', 'homologado', 'em_execucao'];
+
 /**
- * Gestão de editais (US1 / Painel Admin). Consulta (Query, QBE por situação), criação (TanStack Form),
- * publicar/encerrar (Mutations com invalidação). Invariante 1 Edital = 1 Secretaria (backend — FR-002).
+ * Gestão de editais (US1 / Painel Admin). Consulta (Query, QBE por situação), criação (TanStack Form)
+ * e as transições do ciclo AD-37 (publicar → iniciar análise → iniciar distribuição → homologar →
+ * iniciar execução, mais encerrar) como Mutations com invalidação. 1 Edital = 1 Secretaria (FR-002).
  */
 export function GerirEditais({ secretariaId }: { secretariaId: string }) {
   const { t } = useTranslation();
-  const [situacaoFiltro, setSituacaoFiltro] = useState('publicado');
+  const [situacaoFiltro, setSituacaoFiltro] = useState('aberto');
   const qc = useQueryClient();
   const chave = ['gestao-editais', secretariaId] as const;
 
@@ -30,19 +49,32 @@ export function GerirEditais({ secretariaId }: { secretariaId: string }) {
     mutationFn: (v: { objeto: string; cnae: string; quantitativos: number; prazo: string }) => api.criarEdital({ secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), quantitativos: v.quantitativos, prazoVigencia: v.prazo }),
     onSuccess: () => { form.reset(); void invalidar(); },
   });
-  const publicar = useMutation({ mutationFn: (id: string) => api.publicarEdital(id), onSuccess: () => void invalidar() });
-  const encerrar = useMutation({ mutationFn: (id: string) => api.encerrarEdital(id), onSuccess: () => void invalidar() });
+  const sucesso = () => void invalidar();
+  const publicar = useMutation({ mutationFn: (id: string) => api.publicarEdital(id), onSuccess: sucesso });
+  const iniciarAnalise = useMutation({ mutationFn: (id: string) => api.iniciarAnaliseEdital(id), onSuccess: sucesso });
+  const iniciarDistribuicao = useMutation({ mutationFn: (id: string) => api.iniciarDistribuicaoEdital(id), onSuccess: sucesso });
+  const homologar = useMutation({ mutationFn: (id: string) => api.homologarEdital(id), onSuccess: sucesso });
+  const iniciarExecucao = useMutation({ mutationFn: (id: string) => api.iniciarExecucaoEdital(id), onSuccess: sucesso });
+  const encerrar = useMutation({ mutationFn: (id: string) => api.encerrarEdital(id), onSuccess: sucesso });
+  // Motor de Distribuição (Épico 5): dispara o rateio determinístico do edital em `em_distribuicao`.
+  const distribuir = useMutation({ mutationFn: (id: string) => api.distribuirEdital(id), onSuccess: sucesso });
 
   const form = useForm({
     defaultValues: { objeto: '', cnae: '', quantitativos: 1, prazo: '' },
     onSubmit: async ({ value }) => { await criar.mutateAsync(value); },
   });
 
-  const situacoes = [
-    { valor: 'rascunho', rotulo: t('admin.gerirEditais.situacaoRascunho') },
-    { valor: 'publicado', rotulo: t('admin.gerirEditais.situacaoPublicado') },
-    { valor: 'encerrado', rotulo: t('admin.gerirEditais.situacaoEncerrado') },
-  ];
+  /** Ação primária de avanço por estado (o próximo passo do caminho feliz AD-37). */
+  type Avanco = { cy: string; rotulo: string; mut: typeof publicar };
+  const avancoPorEstado: Record<string, Avanco | undefined> = {
+    rascunho: { cy: 'publicar', rotulo: t('admin.gerirEditais.publicar'), mut: publicar },
+    aberto: { cy: 'iniciar-analise', rotulo: t('admin.gerirEditais.iniciarAnalise'), mut: iniciarAnalise },
+    em_analise: { cy: 'iniciar-distribuicao', rotulo: t('admin.gerirEditais.iniciarDistribuicao'), mut: iniciarDistribuicao },
+    em_distribuicao: { cy: 'homologar', rotulo: t('admin.gerirEditais.homologar'), mut: homologar },
+    homologado: { cy: 'iniciar-execucao', rotulo: t('admin.gerirEditais.iniciarExecucao'), mut: iniciarExecucao },
+  };
+
+  const situacoes = Object.entries(LABEL_SITUACAO).map(([valor, chaveLabel]) => ({ valor, rotulo: t(`admin.gerirEditais.${chaveLabel}`) }));
 
   return (
     <div className="stack">
@@ -140,11 +172,14 @@ export function GerirEditais({ secretariaId }: { secretariaId: string }) {
               <div style={{ flex: 1, minWidth: 240 }}>
                 <div style={{ fontSize: 14.5, color: 'var(--cinza-900)', lineHeight: 1.5, marginBottom: 6 }}>{e.objeto}</div>
                 <span className={`pill ${PILL_SITUACAO[e.situacao] ?? 'pill-info'}`}>
-                  {t(`admin.gerirEditais.situacao${e.situacao.charAt(0).toUpperCase()}${e.situacao.slice(1)}`)}
+                  {t(`admin.gerirEditais.${LABEL_SITUACAO[e.situacao] ?? 'situacaoRascunho'}`)}
                 </span>
               </div>
-              {e.situacao === 'rascunho' && <Botao data-cy="publicar" onClick={() => publicar.mutate(e.id)} disabled={publicar.isPending}>{t('admin.gerirEditais.publicar')}</Botao>}
-              {e.situacao === 'publicado' && <Botao data-cy="encerrar" variante="secundario" onClick={() => encerrar.mutate(e.id)} disabled={encerrar.isPending}>{t('admin.gerirEditais.encerrar')}</Botao>}
+              {e.situacao === 'em_distribuicao' && <Botao data-cy="distribuir" onClick={() => distribuir.mutate(e.id)} disabled={distribuir.isPending}>{t('admin.gerirEditais.distribuir')}</Botao>}
+              {avancoPorEstado[e.situacao] && (() => { const a = avancoPorEstado[e.situacao]!; return (
+                <Botao data-cy={a.cy} variante={e.situacao === 'em_distribuicao' ? 'secundario' : 'primario'} onClick={() => a.mut.mutate(e.id)} disabled={a.mut.isPending}>{a.rotulo}</Botao>
+              ); })()}
+              {ESTADOS_ATIVOS.includes(e.situacao) && <Botao data-cy="encerrar" variante="secundario" onClick={() => encerrar.mutate(e.id)} disabled={encerrar.isPending}>{t('admin.gerirEditais.encerrar')}</Botao>}
             </li>
           ))}
         </ul>

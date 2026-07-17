@@ -3,10 +3,10 @@ import type { EditalRepository, EditalProbe, PaginacaoReq } from '../application
 
 export class EditalRepositoryMemory implements EditalRepository {
   private readonly map = new Map<string, Edital>();
-  /** Seeder de teste: garante quantitativo/prazo e publica. */
+  /** Seeder de teste: publica o edital (rascunho → aberto, AD-37) e o guarda. */
   semear(e: Edital): void { e.publicar(); this.map.set(e.id, e); }
   async salvar(e: Edital): Promise<void> { this.map.set(e.id, e); }
-  async abertos(): Promise<Edital[]> { return [...this.map.values()].filter((e) => e.situacao === 'publicado'); }
+  async abertos(): Promise<Edital[]> { return [...this.map.values()].filter((e) => e.situacao === 'aberto'); }
   async porId(id: string): Promise<Edital | null> { return this.map.get(id) ?? null; }
 
   /** QBE (FR-011): cada campo definido filtra por igualdade (AND); CNAE casa contra a lista alvo. */

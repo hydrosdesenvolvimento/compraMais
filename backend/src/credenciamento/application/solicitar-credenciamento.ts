@@ -12,6 +12,8 @@ export interface CredenciamentoRepository {
   porFornecedorEEdital(fornecedorId: string, editalId: string): Promise<Credenciamento | null>;
   /** Todos os credenciamentos do fornecedor (qualquer estado), do mais recente ao mais antigo. */
   listarPorFornecedor(fornecedorId: string): Promise<Credenciamento[]>;
+  /** Todos os credenciamentos de um edital (qualquer estado). Fonte dos aptos do Motor (Épico 5). */
+  listarPorEdital(editalId: string): Promise<Credenciamento[]>;
 }
 
 export type Actor = { userId: string; empresaId?: string };
@@ -47,7 +49,7 @@ export class SolicitarCredenciamento {
     // Precondição UC003: compatível por CNAE (lança EditalIncompativel → 403). `detalhar` NÃO checa a
     // situação, então a garantia de "Aberto" fica explícita aqui (RN014).
     const edital = await this.vitrine.detalhar(fornecedorId, editalId);
-    if (edital.situacao !== 'publicado') throw new EditalNaoAberto();
+    if (edital.situacao !== 'aberto') throw new EditalNaoAberto();
 
     const existente = await this.repo.porFornecedorEEdital(fornecedorId, editalId);
     if (existente && existente.situacao !== 'cancelado') throw new CredenciamentoDuplicado();

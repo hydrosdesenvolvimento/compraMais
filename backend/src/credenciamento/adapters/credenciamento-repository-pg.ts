@@ -51,6 +51,15 @@ export class CredenciamentoRepositoryPg implements CredenciamentoRepository {
     );
     return (r.rows as Record<string, unknown>[]).map(mapear);
   }
+
+  /** Todos os credenciamentos de um edital, em ordem de credenciamento (register_date asc, id p/ desempate). */
+  async listarPorEdital(editalId: string): Promise<Credenciamento[]> {
+    const r = await this.pool.query(
+      'SELECT * FROM credenciamentos WHERE edital_id = $1 ORDER BY register_date ASC, id ASC',
+      [editalId],
+    );
+    return (r.rows as Record<string, unknown>[]).map(mapear);
+  }
 }
 
 function mapear(row: Record<string, unknown>): Credenciamento {

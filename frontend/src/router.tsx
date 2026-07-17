@@ -13,6 +13,7 @@ import { ContestarCnae } from './pages/publico/ContestarCnae';
 import { Documentos } from './pages/publico/Documentos';
 import { Contestacao } from './pages/publico/Contestacao';
 import { MeusCredenciamentosConectada } from './pages/publico/MeusCredenciamentos';
+import { DemandasDistribuidasConectada } from './pages/publico/DemandasDistribuidas';
 import { MinhaContaConectada } from './pages/publico/MinhaContaConectada';
 import { ProcuradoresConectada } from './pages/publico/ProcuradoresConectada';
 import { PrivacidadeConectada } from './pages/publico/PrivacidadeConectada';
@@ -42,7 +43,7 @@ const MENU_FORNECEDOR: ItemMenu[] = [
   { rotuloKey: 'common.nav.credenciamentos', href: '/credenciamentos', cy: 'nav-credenciamentos', icone: <IconeCredenciamentos {...ico} /> },
   { rotuloKey: 'common.nav.contestacao', href: '/contestacao', cy: 'nav-contestacao', icone: <IconeContestacao {...ico} /> },
   { rotuloKey: 'common.nav.documentos', href: '/documentos', cy: 'nav-documentos', icone: <IconeDocumentos {...ico} /> },
-  { rotuloKey: 'common.nav.demandas', href: '/transparencia', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
+  { rotuloKey: 'common.nav.demandas', href: '/demandas', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
   { rotuloKey: 'common.nav.procuradores', href: '/procuradores', cy: 'nav-procuradores', icone: <IconeUsuario {...ico} /> },
   { rotuloKey: 'common.nav.privacidade', href: '/privacidade', cy: 'nav-privacidade', icone: <IconeDocumentos {...ico} /> },
 ];
@@ -68,6 +69,7 @@ const rMeusCredenciamentos = createRoute({ getParentRoute: () => fornecedorLayou
 const rContestacao = createRoute({ getParentRoute: () => fornecedorLayout, path: '/contestacao', component: () => <Contestacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
 const rDocumentos = createRoute({ getParentRoute: () => fornecedorLayout, path: '/documentos', component: () => <Documentos fornecedorId={DEMO_FORNECEDOR_ID} /> });
 const rTransparencia = createRoute({ getParentRoute: () => fornecedorLayout, path: '/transparencia', component: Transparencia });
+const rDemandas = createRoute({ getParentRoute: () => fornecedorLayout, path: '/demandas', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: DemandasDistribuidasConectada });
 const rTitular = createRoute({ getParentRoute: () => fornecedorLayout, path: '/titular', component: () => <PainelTitular fornecedorId={DEMO_FORNECEDOR_ID} /> });
 
 const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <ShellAdmin /> });
@@ -89,7 +91,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   cadastroRoute,
   redefinirSenhaRoute,
-  fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rMeusCredenciamentos, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
+  fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rMeusCredenciamentos, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rDemandas, rTitular]),
   adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos, rAdminUsuarios, rAdminLgpd, rAdminAudit, rAdminPerfis]),
   naoEncontrada,
 ]);

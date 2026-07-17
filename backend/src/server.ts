@@ -72,6 +72,10 @@ import { ListarCredenciamentos, type SecretariaLookup } from './credenciamento/a
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
+import { ExecutarDistribuicao, type DistribuicaoRepository } from './distribuicao/application/executar-distribuicao.js';
+import { DistribuicaoRepositoryMemory } from './distribuicao/adapters/distribuicao-repository-memory.js';
+import { DistribuicaoRepositoryPg } from './distribuicao/adapters/distribuicao-repository-pg.js';
+import { registrarRotasDistribuicao } from './distribuicao/adapters/distribuicao-controller.js';
 import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
 import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
@@ -144,6 +148,8 @@ export async function buildServer(): Promise<FastifyInstance> {
     'CredenciamentoIniciado', 'TermoAceito', 'CredenciamentoCancelado',
     'InadimplenciaVerificada', 'BloqueioAplicado', 'BloqueioLiberado',
     'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalEditado',
+    'EditalEmAnalise', 'EditalEmDistribuicao', 'EditalHomologado', 'EditalEmExecucao',
+    'DistribuicaoExecutada',
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
     'MaloteGerado', 'MaloteExportado',
     'DireitoTitularSolicitado', 'DireitoTitularAtendido',
@@ -281,6 +287,20 @@ export async function buildServer(): Promise<FastifyInstance> {
   const listarCredenciamentos = new ListarCredenciamentos(credRepo, editaisRepo, secretariaLookup);
   registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos });
 
+  // Motor de Distribuição (Épico 5 / UC008 / RF005). Persistência canônica append-only da matriz em
+  // Postgres quando disponível (durável, como `editais`/`credenciamentos`); senão memória. A guarda de
+  // estado (só `em_distribuicao`) e a demanda vêm do próprio agregado Edital (AD-37).
+  const distribuicaoRepo: DistribuicaoRepository = pool ? new DistribuicaoRepositoryPg(pool) : new DistribuicaoRepositoryMemory();
+  const editalParaDistribuir = {
+    porId: async (id: string) => {
+      const e = await editaisRepo.porId(id);
+      return e ? { podeDistribuir: e.podeDistribuir, quantitativos: e.quantitativos } : null;
+    },
+  };
+  const executarDistribuicao = new ExecutarDistribuicao(editalParaDistribuir, credRepo, fornecedores, distribuicaoRepo, bus);
+  const editalResumo = { porId: async (id: string) => { const e = await editaisRepo.porId(id); return e ? { numero: e.numero, objeto: e.objeto } : null; } };
+  registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, editais: editalResumo });
+
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();
   app.get('/metrics/adapters', async () => metrics.snapshot());
@@ -333,11 +353,11 @@ export async function buildServer(): Promise<FastifyInstance> {
     contarDocumentosPendentes: async () => (await docRepo.buscarPorExemplo({ status: 'pendente' as const })).length,
     contarEditaisPorSituacao: async () => ({
       rascunho: (await editaisRepo.buscarPorExemplo({ situacao: 'rascunho' })).length,
-      publicado: (await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })).length,
+      aberto: (await editaisRepo.buscarPorExemplo({ situacao: 'aberto' })).length,
       encerrado: (await editaisRepo.buscarPorExemplo({ situacao: 'encerrado' })).length,
     }),
     contarBloqueiosAtivos: async () => bloqueios.contarAtivos(),
-    editaisPublicados: async () => (await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })).map((e) => ({ secretariaId: e.secretariaId, cnaesAlvo: e.cnaesAlvo })),
+    editaisPublicados: async () => (await editaisRepo.buscarPorExemplo({ situacao: 'aberto' })).map((e) => ({ secretariaId: e.secretariaId, cnaesAlvo: e.cnaesAlvo })),
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
 

@@ -207,12 +207,21 @@
       "listaTitulo": "Tenders",
       "filtrarSituacao": "Filter by status",
       "situacaoRascunho": "Draft",
-      "situacaoPublicado": "Published",
+      "situacaoAberto": "Open",
+      "situacaoEmAnalise": "Under review",
+      "situacaoEmDistribuicao": "Distributing",
+      "situacaoHomologado": "Awarded",
+      "situacaoEmExecucao": "In execution",
       "situacaoEncerrado": "Closed",
       "carregando": "Loading tenders…",
       "vazioTitulo": "No tenders with this status",
       "vazioDica": "Adjust the filter above or create a new tender.",
       "publicar": "Publish",
+      "iniciarAnalise": "Start review",
+      "iniciarDistribuicao": "Start distribution",
+      "homologar": "Award",
+      "iniciarExecucao": "Start execution",
+      "distribuir": "Distribute",
       "encerrar": "Close"
     },
     "contestacoes": {
@@ -502,6 +511,18 @@
     "kpiSegmentos": "Segments (CNAE) served",
     "painelSecretarias": "Departments served",
     "painelSegmentos": "Segments (CNAE) served"
+  },
+  "demandasDistribuidas": {
+    "titulo": "Distributed demands",
+    "subtitulo": "The quotas the Distribution Engine assigned to your company. The split is equal among eligible suppliers and capped at the capacity you declared.",
+    "carregando": "Loading your quotas…",
+    "vazioTitulo": "No distributed demand yet",
+    "vazioDica": "When a tender you are credentialed for is distributed, your quota shows up here.",
+    "editalRemovido": "Tender removed",
+    "geradoEm": "Distributed on {{data}}",
+    "protocolo": "protocol {{hash}}",
+    "unidades": "units",
+    "semEmpresa": "Your account does not represent a supplier company."
   },
   "editais": {
     "vitrine": {

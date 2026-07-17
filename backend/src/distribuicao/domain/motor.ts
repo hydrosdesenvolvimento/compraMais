@@ -6,17 +6,17 @@
  * determinístico. Função **PURA**: sem relógio, sem random, sem leitura de DB (AD-7/AD-8, RNF008).
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * ESCOPO DELIBERADO (bloqueio de governança).
- * O Épico 5 está **bloqueado até a ratificação de Item × Lote (SMGA/TCE)** — ver
- * `spec/docs/epics.md` (linhas 53/78/150) e `spec/docs/prd.md §8`. Este arquivo entrega apenas
- * o **kernel determinístico** (Story 5.1), que é agnóstico a Item×Lote: opera sobre uma única
- * `demanda` escalar e o conjunto de aptos+teto, e é invocado uma vez por unidade de demanda
- * (item ou lote) quando a granularidade for ratificada. Ficam **deferidas** até o desbloqueio:
- *   • Story 5.2 — persistência canônica da matriz (append-only + hash + sementes na trilha);
+ * ESCOPO.
+ * Item × Lote foi **ratificado como item** (ARBITRAGEM-01, 2026-07-16) — ver `spec/docs/epics.md`
+ * §Épico 5 e `spec/docs/prd.md §8`. Este arquivo é o **kernel determinístico** (Story 5.1),
+ * agnóstico à granularidade: opera sobre uma única `demanda` escalar + o conjunto de aptos/teto, e é
+ * invocado uma vez por unidade de demanda. O wiring (Story 5.2 — persistência canônica append-only +
+ * hash na trilha) está em `distribuicao/application/executar-distribuicao.ts` e
+ * `distribuicao/domain/registro-distribuicao.ts`. Ficam **pendentes**:
  *   • Story 5.3 — cadastro de reserva (UC009);
  *   • Story 5.4 — substituição de desistente.
  * O critério de resto (Hamilton) e o desempate são parâmetros a ratificar (LAC-04c/d); por isso
- * a `regraDesempate` é versionada e ecoada no resultado, para futura gravação na trilha (RNF008).
+ * a `regraDesempate` é versionada e ecoada no resultado, gravada na trilha via o registro (RNF008).
  * ─────────────────────────────────────────────────────────────────────────────
  */
 

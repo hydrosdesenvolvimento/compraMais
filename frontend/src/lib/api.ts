@@ -90,7 +90,18 @@ export interface CredenciamentoResumoView {
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
 export interface Transparencia { editaisVigentes: number; secretarias: string[]; segmentos: string[] }
-export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
+export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; aberto: number; encerrado: number }; bloqueiosAtivos: number }
+/** Matriz de distribuição (Épico 5) — resultado do motor, devolvido ao disparar a distribuição. */
+export interface MatrizDistribuicao {
+  editalId: string; versao: number; geradoEm: string; regraDesempate: string;
+  demandaTotal: number; quantidadeDistribuida: number; deficit: boolean; deficitQuantidade: number;
+  alocacoes: { fornecedorId: string; cota: number }[]; hash: string;
+}
+/** Cota do fornecedor num edital ("Demandas distribuídas"), já enriquecida com número/objeto do edital. */
+export interface CotaDistribuida {
+  editalId: string; cota: number; geradoEm: string; hash: string;
+  numeroEdital: string | null; objeto: string | null;
+}
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
 /** UC020 — item de catálogo base (superset: cada catálogo acrescenta seus campos). */
@@ -195,6 +206,14 @@ export const api = {
   criarEdital: (body: unknown) => send('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),
+  // Avanço do ciclo AD-37 (aberto → em_analise → em_distribuicao → homologado → em_execucao).
+  iniciarAnaliseEdital: (id: string) => send(`/editais/${id}/iniciar-analise`, 'POST'),
+  iniciarDistribuicaoEdital: (id: string) => send(`/editais/${id}/iniciar-distribuicao`, 'POST'),
+  homologarEdital: (id: string) => send(`/editais/${id}/homologar`, 'POST'),
+  iniciarExecucaoEdital: (id: string) => send(`/editais/${id}/iniciar-execucao`, 'POST'),
+  // Motor de Distribuição (Épico 5): gestão dispara; fornecedor consulta suas cotas.
+  distribuirEdital: (id: string) => send<MatrizDistribuicao>(`/editais/${id}/distribuir`, 'POST'),
+  distribuicaoMinhas: () => get<CotaDistribuida[]>('/distribuicao/minhas'),
   docsPendentes: (fid: string, params: URLSearchParams) => get<DocPendente[]>(`/fornecedores/${fid}/documentos/pendentes?${params.toString()}`),
   covalidar: (docId: string, body: unknown) => send(`/documentos/${docId}/covalidar`, 'POST', body),
   contestacoesDoEdital: (editalId: string) => get<ContestacaoView[]>(`/editais/${editalId}/contestacoes-cnae`),

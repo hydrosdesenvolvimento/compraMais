@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { Edital } from '../domain/edital.js';
 import { formatarNumeroEdital } from '../domain/numero-edital.js';
-import { EditalCriado, EditalPublicado, EditalEncerrado, EditalEditado, PublicoAlvoAmpliado } from '../domain/eventos.js';
+import {
+  EditalCriado, EditalPublicado, EditalEncerrado, EditalEditado, PublicoAlvoAmpliado,
+  EditalEmAnalise, EditalEmDistribuicao, EditalHomologado, EditalEmExecucao,
+} from '../domain/eventos.js';
 import type { EditalRepository } from './listar-editais-compativeis.js';
 import type { NumeradorEditais } from './numerador-editais.js';
 import { NumeradorEditaisMemory } from '../adapters/numerador-editais-memory.js';
@@ -57,6 +60,35 @@ export class GerirEditais {
     e.publicar(actor.userId);
     await this.repo.salvar(e);
     await this.bus.publish(new EditalPublicado(editalId, { editalId }, actor).toEnvelope(randomUUID(), this.now()));
+  }
+
+  /** Avança o edital pelo caminho feliz do AD-37 (aberto → em_analise → em_distribuicao → homologado → em_execucao). */
+  async iniciarAnalise(editalId: string, actor: Actor): Promise<void> {
+    const e = await this.exigir(editalId);
+    e.iniciarAnalise(actor.userId);
+    await this.repo.salvar(e);
+    await this.bus.publish(new EditalEmAnalise(editalId, { editalId }, actor).toEnvelope(randomUUID(), this.now()));
+  }
+
+  async iniciarDistribuicao(editalId: string, actor: Actor): Promise<void> {
+    const e = await this.exigir(editalId);
+    e.iniciarDistribuicao(actor.userId);
+    await this.repo.salvar(e);
+    await this.bus.publish(new EditalEmDistribuicao(editalId, { editalId }, actor).toEnvelope(randomUUID(), this.now()));
+  }
+
+  async homologar(editalId: string, actor: Actor): Promise<void> {
+    const e = await this.exigir(editalId);
+    e.homologar(actor.userId);
+    await this.repo.salvar(e);
+    await this.bus.publish(new EditalHomologado(editalId, { editalId }, actor).toEnvelope(randomUUID(), this.now()));
+  }
+
+  async iniciarExecucao(editalId: string, actor: Actor): Promise<void> {
+    const e = await this.exigir(editalId);
+    e.iniciarExecucao(actor.userId);
+    await this.repo.salvar(e);
+    await this.bus.publish(new EditalEmExecucao(editalId, { editalId }, actor).toEnvelope(randomUUID(), this.now()));
   }
 
   async editar(editalId: string, campos: Partial<{ objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }>, actor: Actor): Promise<void> {

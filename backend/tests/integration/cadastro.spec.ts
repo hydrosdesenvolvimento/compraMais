@@ -4,6 +4,8 @@ import { CnpjJaCadastrado } from '../../src/catalogo/application/fornecedor-repo
 import { Cnpj, CnpjInvalido } from '../../src/catalogo/domain/cnpj.js';
 import { SituacaoNaoApta, type SituacaoCadastral } from '../../src/catalogo/domain/fornecedor.js';
 import { FornecedorRepositoryMemory } from '../../src/catalogo/adapters/fornecedor-repository-memory.js';
+import { ConsentimentoRepositoryMemory } from '../../src/credenciamento/adapters/consentimento-repository-memory.js';
+import { Consentimento } from '../../src/credenciamento/domain/consentimento.js';
 import { EmailJaCadastrado } from '../../src/shared/identity/autenticacao.js';
 import { InMemoryEventBus } from '../../src/shared/events/event-bus.js';
 import type { ReceitaGateway, ResultadoProveniente, DadosCnpj } from '../../src/shared/acl/receita/receita-gateway.js';
@@ -45,8 +47,8 @@ function loginFake(): RegistroLogin & { emails: string[] } {
   };
 }
 
-const cons = { salvar: async () => {} };
 const contas = { salvar: async () => {} };
+const AGORA = '2026-06-29T12:00:00.000Z';
 const input = {
   cnpjRaw: CNPJ,
   contato: {},
@@ -57,10 +59,16 @@ const input = {
 
 describe('CadastrarFornecedor (UC001 — integração, adaptadores em memória)', () => {
   let repo: FornecedorRepositoryMemory;
-  beforeEach(() => { repo = new FornecedorRepositoryMemory(); });
+  // Repositório REAL de consentimentos (antes era um no-op `{ salvar: async () => {} }`: o teste passava
+  // enquanto a prova LGPD era descartada em silêncio — o mesmo defeito do wiring, AD-19/migração 0017).
+  let cons: ConsentimentoRepositoryMemory;
+  beforeEach(() => {
+    repo = new FornecedorRepositoryMemory();
+    cons = new ConsentimentoRepositoryMemory();
+  });
 
   function novo(receita: ReceitaGateway, login = loginFake()) {
-    return { uc: new CadastrarFornecedor(repo, cons, contas, receita, login, new InMemoryEventBus()), login };
+    return { uc: new CadastrarFornecedor(repo, cons, contas, receita, login, new InMemoryEventBus(), () => AGORA), login };
   }
 
   it('happy path: autopreenche, cria login e nasce Requerente', async () => {
@@ -78,6 +86,28 @@ describe('CadastrarFornecedor (UC001 — integração, adaptadores em memória)'
     const f = await repo.porId(fornecedorId);
     expect(f?.contato.endereco?.cidade).toBe('Rio Branco');
     expect(f?.sincronizadoEm).toBe('2026-06-29T00:00:00Z');
+  });
+
+  it('persiste o consentimento LGPD e o torna recuperável pelo fornecedor (RN016/RF001 — AD-19)', async () => {
+    const { uc } = novo(receitaFake('verificado'));
+    const { fornecedorId } = await uc.executar(input);
+
+    const [c] = await cons.porFornecedor(fornecedorId);
+    expect(c).toBeDefined(); // antes: consentimento construído e jogado fora pelo repo no-op
+    expect(c.finalidade).toBe('credenciamento'); // base legal
+    expect(c.versaoTermo).toBe('v1'); // versão do termo aceita
+    expect(c.concedidoEm).toBe(AGORA);
+    expect(c.titularRef).toBe('u-1'); // aponta para a conta do titular que consentiu
+    expect(c.fornecedorId).toBe(fornecedorId);
+  });
+
+  it('o consentimento sobrevive ao round-trip de estado (durabilidade — migração 0017)', async () => {
+    const { uc } = novo(receitaFake('verificado'));
+    const { fornecedorId } = await uc.executar(input);
+    const [salvo] = await cons.porFornecedor(fornecedorId);
+    // Simula a ida-e-volta ao Postgres (ConsentimentoRepositoryPg grava/lê exatamente este snapshot).
+    const recarregado = Consentimento.deEstado(salvo.estado());
+    expect(recarregado.estado()).toEqual(salvo.estado()); // a prova continua demonstrável após restart
   });
 
   it('fallback manual quando Receita indisponível (A1)', async () => {
@@ -111,8 +141,14 @@ describe('CadastrarFornecedor (UC001 — integração, adaptadores em memória)'
   it('e-mail de login já cadastrado → bloqueado antes de persistir o fornecedor', async () => {
     const login = loginFake();
     login.emails.push('raimundo@padaria.com');
-    const uc = new CadastrarFornecedor(repo, cons, contas, receitaFake('verificado'), login, new InMemoryEventBus());
+    const uc = new CadastrarFornecedor(repo, cons, contas, receitaFake('verificado'), login, new InMemoryEventBus(), () => AGORA);
     await expect(uc.executar(input)).rejects.toBeInstanceOf(EmailJaCadastrado);
     expect(await repo.porCnpj(Cnpj.criar(CNPJ))).toBeNull(); // não persistiu o fornecedor
+  });
+
+  it('cadastro abortado não deixa consentimento órfão (prova só existe se o cadastro existir)', async () => {
+    const { uc } = novo(receitaFake('verificado', 'baixada'));
+    await expect(uc.executar(input)).rejects.toBeInstanceOf(SituacaoNaoApta);
+    expect(await cons.porFornecedor('qualquer')).toEqual([]);
   });
 });

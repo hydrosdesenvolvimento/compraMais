@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildServer } from '../../src/server.js';
+import { comoPapel } from '../helpers/auth.js';
 
 /**
  * UC016 — Contestação de CNAE no nível HTTP (rotas `/editais/:id/contestacoes-cnae`, `/contestacoes-cnae/:id/*`
@@ -8,13 +9,18 @@ import { buildServer } from '../../src/server.js';
  * (caso de uso direto): aqui o fluxo passa pelos controllers reais, cobrindo o wiring `pool ? pg : memory`, o
  * RBAC de resolução (Secretaria/CPL) e a consolidação da contestação pendente na tela única (Épico 7-1).
  * App em memória (sem DATABASE_URL) com a Receita mockada (CNPJ demo → CNAE 1412601).
+ *
+ * ⚠️ Histórico (2026-07-16, AD-20/AD-35): até a Fase 2 estes casos autenticavam por header de texto,
+ * sem token — quem contestava era quem escrevesse `x-empresa-id`, e quem resolvia era quem escrevesse
+ * `x-papel: 'secretaria'` (um CARGO, não um papel). Identidade, empresa e papel agora vêm do JWT.
  */
 describe('Rotas de contestação de CNAE (UC016 — HTTP)', () => {
   let app: FastifyInstance;
   let empresaId: string;
   let editalId: string;
-  const gestor = { 'x-papel': 'secretaria', 'x-user-id': 'gestor1' };
-  const cpl = { 'x-papel': 'cpl', 'x-user-id': 'cpl1' };
+  const gestor = comoPapel('smga', { userId: 'gestor1' });
+  const cpl = comoPapel('cpl', { userId: 'cpl1' });
+  const fornecedor = (): Record<string, string> => comoPapel('titular', { userId: 'titular1', empresaId });
 
   beforeAll(async () => {
     app = await buildServer();
@@ -49,7 +55,7 @@ describe('Rotas de contestação de CNAE (UC016 — HTTP)', () => {
   it('POST /editais/:id/contestacoes-cnae por fornecedor ativo → 201 pendente', async () => {
     const r = await app.inject({
       method: 'POST', url: `/editais/${editalId}/contestacoes-cnae`,
-      headers: { 'x-empresa-id': empresaId },
+      headers: fornecedor(),
       payload: { cnaeContestado: '1412601', justificativa: 'meu CNAE 1412601 é compatível com o objeto' },
     });
     expect(r.statusCode).toBe(201);
@@ -59,17 +65,26 @@ describe('Rotas de contestação de CNAE (UC016 — HTTP)', () => {
   it('POST /editais/:id/contestacoes-cnae por fornecedor inexistente/inativo → 403', async () => {
     const r = await app.inject({
       method: 'POST', url: `/editais/${editalId}/contestacoes-cnae`,
-      headers: { 'x-empresa-id': 'fantasma' },
+      headers: comoPapel('titular', { userId: 'titular-fantasma', empresaId: 'fantasma' }),
       payload: { cnaeContestado: '1412601', justificativa: 'x' },
     });
     expect(r.statusCode).toBe(403);
     expect(r.json()).toMatchObject({ codigo: 'FornecedorNaoLegitimo' });
   });
 
+  it('POST /editais/:id/contestacoes-cnae sem token → 401 (a empresa não pode vir de header)', async () => {
+    const r = await app.inject({
+      method: 'POST', url: `/editais/${editalId}/contestacoes-cnae`,
+      headers: { 'x-empresa-id': empresaId },
+      payload: { cnaeContestado: '1412601', justificativa: 'x' },
+    });
+    expect(r.statusCode).toBe(401);
+  });
+
   it('POST /editais/inexistente/contestacoes-cnae → 404', async () => {
     const r = await app.inject({
       method: 'POST', url: '/editais/inexistente/contestacoes-cnae',
-      headers: { 'x-empresa-id': empresaId },
+      headers: fornecedor(),
       payload: { cnaeContestado: '1412601', justificativa: 'x' },
     });
     expect(r.statusCode).toBe(404);
@@ -77,7 +92,7 @@ describe('Rotas de contestação de CNAE (UC016 — HTTP)', () => {
   });
 
   it('a contestação pendente aparece na tela única consolidada (Épico 7-1)', async () => {
-    const r = await app.inject({ method: 'GET', url: `/fornecedores/${empresaId}/pendencias-consolidadas`, headers: { 'x-user-id': empresaId } });
+    const r = await app.inject({ method: 'GET', url: `/fornecedores/${empresaId}/pendencias-consolidadas`, headers: fornecedor() });
     expect(r.statusCode).toBe(200);
     const pend = r.json() as Array<{ tipo: string; proximoPasso: string }>;
     expect(pend.some((p) => p.tipo === 'contestacao-cnae')).toBe(true);
@@ -86,13 +101,13 @@ describe('Rotas de contestação de CNAE (UC016 — HTTP)', () => {
   it('POST /contestacoes-cnae/:id/recusar sem papel Secretaria/CPL → 403', async () => {
     const abrir = await app.inject({
       method: 'POST', url: `/editais/${editalId}/contestacoes-cnae`,
-      headers: { 'x-empresa-id': empresaId },
+      headers: fornecedor(),
       payload: { cnaeContestado: '1412601', justificativa: 'segunda contestação' },
     });
     const contestacaoId = abrir.json().contestacaoId as string;
     const r = await app.inject({
       method: 'POST', url: `/contestacoes-cnae/${contestacaoId}/recusar`,
-      headers: { 'x-empresa-id': empresaId },
+      headers: fornecedor(),
       payload: { motivo: 'não pode' },
     });
     expect(r.statusCode).toBe(403);
@@ -102,7 +117,7 @@ describe('Rotas de contestação de CNAE (UC016 — HTTP)', () => {
   it('POST /contestacoes-cnae/:id/recusar pela CPL sem motivo → 422 (RN012/FR-009)', async () => {
     const abrir = await app.inject({
       method: 'POST', url: `/editais/${editalId}/contestacoes-cnae`,
-      headers: { 'x-empresa-id': empresaId },
+      headers: fornecedor(),
       payload: { cnaeContestado: '1412601', justificativa: 'terceira contestação' },
     });
     const contestacaoId = abrir.json().contestacaoId as string;
@@ -117,7 +132,7 @@ describe('Rotas de contestação de CNAE (UC016 — HTTP)', () => {
   it('POST /contestacoes-cnae/:id/acatar pela CPL corrige o CNAE do edital e resolve', async () => {
     const abrir = await app.inject({
       method: 'POST', url: `/editais/${editalId}/contestacoes-cnae`,
-      headers: { 'x-empresa-id': empresaId },
+      headers: fornecedor(),
       payload: { cnaeContestado: '1412601', justificativa: 'incluir meu CNAE' },
     });
     const contestacaoId = abrir.json().contestacaoId as string;

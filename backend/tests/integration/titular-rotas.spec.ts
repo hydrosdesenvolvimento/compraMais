@@ -1,18 +1,25 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildServer } from '../../src/server.js';
+import { comoPapel } from '../helpers/auth.js';
 
 /**
  * UC017 — Direitos do titular (LGPD) no nível HTTP (rotas `/titular/solicitacoes`). Cobre o RBAC §V
  * (procurador não exerce), o fluxo completo protocolo→atendimento pelo DPO, o self-service (o próprio
  * titular vê só os seus pedidos), o descarte por retenção (FR-008) e a projeção da pendência LGPD na
  * tela única. App em memória (sem DATABASE_URL) — mesmo wiring do pg via `pool ? pg : memory`.
+ *
+ * ⚠️ Histórico (2026-07-16, AD-20): até a Fase 2 a identidade destes casos era autodeclarada
+ * (`x-user-id`/`x-papel`/`x-empresa-id`). O caso de isolamento self-service já existia e já passava,
+ * mas não provava isolamento nenhum: 't-self' era só a palavra que o cliente resolveu mandar, e trocá-la
+ * por 't-outro' daria acesso ao pedido alheio — a rota devolvia 403 para o header errado, não para a
+ * pessoa errada. Com o JWT o mesmo caso passa a afirmar o que sempre pareceu afirmar.
  */
 describe('Rotas de direitos do titular (UC017 — HTTP)', () => {
   let app: FastifyInstance;
-  const titular = (id: string) => ({ 'x-user-id': id, 'x-papel': 'titular', 'x-empresa-id': id });
-  const dpo = { 'x-user-id': 'dpo1', 'x-papel': 'dpo' };
-  const procurador = { 'x-user-id': 'p1', 'x-papel': 'procurador' };
+  const titular = (id: string) => comoPapel('titular', { userId: id, empresaId: id });
+  const dpo = comoPapel('dpo', { userId: 'dpo1' });
+  const procurador = comoPapel('procurador', { userId: 'p1' });
 
   beforeAll(async () => { app = await buildServer(); });
   afterAll(async () => { await app.close(); });
@@ -54,8 +61,25 @@ describe('Rotas de direitos do titular (UC017 — HTTP)', () => {
     expect(alheio.statusCode).toBe(403);
   });
 
+  it('self-service: o pedido nasce colado ao token — não dá para protocolar por terceiro', async () => {
+    // Antes, o titularId vinha do `x-user-id`: bastava mandar outro nome. Agora o ator é o dono do token.
+    const criar = await app.inject({ method: 'POST', url: '/titular/solicitacoes', headers: titular('t-eu'), payload: { tipo: 'acesso', titularId: 't-vitima' } });
+    expect(criar.statusCode).toBe(201);
+    const meus = await app.inject({ method: 'GET', url: '/titular/solicitacoes?titularId=t-eu', headers: titular('t-eu') });
+    expect((meus.json() as Array<{ id: string }>).some((s) => s.id === criar.json().solicitacaoId)).toBe(true);
+    const daVitima = await app.inject({ method: 'GET', url: '/titular/solicitacoes?titularId=t-vitima', headers: dpo });
+    expect(daVitima.json()).toEqual([]); // o campo do corpo não moveu a titularidade
+  });
+
+  it('anônimo → 401 na fila e no self-service (identidade não vem de header)', async () => {
+    const fila = await app.inject({ method: 'GET', url: '/titular/solicitacoes?status=pendente', headers: { 'x-papel': 'dpo' } });
+    expect(fila.statusCode).toBe(401);
+    const criar = await app.inject({ method: 'POST', url: '/titular/solicitacoes', headers: { 'x-user-id': 't-self', 'x-papel': 'titular' }, payload: { tipo: 'acesso' } });
+    expect(criar.statusCode).toBe(401);
+  });
+
   it('atender/descartar sem papel DPO → 403 (CPL não atende, RNF007)', async () => {
-    const r = await app.inject({ method: 'POST', url: '/titular/solicitacoes/qualquer/atender', headers: { 'x-user-id': 'c1', 'x-papel': 'cpl' }, payload: { resultado: 'x' } });
+    const r = await app.inject({ method: 'POST', url: '/titular/solicitacoes/qualquer/atender', headers: comoPapel('cpl', { userId: 'c1' }), payload: { resultado: 'x' } });
     expect(r.statusCode).toBe(403);
   });
 

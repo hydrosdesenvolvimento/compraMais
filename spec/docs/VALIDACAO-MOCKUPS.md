@@ -1,7 +1,7 @@
 # Validação Mockups × Documentação — Compra Mais
 
 **Data:** 2026-07-02
-**Fontes analisadas:** [`../AI-UI-Design/painel-administrativo.html`](../AI-UI-Design/painel-administrativo.html) e [`../AI-UI-Design/portal-fornecedor.html`](../AI-UI-Design/portal-fornecedor.html) (SPAs; UI extraída dos bundles).
+**Fontes analisadas:** [`../Prototipo/painel-administrativo.html`](../Prototipo/painel-administrativo.html) e [`../Prototipo/portal-fornecedor.html`](../Prototipo/portal-fornecedor.html) (SPAs; UI extraída dos bundles). *Endereço atualizado em 2026-07-16 (AD-39): os bundles vinham de `spec/AI-UI-Design/`, removido; os arquivos analisados são byte-idênticos aos atuais.*
 **Objetivo:** verificar se tudo que os mockups esperam já está coberto na documentação canônica (`spec/docs/`) e **preencher as lacunas**.
 
 > **Método:** os dois arquivos são bundles SPA (~650–870 KB, toda a UI em JS). Extraí os literais de UI (telas, ações "Novo X", campos, colunas, estados, etapas) e cruzei com PRD, épicos, espinha e contrato de UX. Cada gap abaixo foi confirmado com busca nos quatro documentos.
@@ -41,7 +41,7 @@ O wizard de credenciamento do mockup inclui a etapa **"Prova de vida"** (livenes
 - **PRD** ([prd.md](prd.md)) v2.4 — RF020–RF023, RN014–RN016, §15 (cargos), nota de reconciliação G5.
 - **Espinha** ([ARCHITECTURE-SPINE.md](architecture/ARCHITECTURE-SPINE.md)) — AD-37 (ciclo do Edital), AD-38 (inativação preservando histórico), AD-35 (cargos), AD-16 (Secretaria como entidade gerida).
 - **Épicos** ([epics.md](epics.md)) — seção "Cobertura dos Mockups": Stories 3.4, 5.5, 9.4, 9.5, 9.6, 9.7 + ACs em 5.3.
-- **UX** ([EXPERIENCE.md](ux/EXPERIENCE.md)) — telas do Painel Admin detalhadas + etapas do wizard de credenciamento.
+- **UX** (bundles de [`../Prototipo/`](../Prototipo/)) — telas do Painel Admin detalhadas + etapas do wizard de credenciamento.
 
 ## Segunda passada — validação profunda (2026-07-02)
 

@@ -1,16 +1,23 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildServer } from '../../src/server.js';
+import { comoPapel } from '../helpers/auth.js';
 
 /**
  * UC020 — catálogos base no nível HTTP (rotas `/catalogos/:catalogo`). Cobre o RBAC de Administrador nas
  * escritas, a leitura aberta de referência, a inativação lógica (some do default), a unicidade (409) e a
  * validação de domínio (422). App em memória (sem DATABASE_URL) — mesmo wiring do pg via `pool ? pg : memory`.
+ *
+ * ⚠️ Histórico (2026-07-16, AD-20): até a Fase 2 `admin`/`naoAdmin` eram apenas os headers de texto
+ * `x-papel`/`x-user-id`, sem token. O caso "POST sem papel Administrador → 403" afirmava um 403 que só
+ * dependia do cliente NÃO se declarar administrador — e o CRUD verde provava que bastava escrever
+ * `x-papel: administrador` para manter os catálogos. Agora as credenciais são JWT assinado; o caso
+ * `anônimo` abaixo é novo e existe para que a regressão não volte silenciosa.
  */
 describe('Rotas de catálogos base (UC020 — HTTP)', () => {
   let app: FastifyInstance;
-  const admin = { 'x-papel': 'administrador', 'x-user-id': 'admin1' };
-  const naoAdmin = { 'x-papel': 'cpl', 'x-user-id': 'cpl1' };
+  const admin = comoPapel('administrador', { userId: 'admin1' });
+  const naoAdmin = comoPapel('cpl', { userId: 'cpl1' });
 
   beforeAll(async () => { app = await buildServer(); });
   afterAll(async () => { await app.close(); });
@@ -22,6 +29,14 @@ describe('Rotas de catálogos base (UC020 — HTTP)', () => {
     });
     expect(r.statusCode).toBe(403);
     expect(r.json()).toMatchObject({ codigo: 'RBAC' });
+  });
+
+  it('POST anônimo → 401 (o papel não pode vir de header de texto)', async () => {
+    const r = await app.inject({
+      method: 'POST', url: '/catalogos/secretarias', headers: { 'x-papel': 'administrador' },
+      payload: { nome: 'Educação', sigla: 'SME', responsavel: 'Ana' },
+    });
+    expect(r.statusCode).toBe(401);
   });
 
   it('CRUD de secretaria pelo Administrador: cria (201), aparece na listagem, edita, inativa', async () => {

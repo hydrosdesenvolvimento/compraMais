@@ -5,8 +5,10 @@ import { Privacidade } from './Privacidade';
 
 /**
  * Liga a tela "Privacidade" (UC017) ao titular autenticado. O pedido de direito é chaveado pelo ATOR
- * (x-user-id) no backend, então o self-service usa o `userId` da sessão (não o `empresaId`) para que o
- * protocolo e a listagem "meus pedidos" batam. O guard de rota já garante a autenticação.
+ * (o `sub` do token, AD-20), então o self-service usa o `userId` da sessão (não o `empresaId`) para
+ * que o protocolo e a listagem "meus pedidos" batam — dado pessoal é da pessoa, não da empresa: dois
+ * usuários do mesmo CNPJ não leem os pedidos um do outro. O guard de rota garante a autenticação, e
+ * o backend não aceita mais um titular declarado pelo cliente.
  */
 export function PrivacidadeConectada() {
   const { t } = useTranslation();

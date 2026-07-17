@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildServer } from '../../src/server.js';
+import { comoPapel } from '../helpers/auth.js';
 
 /**
  * Projeções de leitura que alimentam a HOME do fornecedor (Inicio) com dados reais (sem mocks):
@@ -9,12 +10,16 @@ import { buildServer } from '../../src/server.js';
  *  - `GET /fornecedores/:id/credenciamentos` (novo) lista os credenciamentos do fornecedor enriquecidos
  *    com objeto/secretaria do edital, excluindo os cancelados (só "em andamento").
  * App em memória (sem DATABASE_URL) com a Receita mockada (CNPJ demo → CNAE 1412601).
+ *
+ * ⚠️ Histórico (2026-07-16, AD-20): o fornecedor se identificava por `x-papel`/`x-empresa-id`. As
+ * asserções deste arquivo não mudaram — só o modo de autenticar o setup, que agora usa token real.
  */
 describe('Home do fornecedor — projeções de leitura (HTTP)', () => {
   let app: FastifyInstance;
   let empresaId: string;
-  const gestor = { 'x-papel': 'secretaria', 'x-user-id': 'gestor1' };
-  const forn = () => ({ 'x-papel': 'titular', 'x-user-id': 'titular1', 'x-empresa-id': empresaId });
+  // `smga` é o papel canônico do gestor; o antigo `secretaria` sequer existe em `Papel`.
+  const gestor = comoPapel('smga', { userId: 'gestor1' });
+  const forn = () => comoPapel('titular', { userId: 'titular1', empresaId });
   let editalCompativel: string;
 
   beforeAll(async () => {
@@ -50,7 +55,7 @@ describe('Home do fornecedor — projeções de leitura (HTTP)', () => {
     app.inject({ method: 'POST', url: `/editais/${editalId}/credenciamentos`, headers: forn(), payload: { capacidade } });
 
   it('GET /editais expõe secretariaId e prazoVigencia (além de id/objeto)', async () => {
-    const r = await app.inject({ method: 'GET', url: '/editais', headers: { 'x-empresa-id': empresaId } });
+    const r = await app.inject({ method: 'GET', url: '/editais', headers: forn() });
     expect(r.statusCode).toBe(200);
     const item = (r.json() as Array<Record<string, unknown>>).find((e) => e.id === editalCompativel);
     expect(item).toMatchObject({

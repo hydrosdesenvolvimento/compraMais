@@ -1,18 +1,24 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildServer } from '../../src/server.js';
+import { comoPapel } from '../helpers/auth.js';
 
 /**
  * UC004 — Solicitar Credenciamento e concluir por Termo de Aceite, no nível HTTP. App em memória (sem
  * DATABASE_URL) com a Receita mockada (CNPJ demo → CNAE 1412601). Cobre a precondição de edital
  * Aberto + compatível (403), a conclusão pelo Termo (fornecedor → pendente_analise, rastro RN016) e o
  * cancelamento antes da distribuição (A2). Biometria/liveness (UC007) NÃO faz parte deste fluxo (R2).
+ *
+ * ⚠️ Histórico (2026-07-16, AD-20): o fornecedor se identificava por `x-papel`/`x-empresa-id`, headers
+ * de texto — qualquer chamador se dizia titular de qualquer empresa. Agora a empresa representada é a
+ * do JWT.
  */
 describe('Rotas de credenciamento (UC004 — HTTP)', () => {
   let app: FastifyInstance;
   let empresaId: string;
-  const gestor = { 'x-papel': 'secretaria', 'x-user-id': 'gestor1' };
-  const forn = () => ({ 'x-papel': 'titular', 'x-user-id': 'titular1', 'x-empresa-id': empresaId });
+  // `smga` é o papel canônico do gestor — o antigo `secretaria` sequer existe em `Papel`.
+  const gestor = comoPapel('smga', { userId: 'gestor1' });
+  const forn = () => comoPapel('titular', { userId: 'titular1', empresaId });
   let editalCompativel: string;
   let editalIncompativel: string;
   let editalRascunho: string;
@@ -69,8 +75,16 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect(r.json()).toMatchObject({ codigo: 'EditalNaoAberto' });
   });
 
-  it('iniciar sem papel de fornecedor → 403 (RBAC)', async () => {
-    const r = await app.inject({ method: 'POST', url: `/editais/${editalCompativel}/credenciamentos`, headers: { 'x-empresa-id': empresaId }, payload: { capacidade: 500 } });
+  // Antes este caso mandava só `x-empresa-id` e afirmava 403. Mas isso é um ANÔNIMO: o 403 existia
+  // porque o controller lia papel de header e "sem papel" caía como "papel errado". Anônimo agora é
+  // 401; o 403 real (identificado, sem permissão) virou o caso seguinte.
+  it('iniciar anônimo → 401 (empresa não vem de header)', async () => {
+    const r = await app.inject({ method: 'POST', url: `/editais/${editalCompativel}/credenciamentos`, headers: { 'x-empresa-id': empresaId, 'x-papel': 'titular' }, payload: { capacidade: 500 } });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it('iniciar com papel que não é do fornecedor → 403 (RBAC)', async () => {
+    const r = await app.inject({ method: 'POST', url: `/editais/${editalCompativel}/credenciamentos`, headers: comoPapel('auditor'), payload: { capacidade: 500 } });
     expect(r.statusCode).toBe(403);
   });
 
@@ -94,7 +108,7 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect(aceite.json()).toMatchObject({ estado: 'aceito', status: 'pendente_analise' });
 
     // Rastro na trilha append-only (auditoria escritora única).
-    const trilha = await app.inject({ method: 'GET', url: '/auditoria?evento=TermoAceito', headers: { 'x-papel': 'auditor' } });
+    const trilha = await app.inject({ method: 'GET', url: '/auditoria?evento=TermoAceito', headers: comoPapel('auditor') });
     expect(trilha.statusCode).toBe(200);
     expect((trilha.json() as { evento: string }[]).some((r) => r.evento === 'TermoAceito')).toBe(true);
   });
@@ -117,7 +131,7 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect(canc.statusCode).toBe(200);
     expect(canc.json()).toMatchObject({ estado: 'cancelado' });
 
-    const trilha = await app.inject({ method: 'GET', url: '/auditoria?evento=CredenciamentoCancelado', headers: { 'x-papel': 'auditor' } });
+    const trilha = await app.inject({ method: 'GET', url: '/auditoria?evento=CredenciamentoCancelado', headers: comoPapel('auditor') });
     expect((trilha.json() as { evento: string }[]).some((r) => r.evento === 'CredenciamentoCancelado')).toBe(true);
   });
 

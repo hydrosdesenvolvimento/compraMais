@@ -42,7 +42,7 @@ export function ConsultaAuditoria() {
 
   const { data: registros = [], error } = useQuery({ queryKey: ['auditoria', aplicado], queryFn: () => api.auditoria(paramsDe(aplicado)), retry: false });
 
-  // Exportação via fetch (carrega x-papel — a rota é protegida por RBAC) + download local; nunca navega para fora.
+  // Exportação via fetch (carrega o Bearer — a rota é protegida por RBAC) + download local; nunca navega para fora.
   const exportacao = useMutation({
     mutationFn: (formato: 'csv' | 'json') => {
       const p = paramsDe(aplicado); p.set('formato', formato);

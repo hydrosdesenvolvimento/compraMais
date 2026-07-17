@@ -32,6 +32,8 @@ export const IconeCheck = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)} str
 export const IconeCheckCirculo = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>);
 export const IconeFechar = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)} strokeWidth={2}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>);
 export const IconeFiltro = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>);
+/** Tela Única de Contestação/Regularização (UC016) — escudo com alerta: pendência a regularizar. */
+export const IconeContestacao = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>);
 export const IconeDownload = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>);
 export const IconeUpload = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>);
 export const IconeSync = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><polyline points="23 4 23 10 17 10" /><polyline points="1 20 1 14 7 14" /><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" /></svg>);

@@ -10,11 +10,14 @@ const PERFIS_FORNECEDOR = ['titular', 'procurador'];
  * ator (rastro AD-30). Conclusão por Termo de Aceite (RN016) e cancelamento antes da distribuição (A2).
  */
 export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento; listar: ListarCredenciamentos }): void {
-  // Leitura: credenciamentos do fornecedor para o portal (home). Somente "em andamento" por padrão
-  // (não cancelados); resolvido por `:id` como as demais rotas de leitura do fornecedor (documentos).
+  // Leitura: credenciamentos do fornecedor para o portal. Somente "em andamento" por padrão (não
+  // cancelados) — recorte da home; resolvido por `:id` como as demais rotas de leitura do fornecedor
+  // (documentos). `?incluirCancelados=true` devolve o histórico completo, que a tela "Meus
+  // Credenciamentos" precisa para o filtro de cancelados.
   app.get('/fornecedores/:id/credenciamentos', async (req, reply) => {
     const { id } = req.params as { id: string };
-    return reply.send(await deps.listar.doFornecedor(id));
+    const { incluirCancelados } = req.query as { incluirCancelados?: string };
+    return reply.send(await deps.listar.doFornecedor(id, { incluirCancelados: incluirCancelados === 'true' }));
   });
 
   app.post('/editais/:id/credenciamentos', async (req, reply) => {

@@ -2,7 +2,7 @@ import { createRouter, createRootRoute, createRoute, redirect, createHashHistory
 import { type ItemMenu } from './design-system/AppShell';
 import { ShellFornecedor, ShellAdmin } from './design-system/ShellConectado';
 import { AuthLayout } from './design-system/AuthLayout';
-import { IconeInicio, IconeEditais, IconeCredenciamentos, IconeDocumentos, IconeDemandas, IconeUsuario } from './design-system/icons';
+import { IconeInicio, IconeEditais, IconeCredenciamentos, IconeContestacao, IconeDocumentos, IconeDemandas, IconeUsuario } from './design-system/icons';
 
 import { AuthPanel } from './pages/publico/AuthPanel';
 import { RedefinirSenha } from './pages/publico/RedefinirSenha';
@@ -12,6 +12,7 @@ import { Editais } from './pages/publico/Editais';
 import { ContestarCnae } from './pages/publico/ContestarCnae';
 import { Documentos } from './pages/publico/Documentos';
 import { Contestacao } from './pages/publico/Contestacao';
+import { MeusCredenciamentosConectada } from './pages/publico/MeusCredenciamentos';
 import { MinhaContaConectada } from './pages/publico/MinhaContaConectada';
 import { ProcuradoresConectada } from './pages/publico/ProcuradoresConectada';
 import { PrivacidadeConectada } from './pages/publico/PrivacidadeConectada';
@@ -38,7 +39,8 @@ const ico = { width: 20, height: 20 };
 const MENU_FORNECEDOR: ItemMenu[] = [
   { rotuloKey: 'common.nav.inicio', href: '/inicio', cy: 'nav-inicio', icone: <IconeInicio {...ico} /> },
   { rotuloKey: 'common.nav.editais', href: '/editais', cy: 'nav-editais', icone: <IconeEditais {...ico} /> },
-  { rotuloKey: 'common.nav.credenciamentos', href: '/contestacao', cy: 'nav-credenciamentos', icone: <IconeCredenciamentos {...ico} /> },
+  { rotuloKey: 'common.nav.credenciamentos', href: '/credenciamentos', cy: 'nav-credenciamentos', icone: <IconeCredenciamentos {...ico} /> },
+  { rotuloKey: 'common.nav.contestacao', href: '/contestacao', cy: 'nav-contestacao', icone: <IconeContestacao {...ico} /> },
   { rotuloKey: 'common.nav.documentos', href: '/documentos', cy: 'nav-documentos', icone: <IconeDocumentos {...ico} /> },
   { rotuloKey: 'common.nav.demandas', href: '/transparencia', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
   { rotuloKey: 'common.nav.procuradores', href: '/procuradores', cy: 'nav-procuradores', icone: <IconeUsuario {...ico} /> },
@@ -62,6 +64,7 @@ const rPrivacidade = createRoute({ getParentRoute: () => fornecedorLayout, path:
 const rEditais = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais', component: Editais });
 const rCredenciamento = createRoute({ getParentRoute: () => fornecedorLayout, path: '/credenciamento/$editalId', component: Credenciamento });
 const rContestarCnae = createRoute({ getParentRoute: () => fornecedorLayout, path: '/editais/contestar', component: () => <ContestarCnae editalId={DEMO_EDITAL_ID} /> });
+const rMeusCredenciamentos = createRoute({ getParentRoute: () => fornecedorLayout, path: '/credenciamentos', component: MeusCredenciamentosConectada });
 const rContestacao = createRoute({ getParentRoute: () => fornecedorLayout, path: '/contestacao', component: () => <Contestacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
 const rDocumentos = createRoute({ getParentRoute: () => fornecedorLayout, path: '/documentos', component: () => <Documentos fornecedorId={DEMO_FORNECEDOR_ID} /> });
 const rTransparencia = createRoute({ getParentRoute: () => fornecedorLayout, path: '/transparencia', component: Transparencia });
@@ -86,7 +89,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   cadastroRoute,
   redefinirSenhaRoute,
-  fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
+  fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rMeusCredenciamentos, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
   adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos, rAdminUsuarios, rAdminLgpd, rAdminAudit, rAdminPerfis]),
   naoEncontrada,
 ]);

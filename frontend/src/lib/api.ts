@@ -84,7 +84,10 @@ export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expi
 /** Resumo de um credenciamento do fornecedor (home) — estado + objeto/secretaria do edital vinculado. */
 export interface CredenciamentoResumoView {
   id: string; editalId: string; estado: 'iniciado' | 'aceito' | 'cancelado';
+  numeroEdital: string | null; // ED-AAAA/NNN — null se o edital sumiu
   objeto: string | null; secretariaId: string | null;
+  secretariaSigla: string | null; // sigla do catálogo; cai para o id quando não catalogada
+  criadoEm: string; atualizadoEm: string; // ISO-8601
 }
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
@@ -157,8 +160,10 @@ export const api = {
   editaisCompativeis: () => get<EditalItem[]>('/editais'),
   transparencia: () => get<Transparencia>('/transparencia'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
-  // Home do fornecedor — seus credenciamentos "em andamento" (o backend exclui os cancelados).
-  meusCredenciamentos: (fid: string) => get<CredenciamentoResumoView[]>(`/fornecedores/${fid}/credenciamentos`),
+  // Credenciamentos do fornecedor. Sem `incluirCancelados` o backend devolve só os "em andamento"
+  // (recorte da home); a tela "Meus Credenciamentos" pede o histórico completo para o filtro de cancelados.
+  meusCredenciamentos: (fid: string, incluirCancelados = false) =>
+    get<CredenciamentoResumoView[]>(`/fornecedores/${fid}/credenciamentos${incluirCancelados ? '?incluirCancelados=true' : ''}`),
   pendencias: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias`),
   pendenciasConsolidadas: (fid: string) => get<Pendencia[]>(`/fornecedores/${fid}/pendencias-consolidadas`),
   // UC016 (tela única) — ações delegadas aos módulos donos:

@@ -21,7 +21,8 @@
       "malote": "SEI Package",
       "privacidade": "Privacy",
       "lgpd": "LGPD Requests",
-      "perfis": "Screens by role"
+      "perfis": "Screens by role",
+      "contestacao": "Disputes"
     },
     "shell": {
       "menu": "MENU",
@@ -385,8 +386,8 @@
     "TransicaoInvalida": "This operation isn't allowed in the current state."
   },
   "contestacao": {
-    "titulo": "My Accreditations",
-    "subtitulo": "Track your accreditations across public notices and resume any that are still in draft.",
+    "titulo": "Disputes and Regularizations",
+    "subtitulo": "Resolve the issues blocking your accreditation and follow the reviews in progress.",
     "carregando": "Loading…",
     "filtros": "Filters",
     "busca": {
@@ -786,5 +787,44 @@
       "retido": "Disposal denied: data still under legal retention.",
       "erro": "The action could not be completed."
     }
+  },
+  "meusCredenciamentos": {
+    "titulo": "My Accreditations",
+    "subtitulo": "Track all of your company’s accreditations and pick up where you left off.",
+    "carregando": "Loading…",
+    "semEmpresa": "No company linked to your account.",
+    "editalRemovido": "Notice removed",
+    "buscaAriaLabel": "Search accreditations",
+    "buscaPlaceholder": "Search by number or subject…",
+    "exportarCsv": "Excel",
+    "exportarPdf": "PDF",
+    "colEdital": "Notice",
+    "colObjeto": "Subject",
+    "colStatus": "Status",
+    "colCriadoEm": "Created on",
+    "colAtualizadoEm": "Last update",
+    "colAcoes": "Actions",
+    "filtro": {
+      "todos": "All",
+      "andamento": "In progress",
+      "finalizados": "Completed",
+      "cancelados": "Cancelled"
+    },
+    "estado": {
+      "iniciado": "In progress",
+      "aceito": "Completed",
+      "cancelado": "Cancelled"
+    },
+    "acao": {
+      "continuar": "Continue",
+      "recredenciar": "Apply again",
+      "cancelar": "Cancel accreditation"
+    },
+    "vazioTitulo": "No accreditations yet",
+    "vazioDica": "Go to the Notices showcase and click “Start Accreditation” to begin.",
+    "vazioFiltroTitulo": "No accreditations in this filter",
+    "vazioFiltroDica": "Adjust the search or pick another status.",
+    "paginacaoInfo": "Showing {{de}}–{{ate}} of {{total}} accreditations",
+    "irParaPagina": "Go to page {{n}}"
   }
 }

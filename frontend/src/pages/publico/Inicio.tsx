@@ -32,7 +32,7 @@ export function Inicio() {
   const goDocs = () => navigate({ to: '/documentos' });
   const goEditais = () => navigate({ to: '/editais' });
   const goCredenciar = (editalId: string) => navigate({ to: '/credenciamento/$editalId', params: { editalId } });
-  const goMeusCred = () => navigate({ to: '/contestacao' });
+  const goMeusCred = () => navigate({ to: '/credenciamentos' });
 
   if (!fornecedorId) return <Aviso texto={t('inicio.estado.semEmpresa')} />;
   if (perfil.isLoading) return <Aviso texto={t('inicio.estado.carregando')} />;

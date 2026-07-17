@@ -5,11 +5,12 @@ import { Trans, useTranslation } from 'react-i18next';
 import { api, type EditalItem, type CatalogoItemView } from '../../lib/api';
 import { obterUsuario } from '../../lib/auth';
 import { diasAte, tomPrazo, CORES_PRAZO } from '../../lib/prazos';
+import { exportarCsv } from '../../lib/exportar';
+import { celula, siglaTag, botaoExportar, cabecalho, setaOrdem, Paginacao, type Direcao } from '../../design-system/tabela';
 import { IconeBusca, IconeDownload, IconeInfo, IconeSeta } from '../../design-system/icons';
 
 /** Colunas ordenáveis da vitrine. `prazo` ordena pelo nº de dias, não pelo texto. */
 type Coluna = 'objeto' | 'secretaria' | 'prazo' | 'quantitativos';
-type Direcao = 'asc' | 'desc';
 
 const POR_PAGINA = 5;
 
@@ -19,38 +20,6 @@ interface EditalLinha extends EditalItem {
   /** Dias até o fim da vigência; `null` quando o edital não tem prazo definido. */
   dias: number | null;
 }
-
-const celula: CSSProperties = { verticalAlign: 'middle', borderTop: '1px solid var(--divider)', padding: '15px 16px' };
-
-const siglaTag: CSSProperties = {
-  font: '600 10.5px var(--font-body)', letterSpacing: '.05em', color: 'var(--azul-800)',
-  background: 'var(--azul-100)', padding: '3px 9px', borderRadius: 6, whiteSpace: 'nowrap',
-};
-
-const botaoExportar: CSSProperties = {
-  display: 'inline-flex', alignItems: 'center', gap: 7, padding: '11px 15px', border: '1px solid var(--border)',
-  borderRadius: 10, background: '#fff', color: 'var(--cinza-700)', font: '600 13.5px var(--font-body)', cursor: 'pointer',
-};
-
-function cabecalho(ordenavel: boolean, alinhamento: CSSProperties['textAlign'] = 'left'): CSSProperties {
-  return {
-    verticalAlign: 'middle', padding: '13px 16px', font: '600 11px var(--font-body)', letterSpacing: '.05em',
-    color: 'var(--azul-900)', textTransform: 'uppercase', whiteSpace: 'nowrap', textAlign: alinhamento,
-    cursor: ordenavel ? 'pointer' : 'default', userSelect: 'none', background: '#E2E7EE',
-  };
-}
-
-/** Dispara o download de um arquivo gerado no cliente (não há endpoint de exportação no backend). */
-function baixar(conteudo: BlobPart, nome: string, tipo: string) {
-  const url = URL.createObjectURL(new Blob([conteudo], { type: tipo }));
-  const a = document.createElement('a');
-  a.href = url; a.download = nome;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-/** Escapa um campo para CSV (aspas duplicadas + envolvido em aspas). */
-const csvCampo = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
 
 /**
  * Vitrine de Editais (UX-DR3) — apenas editais compatíveis com os CNAEs da empresa.
@@ -142,12 +111,11 @@ export function Editais() {
   ];
 
   // Exporta o que está filtrado/ordenado (não só a página), espelhando o que o usuário vê.
-  const exportarCsv = () => {
-    const cabecalhos = colunas.filter((c) => c.chave).map((c) => csvCampo(c.rotulo));
-    const corpo = filtrados.map((e) => [e.objeto, e.sigla, textoPrazo(e.dias), e.quantitativos].map(csvCampo).join(';'));
-    // BOM (\uFEFF): faz o Excel reconhecer UTF-8 (acentuação) ao abrir o CSV.
-    baixar(`\uFEFF${[cabecalhos.join(';'), ...corpo].join('\r\n')}`, 'editais.csv', 'text/csv;charset=utf-8');
-  };
+  const exportar = () => exportarCsv(
+    colunas.filter((c) => c.chave).map((c) => c.rotulo),
+    filtrados.map((e) => [e.objeto, e.sigla, textoPrazo(e.dias), e.quantitativos]),
+    'editais.csv',
+  );
 
   const cnaePrincipal = perfil?.cnaes?.find((c) => c.tipo === 'principal' && c.ativo) ?? perfil?.cnaes?.find((c) => c.ativo);
 
@@ -209,7 +177,7 @@ export function Editais() {
           {opcoesSecretaria.map((s) => <option key={s.id} value={s.id}>{s.sigla}</option>)}
         </select>
 
-        <button type="button" data-cy="exportar-csv" onClick={exportarCsv} disabled={filtrados.length === 0} style={botaoExportar}>
+        <button type="button" data-cy="exportar-csv" onClick={exportar} disabled={filtrados.length === 0} style={botaoExportar}>
           <IconeDownload width={16} height={16} style={{ color: 'var(--sucesso)' }} />
           {t('editais.vitrine.exportarCsv')}
         </button>
@@ -254,7 +222,7 @@ export function Editais() {
                                 onClick={() => ordenarPor(c.chave as Coluna)}
                                 style={{ all: 'unset', cursor: 'pointer', font: 'inherit', color: 'inherit', letterSpacing: 'inherit' }}
                               >
-                                {c.rotulo}{ativa ? (direcao === 'asc' ? ' ↑' : ' ↓') : ''}
+                                {c.rotulo}{setaOrdem(ativa, direcao)}
                               </button>
                             ) : c.rotulo}
                           </th>
@@ -297,38 +265,17 @@ export function Editais() {
                 </table>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '14px 18px', borderTop: '1px solid var(--divider)', flexWrap: 'wrap' }}>
-                <span data-cy="paginacao-info" style={{ fontSize: 13, color: 'var(--cinza-500)' }}>
-                  {t('editais.vitrine.paginacaoInfo', {
-                    de: (paginaAtual - 1) * POR_PAGINA + 1,
-                    ate: Math.min(paginaAtual * POR_PAGINA, filtrados.length),
-                    total: filtrados.length,
-                  })}
-                </span>
-                {totalPaginas > 1 && (
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((n) => (
-                      <button
-                        key={n}
-                        type="button"
-                        data-cy="pagina"
-                        aria-current={n === paginaAtual ? 'page' : undefined}
-                        aria-label={t('editais.vitrine.irParaPagina', { n })}
-                        onClick={() => setPagina(n)}
-                        className="btn"
-                        style={{
-                          minWidth: 34, height: 34, borderRadius: 8, fontSize: 13,
-                          border: `1px solid ${n === paginaAtual ? 'var(--azul-700)' : 'var(--border)'}`,
-                          background: n === paginaAtual ? 'var(--azul-700)' : '#fff',
-                          color: n === paginaAtual ? '#fff' : 'var(--cinza-700)',
-                        }}
-                      >
-                        {n}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Paginacao
+                info={t('editais.vitrine.paginacaoInfo', {
+                  de: (paginaAtual - 1) * POR_PAGINA + 1,
+                  ate: Math.min(paginaAtual * POR_PAGINA, filtrados.length),
+                  total: filtrados.length,
+                })}
+                pagina={paginaAtual}
+                totalPaginas={totalPaginas}
+                onPagina={setPagina}
+                rotuloPagina={(n) => t('editais.vitrine.irParaPagina', { n })}
+              />
             </>
           )}
         </div>

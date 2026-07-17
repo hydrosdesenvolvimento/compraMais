@@ -1,8 +1,9 @@
-import type { FastifyInstance, FastifyRequest } from 'fastify';
+import type { FastifyInstance } from 'fastify';
 import type { RegistrarUsuario, AutenticarLocal, VincularGoogle } from './autenticacao.js';
 import type { TrocarSenha, SolicitarResetSenha, RedefinirSenha } from './gerir-senha.js';
 import type { TokenService } from './token-service.js';
 import type { Identidade } from './identity-provider.js';
+import { identidadeDoBearer } from '../http/autenticacao.js';
 
 // --- Schemas (OpenAPI / @fastify/swagger). `format: email` é documentação (ajv-formats não registrado);
 //     a validação forte (senha, e-mail) fica no domínio, preservando os códigos 422 específicos. ---
@@ -86,7 +87,7 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
       response: { 200: IDENTIDADE, 401: ERRO },
     },
   }, async (req, reply) => {
-    const id = identidadeDoToken(req, deps.tokens);
+    const id = identidadeDoBearer(req, deps.tokens);
     if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
     return reply.send(id);
   });
@@ -100,7 +101,7 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
       response: { 204: { type: 'null' }, 400: ERRO, 401: ERRO, 404: ERRO },
     },
   }, async (req, reply) => {
-    const id = identidadeDoToken(req, deps.tokens);
+    const id = identidadeDoBearer(req, deps.tokens);
     if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
     const { googleId } = req.body as { googleId: string };
     try {
@@ -125,7 +126,7 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
       response: { 204: { type: 'null' }, 400: ERRO, 401: ERRO, 422: ERRO },
     },
   }, async (req, reply) => {
-    const id = identidadeDoToken(req, deps.tokens);
+    const id = identidadeDoBearer(req, deps.tokens);
     if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
     const { senhaAtual, novaSenha } = req.body as { senhaAtual: string; novaSenha: string };
     try {
@@ -172,14 +173,6 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
       return reply.code(status(e) as 400 | 422).send(erro(e));
     }
   });
-}
-
-/** Extrai e valida a identidade do header Authorization: Bearer <jwt>. */
-export function identidadeDoToken(req: FastifyRequest, tokens: TokenService): Identidade | null {
-  const auth = String(req.headers['authorization'] ?? '');
-  const m = auth.match(/^Bearer\s+(.+)$/i);
-  if (!m?.[1]) return null;
-  return tokens.verificar(m[1]);
 }
 
 function status(e: unknown): number {

@@ -7,6 +7,12 @@ import type { CepGateway } from '../../shared/acl/cep/cep-gateway.js';
 /**
  * Controller (camada de Adaptadores). Traduz HTTP ↔ casos de uso. Sem regra de negócio aqui.
  * Erros de domínio viram envelope { codigo, mensagem }. CNPJ e CEP consultam a BrasilAPI (via ACL).
+ *
+ * PÚBLICO por natureza (UC001): é o autocadastro do fornecedor — quem chama `POST /fornecedores` e as
+ * consultas de CNPJ/CEP que alimentam o formulário ainda NÃO tem conta, logo não pode ter token.
+ * Nenhuma rota aqui exige credencial. O que a Fase 2 (AD-20) mudou é a origem do ator do rastro: ele
+ * vem do JWT quando há sessão e é `anon` quando não há — nunca mais de um `x-user-id` que o próprio
+ * chamador escolhia.
  */
 export function registrarRotasCadastro(app: FastifyInstance, deps: {
   cadastrar: CadastrarFornecedor;
@@ -45,7 +51,7 @@ export function registrarRotasCadastro(app: FastifyInstance, deps: {
   app.patch('/fornecedores/:id', async (req, reply) => {
     const { id } = req.params as { id: string };
     try {
-      await deps.conta.editarPerfil(id, req.body as Record<string, unknown>, { userId: actor(req) });
+      await deps.conta.editarPerfil(id, req.body as Record<string, unknown>, { userId: ator(req) });
       return reply.code(204).send();
     } catch (e) {
       return reply.code(mapStatus(e)).send({ codigo: nome(e), mensagem: (e as Error).message });
@@ -65,7 +71,7 @@ export function registrarRotasCadastro(app: FastifyInstance, deps: {
   app.post('/fornecedores/:id/sincronizar', async (req, reply) => {
     const { id } = req.params as { id: string };
     try {
-      const r = await deps.conta.reSincronizar(id, { userId: actor(req) });
+      const r = await deps.conta.reSincronizar(id, { userId: ator(req) });
       return reply.send(r);
     } catch (e) {
       // Fornecedor inexistente → 404 (nunca 500). RF018 preserva os demais estados dentro do caso de uso.
@@ -83,6 +89,7 @@ function mapStatus(e: unknown): number {
   return 400;
 }
 function nome(e: unknown): string { return (e as Error)?.name ?? 'Erro'; }
-function actor(req: { headers: Record<string, unknown> }): string {
-  return String(req.headers['x-user-id'] ?? 'anon');
+/** Ator do rastro (AD-30/AD-20): do token quando há sessão; `anon` no autocadastro, que é anônimo. */
+function ator(req: { identidade: { userId: string } | null }): string {
+  return req.identidade?.userId ?? 'anon';
 }

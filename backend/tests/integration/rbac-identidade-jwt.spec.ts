@@ -33,7 +33,6 @@ describe('⛔ identidade: RBAC exige JWT, não um header de texto (AD-20, AD-35)
     ['/admin/cargos', 'administrador'],
     ['/admin/dashboard', 'administrador'],
     ['/gestao/editais', 'smga'],
-    ['/catalogos/secretarias', 'administrador'],
     ['/titular/solicitacoes', 'dpo'],
     ['/malotes', 'cpl'],
     ['/permissoes/telas', 'administrador'],
@@ -55,6 +54,29 @@ describe('⛔ identidade: RBAC exige JWT, não um header de texto (AD-20, AD-35)
       expect(res.statusCode).toBe(401);
     },
   );
+
+  /**
+   * Correção de escopo (Tech Lead, 2026-07-16). Este caso nasceu como
+   * `GET /catalogos/secretarias` na lista acima, por engano: a sonda viu o GET abrir sem token e
+   * o leu como porta arrombada. O GET nunca foi protegido — a leitura de catálogo é aberta por
+   * decisão registrada (UC020: dado de referência, consumido por editais/upload; o próprio
+   * `catalogos-controller.ts` já o declarava). Quem exige Administrador é a ESCRITA, e é ela que
+   * precisa provar que não autoriza por header. Fechar o GET para deixar a linha verde teria
+   * revertido uma decisão de produto para satisfazer um teste.
+   */
+  it('escrita em catálogo: `x-papel: administrador` SEM token não pode autorizar', async () => {
+    const app = await buildServer();
+    const res = await app.inject({
+      method: 'POST',
+      url: '/catalogos/secretarias',
+      headers: { 'x-papel': 'administrador', 'x-user-id': 'nao-autenticado' },
+      payload: { chave: 'SEMSA', nome: 'Secretaria Municipal de Saúde' },
+    });
+    await app.close();
+
+    expect(res.statusCode).not.toBe(201);
+    expect(res.statusCode).toBe(401);
+  });
 
   it('escalação de papel: trocar `x-papel` não pode mudar a autorização', async () => {
     const app = await buildServer();

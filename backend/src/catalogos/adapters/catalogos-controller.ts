@@ -2,6 +2,8 @@ import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { ManterCatalogos } from '../application/manter-catalogos.js';
 import type { ItemCatalogo, CatalogoStateBase } from '../domain/item-catalogo.js';
 import type { FiltroListagem } from '../application/catalogo-repository.js';
+import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
+import { exigirPapel } from '../../shared/http/autenticacao.js';
 
 type Actor = { userId: string; empresaId?: string };
 
@@ -17,8 +19,11 @@ interface CrudLike {
   listar(filtro?: FiltroListagem): Promise<ItemCatalogo[]>;
 }
 
-/** Apenas o Administrador mantém catálogos (UC020). A leitura é aberta (dado de referência). */
-const PERFIL_ADMIN = 'administrador';
+/**
+ * Apenas o Administrador mantém catálogos (UC020). A leitura é aberta (dado de referência):
+ * anônimo → 401 nas escritas, papel errado → 403; o GET não passa por guard algum, de propósito.
+ */
+const PERFIS_ESCRITA: readonly Papel[] = ['administrador'];
 
 /**
  * Controller dos catálogos base (UC020 / RF020-RF022). Um único conjunto de rotas parametrizado por
@@ -47,33 +52,33 @@ export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: Ma
   });
 
   app.post('/catalogos/:catalogo', async (req, reply) => {
-    if (!admin(req)) return proibido(reply);
+    const quem = exigirPapel(req, reply, PERFIS_ESCRITA); if (!quem) return reply;
     const crud = resolver(req, reply); if (!crud) return;
-    try { return reply.code(201).send(await crud.criar(req.body, actor(req))); }
+    try { return reply.code(201).send(await crud.criar(req.body, actor(quem))); }
     catch (e) { return falha(reply, e); }
   });
 
   app.patch('/catalogos/:catalogo/:id', async (req, reply) => {
-    if (!admin(req)) return proibido(reply);
+    const quem = exigirPapel(req, reply, PERFIS_ESCRITA); if (!quem) return reply;
     const crud = resolver(req, reply); if (!crud) return;
     const { id } = req.params as { id: string };
-    try { await crud.editar(id, req.body, actor(req)); return reply.send({ ok: true }); }
+    try { await crud.editar(id, req.body, actor(quem)); return reply.send({ ok: true }); }
     catch (e) { return falha(reply, e); }
   });
 
   app.post('/catalogos/:catalogo/:id/inativar', async (req, reply) => {
-    if (!admin(req)) return proibido(reply);
+    const quem = exigirPapel(req, reply, PERFIS_ESCRITA); if (!quem) return reply;
     const crud = resolver(req, reply); if (!crud) return;
     const { id } = req.params as { id: string };
-    try { await crud.inativar(id, actor(req)); return reply.send({ situacao: 'inativo' }); }
+    try { await crud.inativar(id, actor(quem)); return reply.send({ situacao: 'inativo' }); }
     catch (e) { return falha(reply, e); }
   });
 
   app.post('/catalogos/:catalogo/:id/reativar', async (req, reply) => {
-    if (!admin(req)) return proibido(reply);
+    const quem = exigirPapel(req, reply, PERFIS_ESCRITA); if (!quem) return reply;
     const crud = resolver(req, reply); if (!crud) return;
     const { id } = req.params as { id: string };
-    try { await crud.reativar(id, actor(req)); return reply.send({ situacao: 'ativo' }); }
+    try { await crud.reativar(id, actor(quem)); return reply.send({ situacao: 'ativo' }); }
     catch (e) { return falha(reply, e); }
   });
 }
@@ -88,11 +93,8 @@ function serializar(item: ItemCatalogo): Record<string, unknown> {
   };
 }
 
-function actor(req: FastifyRequest): Actor { return { userId: String(req.headers['x-user-id'] ?? 'anon') }; }
-function admin(req: FastifyRequest): boolean { return String(req.headers['x-papel'] ?? '') === PERFIL_ADMIN; }
-function proibido(reply: FastifyReply): FastifyReply {
-  return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only Administrator can maintain catalogs.' });
-}
+/** Ator da trilha: vem do token verificado (AD-20), nunca de `x-user-id`. */
+function actor(quem: Identidade): Actor { return { userId: quem.userId, empresaId: quem.empresaId }; }
 
 /** Mapeia os erros do caso de uso/adaptador para HTTP. */
 function falha(reply: FastifyReply, e: unknown): FastifyReply {

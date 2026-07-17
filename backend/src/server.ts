@@ -1,5 +1,6 @@
 import Fastify, { type FastifyInstance } from 'fastify';
 import { registrarSegurancaHttp } from './shared/http/security.js';
+import { registrarAutenticacao } from './shared/http/autenticacao.js';
 import { registrarDocsApi } from './shared/http/openapi.js';
 import { InMemoryEventBus } from './shared/events/event-bus.js';
 import { AuditConsumer } from './auditoria/application/audit-consumer.js';
@@ -122,6 +123,12 @@ export async function buildServer(): Promise<FastifyInstance> {
     app.addHook('onClose', async () => { await pool!.end(); });
   }
 
+  // Identidade (AD-20): resolve o Bearer token em `req.identidade` para TODAS as rotas de negócio.
+  // Precisa vir antes do primeiro `app.get/post` — o Fastify só aplica um hook às rotas registradas
+  // depois dele. É a única origem de identidade/papel; os headers `x-papel`/`x-user-id` não autorizam.
+  const tokens = new JwtTokenService(config.auth.jwtSecret, config.auth.jwtExpiraEmSeg);
+  registrarAutenticacao(app, tokens);
+
   // Barramento + auditoria (escritor único — AD-18). Trilha durável em Postgres quando disponível;
   // a leitura (004) usa o MESMO repositório do escritor.
   const bus = new InMemoryEventBus();
@@ -162,7 +169,6 @@ export async function buildServer(): Promise<FastifyInstance> {
   });
   registrarRotasIdentidade(app, { procuradores });
 
-  const tokens = new JwtTokenService(config.auth.jwtSecret, config.auth.jwtExpiraEmSeg);
   // Reutilizado pelo cadastro de fornecedor (UC001): o cadastro cria a credencial de login (e-mail/senha).
   const registrarUsuario = new RegistrarUsuario(usuarioRepo, bus);
   // UC015 — gestão da própria senha (RF015): reset de senha (A1) com token durável + notificador plugável.

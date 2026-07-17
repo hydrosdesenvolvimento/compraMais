@@ -28,6 +28,30 @@ export interface AppConfig {
   };
 }
 
+/** Segredo de assinatura usado fora de produção, quando `JWT_SECRET` não foi informado. */
+const SEGREDO_DEV = 'dev-secret-inseguro-trocar-em-producao';
+
+/**
+ * Resolve o segredo do JWT, e em produção EXIGE que ele venha do ambiente (AD-29).
+ *
+ * Antes do AD-20 o token era decorativo — quem autorizava era o header `x-papel` — e um segredo
+ * default era só um cheiro ruim. Agora o token É a autorização: subir produção sem `JWT_SECRET`
+ * significa assinar com um segredo que está neste repositório público, e qualquer pessoa forja um
+ * token de administrador. Isso reabriria, por configuração, exatamente o buraco que a Fase 2
+ * fechou — então aqui o processo morre no boot em vez de subir inseguro e silencioso.
+ */
+function exigirSegredoJwt(nodeEnv: string): string {
+  const segredo = readSecret('JWT_SECRET');
+  if (segredo && segredo !== SEGREDO_DEV) return segredo;
+  if (nodeEnv === 'production') {
+    throw new Error(
+      'JWT_SECRET is required in production: set it via environment or Docker secret (JWT_SECRET_FILE). ' +
+        'Refusing to sign tokens with the development secret.',
+    );
+  }
+  return SEGREDO_DEV;
+}
+
 /** Verdadeiro quando há Postgres configurado por ambiente (decide repo pg vs memória). */
 export function temPostgresConfigurado(): boolean {
   return Boolean(process.env.POSTGRES_HOST ?? process.env.DATABASE_URL);
@@ -52,8 +76,7 @@ export function loadConfig(): AppConfig {
       poolMax: toInt(process.env.POSTGRES_POOL_MAX, 10),
     },
     auth: {
-      // Em DEV cai num segredo de desenvolvimento; em PROD venha de JWT_SECRET / *_FILE (Docker secret).
-      jwtSecret: readSecret('JWT_SECRET') ?? 'dev-secret-inseguro-trocar-em-producao',
+      jwtSecret: exigirSegredoJwt(process.env.NODE_ENV ?? 'development'),
       jwtExpiraEmSeg: toInt(process.env.JWT_EXPIRES_IN_SECONDS, 3600),
       ...(google ? { google } : {}),
       frontendRedirect: process.env.AUTH_FRONTEND_REDIRECT ?? 'http://localhost:5173/#/cadastro',

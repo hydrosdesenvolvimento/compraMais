@@ -1,9 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import type { Covalidar } from '../application/covalidar.js';
+import type { Papel } from '../../shared/identity/identity-provider.js';
+import { exigirPapel } from '../../shared/http/autenticacao.js';
 
-const PERFIS_CPL = ['cpl', 'smga'];
+/** Veredito de covalidação é ato de controle: só CPL/SMGA. Demais → 403; anônimo → 401. */
+const PERFIS_CPL: readonly Papel[] = ['cpl', 'smga'];
 
-/** Controller de covalidação (FR-001/013). RBAC: só CPL/SMGA. */
+/** Controller de covalidação (FR-001/013). RBAC do veredito por JWT (AD-20). */
 export function registrarRotasCovalidacao(app: FastifyInstance, deps: { covalidar: Covalidar }): void {
   app.get('/fornecedores/:id/documentos/pendentes', async (req, reply) => {
     const { id } = req.params as { id: string };
@@ -16,12 +19,14 @@ export function registrarRotasCovalidacao(app: FastifyInstance, deps: { covalida
   });
 
   app.post('/documentos/:docId/covalidar', async (req, reply) => {
-    if (!cpl(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Only CPL/SMGA can co-validate.' });
+    const id = exigirPapel(req, reply, PERFIS_CPL);
+    if (!id) return reply;
     const { docId } = req.params as { docId: string };
     const { resultado, justificativa, empresaId } = req.body as { resultado: 'aprovado' | 'reprovado'; justificativa?: string; empresaId: string };
     try {
-      if (resultado === 'aprovado') await deps.covalidar.aprovar(docId, actor(req), empresaId);
-      else await deps.covalidar.reprovar(docId, actor(req), empresaId, justificativa ?? '');
+      // O analista é o dono do token (AD-30): o cliente não escolhe mais quem assina o veredito.
+      if (resultado === 'aprovado') await deps.covalidar.aprovar(docId, id.userId, empresaId);
+      else await deps.covalidar.reprovar(docId, id.userId, empresaId, justificativa ?? '');
       return reply.code(200).send({ ok: true });
     } catch (e) {
       const code = (e as Error).name?.includes('Justificativa') ? 422 : (e as Error).name === 'DocumentoNaoEncontrado' ? 404 : 400;
@@ -29,6 +34,3 @@ export function registrarRotasCovalidacao(app: FastifyInstance, deps: { covalida
     }
   });
 }
-
-function actor(req: { headers: Record<string, unknown> }): string { return String(req.headers['x-user-id'] ?? 'anon'); }
-function cpl(req: { headers: Record<string, unknown> }): boolean { return PERFIS_CPL.includes(String(req.headers['x-papel'] ?? '')); }

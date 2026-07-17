@@ -1,20 +1,36 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { FastifyInstance } from 'fastify';
 import { buildServer } from '../../src/server.js';
+import { comoPapel } from '../helpers/auth.js';
 
 /**
  * UC021 — gestão de usuários internos no nível HTTP (rotas `/admin/usuarios` + `/admin/cargos`). Cobre o
  * RBAC de Administrador, o mapeamento cargo→papel, a unicidade de e-mail (409), a inativação lógica
  * (some do default; login do inativo é recusado), o guard anti-lockout e o reset de senha. App em memória
  * (sem DATABASE_URL) — mesmo wiring do pg via `pool ? pg : memory`.
+ *
+ * ⚠️ Histórico (2026-07-16, AD-20): até a Fase 2 este arquivo se autenticava com `x-papel:
+ * administrador` + `x-user-id`, headers de texto, SEM token — e passava. Ele afirmava o RBAC de papel
+ * (o `403` do cpl era real) mas nunca a IDENTIDADE: qualquer chamador se dizia administrador e lia
+ * nome, e-mail, cargo e papel dos servidores da Prefeitura. Idem o guard anti-lockout, que comparava o
+ * ator com o alvo usando um `x-user-id` que o próprio cliente escolhia — bastava mentir o header para
+ * inativar a conta de outro Administrador. Agora todos os casos emitem token assinado; papel e ator
+ * vêm do JWT. O caso `anônimo → 401` existe para que a regressão não volte silenciosa.
  */
 describe('Rotas de usuários internos (UC021 — HTTP)', () => {
   let app: FastifyInstance;
-  const admin = { 'x-papel': 'administrador', 'x-user-id': 'admin-1' };
-  const naoAdmin = { 'x-papel': 'cpl', 'x-user-id': 'cpl-1' };
+  const admin = comoPapel('administrador', { userId: 'admin-1' });
+  const naoAdmin = comoPapel('cpl', { userId: 'cpl-1' });
 
   beforeAll(async () => { app = await buildServer(); });
   afterAll(async () => { await app.close(); });
+
+  it('anônimo → 401 (o papel não pode vir de header de texto)', async () => {
+    const semToken = await app.inject({ method: 'GET', url: '/admin/usuarios', headers: { 'x-papel': 'administrador' } });
+    expect(semToken.statusCode).toBe(401);
+    const cargos = await app.inject({ method: 'GET', url: '/admin/cargos', headers: { 'x-papel': 'administrador' } });
+    expect(cargos.statusCode).toBe(401);
+  });
 
   it('escrita sem papel Administrador → 403', async () => {
     const r = await app.inject({
@@ -95,7 +111,8 @@ describe('Rotas de usuários internos (UC021 — HTTP)', () => {
   it('Administrador não inativa a própria conta → 409', async () => {
     const criar = await app.inject({ method: 'POST', url: '/admin/usuarios', headers: admin, payload: { nome: 'Adm2', email: 'adm2@pref.gov', cargo: 'administrador', senha: 'segredo12' } });
     const id = criar.json().usuarioId as string;
-    const r = await app.inject({ method: 'POST', url: `/admin/usuarios/${id}/inativar`, headers: { 'x-papel': 'administrador', 'x-user-id': id } });
+    // O ator agora é o `userId` do token: para provar o anti-lockout, o token é o da PRÓPRIA conta alvo.
+    const r = await app.inject({ method: 'POST', url: `/admin/usuarios/${id}/inativar`, headers: comoPapel('administrador', { userId: id }) });
     expect(r.statusCode).toBe(409);
     expect(r.json()).toMatchObject({ codigo: 'NaoPodeInativarPropriaConta' });
   });

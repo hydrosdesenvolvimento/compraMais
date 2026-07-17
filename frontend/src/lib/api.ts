@@ -1,19 +1,17 @@
 /** Camada de acesso à API (usada pelo TanStack Query). Erros HTTP viram exceção → o Query trata. */
-import { obterUsuario, obterToken } from './auth';
+import { obterToken } from './auth';
 
 /**
- * Cabeçalhos comuns: identifica o ator autenticado (auditoria — `x-user-id`), seu papel RBAC
- * (`x-papel`, exigido pelas rotas de gestão/admin) e a empresa representada (`x-empresa-id`, usada
- * pela vitrine/contestação para resolver o fornecedor). Envia também o JWT (`Authorization: Bearer`)
- * quando há sessão — rotas que exigem token real (ex.: trocar senha, UC015) validam o Bearer; as
- * demais o ignoram (compatível com o modelo de ator por header).
+ * Cabeçalhos comuns: o JWT da sessão (`Authorization: Bearer`) e nada mais (AD-20).
+ *
+ * Até 2026-07-16 daqui saíam também `x-user-id`, `x-papel` e `x-empresa-id`, e eram ELES que o
+ * backend usava para autorizar — o cliente declarava o próprio papel. O backend agora só lê o
+ * token assinado; ator, papel e empresa vêm das claims (`sub`/`papel`/`empresaId`). Mandar os
+ * headers de novo não daria acesso a nada, mas sugeriria que a identidade ainda se negocia aqui.
+ * Ela não se negocia. Rota sem token → 401.
  */
 function headers(extra?: Record<string, string>): Record<string, string> | undefined {
   const h: Record<string, string> = { ...extra };
-  const u = obterUsuario();
-  if (u?.userId) h['x-user-id'] = u.userId;
-  if (u?.papel) h['x-papel'] = u.papel;
-  if (u?.empresaId) h['x-empresa-id'] = u.empresaId;
   const token = obterToken();
   if (token) h['authorization'] = `Bearer ${token}`;
   return Object.keys(h).length ? h : undefined;
@@ -65,9 +63,9 @@ export class HttpError extends Error {
 }
 
 /**
- * Baixa um recurso como arquivo. Diferente de navegar via `window.location`, envia os cabeçalhos de
- * ator/RBAC (`x-papel`, `x-user-id`) — imprescindível em rotas protegidas como a exportação da trilha
- * (auditoria), que de outro modo responderia 403. Devolve o blob e o nome sugerido pelo servidor.
+ * Baixa um recurso como arquivo. Diferente de navegar via `window.location`, envia o Bearer token —
+ * imprescindível em rotas protegidas como a exportação da trilha (auditoria), que de outro modo
+ * responderia 401. Devolve o blob e o nome sugerido pelo servidor.
  */
 export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: string }> {
   const r = await fetch(url, { headers: headers() });
@@ -203,7 +201,7 @@ export const api = {
   acatarContestacao: (id: string, novoCnaes: string[]) => send(`/contestacoes-cnae/${id}/acatar`, 'POST', { novoCnaes }),
   recusarContestacao: (id: string, motivo: string) => send(`/contestacoes-cnae/${id}/recusar`, 'POST', { motivo }),
   auditoria: (params: URLSearchParams) => get<RegistroAuditoria[]>(`/auditoria?${params.toString()}`),
-  // UC012: exportação da trilha via fetch (carrega x-papel — a rota é protegida por RBAC).
+  // UC012: exportação da trilha via fetch (carrega o Bearer — a rota é protegida por RBAC).
   auditoriaExportar: (params: URLSearchParams) => baixarArquivo(`/auditoria/exportar?${params.toString()}`),
 
   // UC017 — Atendimento LGPD pelo Encarregado (DPO) / Administrador. CPL não atende (RNF007 → 403 no backend).
@@ -220,7 +218,7 @@ export const api = {
   maloteGerar: (body: { fornecedorId: string; editalId: string; pecas: PecaMalote[] }) => send<{ maloteId: string; status: string }>('/malotes', 'POST', body),
   maloteExportar: (id: string) => send<{ status: string; jaExportado: boolean }>(`/malotes/${id}/exportar`, 'POST'),
 
-  // UC020 — Catálogos base (Administrador). Leitura aberta; escritas exigem x-papel administrador.
+  // UC020 — Catálogos base. Leitura aberta (dado de referência); escritas exigem papel administrador no token.
   catalogoListar: (slug: CatalogoSlug, incluirInativos = false) =>
     get<CatalogoItemView[]>(`/catalogos/${slug}${incluirInativos ? '?incluirInativos=true' : ''}`),
   catalogoCriar: (slug: CatalogoSlug, body: Record<string, unknown>) => send<{ id: string }>(`/catalogos/${slug}`, 'POST', body),
@@ -228,7 +226,7 @@ export const api = {
   catalogoInativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/inativar`, 'POST'),
   catalogoReativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/reativar`, 'POST'),
 
-  // UC021 — Gestão de usuários internos/servidores (Administrador). Todas exigem x-papel administrador.
+  // UC021 — Gestão de usuários internos/servidores. Todas exigem papel administrador no token.
   cargos: () => get<CargoOpcao[]>('/admin/cargos'),
   usuariosListar: (incluirInativos = false) =>
     get<UsuarioInternoView[]>(`/admin/usuarios${incluirInativos ? '?incluirInativos=true' : ''}`),

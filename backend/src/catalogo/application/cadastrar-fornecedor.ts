@@ -93,8 +93,8 @@ export class CadastrarFornecedor {
     await this.fornecedores.salvar(fornecedor);
 
     // A ContaAcesso(titular) COMPARTILHA o id do usuário de login: as rotas de procuradores (UC019)
-    // resolvem o titular por `x-user-id` (= userId do JWT). Sem esse alinhamento, o convite nunca
-    // encontraria o titular. (Antes usava randomUUID() e o fluxo de convite era inoperante.)
+    // resolvem o titular pelo `userId` do JWT (`req.identidade`, AD-20). Sem esse alinhamento, o
+    // convite nunca encontraria o titular. (Antes usava randomUUID() e o fluxo era inoperante.)
     const titular = ContaAcesso.criarTitular({ id: usuarioId, fornecedorId: id, identificador: input.titular.identificador });
     await this.contas.salvar(titular);
 

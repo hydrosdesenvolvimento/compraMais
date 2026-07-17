@@ -1,18 +1,21 @@
 /**
  * Design System — tokens (Prefeitura de Rio Branco / Portal do Fornecedor "Compra Mais").
- * Paleta navy institucional + âmbar de ação, Poppins. Valores alinhados ao design de referência
- * (spec/AI-UI-Design). Acessibilidade: foco visível âmbar 3px; meta e-MAG/WCAG 2.1 AA.
+ * Paleta azul institucional (`#0061AE`, manual da Prefeitura — ARBITRAGEM-01, 1=B) + âmbar de ação,
+ * Poppins. Acessibilidade: foco visível âmbar 3px; meta e-MAG/WCAG 2.1 AA.
+ *
+ * NB: a FONTE DE VERDADE dos tokens é `index.css` (variáveis CSS `--azul-*`); este arquivo não é
+ * importado (D2) e é mantido em espelho apenas para não induzir a erro. Preferir as variáveis CSS.
  */
 export const cores = {
-  // Navy institucional (do mais escuro ao claro)
-  azul900: '#0A2A52',
-  azul800: '#0E3A6E',
-  azul700: '#14467F', // navy primária (textos/headers, botão primário)
-  azul600: '#1E5AA0',
-  azul500: '#3B82C4',
-  azul300: '#5B9BD5', // azul claro de destaque
+  // Azul institucional (do mais escuro ao claro) — manual da Prefeitura de Rio Branco
+  azul900: '#003A68',
+  azul800: '#004C87',
+  azul700: '#0061AE', // azul institucional primário (textos/headers, botão primário)
+  azul600: '#1F77BD',
+  azul500: '#3385C4',
+  azul300: '#80B2DC', // azul claro de destaque
   azul100: '#CCE0F0', // avatar / superfícies suaves
-  azul50: '#E8F0FB', // item de menu ativo
+  azul50: '#E9F2FA', // item de menu ativo
   // Âmbar (ação)
   acentoAmbar: '#F2B705',
   ambarEscuro: '#8A5410', // texto/ícone sobre âmbar
@@ -33,7 +36,7 @@ export const cores = {
   sucessoBg: '#E6F4EA',
   erro: '#C0362C',
   erroBg: '#FBEAE8',
-  info: '#14467F',
+  info: '#0061AE',
 } as const;
 
 export const tipografia = { familia: "'Poppins', system-ui, sans-serif" } as const;

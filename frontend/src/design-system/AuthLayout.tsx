@@ -27,8 +27,8 @@ export function AuthLayout({ children }: { children: ReactNode }) {
         <svg aria-hidden="true" width="100%" height="100%" viewBox="0 0 620 820" preserveAspectRatio="xMidYMid slice" style={{ position: 'absolute', inset: 0, transform: 'scaleX(-1)' }}>
           <defs>
             <linearGradient id="cmL2" x1="0" y1="1" x2="1" y2="0">
-              <stop offset="0" stopColor="#1E5AA0" stopOpacity="0" />
-              <stop offset="1" stopColor="#5B9BD5" stopOpacity="0.5" />
+              <stop offset="0" stopColor="#1F77BD" stopOpacity="0" />
+              <stop offset="1" stopColor="#80B2DC" stopOpacity="0.5" />
             </linearGradient>
             <radialGradient id="cmGlow2" cx="0.5" cy="0.5" r="0.5">
               <stop offset="0" stopColor="#F2B705" stopOpacity="0.18" />

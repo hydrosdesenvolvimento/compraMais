@@ -15,14 +15,14 @@
 - **Público consumidor do documento:** UX Expert, Senior Developer, QA Expert, Tech Lead e Business Analyst.
 - **Status:** **Implementado (evolução contínua).**
 
-Identidade da marca: **navy institucional** (ação/estrutura) + **âmbar de ação** (acento assinatura, usado com parcimônia), tipografia **Poppins** (400–700).
+Identidade da marca: **azul institucional `#0061AE`** (ação/estrutura — manual da Prefeitura de Rio Branco, ratificado pela ARBITRAGEM-01, 2026-07-16, resposta 1=B) + **âmbar de ação** (acento assinatura, usado com parcimônia), tipografia **Poppins** (400–700). *(A divergência D1 — navy `#0A2A52` da implementação anterior × azul do manual — foi resolvida a favor do manual; a migração da paleta está aplicada.)*
 
 ## Fundamentos visuais
 
 ### Princípios de design
 
-1. **Institucional e confiável** — navy como base estrutural; âmbar reservado a foco e chamadas de ação pontuais.
-2. **Clareza e hierarquia** — títulos em navy escuro, corpo em cinza neutro, superfícies claras com sombras azul-tingidas suaves.
+1. **Institucional e confiável** — azul institucional como base estrutural; âmbar reservado a foco e chamadas de ação pontuais.
+2. **Clareza e hierarquia** — títulos em azul escuro, corpo em cinza neutro, superfícies claras com sombras azul-tingidas suaves.
 3. **Acessível por padrão** — foco visível âmbar de 3px, status comunicado por texto + ícone + cor (nunca só cor), navegação por teclado.
 4. **Localizável** — nenhum texto fixado no design; toda string vem do i18n.
 
@@ -34,14 +34,14 @@ Valores reais de `frontend/src/index.css` (`:root`) — fonte de runtime das cla
 
 | Token CSS | Valor | Uso |
 |---|---|---|
-| `--azul-900` | `#0A2A52` | mais escuro — headers, hero, títulos fortes |
-| `--azul-800` | `#0E3A6E` | títulos sobre claro, hover primário |
-| `--azul-700` | `#14467F` | ação primária, links, item ativo |
-| `--azul-600` | `#1E5AA0` | foco de input, links `<a>` |
-| `--azul-500` | `#2C72C4` | — |
-| `--azul-300` | `#8FB8E6` | — |
-| `--azul-100` | `#DCE9F8` | anel de foco suave, avatar |
-| `--azul-50` | `#EEF4FC` | superfície tint / item de menu ativo |
+| `--azul-900` | `#003A68` | mais escuro — headers, hero, títulos fortes |
+| `--azul-800` | `#004C87` | títulos sobre claro, hover primário |
+| `--azul-700` | `#0061AE` | ação primária, links, item ativo — azul institucional oficial |
+| `--azul-600` | `#1F77BD` | foco de input, links `<a>` |
+| `--azul-500` | `#3385C4` | — |
+| `--azul-300` | `#80B2DC` | — |
+| `--azul-100` | `#CCE0F0` | anel de foco suave, avatar |
+| `--azul-50` | `#E9F2FA` | superfície tint / item de menu ativo |
 
 **Âmbar (acento — usar com parcimônia):**
 
@@ -75,7 +75,7 @@ Observação: em composições do shell (`AppShell`) o texto sobre âmbar aparec
 | Sucesso | `--sucesso #1E7A46` | `--sucesso-bg #E6F2EB` |
 | Atenção | `--atencao #B5701A` | `--atencao-bg #FBEACB` |
 | Erro | `--erro #C0362C` (hover `--erro-700 #9E2C24`) | `--erro-bg #FBE7E5` |
-| Info | `--info #14467F` | `--info-bg #DCE9F8` |
+| Info | `--info #0061AE` | `--info-bg #CCE0F0` |
 
 **Aliases semânticos** (mapeiam para os tokens acima): `--bg-page #F6F8FB`, `--surface-card`, `--surface-tint`, `--text-strong/--text-heading/--text-title/--text-body/--text-muted`, `--text-link`, `--brand` / `--brand-hover`, `--accent` / `--accent-hover`, `--border #E6EBF1`, `--border-strong`, `--divider #F0F3F7`, `--focus-ring` (= `--ambar-300`). Há ainda **aliases legados** (`--navy-*`, `--ambar`, `--borda`, `--texto`…) para páginas ainda não migradas (admin, titular, contestar-cnae).
 

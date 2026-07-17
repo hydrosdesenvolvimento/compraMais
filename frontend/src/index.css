@@ -1,18 +1,19 @@
 /* ==========================================================================
    Compra Mais — Portal do Fornecedor. Estilos globais + design system.
-   Alinhado ao mockup de referência (spec/AI-UI-Design — navy + âmbar, Poppins).
+   Layout do mockup de referência (spec/AI-UI-Design, Poppins); paleta = azul institucional
+   #0061AE do manual da Prefeitura (ARBITRAGEM-01, 1=B) + âmbar de acento.
    Tokens e classes de shell (cm-*) reproduzem o design compilado.
    ========================================================================== */
 :root {
-  /* ---- Azul institucional (marca) ---- */
-  --azul-900: #0a2a52; /* mais escuro — headers, hero */
-  --azul-800: #0e3a6e; /* títulos sobre claro */
-  --azul-700: #14467f; /* ação primária, links */
-  --azul-600: #1e5aa0;
-  --azul-500: #2c72c4;
-  --azul-300: #8fb8e6;
-  --azul-100: #dce9f8;
-  --azul-50: #eef4fc; /* superfície tint / item ativo */
+  /* ---- Azul institucional (marca) — manual da Prefeitura de Rio Branco (ARBITRAGEM-01, 1=B) ---- */
+  --azul-900: #003a68; /* mais escuro — headers, hero */
+  --azul-800: #004c87; /* títulos sobre claro */
+  --azul-700: #0061ae; /* ação primária, links — azul institucional oficial */
+  --azul-600: #1f77bd;
+  --azul-500: #3385c4;
+  --azul-300: #80b2dc;
+  --azul-100: #cce0f0;
+  --azul-50: #e9f2fa; /* superfície tint / item ativo */
 
   /* ---- Âmbar (acento — usar com parcimônia) ---- */
   --ambar-700: #7a4e12;
@@ -39,8 +40,8 @@
   --erro: #c0362c;
   --erro-bg: #fbe7e5;
   --erro-700: #9e2c24;
-  --info: #14467f;
-  --info-bg: #dce9f8;
+  --info: #0061ae;
+  --info-bg: #cce0f0;
 
   /* ---- Aliases semânticos ---- */
   --bg-page: #f6f8fb;
@@ -75,11 +76,11 @@
   --radius-xl: 16px;
   --radius-pill: 999px;
 
-  /* ---- Sombras (azul-tingidas, suaves) ---- */
-  --shadow-xs: 0 1px 3px rgba(10, 42, 82, 0.05);
-  --shadow-sm: 0 2px 8px rgba(10, 42, 82, 0.06);
-  --shadow-md: 0 4px 16px rgba(10, 42, 82, 0.08);
-  --shadow-lg: 0 12px 32px rgba(10, 42, 82, 0.12);
+  /* ---- Sombras (azul-tingidas, suaves) — tinte no azul institucional #003a68 ---- */
+  --shadow-xs: 0 1px 3px rgba(0, 58, 104, 0.05);
+  --shadow-sm: 0 2px 8px rgba(0, 58, 104, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 58, 104, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 58, 104, 0.12);
 
   /* ---- Layout ---- */
   --sidebar-w: 262px;
@@ -285,7 +286,7 @@ input[type="date"], input[type="number"], input[type="tel"], select, textarea {
 /* Lockup institucional: logotipo oficial (logoCompraMais.png) centralizado */
 .auth-lockup { max-width: 560px; width: 100%; position: relative; z-index: 1; display: flex; justify-content: center; }
 .auth-logo { display: block; width: 100%; height: auto; }
-.auth-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 40px; background: linear-gradient(157deg, #0a2a52 0%, #0e3a6e 52%, #14467f 100%); position: relative; overflow: hidden; }
+.auth-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 40px; background: linear-gradient(157deg, #003a68 0%, #004c87 52%, #0061ae 100%); position: relative; overflow: hidden; }
 .auth-card { width: 100%; max-width: 452px; position: relative; z-index: 1; background: #fff; color: var(--text-body); border-radius: 18px; box-shadow: 0 20px 48px rgba(8, 20, 42, .35); padding: 36px 34px; }
 .auth-tabs { display: flex; gap: 4px; background: var(--cinza-100); padding: 4px; border-radius: 10px; margin-bottom: 22px; }
 .auth-tab { flex: 1; text-align: center; padding: 10px; border-radius: 8px; font: 600 14px var(--font-body); color: var(--cinza-500); border: none; background: transparent; cursor: pointer; }

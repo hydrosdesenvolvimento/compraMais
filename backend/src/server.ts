@@ -52,7 +52,11 @@ import { ContestacaoRepositoryPg } from './editais/adapters/contestacao-reposito
 import { registrarRotasGestaoEditais } from './editais/adapters/editais-gestao-controller.js';
 import { registrarRotasContestacao } from './editais/adapters/contestacao-controller.js';
 import { GerirDocumentos } from './credenciamento/application/gerir-documentos.js';
-import { DocumentoRepositoryMemory, ObjectStorageMemory, PiiCipherDev } from './credenciamento/adapters/documentos-memory.js';
+import { DocumentoRepositoryMemory, ObjectStorageMemory } from './credenciamento/adapters/documentos-memory.js';
+import { DocumentoRepositoryPg, ObjectStoragePg } from './credenciamento/adapters/documentos-pg.js';
+import { PiiCipherAesGcm } from './shared/crypto/pii-cipher-aes.js';
+import { ConsentimentoRepositoryMemory } from './credenciamento/adapters/consentimento-repository-memory.js';
+import { ConsentimentoRepositoryPg } from './credenciamento/adapters/consentimento-repository-pg.js';
 import { registrarRotasDocumentos } from './credenciamento/adapters/documentos-controller.js';
 import { Covalidar } from './credenciamento/application/covalidar.js';
 import { AnaliseRepositoryMemory } from './credenciamento/adapters/analise-repository-memory.js';
@@ -206,7 +210,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   const usarMockReceita = config.nodeEnv === 'test' || process.env.RECEITA_PROVIDER === 'mock';
   const receita = usarMockReceita ? new ReceitaMockGateway() : new ReceitaBrasilApiGateway();
   const cep = usarMockReceita ? new CepMockGateway() : new CepBrasilApiGateway();
-  const consentimentosRepo = { salvar: async () => {} };
+  // Consentimento LGPD (AD-19 / RN016): era `{ salvar: async () => {} }` — o consentimento do titular
+  // era construído e jogado fora. A LGPD exige DEMONSTRAR o consentimento; a prova nunca existiu.
+  // A tabela recusa UPDATE/DELETE (0017): consentimento não se edita, se revoga com um fato novo.
+  const consentimentosRepo = pool ? new ConsentimentoRepositoryPg(pool) : new ConsentimentoRepositoryMemory();
   const cadastrar = new CadastrarFornecedor(fornecedores, consentimentosRepo, contasRepo, receita, registrarUsuario, bus);
   const conta = new GerirConta(fornecedores, receita, bus);
   registrarRotasCadastro(app, { cadastrar, conta, receita, cep });
@@ -245,8 +252,15 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Módulo credenciamento — documentos (001 US3) + covalidação (UC006 / 002 US1), repo compartilhado.
   // A covalidação recebe o repo de fornecedores (`fornecedores`, def. acima) para o veredito do conjunto:
   // aprovar o conjunto → `credenciado` (UC006 passo 3); reprovar → `em_correcao` (A1, laço UC016).
-  const docRepo = new DocumentoRepositoryMemory();
-  const docs = new GerirDocumentos(docRepo, new ObjectStorageMemory(), new PiiCipherDev());
+  // Documentos + PII (AD-19). Antes: `DocumentoRepositoryMemory` + `ObjectStorageMemory` +
+  // `PiiCipherDev` INCONDICIONAIS — mesmo com Postgres, os documentos comprobatórios e a PII de
+  // sócios viviam num Map e sumiam no restart, levando junto a fila de covalidação (UC006). Era o
+  // único agregado sem par pg. A cifra é AES-256-GCM sempre (a chave é que muda por ambiente; em
+  // produção `loadConfig` exige a real): base64 nunca foi cifra, e manter dois ciphers criaria blob
+  // legado indecifrável assim que o conteúdo virasse durável.
+  const docRepo = pool ? new DocumentoRepositoryPg(pool) : new DocumentoRepositoryMemory();
+  const storage = pool ? new ObjectStoragePg(pool) : new ObjectStorageMemory();
+  const docs = new GerirDocumentos(docRepo, storage, new PiiCipherAesGcm(config.crypto.piiKey));
   registrarRotasDocumentos(app, { docs });
   const covalidar = new Covalidar(docRepo, new AnaliseRepositoryMemory(), bus, fornecedores);
   registrarRotasCovalidacao(app, { covalidar });

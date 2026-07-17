@@ -33,6 +33,8 @@ describe('segredo do JWT (AD-29)', () => {
   it('produção com segredo próprio → sobe e usa o segredo do ambiente', () => {
     process.env.NODE_ENV = 'production';
     process.env.JWT_SECRET = 'um-segredo-de-verdade-vindo-do-ambiente';
+    // Produção exige também a chave de PII (AD-19); satisfeita aqui para isolar o segredo do JWT.
+    process.env.PII_ENCRYPTION_KEY = Buffer.alloc(32, 7).toString('base64');
 
     expect(loadConfig().auth.jwtSecret).toBe('um-segredo-de-verdade-vindo-do-ambiente');
   });

@@ -21,7 +21,8 @@
       "malote": "Valija SEI",
       "privacidade": "Privacidad",
       "lgpd": "Solicitudes LGPD",
-      "perfis": "Pantallas por perfil"
+      "perfis": "Pantallas por perfil",
+      "contestacao": "Impugnaciones"
     },
     "shell": {
       "menu": "MENÚ",
@@ -385,8 +386,8 @@
     "TransicaoInvalida": "Operación no permitida en el estado actual."
   },
   "contestacao": {
-    "titulo": "Mis Acreditaciones",
-    "subtitulo": "Haga seguimiento de sus acreditaciones en las convocatorias y continúe las que estén en borrador.",
+    "titulo": "Impugnaciones y Regularizaciones",
+    "subtitulo": "Resuelva las pendencias que impiden su acreditación y siga los análisis en curso.",
     "carregando": "Cargando…",
     "filtros": "Filtros",
     "busca": {
@@ -786,5 +787,44 @@
       "retido": "Descarte denegado: dato aún bajo retención legal.",
       "erro": "No se pudo completar la acción."
     }
+  },
+  "meusCredenciamentos": {
+    "titulo": "Mis Acreditaciones",
+    "subtitulo": "Siga todas las acreditaciones de su empresa y continúe donde lo dejó.",
+    "carregando": "Cargando…",
+    "semEmpresa": "Ninguna empresa vinculada a su cuenta.",
+    "editalRemovido": "Convocatoria eliminada",
+    "buscaAriaLabel": "Buscar acreditaciones",
+    "buscaPlaceholder": "Buscar por número u objeto…",
+    "exportarCsv": "Excel",
+    "exportarPdf": "PDF",
+    "colEdital": "Convocatoria",
+    "colObjeto": "Objeto",
+    "colStatus": "Estado",
+    "colCriadoEm": "Creado el",
+    "colAtualizadoEm": "Última actualización",
+    "colAcoes": "Acciones",
+    "filtro": {
+      "todos": "Todos",
+      "andamento": "En curso",
+      "finalizados": "Finalizados",
+      "cancelados": "Cancelados"
+    },
+    "estado": {
+      "iniciado": "En curso",
+      "aceito": "Finalizado",
+      "cancelado": "Cancelado"
+    },
+    "acao": {
+      "continuar": "Continuar",
+      "recredenciar": "Acreditar de nuevo",
+      "cancelar": "Cancelar acreditación"
+    },
+    "vazioTitulo": "Aún no hay acreditaciones",
+    "vazioDica": "Acceda a la Vitrina de Convocatorias y haga clic en “Iniciar Acreditación” para comenzar.",
+    "vazioFiltroTitulo": "Ninguna acreditación en este filtro",
+    "vazioFiltroDica": "Ajuste la búsqueda o elija otro estado.",
+    "paginacaoInfo": "Mostrando {{de}}–{{ate}} de {{total}} acreditaciones",
+    "irParaPagina": "Ir a la página {{n}}"
   }
 }

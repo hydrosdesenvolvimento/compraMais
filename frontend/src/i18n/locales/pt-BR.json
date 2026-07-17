@@ -21,7 +21,8 @@
       "malote": "Malote SEI",
       "privacidade": "Privacidade",
       "lgpd": "Atendimento LGPD",
-      "perfis": "Telas por perfil"
+      "perfis": "Telas por perfil",
+      "contestacao": "Contestações"
     },
     "shell": {
       "menu": "MENU",
@@ -385,8 +386,8 @@
     "TransicaoInvalida": "Operação não permitida no estado atual."
   },
   "contestacao": {
-    "titulo": "Meus Credenciamentos",
-    "subtitulo": "Acompanhe seus credenciamentos em editais e continue o que estiver em rascunho.",
+    "titulo": "Contestações e Regularizações",
+    "subtitulo": "Resolva as pendências que impedem seu credenciamento e acompanhe as análises em curso.",
     "carregando": "Carregando…",
     "filtros": "Filtros",
     "busca": {
@@ -786,5 +787,44 @@
       "retido": "Descarte negado: dado ainda sob retenção legal.",
       "erro": "Não foi possível concluir a ação."
     }
+  },
+  "meusCredenciamentos": {
+    "titulo": "Meus Credenciamentos",
+    "subtitulo": "Acompanhe todos os credenciamentos da sua empresa e continue de onde parou.",
+    "carregando": "Carregando…",
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
+    "editalRemovido": "Edital removido",
+    "buscaAriaLabel": "Buscar credenciamentos",
+    "buscaPlaceholder": "Buscar por número ou objeto…",
+    "exportarCsv": "Excel",
+    "exportarPdf": "PDF",
+    "colEdital": "Edital",
+    "colObjeto": "Objeto",
+    "colStatus": "Status",
+    "colCriadoEm": "Criado em",
+    "colAtualizadoEm": "Última atualização",
+    "colAcoes": "Ações",
+    "filtro": {
+      "todos": "Todos",
+      "andamento": "Em andamento",
+      "finalizados": "Finalizados",
+      "cancelados": "Cancelados"
+    },
+    "estado": {
+      "iniciado": "Em andamento",
+      "aceito": "Finalizado",
+      "cancelado": "Cancelado"
+    },
+    "acao": {
+      "continuar": "Continuar",
+      "recredenciar": "Credenciar novamente",
+      "cancelar": "Cancelar credenciamento"
+    },
+    "vazioTitulo": "Nenhum credenciamento ainda",
+    "vazioDica": "Acesse a Vitrine de Editais e clique em “Iniciar Credenciamento” para começar.",
+    "vazioFiltroTitulo": "Nenhum credenciamento neste filtro",
+    "vazioFiltroDica": "Ajuste a busca ou escolha outra situação.",
+    "paginacaoInfo": "Mostrando {{de}}–{{ate}} de {{total}} credenciamentos",
+    "irParaPagina": "Ir para a página {{n}}"
   }
 }

@@ -38,6 +38,9 @@ import { registrarRotasAuth } from './shared/identity/auth-controller.js';
 import { registrarGoogleOAuth } from './shared/http/google-oauth.js';
 import { EditalRepositoryMemory } from './editais/adapters/edital-repository-memory.js';
 import { EditalRepositoryPg } from './editais/adapters/edital-repository-pg.js';
+import { NumeradorEditaisPg } from './editais/adapters/numerador-editais-pg.js';
+import { NumeradorEditaisMemory } from './editais/adapters/numerador-editais-memory.js';
+import type { NumeradorEditais } from './editais/application/numerador-editais.js';
 import { ListarEditaisCompativeis, type EditalRepository } from './editais/application/listar-editais-compativeis.js';
 import { registrarRotasEditais } from './editais/adapters/editais-controller.js';
 import { GerirEditais } from './editais/application/gerir-editais.js';
@@ -60,7 +63,7 @@ import { DividaMockGateway } from './shared/acl/divida/divida-mock.js';
 import { registrarRotasElegibilidade } from './credenciamento/adapters/elegibilidade-controller.js';
 import { registrarRotasRegularizacao } from './credenciamento/adapters/regularizacao-controller.js';
 import { SolicitarCredenciamento, type CredenciamentoRepository } from './credenciamento/application/solicitar-credenciamento.js';
-import { ListarCredenciamentos } from './credenciamento/application/listar-credenciamentos.js';
+import { ListarCredenciamentos, type SecretariaLookup } from './credenciamento/application/listar-credenciamentos.js';
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
@@ -202,6 +205,17 @@ export async function buildServer(): Promise<FastifyInstance> {
   const conta = new GerirConta(fornecedores, receita, bus);
   registrarRotasCadastro(app, { cadastrar, conta, receita, cep });
 
+  // Catálogos base (UC020 / RF020-RF022): Secretarias + Setores/CNAE + Tipos de Documento. CRUD com
+  // inativação lógica (RN015), mantido pelo Administrador. Durável em Postgres quando disponível (como
+  // `editais`/`fornecedores`); senão memória (testes sem banco). Alimenta editais (secretaria/CNAE) e
+  // o upload/covalidação (tipos de documento). Declarado ANTES de editais/credenciamento porque a
+  // projeção de "Meus Credenciamentos" resolve a sigla da secretaria por aqui.
+  const secretariasRepo: CatalogoRepository<Secretaria> = pool ? new SecretariaRepositoryPg(pool) : new CatalogoRepositoryMemory<Secretaria>();
+  const setoresRepo: CatalogoRepository<SetorCnae> = pool ? new SetorCnaeRepositoryPg(pool) : new CatalogoRepositoryMemory<SetorCnae>();
+  const tiposDocRepo: CatalogoRepository<TipoDocumento> = pool ? new TipoDocumentoRepositoryPg(pool) : new CatalogoRepositoryMemory<TipoDocumento>();
+  const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);
+  registrarRotasCatalogos(app, { manter: manterCatalogos });
+
   // Módulo editais — vitrine filtrada por CNAE (002) + gestão/contestação de editais (003)
   // Persistência: Postgres quando disponível (durável, como `fornecedores`/`contas_acesso`); senão
   // memória (testes sem banco). Antes era sempre memória → editais criados/publicados se perdiam no restart.
@@ -211,7 +225,10 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // Editais individualizados (003): criação/publicação/edição/encerramento + busca QBE + contestação de CNAE
   const contestacaoRepo: ContestacaoRepository = pool ? new ContestacaoRepositoryPg(pool) : new ContestacaoRepositoryMemory();
-  const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo);
+  // Numeração oficial ED-AAAA/NNN: durável e atômica em Postgres (tabela `edital_numeros`); em memória
+  // nos testes/sem banco. Sem ela dois editais do mesmo ano poderiam receber o mesmo número.
+  const numeradorEditais: NumeradorEditais = pool ? new NumeradorEditaisPg(pool) : new NumeradorEditaisMemory();
+  const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo, undefined, numeradorEditais);
   const buscarEditais = new BuscarEditais(editaisRepo);
   registrarRotasGestaoEditais(app, { gerir: gerirEditais, buscar: buscarEditais });
   const fornecedorAtivo = { estaAtivo: async (id: string) => { const f = await fornecedores.porId(id); return !!f && f.situacao === 'ativa'; } };
@@ -236,7 +253,12 @@ export async function buildServer(): Promise<FastifyInstance> {
   const solicitarCredenciamento = new SolicitarCredenciamento(credRepo, vitrine, fornecedores, bus);
   // Leitura da home do fornecedor: lista seus credenciamentos enriquecidos com objeto/secretaria do
   // edital (reusa o `editaisRepo` já definido acima). Somente leitura — não altera o domínio.
-  const listarCredenciamentos = new ListarCredenciamentos(credRepo, editaisRepo);
+  // Sigla da secretaria (ex.: SEME) para a tela "Meus Credenciamentos". Editais guardam `secretariaId`
+  // livre (sem FK para o catálogo UC020) — sem match a projeção cai para o próprio id, nunca quebra.
+  const secretariaLookup: SecretariaLookup = {
+    siglaPorId: async (id) => (await secretariasRepo.porId(id))?.sigla ?? null,
+  };
+  const listarCredenciamentos = new ListarCredenciamentos(credRepo, editaisRepo, secretariaLookup);
   registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
@@ -298,16 +320,6 @@ export async function buildServer(): Promise<FastifyInstance> {
     editaisPublicados: async () => (await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })).map((e) => ({ secretariaId: e.secretariaId, cnaesAlvo: e.cnaesAlvo })),
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
-
-  // Catálogos base (UC020 / RF020-RF022): Secretarias + Setores/CNAE + Tipos de Documento. CRUD com
-  // inativação lógica (RN015), mantido pelo Administrador. Durável em Postgres quando disponível (como
-  // `editais`/`fornecedores`); senão memória (testes sem banco). Alimenta editais (secretaria/CNAE) e
-  // o upload/covalidação (tipos de documento).
-  const secretariasRepo: CatalogoRepository<Secretaria> = pool ? new SecretariaRepositoryPg(pool) : new CatalogoRepositoryMemory<Secretaria>();
-  const setoresRepo: CatalogoRepository<SetorCnae> = pool ? new SetorCnaeRepositoryPg(pool) : new CatalogoRepositoryMemory<SetorCnae>();
-  const tiposDocRepo: CatalogoRepository<TipoDocumento> = pool ? new TipoDocumentoRepositoryPg(pool) : new CatalogoRepositoryMemory<TipoDocumento>();
-  const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);
-  registrarRotasCatalogos(app, { manter: manterCatalogos });
 
   // Administração de telas por perfil (§15/AD-35): governa quais TELAS do Painel Admin cada papel enxerga.
   // O Administrador é superusuário (vê tudo); os demais papéis internos seguem o override persistido ou o

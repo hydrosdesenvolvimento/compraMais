@@ -35,7 +35,6 @@ import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
 const DEMO_EDITAL_ID = 'demo-edital';
-const DEMO_SECRETARIA_ID = 'demo-secretaria';
 
 const ico = { width: 20, height: 20 };
 // Ordem = sidebar do protótipo `spec/Prototipo/portal-fornecedor.html` (Início, Editais, Meus
@@ -79,7 +78,7 @@ const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', 
 const rAdminIndex = createRoute({ getParentRoute: () => adminLayout, path: '/admin', beforeLoad: () => { throw redirect({ to: '/admin/dashboard' }); } });
 const rAdminDash = createRoute({ getParentRoute: () => adminLayout, path: '/admin/dashboard', beforeLoad: () => exigirTelaAdmin('painel'), component: Dashboard });
 const rAdminCoval = createRoute({ getParentRoute: () => adminLayout, path: '/admin/covalidacao', beforeLoad: () => exigirTelaAdmin('covalidacao'), component: () => <FilaCovalidacao fornecedorId={DEMO_FORNECEDOR_ID} /> });
-const rAdminEditais = createRoute({ getParentRoute: () => adminLayout, path: '/admin/editais', beforeLoad: () => exigirTelaAdmin('gestaoEditais'), component: () => <GerirEditais secretariaId={DEMO_SECRETARIA_ID} /> });
+const rAdminEditais = createRoute({ getParentRoute: () => adminLayout, path: '/admin/editais', beforeLoad: () => exigirTelaAdmin('gestaoEditais'), component: GerirEditais });
 const rAdminContest = createRoute({ getParentRoute: () => adminLayout, path: '/admin/contestacoes', beforeLoad: () => exigirTelaAdmin('contestacoes'), component: () => <FilaContestacoes editalId={DEMO_EDITAL_ID} /> });
 const rAdminMalote = createRoute({ getParentRoute: () => adminLayout, path: '/admin/malote', beforeLoad: () => exigirTelaAdmin('malote'), component: GerarMalote });
 const rAdminCatalogos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/catalogos', beforeLoad: () => exigirTelaAdmin('catalogos'), component: ManterCatalogos });
@@ -90,7 +89,6 @@ const rAdminPerfis = createRoute({ getParentRoute: () => adminLayout, path: '/ad
 
 // Telas novas do catálogo de perfis ainda sem UI própria — placeholder navegável ("Em construção").
 const rAdminFornecedores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/fornecedores', beforeLoad: () => exigirTelaAdmin('fornecedores'), component: Fornecedores });
-const rAdminEditaisOp = createRoute({ getParentRoute: () => adminLayout, path: '/admin/operacao/editais', beforeLoad: () => exigirTelaAdmin('editais'), component: () => <EmConstrucao tituloKey="common.nav.editais" /> });
 const rAdminCredenciamento = createRoute({ getParentRoute: () => adminLayout, path: '/admin/credenciamento', beforeLoad: () => exigirTelaAdmin('credenciamento'), component: () => <EmConstrucao tituloKey="common.nav.credenciamento" /> });
 const rAdminAnaliseDoc = createRoute({ getParentRoute: () => adminLayout, path: '/admin/analise-documental', beforeLoad: () => exigirTelaAdmin('analiseDocumental'), component: () => <EmConstrucao tituloKey="common.nav.analiseDocumental" /> });
 const rAdminDistribuicao = createRoute({ getParentRoute: () => adminLayout, path: '/admin/distribuicao', beforeLoad: () => exigirTelaAdmin('distribuicao'), component: () => <EmConstrucao tituloKey="common.nav.distribuicao" /> });
@@ -110,7 +108,7 @@ const routeTree = rootRoute.addChildren([
   adminLayout.addChildren([
     rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos,
     rAdminUsuarios, rAdminLgpd, rAdminAudit, rAdminPerfis,
-    rAdminFornecedores, rAdminEditaisOp, rAdminCredenciamento, rAdminAnaliseDoc, rAdminDistribuicao,
+    rAdminFornecedores, rAdminCredenciamento, rAdminAnaliseDoc, rAdminDistribuicao,
     rAdminCadastroReserva, rAdminDesistencias, rAdminSecretarias, rAdminSetores, rAdminTiposArquivos,
   ]),
   naoEncontrada,

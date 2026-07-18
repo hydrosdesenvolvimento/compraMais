@@ -50,9 +50,9 @@ describe('GerirVisibilidadeTelas', () => {
     let evento: { adicionadas: unknown; removidas: unknown } | null = null;
     bus.subscribe('VisibilidadeTelasAlterada', async (e) => { evento = e.payload as never; });
     // fora de ordem e com duplicata; 'auditoria' é nova para o cpl
-    const salvo = await gerir.definir('cpl', ['malote', 'editais', 'editais', 'auditoria', 'contestacoes'], ADMIN);
-    expect(salvo).toEqual(TELAS_ADMIN.filter((k) => ['malote', 'editais', 'auditoria', 'contestacoes'].includes(k)));
-    expect(salvo.filter((k) => k === 'editais')).toHaveLength(1); // dedup
+    const salvo = await gerir.definir('cpl', ['malote', 'gestaoEditais', 'gestaoEditais', 'auditoria', 'contestacoes'], ADMIN);
+    expect(salvo).toEqual(TELAS_ADMIN.filter((k) => ['malote', 'gestaoEditais', 'auditoria', 'contestacoes'].includes(k)));
+    expect(salvo.filter((k) => k === 'gestaoEditais')).toHaveLength(1); // dedup
     expect(evento).not.toBeNull();
     expect((evento as unknown as { adicionadas: string[] }).adicionadas).toContain('auditoria');
     expect(await gerir.telasDoPapel('cpl')).toEqual(salvo); // override reflete

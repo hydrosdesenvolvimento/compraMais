@@ -1,24 +1,38 @@
 /// <reference types="cypress" />
-// E2E (Cypress) — gestão de editais (US1): gestor cria e publica edital individualizado.
+// E2E (Cypress) — Gestão de Editais (US1): gestor cria e publica edital individualizado em /admin/editais.
 
 describe('Gestão de editais (US1)', () => {
-  it('cria e publica um edital', () => {
+  const secretarias = [
+    { id: 's1', sigla: 'SEME', nome: 'Educação', ativo: true, situacao: 'ativo' },
+    { id: 's2', sigla: 'SEMSA', nome: 'Saúde', ativo: true, situacao: 'ativo' },
+  ];
+
+  it('cria um edital pelo modal "Novo edital"', () => {
     cy.intercept('GET', '/gestao/editais*', { body: [] }).as('lista');
+    cy.intercept('GET', '/catalogos/secretarias*', { body: secretarias });
     cy.intercept('POST', '/editais', { statusCode: 201, body: { editalId: 'e1', situacao: 'rascunho' } }).as('criar');
     cy.visit('/#/admin/editais');
+
+    cy.get('[data-cy=novo-edital]').click();
+    cy.get('[data-cy=modal-novo-edital]').should('be.visible');
     cy.get('[data-cy=objeto]').type('Merenda escolar');
+    cy.get('[data-cy=secretaria]').select('s2');
     cy.get('[data-cy=cnae]').type('1091101');
     cy.get('[data-cy=quantitativos]').clear().type('100');
     cy.get('[data-cy=prazo]').type('2026-12-31');
     cy.get('[data-cy=criar]').click();
-    cy.wait('@criar').its('request.body.secretariaId').should('exist'); // 1 secretaria (invariante)
+    cy.wait('@criar').its('request.body.secretariaId').should('exist'); // 1 secretaria (invariante RN007)
   });
 
-  it('lista por situação (QBE) e permite publicar rascunho', () => {
-    cy.intercept('GET', '/gestao/editais*', { body: [{ id: 'e1', objeto: 'Merenda', secretariaId: 's1', situacao: 'rascunho' }] });
+  it('lista os editais (QBE) e permite publicar um rascunho', () => {
+    cy.intercept('GET', '/gestao/editais*', {
+      body: [{ id: 'e1', numero: 'ED-2026/001', objeto: 'Merenda', secretariaId: 's1', situacao: 'rascunho', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2026-12-31' }],
+    });
+    cy.intercept('GET', '/catalogos/secretarias*', { body: secretarias });
     cy.intercept('POST', '/editais/e1/publicar', { statusCode: 200, body: { situacao: 'publicado' } }).as('pub');
     cy.visit('/#/admin/editais');
-    cy.get('[data-cy=edital]').should('have.length', 1);
+
+    cy.get('[data-cy=item-edital]').should('have.length', 1);
     cy.get('[data-cy=publicar]').click();
     cy.wait('@pub');
   });

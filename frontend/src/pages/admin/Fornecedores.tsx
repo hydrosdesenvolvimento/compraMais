@@ -38,7 +38,7 @@ function tomStatus(status: string): { bg: string; fg: string } {
 }
 
 const pill: CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '5px 12px', borderRadius: 999, font: '600 12.5px var(--font-body)', whiteSpace: 'nowrap' };
-const iconeAcao: CSSProperties = { width: 34, height: 34, border: '1px solid var(--border)', borderRadius: 8, background: '#fff', color: 'var(--cinza-500)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
+const iconeAcao: CSSProperties = { width: 40, height: 40, border: '1px solid var(--border)', borderRadius: 9, background: '#fff', color: 'var(--cinza-600, #556)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 
 export function Fornecedores() {
   const { t } = useTranslation();
@@ -127,7 +127,7 @@ export function Fornecedores() {
       {/* Toolbar: busca + Filtros/Ordenar/Exportar */}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 240 }}>
-          <IconeBusca width={17} height={17} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--cinza-400)' }} />
+          <IconeBusca width={19} height={19} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--cinza-400)' }} />
           <input
             className="input"
             data-cy="busca"
@@ -139,13 +139,13 @@ export function Fornecedores() {
           />
         </div>
         <Botao data-cy="btn-filtros" variante="secundario" aria-expanded={mostrarFiltros} onClick={() => setMostrarFiltros((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <IconeFiltro width={16} height={16} />{t('admin.fornecedores.filtros')}
+          <IconeFiltro width={18} height={18} />{t('admin.fornecedores.filtros')}
         </Botao>
         <Botao data-cy="btn-ordenar" variante="secundario" aria-expanded={mostrarOrdenar} onClick={() => setMostrarOrdenar((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <IconeOrdenar width={16} height={16} />{t('admin.fornecedores.ordenar')}
+          <IconeOrdenar width={18} height={18} />{t('admin.fornecedores.ordenar')}
         </Botao>
         <Botao data-cy="btn-exportar" variante="secundario" disabled={total === 0} onClick={() => void exportar()} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <IconeDownload width={16} height={16} style={{ color: 'var(--sucesso)' }} />{t('admin.fornecedores.exportar')}
+          <IconeDownload width={18} height={18} style={{ color: 'var(--sucesso)' }} />{t('admin.fornecedores.exportar')}
         </Botao>
       </div>
 
@@ -236,13 +236,13 @@ export function Fornecedores() {
                           <td style={{ ...celula, textAlign: 'right' }}>
                             <div style={{ display: 'inline-flex', gap: 8, justifyContent: 'flex-end' }}>
                               <button type="button" data-cy="ver-detalhes" title={t('admin.fornecedores.acao.ver')} aria-label={t('admin.fornecedores.acao.ver')} onClick={() => setModal({ modo: 'ver', id: f.id })} style={iconeAcao}>
-                                <IconeOlho width={17} height={17} />
+                                <IconeOlho width={21} height={21} />
                               </button>
                               <button type="button" data-cy="editar" title={t('admin.fornecedores.acao.editar')} aria-label={t('admin.fornecedores.acao.editar')} onClick={() => setModal({ modo: 'editar', id: f.id })} style={iconeAcao}>
-                                <IconeLapis width={16} height={16} />
+                                <IconeLapis width={20} height={20} />
                               </button>
                               <button type="button" data-cy="bloquear" disabled title={t('admin.fornecedores.acao.bloquearIndisponivel')} aria-label={t('admin.fornecedores.acao.bloquearIndisponivel')} style={{ ...iconeAcao, cursor: 'not-allowed', opacity: 0.5 }}>
-                                <IconeBloquear width={16} height={16} />
+                                <IconeBloquear width={20} height={20} />
                               </button>
                             </div>
                           </td>

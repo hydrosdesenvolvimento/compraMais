@@ -48,7 +48,7 @@ export function ModalFornecedor({ modo, id, onFechar, onMudou }: { modo: ModoMod
             <h2 style={{ margin: 0, fontSize: 20, color: 'var(--azul-900)' }}>{titulo}</h2>
             <p style={{ margin: '4px 0 0', fontSize: 13.5, color: 'var(--cinza-500)' }}>{subtitulo}</p>
           </div>
-          <button type="button" onClick={onFechar} style={botaoX} data-cy="fechar-modal" aria-label={t('admin.fornecedores.fechar')}><IconeFechar width={18} height={18} /></button>
+          <button type="button" onClick={onFechar} style={botaoX} data-cy="fechar-modal" aria-label={t('admin.fornecedores.fechar')}><IconeFechar width={20} height={20} /></button>
         </header>
 
         {modoAtual === 'criar'

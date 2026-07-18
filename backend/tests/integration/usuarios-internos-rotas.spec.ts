@@ -71,6 +71,27 @@ describe('Rotas de usuários internos (UC021 — HTTP)', () => {
     expect(loginOk.statusCode).toBe(200);
   });
 
+  it('cria com login/secretaria (expostos na listagem); login duplicado → 409, login inválido → 422', async () => {
+    const criar = await app.inject({
+      method: 'POST', url: '/admin/usuarios', headers: admin,
+      payload: { nome: 'Silas', email: 'silas@pref.gov', cargo: 'analista_cpl', senha: 'segredo12', login: 'silas.cpl', secretaria: 'CPL' },
+    });
+    expect(criar.statusCode).toBe(201);
+    const id = criar.json().usuarioId as string;
+
+    const lista = await app.inject({ method: 'GET', url: '/admin/usuarios', headers: admin });
+    expect((lista.json() as Array<{ id: string; login: string; secretaria: string }>).find((u) => u.id === id))
+      .toMatchObject({ login: 'silas.cpl', secretaria: 'CPL' });
+
+    const dup = await app.inject({ method: 'POST', url: '/admin/usuarios', headers: admin, payload: { nome: 'Outro', email: 'outro@pref.gov', cargo: 'gestor', senha: 'segredo12', login: 'Silas.CPL' } });
+    expect(dup.statusCode).toBe(409);
+    expect(dup.json()).toMatchObject({ codigo: 'LoginJaCadastrado' });
+
+    const ruim = await app.inject({ method: 'POST', url: '/admin/usuarios', headers: admin, payload: { nome: 'Z', email: 'zlogin@pref.gov', cargo: 'gestor', senha: 'segredo12', login: 'a b' } });
+    expect(ruim.statusCode).toBe(422);
+    expect(ruim.json()).toMatchObject({ codigo: 'LoginInvalido' });
+  });
+
   it('e-mail duplicado → 409; cargo inválido → 422; senha fraca → 422', async () => {
     await app.inject({ method: 'POST', url: '/admin/usuarios', headers: admin, payload: { nome: 'Bia', email: 'bia@pref.gov', cargo: 'gestor', senha: 'segredo12' } });
     const dup = await app.inject({ method: 'POST', url: '/admin/usuarios', headers: admin, payload: { nome: 'Bia2', email: 'Bia@pref.gov', cargo: 'gestor', senha: 'segredo12' } });

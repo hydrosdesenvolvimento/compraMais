@@ -106,7 +106,8 @@ export interface CatalogoItemView {
 }
 /** UC021 — servidor interno exibido no Painel Admin de usuários (sem segredos). */
 export interface UsuarioInternoView {
-  id: string; nome: string; email: string; cargo: string | null; papel: string; ativo: boolean;
+  id: string; nome: string; email: string; cargo: string | null; papel: string;
+  login: string | null; secretaria: string | null; ativo: boolean;
   registerDate: string; updateDate: string;
 }
 /** Telas do Painel Admin visíveis ao papel do próprio requisitante (GET /permissoes/telas/me). */
@@ -271,8 +272,8 @@ export const api = {
   cargos: () => get<CargoOpcao[]>('/admin/cargos'),
   usuariosListar: (incluirInativos = false) =>
     get<UsuarioInternoView[]>(`/admin/usuarios${incluirInativos ? '?incluirInativos=true' : ''}`),
-  usuarioCriar: (body: { nome: string; email: string; cargo: string; senha: string }) => send<{ usuarioId: string }>('/admin/usuarios', 'POST', body),
-  usuarioEditar: (id: string, body: { nome?: string; cargo?: string }) => send<{ ok: boolean }>(`/admin/usuarios/${id}`, 'PATCH', body),
+  usuarioCriar: (body: { nome: string; email: string; cargo: string; senha: string; login?: string | null; secretaria?: string | null }) => send<{ usuarioId: string }>('/admin/usuarios', 'POST', body),
+  usuarioEditar: (id: string, body: { nome?: string; cargo?: string; login?: string | null; secretaria?: string | null }) => send<{ ok: boolean }>(`/admin/usuarios/${id}`, 'PATCH', body),
   usuarioResetarSenha: (id: string, novaSenha: string) => send<{ ok: boolean }>(`/admin/usuarios/${id}/resetar-senha`, 'POST', { novaSenha }),
   usuarioInativar: (id: string) => send<{ situacao: string }>(`/admin/usuarios/${id}/inativar`, 'POST'),
   usuarioReativar: (id: string) => send<{ situacao: string }>(`/admin/usuarios/${id}/reativar`, 'POST'),

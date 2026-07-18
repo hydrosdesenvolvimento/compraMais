@@ -3,8 +3,12 @@ import { EntidadeBase, type MetadadosBase } from '../domain/entidade-base.js';
 import type { Papel, Identidade } from './identity-provider.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// UC021 — `login` é um IDENTIFICADOR de exibição/busca do servidor (ex.: `silas.cpl`), único quando
+// informado; a autenticação continua por e-mail (AD-20). Formato: minúsculas/dígitos e `. _ -` internos.
+const LOGIN_RE = /^[a-z0-9](?:[a-z0-9._-]*[a-z0-9])?$/;
 
 export class EmailInvalido extends Error { constructor() { super('Invalid e-mail.'); this.name = 'EmailInvalido'; } }
+export class LoginInvalido extends Error { constructor() { super('Invalid login handle.'); this.name = 'LoginInvalido'; } }
 export class SenhaFraca extends Error { constructor() { super('The password must be at least 8 characters long.'); this.name = 'SenhaFraca'; } }
 export class SemCredencialLocal extends Error { constructor() { super('User has no local password (use social login).'); this.name = 'SemCredencialLocal'; } }
 export class GoogleJaVinculado extends Error { constructor() { super('Another Google account is already linked to this user.'); this.name = 'GoogleJaVinculado'; } }
@@ -13,6 +17,20 @@ export function normalizarEmail(email: string): string {
   const e = (email ?? '').trim().toLowerCase();
   if (!EMAIL_RE.test(e)) throw new EmailInvalido();
   return e;
+}
+
+/** UC021 — normaliza o `login` opcional: vazio → `null`; caso contrário valida o formato. */
+export function normalizarLogin(login: string | null | undefined): string | null {
+  const l = (login ?? '').trim().toLowerCase();
+  if (!l) return null;
+  if (l.length < 3 || l.length > 40 || !LOGIN_RE.test(l)) throw new LoginInvalido();
+  return l;
+}
+
+/** UC021 — normaliza a `secretaria` (sigla da unidade demandante): vazio → `null`. */
+export function normalizarSecretaria(secretaria: string | null | undefined): string | null {
+  const s = (secretaria ?? '').trim();
+  return s || null;
 }
 
 function calcularHash(senha: string, salt: string): string {
@@ -33,6 +51,8 @@ export interface UsuarioState {
   fornecedorId: string | null;
   ativo: boolean;
   cargo: string | null;
+  login: string | null;
+  secretaria: string | null;
 }
 
 /**
@@ -52,18 +72,20 @@ export class Usuario extends EntidadeBase {
     readonly fornecedorId: string | null,
     private _ativo: boolean,
     private _cargo: string | null,
+    private _login: string | null,
+    private _secretaria: string | null,
   ) {
     super(meta);
   }
 
-  static criarLocal(input: { id: string; email: string; senha: string; nome: string; papel: Papel; fornecedorId?: string | null; cargo?: string | null; userName?: string }): Usuario {
+  static criarLocal(input: { id: string; email: string; senha: string; nome: string; papel: Papel; fornecedorId?: string | null; cargo?: string | null; login?: string | null; secretaria?: string | null; userName?: string }): Usuario {
     const email = normalizarEmail(input.email);
     if (!input.senha || input.senha.length < 8) throw new SenhaFraca();
     const salt = randomBytes(16).toString('hex');
     return new Usuario(
       EntidadeBase.metaNova(input.id, input.userName ?? email),
       email, calcularHash(input.senha, salt), salt, null, input.nome, input.papel, input.fornecedorId ?? null,
-      true, input.cargo ?? null,
+      true, input.cargo ?? null, normalizarLogin(input.login), normalizarSecretaria(input.secretaria),
     );
   }
 
@@ -72,13 +94,13 @@ export class Usuario extends EntidadeBase {
     return new Usuario(
       EntidadeBase.metaNova(input.id, email),
       email, null, null, input.googleId, input.nome, input.papel, input.fornecedorId ?? null,
-      true, null,
+      true, null, null, null,
     );
   }
 
   /** Reconstrução a partir da persistência (sem regra de criação). */
   static deEstado(s: UsuarioState): Usuario {
-    return new Usuario(s.meta, s.email, s.senhaHash, s.salt, s.googleId, s.nome, s.papel, s.fornecedorId, s.ativo, s.cargo);
+    return new Usuario(s.meta, s.email, s.senhaHash, s.salt, s.googleId, s.nome, s.papel, s.fornecedorId, s.ativo, s.cargo, s.login, s.secretaria);
   }
 
   get googleId(): string | null { return this._googleId; }
@@ -87,6 +109,8 @@ export class Usuario extends EntidadeBase {
   get papel(): Papel { return this._papel; }
   get ativo(): boolean { return this._ativo; }
   get cargo(): string | null { return this._cargo; }
+  get login(): string | null { return this._login; }
+  get secretaria(): string | null { return this._secretaria; }
 
   /** Verificação em tempo constante (timingSafeEqual). Lança se não houver credencial local. */
   verificarSenha(senha: string): boolean {
@@ -129,6 +153,23 @@ export class Usuario extends EntidadeBase {
     this.marcarAtualizacao(userName);
   }
 
+  /** UC021 — define o `login` de exibição (normalizado; `null` limpa). A unicidade é garantida pela camada
+   *  de aplicação/persistência (índice único parcial). */
+  definirLogin(login: string | null, userName = 'sistema'): void {
+    const l = normalizarLogin(login);
+    if (l === this._login) return;
+    this._login = l;
+    this.marcarAtualizacao(userName);
+  }
+
+  /** UC021 — vincula/limpa a `secretaria` (sigla da unidade demandante). */
+  definirSecretaria(secretaria: string | null, userName = 'sistema'): void {
+    const s = normalizarSecretaria(secretaria);
+    if (s === this._secretaria) return;
+    this._secretaria = s;
+    this.marcarAtualizacao(userName);
+  }
+
   /** RN015 — inativação lógica (idempotente): o servidor desligado não autentica, mas o histórico fica. */
   inativar(userName = 'sistema'): void {
     if (!this._ativo) return;
@@ -151,6 +192,7 @@ export class Usuario extends EntidadeBase {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
       email: this.email, senhaHash: this._senhaHash, salt: this._salt, googleId: this._googleId,
       nome: this._nome, papel: this._papel, fornecedorId: this.fornecedorId, ativo: this._ativo, cargo: this._cargo,
+      login: this._login, secretaria: this._secretaria,
     };
   }
 }

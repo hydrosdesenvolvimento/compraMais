@@ -32,8 +32,8 @@ export function registrarRotasUsuariosInternos(app: FastifyInstance, deps: { ger
   app.post('/admin/usuarios', async (req, reply) => {
     const ator = exigirPapel(req, reply, PERFIS_ADMIN);
     if (!ator) return reply;
-    const { nome, email, cargo, senha } = req.body as { nome: string; email: string; cargo: string; senha: string };
-    try { return reply.code(201).send(await deps.gerir.criar({ nome, email, cargo, senha }, { userId: ator.userId })); }
+    const { nome, email, cargo, senha, login, secretaria } = req.body as { nome: string; email: string; cargo: string; senha: string; login?: string | null; secretaria?: string | null };
+    try { return reply.code(201).send(await deps.gerir.criar({ nome, email, cargo, senha, login, secretaria }, { userId: ator.userId })); }
     catch (e) { return falha(reply, e); }
   });
 
@@ -41,8 +41,8 @@ export function registrarRotasUsuariosInternos(app: FastifyInstance, deps: { ger
     const ator = exigirPapel(req, reply, PERFIS_ADMIN);
     if (!ator) return reply;
     const { id } = req.params as { id: string };
-    const { nome, cargo } = req.body as { nome?: string; cargo?: string };
-    try { await deps.gerir.editar(id, { nome, cargo }, { userId: ator.userId }); return reply.send({ ok: true }); }
+    const { nome, cargo, login, secretaria } = req.body as { nome?: string; cargo?: string; login?: string | null; secretaria?: string | null };
+    try { await deps.gerir.editar(id, { nome, cargo, login, secretaria }, { userId: ator.userId }); return reply.send({ ok: true }); }
     catch (e) { return falha(reply, e); }
   });
 
@@ -75,9 +75,9 @@ export function registrarRotasUsuariosInternos(app: FastifyInstance, deps: { ger
 /** Mapeia os erros do caso de uso/domínio para HTTP. */
 function falha(reply: FastifyReply, e: unknown): FastifyReply {
   const n = (e as Error).name;
-  if (n === 'EmailJaCadastrado') return reply.code(409).send({ codigo: n, mensagem: (e as Error).message });
+  if (n === 'EmailJaCadastrado' || n === 'LoginJaCadastrado') return reply.code(409).send({ codigo: n, mensagem: (e as Error).message });
   if (n === 'NaoPodeInativarPropriaConta') return reply.code(409).send({ codigo: n, mensagem: (e as Error).message });
   if (n === 'UsuarioNaoEncontrado' || n === 'NaoEUsuarioInterno') return reply.code(404).send({ codigo: n, mensagem: (e as Error).message });
-  // CargoInvalido, EmailInvalido, SenhaFraca → 422
+  // CargoInvalido, EmailInvalido, SenhaFraca, LoginInvalido → 422
   return reply.code(422).send({ codigo: n, mensagem: (e as Error).message });
 }

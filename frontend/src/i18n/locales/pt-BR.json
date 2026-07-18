@@ -451,12 +451,33 @@
       "vazio": "Nenhum item cadastrado ainda."
     },
     "usuarios": {
-      "titulo": "Usuários internos",
-      "subtitulo": "Cadastre servidores da Prefeitura e atribua um cargo — o cargo define o papel de acesso (RBAC). A exclusão é lógica: o usuário inativado não acessa, mas o histórico de suas ações é preservado.",
+      "breadcrumb": "Administração · Usuários",
+      "titulo": "Usuários",
+      "subtitulo": "Gestão de acessos ao sistema",
+      "novoCadastro": "Novo usuário",
+      "carregando": "Carregando usuários…",
+      "erroCarregar": "Não foi possível carregar os usuários.",
+      "vazioTitulo": "Nenhum usuário cadastrado ainda",
+      "vazioDica": "Use “Novo usuário” para cadastrar o primeiro servidor.",
+      "semSecretaria": "—",
+      "semLogin": "—",
+      "selecioneCargo": "Selecione um cargo",
+      "selecioneSecretaria": "Selecione uma secretaria",
+      "fechar": "Fechar",
+      "resetarSenha": "Redefinir senha",
+      "novaSenha": "Nova senha (mín. 8)",
+      "confirmarReset": "Confirmar",
+      "resetOk": "Senha redefinida.",
+      "erroReset": "Não foi possível redefinir. Verifique a senha (mín. 8).",
       "campos": {
         "nome": "Nome",
         "email": "E-mail",
         "cargo": "Cargo",
+        "secretaria": "Secretaria",
+        "perfil": "Perfil",
+        "login": "Login",
+        "status": "Status",
+        "acoes": "Ações",
         "senha": "Senha inicial (mín. 8 caracteres)"
       },
       "cargos": {
@@ -468,19 +489,35 @@
         "auditor": "Auditor",
         "dpo": "DPO / Encarregado"
       },
-      "selecioneCargo": "Selecione um cargo",
-      "criar": "Adicionar usuário",
-      "erroCriar": "Não foi possível salvar. Verifique se o e-mail já existe, o cargo e a senha (mín. 8 caracteres).",
-      "mostrarInativos": "Mostrar inativos",
-      "situacaoInativo": "inativo",
-      "resetarSenha": "Resetar senha",
-      "novaSenha": "Nova senha (mín. 8)",
-      "confirmarReset": "Confirmar",
-      "resetOk": "Senha redefinida.",
-      "erroReset": "Não foi possível redefinir. Verifique a senha (mín. 8).",
-      "inativar": "Inativar",
-      "reativar": "Reativar",
-      "vazio": "Nenhum servidor cadastrado ainda."
+      "perfis": {
+        "administrador": "Administrador",
+        "cpl": "Analista",
+        "smga": "Gestor",
+        "auditor": "Auditor",
+        "dpo": "DPO",
+        "leitura": "Leitura"
+      },
+      "status": {
+        "ativo": "Ativo",
+        "inativo": "Inativo"
+      },
+      "acao": {
+        "editar": "Editar",
+        "inativar": "Inativar",
+        "reativar": "Reativar"
+      },
+      "modal": {
+        "tituloCriar": "Novo usuário",
+        "tituloEditar": "Editar usuário",
+        "subtitulo": "O cargo define o perfil de acesso (RBAC). A exclusão é lógica: o usuário inativado não acessa, mas o histórico de suas ações é preservado.",
+        "nomePlaceholder": "Nome completo do servidor",
+        "emailPlaceholder": "email@prefeitura.gov.br",
+        "loginPlaceholder": "ex.: silas.cpl",
+        "senhaPlaceholder": "Mínimo de 8 caracteres",
+        "salvar": "Salvar",
+        "cancelar": "Cancelar",
+        "erroSalvar": "Não foi possível salvar. Verifique os dados (e-mail/login já em uso, cargo e senha)."
+      }
     },
     "malote": {
       "titulo": "Malote SEI",

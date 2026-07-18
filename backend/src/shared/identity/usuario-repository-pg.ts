@@ -10,18 +10,22 @@ export class UsuarioRepositoryPg implements UsuarioRepository {
     const s = u.estado();
     await this.pool.query(
       `INSERT INTO usuarios
-         (id, email, senha_hash, salt, google_id, nome, papel, fornecedor_id, ativo, cargo, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+         (id, email, senha_hash, salt, google_id, nome, papel, fornecedor_id, ativo, cargo, login, secretaria, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
        ON CONFLICT (id) DO UPDATE SET
          email = $2, senha_hash = $3, salt = $4, google_id = $5, nome = $6,
-         papel = $7, fornecedor_id = $8, ativo = $9, cargo = $10, update_date = $12, last_user_update = $13`,
-      [s.meta.id, s.email, s.senhaHash, s.salt, s.googleId, s.nome, s.papel, s.fornecedorId, s.ativo, s.cargo, s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate],
+         papel = $7, fornecedor_id = $8, ativo = $9, cargo = $10, login = $11, secretaria = $12, update_date = $14, last_user_update = $15`,
+      [s.meta.id, s.email, s.senhaHash, s.salt, s.googleId, s.nome, s.papel, s.fornecedorId, s.ativo, s.cargo, s.login, s.secretaria, s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate],
     );
   }
 
   async porId(id: string): Promise<Usuario | null> { return this.buscarUm('id = $1', [id]); }
   async porEmail(email: string): Promise<Usuario | null> { return this.buscarUm('email = $1', [email.trim().toLowerCase()]); }
   async porGoogleId(googleId: string): Promise<Usuario | null> { return this.buscarUm('google_id = $1', [googleId]); }
+  async porLogin(login: string): Promise<Usuario | null> {
+    const l = (login ?? '').trim().toLowerCase();
+    return l ? this.buscarUm('login = $1', [l]) : null;
+  }
 
   /** UC021 — servidores internos (papel não-fornecedor); inativos só quando pedido (RN015). */
   async listarInternos(filtro?: { incluirInativos?: boolean }): Promise<Usuario[]> {
@@ -51,6 +55,8 @@ function mapear(row: Record<string, unknown>): Usuario {
     fornecedorId: (row.fornecedor_id as string | null) ?? null,
     ativo: (row.ativo as boolean | null) ?? true,
     cargo: (row.cargo as string | null) ?? null,
+    login: (row.login as string | null) ?? null,
+    secretaria: (row.secretaria as string | null) ?? null,
   });
 }
 

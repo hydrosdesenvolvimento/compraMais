@@ -272,6 +272,48 @@
         "erro": "Receita indisponível — dados atuais preservados."
       }
     },
+    "secretarias": {
+      "titulo": "Secretarias",
+      "subtitulo": "Gestão das unidades demandantes",
+      "novoCadastro": "Novo cadastro",
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar as secretarias. Verifique suas permissões.",
+      "vazioTitulo": "Nenhuma secretaria cadastrada",
+      "vazioDica": "Clique em \"Novo cadastro\" para adicionar a primeira.",
+      "semContato": "—",
+      "fechar": "Fechar",
+      "campos": {
+        "sigla": "Sigla",
+        "nome": "Nome",
+        "responsavel": "Responsável",
+        "contato": "Contato",
+        "status": "Status",
+        "acoes": "Ações"
+      },
+      "status": {
+        "ativa": "Ativa",
+        "inativa": "Inativa"
+      },
+      "acao": {
+        "editar": "Editar secretaria",
+        "inativar": "Inativar secretaria",
+        "reativar": "Reativar secretaria"
+      },
+      "modal": {
+        "tituloCriar": "Nova secretaria",
+        "tituloEditar": "Editar secretaria",
+        "subtitulo": "Preencha os campos e salve",
+        "siglaPlaceholder": "SEME",
+        "nomePlaceholder": "Secretaria Municipal de…",
+        "responsavelPlaceholder": "Nome do responsável",
+        "contatoLabel": "E-mail de contato",
+        "contatoPlaceholder": "setor@riobranco.ac.gov.br",
+        "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "erroSalvar": "Não foi possível salvar. Verifique os campos obrigatórios e o e-mail."
+      }
+    },
     "dashboard": {
       "carregando": "Carregando…",
       "titulo": "Painel administrativo",

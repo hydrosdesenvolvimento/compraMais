@@ -46,5 +46,7 @@ export const IconeOlho = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><pat
 export const IconeLapis = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>);
 /** Círculo com barra — ação "bloquear" (RN002). */
 export const IconeBloquear = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><circle cx="12" cy="12" r="10" /><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" /></svg>);
+/** Botão liga/desliga — alterna a situação (ativar/inativar) de um item de catálogo. */
+export const IconePower = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><path d="M18.36 6.64a9 9 0 1 1-12.73 0" /><line x1="12" y1="2" x2="12" y2="12" /></svg>);
 /** Setas de ordenação — botão "Ordenar" da toolbar. */
 export const IconeOrdenar = (p: SVGProps<SVGSVGElement>) => (<svg {...base(p)}><path d="M3 6h11M3 12h7M3 18h4" /><path d="m17 8 4-4 4 4M21 4v12" transform="translate(-4 2)" /></svg>);

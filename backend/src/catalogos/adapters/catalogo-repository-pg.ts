@@ -66,16 +66,17 @@ export class SecretariaRepositoryPg extends CatalogoPgBase<Secretaria> {
   protected async upsert(s: Secretaria): Promise<void> {
     const e = s.estado();
     await this.pool.query(
-      `INSERT INTO secretarias (id, nome, sigla, responsavel, situacao, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-       ON CONFLICT (id) DO UPDATE SET nome=$2, sigla=$3, responsavel=$4, situacao=$5, update_date=$7, last_user_update=$8`,
-      [e.meta.id, e.nome, e.sigla, e.responsavel, e.situacao, e.meta.registerDate, e.meta.updateDate, e.meta.lastUserUpdate],
+      `INSERT INTO secretarias (id, nome, sigla, responsavel, contato, situacao, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+       ON CONFLICT (id) DO UPDATE SET nome=$2, sigla=$3, responsavel=$4, contato=$5, situacao=$6, update_date=$8, last_user_update=$9`,
+      [e.meta.id, e.nome, e.sigla, e.responsavel, e.contato ?? null, e.situacao, e.meta.registerDate, e.meta.updateDate, e.meta.lastUserUpdate],
     );
   }
   protected mapear(row: Record<string, unknown>): Secretaria {
     return Secretaria.deEstado({
       meta: meta(row), nome: String(row.nome), sigla: String(row.sigla),
-      responsavel: String(row.responsavel), situacao: row.situacao as SituacaoCatalogo,
+      responsavel: String(row.responsavel), contato: row.contato == null ? undefined : String(row.contato),
+      situacao: row.situacao as SituacaoCatalogo,
     });
   }
 }

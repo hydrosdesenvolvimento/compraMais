@@ -31,6 +31,7 @@ import { GerarMalote } from './pages/admin/GerarMalote';
 import { AdministracaoTelas } from './pages/admin/AdministracaoTelas';
 import { EmConstrucao } from './pages/admin/EmConstrucao';
 import { Fornecedores } from './pages/admin/Fornecedores';
+import { Secretarias } from './pages/admin/Secretarias';
 import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
@@ -94,7 +95,7 @@ const rAdminAnaliseDoc = createRoute({ getParentRoute: () => adminLayout, path: 
 const rAdminDistribuicao = createRoute({ getParentRoute: () => adminLayout, path: '/admin/distribuicao', beforeLoad: () => exigirTelaAdmin('distribuicao'), component: () => <EmConstrucao tituloKey="common.nav.distribuicao" /> });
 const rAdminCadastroReserva = createRoute({ getParentRoute: () => adminLayout, path: '/admin/cadastro-reserva', beforeLoad: () => exigirTelaAdmin('cadastroReserva'), component: () => <EmConstrucao tituloKey="common.nav.cadastroReserva" /> });
 const rAdminDesistencias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/desistencias', beforeLoad: () => exigirTelaAdmin('desistencias'), component: () => <EmConstrucao tituloKey="common.nav.desistencias" /> });
-const rAdminSecretarias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/secretarias', beforeLoad: () => exigirTelaAdmin('secretarias'), component: () => <EmConstrucao tituloKey="common.nav.secretarias" /> });
+const rAdminSecretarias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/secretarias', beforeLoad: () => exigirTelaAdmin('secretarias'), component: Secretarias });
 const rAdminSetores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/setores-industriais', beforeLoad: () => exigirTelaAdmin('setoresIndustriais'), component: () => <EmConstrucao tituloKey="common.nav.setoresIndustriais" /> });
 const rAdminTiposArquivos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/tipos-arquivos', beforeLoad: () => exigirTelaAdmin('tiposArquivos'), component: () => <EmConstrucao tituloKey="common.nav.tiposArquivos" /> });
 

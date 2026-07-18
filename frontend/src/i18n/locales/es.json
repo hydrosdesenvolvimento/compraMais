@@ -272,6 +272,48 @@
         "erro": "Receita no disponible — datos actuales preservados."
       }
     },
+    "secretarias": {
+      "titulo": "Secretarías",
+      "subtitulo": "Gestión de las unidades solicitantes",
+      "novoCadastro": "Nuevo registro",
+      "carregando": "Cargando…",
+      "erroCarregar": "No se pudieron cargar las secretarías. Verifique sus permisos.",
+      "vazioTitulo": "Ninguna secretaría registrada",
+      "vazioDica": "Haga clic en «Nuevo registro» para agregar la primera.",
+      "semContato": "—",
+      "fechar": "Cerrar",
+      "campos": {
+        "sigla": "Sigla",
+        "nome": "Nombre",
+        "responsavel": "Responsable",
+        "contato": "Contacto",
+        "status": "Estado",
+        "acoes": "Acciones"
+      },
+      "status": {
+        "ativa": "Activa",
+        "inativa": "Inactiva"
+      },
+      "acao": {
+        "editar": "Editar secretaría",
+        "inativar": "Inactivar secretaría",
+        "reativar": "Reactivar secretaría"
+      },
+      "modal": {
+        "tituloCriar": "Nueva secretaría",
+        "tituloEditar": "Editar secretaría",
+        "subtitulo": "Complete los campos y guarde",
+        "siglaPlaceholder": "SEME",
+        "nomePlaceholder": "Secretaría Municipal de…",
+        "responsavelPlaceholder": "Nombre del responsable",
+        "contatoLabel": "Correo de contacto",
+        "contatoPlaceholder": "sector@riobranco.ac.gov.br",
+        "avisoHistorico": "Los registros nunca se eliminan definitivamente: la eliminación los convierte en Inactivo o Bloqueado, preservando el historial.",
+        "cancelar": "Cancelar",
+        "salvar": "Guardar",
+        "erroSalvar": "No se pudo guardar. Verifique los campos obligatorios y el correo."
+      }
+    },
     "dashboard": {
       "carregando": "Cargando…",
       "titulo": "Panel administrativo",

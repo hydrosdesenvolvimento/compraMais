@@ -451,12 +451,33 @@
       "vazio": "Aún no hay ítems registrados."
     },
     "usuarios": {
-      "titulo": "Usuarios internos",
-      "subtitulo": "Registre al personal del Municipio y asigne un cargo — el cargo define el acceso (RBAC). La eliminación es lógica: un usuario inactivado no accede, pero se conserva el historial de sus acciones.",
+      "breadcrumb": "Administración · Usuarios",
+      "titulo": "Usuarios",
+      "subtitulo": "Gestión de accesos al sistema",
+      "novoCadastro": "Nuevo usuario",
+      "carregando": "Cargando usuarios…",
+      "erroCarregar": "No se pudieron cargar los usuarios.",
+      "vazioTitulo": "Aún no hay usuarios registrados",
+      "vazioDica": "Use “Nuevo usuario” para registrar al primer servidor.",
+      "semSecretaria": "—",
+      "semLogin": "—",
+      "selecioneCargo": "Seleccione un cargo",
+      "selecioneSecretaria": "Seleccione una secretaría",
+      "fechar": "Cerrar",
+      "resetarSenha": "Restablecer contraseña",
+      "novaSenha": "Nueva contraseña (mín. 8)",
+      "confirmarReset": "Confirmar",
+      "resetOk": "Contraseña restablecida.",
+      "erroReset": "No se pudo restablecer. Verifique la contraseña (mín. 8).",
       "campos": {
         "nome": "Nombre",
         "email": "Correo electrónico",
         "cargo": "Cargo",
+        "secretaria": "Secretaría",
+        "perfil": "Perfil",
+        "login": "Usuario",
+        "status": "Estado",
+        "acoes": "Acciones",
         "senha": "Contraseña inicial (mín. 8 caracteres)"
       },
       "cargos": {
@@ -468,19 +489,35 @@
         "auditor": "Auditor",
         "dpo": "DPO / Encargado"
       },
-      "selecioneCargo": "Seleccione un cargo",
-      "criar": "Agregar usuario",
-      "erroCriar": "No se pudo guardar. Verifique si el correo ya existe, el cargo y la contraseña (mín. 8 caracteres).",
-      "mostrarInativos": "Mostrar inactivos",
-      "situacaoInativo": "inactivo",
-      "resetarSenha": "Restablecer contraseña",
-      "novaSenha": "Nueva contraseña (mín. 8)",
-      "confirmarReset": "Confirmar",
-      "resetOk": "Contraseña restablecida.",
-      "erroReset": "No se pudo restablecer. Verifique la contraseña (mín. 8).",
-      "inativar": "Inactivar",
-      "reativar": "Reactivar",
-      "vazio": "Aún no hay personal registrado."
+      "perfis": {
+        "administrador": "Administrador",
+        "cpl": "Analista",
+        "smga": "Gestor",
+        "auditor": "Auditor",
+        "dpo": "DPO",
+        "leitura": "Lectura"
+      },
+      "status": {
+        "ativo": "Activo",
+        "inativo": "Inactivo"
+      },
+      "acao": {
+        "editar": "Editar",
+        "inativar": "Inactivar",
+        "reativar": "Reactivar"
+      },
+      "modal": {
+        "tituloCriar": "Nuevo usuario",
+        "tituloEditar": "Editar usuario",
+        "subtitulo": "El cargo define el perfil de acceso (RBAC). La eliminación es lógica: un usuario inactivado no accede, pero se conserva el historial de sus acciones.",
+        "nomePlaceholder": "Nombre completo del servidor",
+        "emailPlaceholder": "correo@municipio.gob",
+        "loginPlaceholder": "ej.: silas.cpl",
+        "senhaPlaceholder": "Mínimo de 8 caracteres",
+        "salvar": "Guardar",
+        "cancelar": "Cancelar",
+        "erroSalvar": "No se pudo guardar. Verifique los datos (correo/usuario ya en uso, cargo y contraseña)."
+      }
     },
     "malote": {
       "titulo": "Valija SEI",

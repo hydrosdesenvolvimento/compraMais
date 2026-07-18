@@ -5,8 +5,9 @@ import { AutenticarLocal, CredenciaisInvalidas, EmailJaCadastrado, UsuarioNaoEnc
 import { JwtTokenService } from '../../src/shared/identity/token-service.js';
 import { papelDoCargo, CargoInvalido, catalogoDeCargos } from '../../src/shared/identity/cargos-internos.js';
 import {
-  GerirUsuariosInternos, NaoEUsuarioInterno, NaoPodeInativarPropriaConta,
+  GerirUsuariosInternos, NaoEUsuarioInterno, NaoPodeInativarPropriaConta, LoginJaCadastrado,
 } from '../../src/shared/identity/gerir-usuarios-internos.js';
+import { LoginInvalido } from '../../src/shared/identity/usuario.js';
 import { InMemoryEventBus } from '../../src/shared/events/event-bus.js';
 
 const ADMIN = { userId: 'admin-1' };
@@ -31,13 +32,20 @@ describe('cargos-internos — mapeamento cargo → papel (§15/AD-35)', () => {
 });
 
 describe('Usuario — inativação lógica (RN015) e cargo/papel', () => {
-  it('round-trip estado()/deEstado() preserva ativo e cargo', () => {
-    const u = Usuario.criarLocal({ id: 'u1', email: 'a@b.com', senha: 'segredo12', nome: 'Ana', papel: 'cpl', cargo: 'analista_cpl' });
+  it('round-trip estado()/deEstado() preserva ativo, cargo, login e secretaria', () => {
+    const u = Usuario.criarLocal({ id: 'u1', email: 'a@b.com', senha: 'segredo12', nome: 'Ana', papel: 'cpl', cargo: 'analista_cpl', login: 'Ana.CPL', secretaria: 'CPL' });
     u.inativar('admin');
     const rt = Usuario.deEstado(u.estado());
     expect(rt.ativo).toBe(false);
     expect(rt.cargo).toBe('analista_cpl');
     expect(rt.papel).toBe('cpl');
+    expect(rt.login).toBe('ana.cpl'); // normalizado (minúsculas)
+    expect(rt.secretaria).toBe('CPL');
+  });
+  it('login inválido lança LoginInvalido; vazio vira null', () => {
+    expect(() => Usuario.criarLocal({ id: 'x', email: 'a@b.com', senha: 'segredo12', nome: 'Ana', papel: 'cpl', login: 'a b' })).toThrow(LoginInvalido);
+    const u = Usuario.criarLocal({ id: 'y', email: 'a@b.com', senha: 'segredo12', nome: 'Ana', papel: 'cpl', login: '  ' });
+    expect(u.login).toBeNull();
   });
   it('inativar/reativar são idempotentes', () => {
     const u = Usuario.criarLocal({ id: 'u2', email: 'a@b.com', senha: 'segredo12', nome: 'Ana', papel: 'cpl' });
@@ -115,6 +123,31 @@ describe('GerirUsuariosInternos (UC021)', () => {
     await gerir.resetarSenha(usuarioId, 'novaSenha9', ADMIN);
     u = await repo.porId(usuarioId);
     expect(u?.verificarSenha('novaSenha9')).toBe(true);
+  });
+
+  it('persiste login/secretaria na criação e os expõe na view', async () => {
+    const { usuarioId } = await gerir.criar({ nome: 'Silas', email: 'silas@pref.gov', cargo: 'analista_cpl', senha: 'segredo12', login: 'silas.cpl', secretaria: 'CPL' }, ADMIN);
+    const u = await repo.porId(usuarioId);
+    expect(u?.login).toBe('silas.cpl');
+    expect(u?.secretaria).toBe('CPL');
+    const view = (await gerir.listar()).find((v) => v.id === usuarioId);
+    expect(view?.login).toBe('silas.cpl');
+    expect(view?.secretaria).toBe('CPL');
+  });
+
+  it('login duplicado → LoginJaCadastrado (na criação e na edição)', async () => {
+    await gerir.criar({ nome: 'Ana', email: 'ana@pref.gov', cargo: 'analista_cpl', senha: 'segredo12', login: 'ana.cpl' }, ADMIN);
+    await expect(gerir.criar({ nome: 'Bia', email: 'bia@pref.gov', cargo: 'gestor', senha: 'segredo12', login: 'Ana.CPL' }, ADMIN)).rejects.toBeInstanceOf(LoginJaCadastrado);
+    const { usuarioId } = await gerir.criar({ nome: 'Bia', email: 'bia@pref.gov', cargo: 'gestor', senha: 'segredo12' }, ADMIN);
+    await expect(gerir.editar(usuarioId, { login: 'ana.cpl' }, ADMIN)).rejects.toBeInstanceOf(LoginJaCadastrado);
+  });
+
+  it('editar atualiza login e secretaria (e o mesmo login no próprio usuário é permitido)', async () => {
+    const { usuarioId } = await gerir.criar({ nome: 'Ana', email: 'ana@pref.gov', cargo: 'analista_cpl', senha: 'segredo12', login: 'ana.cpl', secretaria: 'CPL' }, ADMIN);
+    await gerir.editar(usuarioId, { login: 'ana.cpl', secretaria: 'SEMGA' }, ADMIN); // re-salvar o próprio login não colide
+    const u = await repo.porId(usuarioId);
+    expect(u?.login).toBe('ana.cpl');
+    expect(u?.secretaria).toBe('SEMGA');
   });
 
   it('não inativa a própria conta (anti-lockout) e recusa alvo inexistente/não-interno', async () => {

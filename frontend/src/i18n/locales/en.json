@@ -451,12 +451,33 @@
       "vazio": "No items registered yet."
     },
     "usuarios": {
-      "titulo": "Internal users",
-      "subtitulo": "Register City Hall staff and assign a role — the role defines RBAC access. Deletion is logical: a deactivated user cannot sign in, but their action history is preserved.",
+      "breadcrumb": "Administration · Users",
+      "titulo": "Users",
+      "subtitulo": "System access management",
+      "novoCadastro": "New user",
+      "carregando": "Loading users…",
+      "erroCarregar": "Could not load users.",
+      "vazioTitulo": "No users registered yet",
+      "vazioDica": "Use “New user” to register the first staff member.",
+      "semSecretaria": "—",
+      "semLogin": "—",
+      "selecioneCargo": "Select a role",
+      "selecioneSecretaria": "Select a department",
+      "fechar": "Close",
+      "resetarSenha": "Reset password",
+      "novaSenha": "New password (min. 8)",
+      "confirmarReset": "Confirm",
+      "resetOk": "Password reset.",
+      "erroReset": "Could not reset. Check the password (min. 8).",
       "campos": {
         "nome": "Name",
         "email": "E-mail",
-        "cargo": "Role",
+        "cargo": "Position",
+        "secretaria": "Department",
+        "perfil": "Profile",
+        "login": "Login",
+        "status": "Status",
+        "acoes": "Actions",
         "senha": "Initial password (min. 8 characters)"
       },
       "cargos": {
@@ -468,19 +489,35 @@
         "auditor": "Auditor",
         "dpo": "DPO / Data Officer"
       },
-      "selecioneCargo": "Select a role",
-      "criar": "Add user",
-      "erroCriar": "Could not save. Check if the e-mail already exists, the role and the password (min. 8 characters).",
-      "mostrarInativos": "Show inactive",
-      "situacaoInativo": "inactive",
-      "resetarSenha": "Reset password",
-      "novaSenha": "New password (min. 8)",
-      "confirmarReset": "Confirm",
-      "resetOk": "Password reset.",
-      "erroReset": "Could not reset. Check the password (min. 8).",
-      "inativar": "Deactivate",
-      "reativar": "Reactivate",
-      "vazio": "No staff registered yet."
+      "perfis": {
+        "administrador": "Administrator",
+        "cpl": "Analyst",
+        "smga": "Manager",
+        "auditor": "Auditor",
+        "dpo": "DPO",
+        "leitura": "Read-only"
+      },
+      "status": {
+        "ativo": "Active",
+        "inativo": "Inactive"
+      },
+      "acao": {
+        "editar": "Edit",
+        "inativar": "Deactivate",
+        "reativar": "Reactivate"
+      },
+      "modal": {
+        "tituloCriar": "New user",
+        "tituloEditar": "Edit user",
+        "subtitulo": "The position defines the access profile (RBAC). Deletion is logical: a deactivated user cannot sign in, but their action history is preserved.",
+        "nomePlaceholder": "Staff member full name",
+        "emailPlaceholder": "email@cityhall.gov",
+        "loginPlaceholder": "e.g. silas.cpl",
+        "senhaPlaceholder": "Minimum of 8 characters",
+        "salvar": "Save",
+        "cancelar": "Cancel",
+        "erroSalvar": "Could not save. Check the data (e-mail/login already in use, position and password)."
+      }
     },
     "malote": {
       "titulo": "SEI Package",

@@ -93,7 +93,7 @@ export class CrudCatalogo<T extends ItemCatalogo, TCriar, TEditar> {
 }
 
 /** Entradas de criação/edição por catálogo. */
-export type CriarSecretaria = { nome: string; sigla: string; responsavel: string };
+export type CriarSecretaria = { nome: string; sigla: string; responsavel: string; contato?: string };
 export type EditarSecretaria = Partial<CriarSecretaria>;
 export type CriarSetor = { codigo: string; descricao: string };
 export type EditarSetor = Partial<CriarSetor>;

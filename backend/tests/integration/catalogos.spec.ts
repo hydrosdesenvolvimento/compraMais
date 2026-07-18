@@ -4,6 +4,7 @@ import { CatalogoRepositoryMemory } from '../../src/catalogos/adapters/catalogo-
 import type { Secretaria } from '../../src/catalogos/domain/secretaria.js';
 import type { SetorCnae } from '../../src/catalogos/domain/setor-cnae.js';
 import type { TipoDocumento } from '../../src/catalogos/domain/tipo-documento.js';
+import { EmailInvalido } from '../../src/catalogos/domain/item-catalogo.js';
 import { InMemoryEventBus } from '../../src/shared/events/event-bus.js';
 
 /**
@@ -34,6 +35,23 @@ describe('ManterCatalogos (UC020)', () => {
     const lista = await manter.secretarias.listar();
     expect(lista.map((s) => s.id)).toContain(id);
     expect(eventos).toContain('CatalogoItemCriado');
+  });
+
+  it('secretaria: guarda o e-mail de contato (normalizado) e permite editá-lo; contato é opcional', async () => {
+    const { id } = await manter.secretarias.criar({ nome: 'Educação', sigla: 'SME', responsavel: 'Ana', contato: 'Educacao@RioBranco.AC.gov.br' }, actor);
+    expect((await manter.secretarias.porId(id))?.contato).toBe('educacao@riobranco.ac.gov.br'); // trim + lower
+
+    await manter.secretarias.editar(id, { contato: 'nova@riobranco.ac.gov.br' }, actor);
+    expect((await manter.secretarias.porId(id))?.contato).toBe('nova@riobranco.ac.gov.br');
+
+    // Opcional: jornada UC020 (sem contato) continua válida.
+    const semContato = await manter.secretarias.criar({ nome: 'Obras', sigla: 'SEMOB', responsavel: 'Beto' }, actor);
+    expect((await manter.secretarias.porId(semContato.id))?.contato).toBeUndefined();
+  });
+
+  it('secretaria: e-mail de contato inválido → EmailInvalido', async () => {
+    await expect(manter.secretarias.criar({ nome: 'Saúde', sigla: 'SMS', responsavel: 'C', contato: 'nao-e-email' }, actor))
+      .rejects.toThrow(EmailInvalido);
   });
 
   it('bloqueia sigla duplicada (case-insensitive) — RN015 "duplicidade → bloqueado"', async () => {

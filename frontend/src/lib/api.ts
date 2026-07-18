@@ -98,7 +98,7 @@ export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento';
 export interface CatalogoItemView {
   id: string; ativo: boolean; situacao: 'ativo' | 'inativo';
   // Secretaria
-  nome?: string; sigla?: string; responsavel?: string;
+  nome?: string; sigla?: string; responsavel?: string; contato?: string;
   // Setor/CNAE
   codigo?: string; descricao?: string;
   // Tipo de documento

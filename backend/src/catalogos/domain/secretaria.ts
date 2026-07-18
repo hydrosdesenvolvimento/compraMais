@@ -1,5 +1,5 @@
 import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-base.js';
-import { ItemCatalogo, type SituacaoCatalogo, type CampoDiff, normalizarChave, exigirTexto } from './item-catalogo.js';
+import { ItemCatalogo, type SituacaoCatalogo, type CampoDiff, normalizarChave, exigirTexto, emailOpcional } from './item-catalogo.js';
 
 /** Snapshot plano do agregado para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
 export interface SecretariaState {
@@ -7,12 +7,16 @@ export interface SecretariaState {
   nome: string;
   sigla: string;
   responsavel: string;
+  /** E-mail de contato da unidade (RF020 — tela dedicada). Opcional: registros legados podem não tê-lo. */
+  contato?: string;
   situacao: SituacaoCatalogo;
 }
 
 /**
  * Secretaria demandante (RF020 / AD-16). Chave natural = **sigla** (case-insensitive). Selecionável na
  * criação de editais (1 Edital → 1 Secretaria). Inativação lógica preserva os editais que já a vincularam.
+ * `contato` (e-mail) é opcional no domínio — validado apenas quando informado; a tela dedicada o exige no
+ * formulário, mas a jornada de catálogos (UC020) e os registros legados podem criá-la sem contato.
  */
 export class Secretaria extends ItemCatalogo {
   private constructor(
@@ -20,37 +24,40 @@ export class Secretaria extends ItemCatalogo {
     private _nome: string,
     private _sigla: string,
     private _responsavel: string,
+    private _contato: string | undefined,
     situacao: SituacaoCatalogo,
   ) { super(meta, situacao); }
 
-  static criar(input: { id: string; nome: string; sigla: string; responsavel: string; userName?: string }): Secretaria {
+  static criar(input: { id: string; nome: string; sigla: string; responsavel: string; contato?: string; userName?: string }): Secretaria {
     return new Secretaria(
       EntidadeBase.metaNova(input.id, input.userName),
       exigirTexto(input.nome, 'nome'),
       exigirTexto(input.sigla, 'sigla'),
       exigirTexto(input.responsavel, 'responsavel'),
+      emailOpcional(input.contato, 'contato'),
       'ativo',
     );
   }
 
   static deEstado(s: SecretariaState): Secretaria {
-    return new Secretaria(s.meta, s.nome, s.sigla, s.responsavel, s.situacao);
+    return new Secretaria(s.meta, s.nome, s.sigla, s.responsavel, s.contato, s.situacao);
   }
 
   estado(): SecretariaState {
     return {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
-      nome: this._nome, sigla: this._sigla, responsavel: this._responsavel, situacao: this._situacao,
+      nome: this._nome, sigla: this._sigla, responsavel: this._responsavel, contato: this._contato, situacao: this._situacao,
     };
   }
 
   get nome(): string { return this._nome; }
   get sigla(): string { return this._sigla; }
   get responsavel(): string { return this._responsavel; }
+  get contato(): string | undefined { return this._contato; }
   chave(): string { return normalizarChave(this._sigla); }
 
   /** Edição auditada: aplica os campos informados e devolve o diff antes/depois (AD-18). */
-  editar(campos: Partial<{ nome: string; sigla: string; responsavel: string }>, userName: string): CampoDiff[] {
+  editar(campos: Partial<{ nome: string; sigla: string; responsavel: string; contato: string }>, userName: string): CampoDiff[] {
     const diff: CampoDiff[] = [];
     if (campos.nome !== undefined) {
       const novo = exigirTexto(campos.nome, 'nome');
@@ -63,6 +70,10 @@ export class Secretaria extends ItemCatalogo {
     if (campos.responsavel !== undefined) {
       const novo = exigirTexto(campos.responsavel, 'responsavel');
       if (novo !== this._responsavel) { diff.push({ campo: 'responsavel', antes: this._responsavel, depois: novo }); this._responsavel = novo; }
+    }
+    if (campos.contato !== undefined) {
+      const novo = emailOpcional(campos.contato, 'contato'); // '' → undefined (limpa o contato)
+      if (novo !== this._contato) { diff.push({ campo: 'contato', antes: this._contato, depois: novo }); this._contato = novo; }
     }
     if (diff.length) this.marcarAtualizacao(userName);
     return diff;

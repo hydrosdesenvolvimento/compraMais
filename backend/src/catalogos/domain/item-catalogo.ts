@@ -54,10 +54,25 @@ export function normalizarChave(v: string): string { return v.trim().toLowerCase
 export class CampoObrigatorio extends Error {
   constructor(campo: string) { super(`Field '${campo}' is required.`); this.name = 'CampoObrigatorio'; }
 }
+export class EmailInvalido extends Error {
+  constructor(campo: string) { super(`Field '${campo}' must be a valid e-mail.`); this.name = 'EmailInvalido'; }
+}
 
 /** Valida e devolve o texto sem espaços nas bordas; lança CampoObrigatorio quando vazio. */
 export function exigirTexto(valor: string | undefined | null, campo: string): string {
   const t = (valor ?? '').trim();
   if (!t) throw new CampoObrigatorio(campo);
   return t;
+}
+
+/**
+ * Normaliza um e-mail **opcional** (trim + minúsculas). Vazio → `undefined` (campo não informado);
+ * formato inválido → EmailInvalido (mapeado a 422 no controller). Validação deliberadamente simples
+ * (local@dominio.tld) — o e-mail é dado de contato exibido, não credencial.
+ */
+export function emailOpcional(valor: string | undefined | null, campo: string): string | undefined {
+  const t = (valor ?? '').trim();
+  if (!t) return undefined;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)) throw new EmailInvalido(campo);
+  return t.toLowerCase();
 }

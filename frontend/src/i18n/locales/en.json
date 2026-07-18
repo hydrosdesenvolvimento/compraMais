@@ -272,6 +272,48 @@
         "erro": "Receita unavailable — current data preserved."
       }
     },
+    "secretarias": {
+      "titulo": "Departments",
+      "subtitulo": "Management of requesting units",
+      "novoCadastro": "New record",
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load the departments. Check your permissions.",
+      "vazioTitulo": "No department registered",
+      "vazioDica": "Click \"New record\" to add the first one.",
+      "semContato": "—",
+      "fechar": "Close",
+      "campos": {
+        "sigla": "Acronym",
+        "nome": "Name",
+        "responsavel": "Owner",
+        "contato": "Contact",
+        "status": "Status",
+        "acoes": "Actions"
+      },
+      "status": {
+        "ativa": "Active",
+        "inativa": "Inactive"
+      },
+      "acao": {
+        "editar": "Edit department",
+        "inativar": "Deactivate department",
+        "reativar": "Reactivate department"
+      },
+      "modal": {
+        "tituloCriar": "New department",
+        "tituloEditar": "Edit department",
+        "subtitulo": "Fill in the fields and save",
+        "siglaPlaceholder": "SEME",
+        "nomePlaceholder": "Municipal Department of…",
+        "responsavelPlaceholder": "Owner name",
+        "contatoLabel": "Contact e-mail",
+        "contatoPlaceholder": "sector@riobranco.ac.gov.br",
+        "avisoHistorico": "Records are never permanently deleted — deletion converts them to Inactive or Blocked, preserving history.",
+        "cancelar": "Cancel",
+        "salvar": "Save",
+        "erroSalvar": "Could not save. Check the required fields and the e-mail."
+      }
+    },
     "dashboard": {
       "carregando": "Loading…",
       "titulo": "Administrative panel",

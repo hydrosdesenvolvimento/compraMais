@@ -21,6 +21,15 @@
       "malote": "SEI Package",
       "privacidade": "Privacy",
       "lgpd": "LGPD Requests",
+      "fornecedores": "Suppliers",
+      "credenciamento": "Accreditation",
+      "analiseDocumental": "Document Review",
+      "distribuicao": "Distribution",
+      "cadastroReserva": "Reserve List",
+      "desistencias": "Withdrawals",
+      "secretarias": "Departments",
+      "setoresIndustriais": "Industrial Sectors",
+      "tiposArquivos": "File Types",
       "perfis": "Screens by role",
       "contestacao": "Disputes"
     },
@@ -160,13 +169,95 @@
   "admin": {
     "perfis": {
       "titulo": "Screen access by role",
-      "subtitulo": "Choose which Admin Panel screens each role can see. The Administrator sees them all.",
+      "subtitulo": "Choose which Admin Panel screens each role can see. The Administrator's own access is editable too, but they never lose this screen.",
       "colPerfil": "Role",
       "superusuario": "sees all",
       "customizado": "customized",
       "salvar": "Save",
       "salvo": "Visibility updated.",
       "erro": "Could not save. Check your permissions."
+    },
+    "emConstrucao": {
+      "subtitulo": "Screen under construction.",
+      "corpo": "This feature is not implemented yet. The item already appears in the menu and in Screen access by role."
+    },
+    "fornecedores": {
+      "titulo": "Supplier Management",
+      "subtitulo": "Local companies registered on the platform.",
+      "buscaPlaceholder": "Search by tax ID or legal name…",
+      "buscaAriaLabel": "Search suppliers",
+      "novoFornecedor": "New supplier",
+      "novoFornecedorIndisponivel": "Registration is done by the supplier itself (self-registration).",
+      "filtros": "Filters",
+      "ordenar": "Sort",
+      "exportar": "Export",
+      "ordenarPor": "Sort by",
+      "ordenacaoPadrao": "Most recent",
+      "direcao": { "asc": "Ascending", "desc": "Descending" },
+      "capProdutivaIndisponivel": "Capacity is declared per notice (not a supplier attribute).",
+      "filtroStatusTodos": "All statuses",
+      "filtroSituacaoTodas": "All registration states",
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load suppliers. Check your permissions.",
+      "vazioTitulo": "No suppliers found",
+      "vazioDica": "Adjust the search or filters to see other results.",
+      "verDetalhes": "View details",
+      "fechar": "Close",
+      "detalheTitulo": "Supplier details",
+      "contatoTitulo": "Contact details (editable)",
+      "salvarContato": "Save contact",
+      "contatoSalvo": "Contact updated.",
+      "erroSalvarContato": "Could not save. Check the fields.",
+      "sincronizar": "Sync with Receita",
+      "sincronizando": "Syncing…",
+      "nuncaSincronizado": "Never synced",
+      "paginacaoInfo": "Showing {{de}}–{{ate}} of {{total}} suppliers",
+      "irParaPagina": "Go to page {{n}}",
+      "campos": {
+        "cnpj": "Tax ID (CNPJ)",
+        "razaoSocial": "Legal name",
+        "nomeFantasia": "Trade name",
+        "porte": "Company size",
+        "cnaePrincipal": "Primary CNAE",
+        "capProdutiva": "Prod. capacity",
+        "cnaes": "CNAEs",
+        "situacao": "Registration status",
+        "status": "Status",
+        "telefone": "Phone",
+        "sincronizadoEm": "Last sync",
+        "acoes": "Actions"
+      },
+      "acao": {
+        "ver": "View details",
+        "editar": "Edit contact",
+        "bloquearIndisponivel": "Debt-based blocking is handled in the accreditation module (RN002)."
+      },
+      "endereco": {
+        "logradouro": "Street",
+        "numero": "Number",
+        "bairro": "District",
+        "cidade": "City",
+        "uf": "State",
+        "cep": "ZIP code"
+      },
+      "status": {
+        "requerente": "Applicant",
+        "pendente_analise": "Pending review",
+        "credenciado": "Accredited",
+        "apto": "Eligible",
+        "em_correcao": "Under correction"
+      },
+      "situacao": {
+        "ativa": "Active",
+        "baixada": "Closed",
+        "inapta": "Unfit",
+        "suspensa": "Suspended"
+      },
+      "sincResultado": {
+        "sucesso": "Data updated successfully.",
+        "revisao": "Data updated — status requires CPL review.",
+        "erro": "Receita unavailable — current data preserved."
+      }
     },
     "dashboard": {
       "carregando": "Loading…",

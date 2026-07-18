@@ -21,6 +21,15 @@
       "malote": "Valija SEI",
       "privacidade": "Privacidad",
       "lgpd": "Solicitudes LGPD",
+      "fornecedores": "Proveedores",
+      "credenciamento": "Acreditación",
+      "analiseDocumental": "Análisis Documental",
+      "distribuicao": "Distribución",
+      "cadastroReserva": "Lista de Reserva",
+      "desistencias": "Desistimientos",
+      "secretarias": "Secretarías",
+      "setoresIndustriais": "Sectores Industriales",
+      "tiposArquivos": "Tipos de Archivo",
       "perfis": "Pantallas por perfil",
       "contestacao": "Impugnaciones"
     },
@@ -160,13 +169,95 @@
   "admin": {
     "perfis": {
       "titulo": "Administración de pantallas por perfil",
-      "subtitulo": "Defina qué pantallas del Panel Admin ve cada rol. El Administrador las ve todas.",
+      "subtitulo": "Defina qué pantallas del Panel Admin ve cada rol. Los permisos del Administrador también son editables, pero nunca pierde el acceso a esta pantalla.",
       "colPerfil": "Perfil (rol)",
       "superusuario": "ve todas",
       "customizado": "personalizado",
       "salvar": "Guardar",
       "salvo": "Visibilidad actualizada.",
       "erro": "No se pudo guardar. Verifique sus permisos."
+    },
+    "emConstrucao": {
+      "subtitulo": "Pantalla en construcción.",
+      "corpo": "Esta funcionalidad aún no está implementada. El elemento ya aparece en el menú y en la Administración de pantallas por perfil."
+    },
+    "fornecedores": {
+      "titulo": "Gestión de Proveedores",
+      "subtitulo": "Empresas locales registradas en la plataforma.",
+      "buscaPlaceholder": "Buscar por CNPJ o razón social…",
+      "buscaAriaLabel": "Buscar proveedores",
+      "novoFornecedor": "Nuevo proveedor",
+      "novoFornecedorIndisponivel": "El registro lo realiza el propio proveedor (autorregistro).",
+      "filtros": "Filtros",
+      "ordenar": "Ordenar",
+      "exportar": "Exportar",
+      "ordenarPor": "Ordenar por",
+      "ordenacaoPadrao": "Más recientes",
+      "direcao": { "asc": "Ascendente", "desc": "Descendente" },
+      "capProdutivaIndisponivel": "La capacidad se declara por edicto (no es un atributo del proveedor).",
+      "filtroStatusTodos": "Todos los estados",
+      "filtroSituacaoTodas": "Todas las situaciones",
+      "carregando": "Cargando…",
+      "erroCarregar": "No se pudieron cargar los proveedores. Verifique sus permisos.",
+      "vazioTitulo": "No se encontraron proveedores",
+      "vazioDica": "Ajuste la búsqueda o los filtros para ver otros resultados.",
+      "verDetalhes": "Ver detalles",
+      "fechar": "Cerrar",
+      "detalheTitulo": "Detalles del proveedor",
+      "contatoTitulo": "Datos de contacto (editables)",
+      "salvarContato": "Guardar contacto",
+      "contatoSalvo": "Contacto actualizado.",
+      "erroSalvarContato": "No se pudo guardar. Verifique los campos.",
+      "sincronizar": "Sincronizar con Receita",
+      "sincronizando": "Sincronizando…",
+      "nuncaSincronizado": "Nunca sincronizado",
+      "paginacaoInfo": "Mostrando {{de}}–{{ate}} de {{total}} proveedores",
+      "irParaPagina": "Ir a la página {{n}}",
+      "campos": {
+        "cnpj": "CNPJ",
+        "razaoSocial": "Razón social",
+        "nomeFantasia": "Nombre comercial",
+        "porte": "Tamaño",
+        "cnaePrincipal": "CNAE principal",
+        "capProdutiva": "Cap. productiva",
+        "cnaes": "CNAEs",
+        "situacao": "Situación registral",
+        "status": "Estado",
+        "telefone": "Teléfono",
+        "sincronizadoEm": "Última sincronización",
+        "acoes": "Acciones"
+      },
+      "acao": {
+        "ver": "Ver detalles",
+        "editar": "Editar contacto",
+        "bloquearIndisponivel": "El bloqueo por morosidad se realiza en el módulo de acreditación (RN002)."
+      },
+      "endereco": {
+        "logradouro": "Dirección",
+        "numero": "Número",
+        "bairro": "Barrio",
+        "cidade": "Ciudad",
+        "uf": "Estado",
+        "cep": "Código postal"
+      },
+      "status": {
+        "requerente": "Solicitante",
+        "pendente_analise": "Pendiente de análisis",
+        "credenciado": "Acreditado",
+        "apto": "Apto",
+        "em_correcao": "En corrección"
+      },
+      "situacao": {
+        "ativa": "Activa",
+        "baixada": "Dada de baja",
+        "inapta": "No apta",
+        "suspensa": "Suspendida"
+      },
+      "sincResultado": {
+        "sucesso": "Datos actualizados con éxito.",
+        "revisao": "Datos actualizados — la situación requiere revisión de la CPL.",
+        "erro": "Receita no disponible — datos actuales preservados."
+      }
     },
     "dashboard": {
       "carregando": "Cargando…",

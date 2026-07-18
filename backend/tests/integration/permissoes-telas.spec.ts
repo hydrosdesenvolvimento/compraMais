@@ -19,17 +19,18 @@ describe('permissoes/telas — visibilidade por papel', () => {
     expect(res.statusCode).toBe(200);
     const body = res.json() as { papel: string; telas: string[] };
     expect(body.papel).toBe('cpl');
-    expect(body.telas).toEqual(['painel', 'covalidacao', 'contestacoes', 'malote']);
+    expect(body.telas).toEqual(['editais', 'credenciamento', 'analiseDocumental']);
     await app.close();
   });
 
-  it('administrador é superusuário: /me lista todas as telas, inclusive perfis/usuarios/catalogos', async () => {
+  it('administrador: /me lista as telas de configuração do admin (perfis/usuarios/secretarias), não as operacionais', async () => {
     const app = await buildServer();
     const res = await app.inject({ method: 'GET', url: '/permissoes/telas/me', headers: comoPapel('administrador') });
     const body = res.json() as { telas: string[] };
     expect(body.telas).toContain('perfis');
     expect(body.telas).toContain('usuarios');
-    expect(body.telas).toContain('catalogos');
+    expect(body.telas).toContain('secretarias');
+    expect(body.telas).not.toContain('painel'); // não é mais superusuário "vê tudo"
     await app.close();
   });
 
@@ -80,13 +81,27 @@ describe('permissoes/telas — visibilidade por papel', () => {
     await app.close();
   });
 
-  it('PUT recusa papel não configurável (administrador) e tela desconhecida → 422', async () => {
+  it('PUT recusa papel não configurável (titular) e tela desconhecida → 422', async () => {
     const app = await buildServer();
     const admin = comoPapel('administrador', { userId: 'adm-1' });
-    const r1 = await app.inject({ method: 'PUT', url: '/permissoes/telas/administrador', headers: admin, payload: { telas: ['painel'] } });
+    const r1 = await app.inject({ method: 'PUT', url: '/permissoes/telas/titular', headers: admin, payload: { telas: ['painel'] } });
     expect(r1.statusCode).toBe(422);
     const r2 = await app.inject({ method: 'PUT', url: '/permissoes/telas/cpl', headers: admin, payload: { telas: ['inexistente'] } });
     expect(r2.statusCode).toBe(422);
+    await app.close();
+  });
+
+  it('Administrador pode redefinir as próprias telas, mas `perfis` permanece (anti-lockout)', async () => {
+    const app = await buildServer();
+    const admin = comoPapel('administrador', { userId: 'adm-1' });
+    const put = await app.inject({ method: 'PUT', url: '/permissoes/telas/administrador', headers: admin, payload: { telas: ['malote'] } });
+    expect(put.statusCode).toBe(200);
+    const telas = (put.json() as { telas: string[] }).telas;
+    expect(telas).toContain('malote');
+    expect(telas).toContain('perfis');
+
+    const me = await app.inject({ method: 'GET', url: '/permissoes/telas/me', headers: admin });
+    expect((me.json() as { telas: string[] }).telas).toEqual(['malote', 'perfis']);
     await app.close();
   });
 });

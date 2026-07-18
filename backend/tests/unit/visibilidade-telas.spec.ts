@@ -8,12 +8,15 @@ import { TELAS_ADMIN, VISIBILIDADE_PADRAO, telasPadraoDoPapel } from '../../src/
 
 const ADMIN = { userId: 'admin-1' };
 
-describe('tela-admin — política padrão (derivada dos UCs)', () => {
-  it('administrador é superusuário: vê todas as telas', () => {
-    expect(telasPadraoDoPapel('administrador')).toEqual([...TELAS_ADMIN]);
+describe('tela-admin — política padrão (derivada dos papéis)', () => {
+  it('administrador tem um conjunto próprio de telas de configuração (não mais "todas")', () => {
+    expect(telasPadraoDoPapel('administrador')).toEqual(VISIBILIDADE_PADRAO.administrador);
+    expect(telasPadraoDoPapel('administrador')).toContain('perfis');
+    expect(telasPadraoDoPapel('administrador')).not.toContain('painel');
   });
-  it('papéis internos veem só as telas dos seus UCs', () => {
+  it('papéis internos veem só as telas do seu fluxo', () => {
     expect(telasPadraoDoPapel('cpl')).toEqual(VISIBILIDADE_PADRAO.cpl);
+    expect(telasPadraoDoPapel('smga')).toEqual(VISIBILIDADE_PADRAO.smga);
     expect(telasPadraoDoPapel('auditor')).toEqual(['auditoria']);
     expect(telasPadraoDoPapel('dpo')).toEqual(['lgpd']);
   });
@@ -22,11 +25,11 @@ describe('tela-admin — política padrão (derivada dos UCs)', () => {
     expect(telasPadraoDoPapel('procurador')).toEqual([]);
     expect(telasPadraoDoPapel('rei')).toEqual([]);
   });
-  it('telas exclusivas do admin não estão no padrão de nenhum papel configurável', () => {
+  it('telas de configuração exclusivas do admin não estão no padrão de nenhum outro papel', () => {
+    const soAdmin = ['secretarias', 'setoresIndustriais', 'tiposArquivos', 'usuarios', 'perfis'];
     for (const papel of Object.keys(VISIBILIDADE_PADRAO) as Array<keyof typeof VISIBILIDADE_PADRAO>) {
-      expect(VISIBILIDADE_PADRAO[papel]).not.toContain('catalogos');
-      expect(VISIBILIDADE_PADRAO[papel]).not.toContain('usuarios');
-      expect(VISIBILIDADE_PADRAO[papel]).not.toContain('perfis');
+      if (papel === 'administrador') continue;
+      for (const tela of soAdmin) expect(VISIBILIDADE_PADRAO[papel]).not.toContain(tela);
     }
   });
 });
@@ -40,27 +43,34 @@ describe('GerirVisibilidadeTelas', () => {
 
   it('telasDoPapel usa o padrão quando nunca customizado', async () => {
     expect(await gerir.telasDoPapel('cpl')).toEqual(VISIBILIDADE_PADRAO.cpl);
-    expect(await gerir.telasDoPapel('administrador')).toEqual([...TELAS_ADMIN]);
+    expect(await gerir.telasDoPapel('administrador')).toEqual(VISIBILIDADE_PADRAO.administrador);
   });
 
   it('definir persiste, normaliza (ordem do catálogo + dedup) e emite VisibilidadeTelasAlterada com diff', async () => {
     let evento: { adicionadas: unknown; removidas: unknown } | null = null;
     bus.subscribe('VisibilidadeTelasAlterada', async (e) => { evento = e.payload as never; });
-    // fora de ordem e com duplicata; 'auditoria' é nova para o cpl, 'malote' some
-    const salvo = await gerir.definir('cpl', ['malote', 'painel', 'painel', 'auditoria', 'covalidacao', 'contestacoes'], ADMIN);
-    // some 'malote'? não — o alvo inclui malote. Vamos testar remoção separadamente; aqui checa ordem/dedup.
-    expect(salvo).toEqual(TELAS_ADMIN.filter((k) => ['malote', 'painel', 'auditoria', 'covalidacao', 'contestacoes'].includes(k)));
-    // painel aparece uma vez só (dedup)
-    expect(salvo.filter((k) => k === 'painel')).toHaveLength(1);
+    // fora de ordem e com duplicata; 'auditoria' é nova para o cpl
+    const salvo = await gerir.definir('cpl', ['malote', 'editais', 'editais', 'auditoria', 'contestacoes'], ADMIN);
+    expect(salvo).toEqual(TELAS_ADMIN.filter((k) => ['malote', 'editais', 'auditoria', 'contestacoes'].includes(k)));
+    expect(salvo.filter((k) => k === 'editais')).toHaveLength(1); // dedup
     expect(evento).not.toBeNull();
     expect((evento as unknown as { adicionadas: string[] }).adicionadas).toContain('auditoria');
-    // persistido: telasDoPapel agora reflete o override
-    expect(await gerir.telasDoPapel('cpl')).toEqual(salvo);
+    expect(await gerir.telasDoPapel('cpl')).toEqual(salvo); // override reflete
   });
 
-  it('definir com conjunto vazio zera as telas do papel (customizado ≠ padrão)', async () => {
+  it('definir com conjunto vazio zera as telas de um papel sem obrigatórias', async () => {
     await gerir.definir('leitura', [], ADMIN);
     expect(await gerir.telasDoPapel('leitura')).toEqual([]);
+  });
+
+  it('administrador é configurável, mas nunca perde `perfis` (anti-lockout)', async () => {
+    const salvo = await gerir.definir('administrador', ['malote'], ADMIN);
+    expect(salvo).toContain('perfis');
+    expect(salvo).toContain('malote');
+    // mesmo pedindo o esvaziamento total, `perfis` permanece
+    const zerado = await gerir.definir('administrador', [], ADMIN);
+    expect(zerado).toEqual(['perfis']);
+    expect(await gerir.telasDoPapel('administrador')).toEqual(['perfis']);
   });
 
   it('não emite evento quando o conjunto não muda', async () => {
@@ -70,23 +80,28 @@ describe('GerirVisibilidadeTelas', () => {
     expect(emitiu).toBe(false);
   });
 
-  it('recusa papel não configurável (administrador/titular) e tela desconhecida', async () => {
-    await expect(gerir.definir('administrador', ['painel'], ADMIN)).rejects.toBeInstanceOf(PapelNaoConfiguravel);
+  it('recusa papel não configurável (externo) e tela desconhecida', async () => {
     await expect(gerir.definir('titular', ['painel'], ADMIN)).rejects.toBeInstanceOf(PapelNaoConfiguravel);
+    await expect(gerir.definir('procurador', ['painel'], ADMIN)).rejects.toBeInstanceOf(PapelNaoConfiguravel);
     await expect(gerir.definir('cpl', ['inexistente'], ADMIN)).rejects.toBeInstanceOf(TelaDesconhecida);
   });
 
-  it('matriz expõe administrador não-editável + papéis configuráveis com flag customizado', async () => {
+  it('matriz expõe todos os papéis configuráveis (inclusive admin editável) com flags e obrigatórias', async () => {
     await gerir.definir('smga', ['painel'], ADMIN);
     const m = await gerir.matriz();
     expect(m.telas).toEqual([...TELAS_ADMIN]);
+
     const admin = m.linhas.find((l) => l.papel === 'administrador')!;
-    expect(admin.editavel).toBe(false);
-    expect(admin.telasVisiveis).toEqual([...TELAS_ADMIN]);
+    expect(admin.editavel).toBe(true);
+    expect(admin.obrigatorias).toEqual(['perfis']);
+    expect(admin.telasVisiveis).toEqual(VISIBILIDADE_PADRAO.administrador);
+
     const smga = m.linhas.find((l) => l.papel === 'smga')!;
     expect(smga.editavel).toBe(true);
     expect(smga.customizado).toBe(true);
     expect(smga.telasVisiveis).toEqual(['painel']);
+    expect(smga.obrigatorias).toEqual([]);
+
     const cpl = m.linhas.find((l) => l.papel === 'cpl')!;
     expect(cpl.customizado).toBe(false);
     expect(cpl.telasVisiveis).toEqual(VISIBILIDADE_PADRAO.cpl);

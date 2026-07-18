@@ -111,8 +111,9 @@ export interface UsuarioInternoView {
 }
 /** Telas do Painel Admin visíveis ao papel do próprio requisitante (GET /permissoes/telas/me). */
 export interface TelasVisiveisView { papel: string; telas: string[] }
-/** Uma linha da matriz de "telas por perfil": o papel, suas telas visíveis e se é editável/customizado. */
-export interface LinhaMatrizTelas { papel: string; telasVisiveis: string[]; editavel: boolean; customizado: boolean }
+/** Uma linha da matriz de "telas por perfil": o papel, suas telas visíveis, flags de estado e as telas
+ *  obrigatórias (não removíveis — anti-lockout, ex.: `perfis` do administrador). */
+export interface LinhaMatrizTelas { papel: string; telasVisiveis: string[]; editavel: boolean; customizado: boolean; obrigatorias: string[] }
 /** Matriz completa (catálogo de telas + linha por papel) — GET /permissoes/telas (Administrador). */
 export interface MatrizTelasView { telas: string[]; linhas: LinhaMatrizTelas[] }
 /** UC021 — opção de cargo do seletor (rótulo → papel RBAC efetivo). */
@@ -150,6 +151,22 @@ export interface FornecedorPerfil {
   origem: 'oficial' | 'manual';
   status: string; sincronizadoEm: string | null;
   nomeFantasia?: string; telefone?: string; endereco?: EnderecoView; cnaes: CnaeView[];
+}
+
+/** Painel Admin · Gestão de Fornecedores — item da listagem (read model). */
+export interface FornecedorResumoView {
+  id: string; cnpj: string; razaoSocial: string; nomeFantasia?: string; porte: string;
+  cnaePrincipal: string | null;
+  situacao: 'ativa' | 'baixada' | 'inapta' | 'suspensa';
+  status: string; sincronizadoEm: string | null;
+}
+export interface PaginaFornecedoresView {
+  itens: FornecedorResumoView[]; total: number; pagina: number; tamanho: number;
+}
+export interface FiltroFornecedoresView {
+  busca?: string; status?: string; situacao?: string;
+  ordenarPor?: 'cnpj' | 'razaoSocial' | 'porte' | 'status'; direcao?: 'asc' | 'desc';
+  pagina?: number; tamanho?: number;
 }
 
 export const api = {
@@ -191,6 +208,25 @@ export const api = {
 
   // Painel admin
   dashboardAdmin: () => get<Funil>('/admin/dashboard'),
+
+  // Painel Admin · Gestão de Fornecedores (Operação). RBAC smga/administrador no backend.
+  // Detalhe/edição de contato/sincronização reusam o caso de uso do portal (RN009/RF018).
+  fornecedoresAdminListar: (filtro: FiltroFornecedoresView = {}) => {
+    const p = new URLSearchParams();
+    if (filtro.busca) p.set('busca', filtro.busca);
+    if (filtro.status) p.set('status', filtro.status);
+    if (filtro.situacao) p.set('situacao', filtro.situacao);
+    if (filtro.ordenarPor) p.set('ordenarPor', filtro.ordenarPor);
+    if (filtro.direcao) p.set('direcao', filtro.direcao);
+    if (filtro.pagina) p.set('pagina', String(filtro.pagina));
+    if (filtro.tamanho) p.set('tamanho', String(filtro.tamanho));
+    const qs = p.toString();
+    return get<PaginaFornecedoresView>(`/admin/fornecedores${qs ? `?${qs}` : ''}`);
+  },
+  fornecedorAdminDetalhe: (id: string) => get<FornecedorPerfil>(`/admin/fornecedores/${id}`),
+  fornecedorAdminEditarContato: (id: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) =>
+    send<void>(`/admin/fornecedores/${id}/contato`, 'PATCH', patch),
+  fornecedorAdminSincronizar: (id: string) => send<SincronizacaoResultado>(`/admin/fornecedores/${id}/sincronizar`, 'POST'),
   gestaoEditais: (secretariaId: string, situacao: string) => get<EditalGestao[]>(`/gestao/editais?secretariaId=${encodeURIComponent(secretariaId)}&situacao=${encodeURIComponent(situacao)}`),
   criarEdital: (body: unknown) => send('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),

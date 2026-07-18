@@ -18,14 +18,13 @@ export function homeDoPapel(papel: string | undefined, telas: readonly string[] 
  * Guarda de rota do Painel Admin (beforeLoad). Enforça "telas por perfil" para sessões autenticadas:
  * - anônimo/demo (sem sessão): passa — o RBAC do backend é a salvaguarda real dos dados;
  * - fornecedor (titular/procurador): não acessa o admin → volta ao Início;
- * - administrador: superusuário, acessa tudo;
- * - demais papéis internos: só as telas visíveis (cache local); do contrário, vai à sua home admin.
+ * - papéis internos (inclusive administrador): só as telas visíveis ao papel (cache local); do
+ *   contrário, vai à sua home admin. O administrador sempre mantém `perfis` (anti-lockout no backend).
  */
 export function exigirTelaAdmin(tela: TelaAdminKey): void {
   const u = obterUsuario();
   if (!u) return;
   if (!ehPapelInterno(u.papel)) throw redirect({ to: '/inicio' });
-  if (u.papel === 'administrador') return;
   const telas = obterTelasAdmin();
   if (telas && !telas.includes(tela)) throw redirect({ to: homeAdmin(telas) });
 }

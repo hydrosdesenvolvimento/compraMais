@@ -3,15 +3,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { Card, Botao } from '../../design-system/components';
-import { TELAS_ADMIN } from '../../lib/telas-admin';
+import { TELAS_ADMIN, TELAS_ADMIN_ONLY, TELAS_OBRIGATORIAS_POR_PAPEL } from '../../lib/telas-admin';
 
 /**
- * "Administração de telas por perfil" (§15/AD-35). O Administrador (superusuário) define quais TELAS do
- * Painel Admin cada papel interno enxerga. A linha do `administrador` é somente-leitura (vê tudo — evita
- * auto-lockout). Cada alteração persiste no backend (PUT /permissoes/telas/:papel) e entra na trilha
- * (VisibilidadeTelasAlterada). Escritas exigem RBAC Administrador (403 sem o papel).
+ * "Administração de telas por perfil" (§15/AD-35). O Administrador define quais TELAS do Painel Admin cada
+ * papel interno enxerga — inclusive as suas próprias. Duas travas: `perfis` do administrador não pode ser
+ * desmarcada (anti-lockout) e as telas de configuração exclusivas do admin ficam bloqueadas para os demais
+ * papéis. Cada alteração persiste (PUT /permissoes/telas/:papel) e entra na trilha (VisibilidadeTelasAlterada);
+ * escritas exigem RBAC Administrador (403 sem o papel).
  */
 const rotuloTela: Record<string, string> = Object.fromEntries(TELAS_ADMIN.map((t) => [t.key, t.item.rotuloKey]));
+const ADMIN_ONLY = new Set<string>(TELAS_ADMIN_ONLY);
 
 export function AdministracaoTelas() {
   const { t } = useTranslation();
@@ -73,27 +75,34 @@ export function AdministracaoTelas() {
             <tbody>
               {linhas.map((linha) => {
                 const visiveis = conjuntoAtual(linha.papel);
+                const obrigatorias = new Set<string>(TELAS_OBRIGATORIAS_POR_PAPEL[linha.papel] ?? []);
                 return (
                   <tr key={linha.papel} data-cy={`linha-${linha.papel}`} style={{ borderBottom: '1px solid var(--divider)' }}>
                     <th scope="row" style={{ padding: '8px 6px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>
                       {rotuloPapel(linha.papel)}
-                      {!linha.editavel && <em style={{ color: 'var(--texto-suave)', fontWeight: 400 }}> · {t('admin.perfis.superusuario')}</em>}
                       {linha.editavel && linha.customizado && !sujo(linha.papel) && (
                         <em style={{ color: 'var(--texto-suave)', fontWeight: 400 }}> · {t('admin.perfis.customizado')}</em>
                       )}
                     </th>
-                    {telas.map((tela) => (
-                      <td key={tela} style={{ padding: '8px 6px', textAlign: 'center' }}>
-                        <input
-                          type="checkbox"
-                          data-cy={`chk-${linha.papel}-${tela}`}
-                          aria-label={`${rotuloPapel(linha.papel)} — ${t(rotuloTela[tela] ?? tela)}`}
-                          checked={visiveis.has(tela)}
-                          disabled={!linha.editavel}
-                          onChange={() => alternar(linha.papel, tela)}
-                        />
-                      </td>
-                    ))}
+                    {telas.map((tela) => {
+                      // `perfis` do admin é obrigatória (marcada e travada); telas de config do admin ficam
+                      // bloqueadas (desmarcadas) para os demais papéis.
+                      const obrigatoria = obrigatorias.has(tela);
+                      const bloqueadaOutros = linha.papel !== 'administrador' && ADMIN_ONLY.has(tela);
+                      const travada = obrigatoria || bloqueadaOutros;
+                      return (
+                        <td key={tela} style={{ padding: '8px 6px', textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            data-cy={`chk-${linha.papel}-${tela}`}
+                            aria-label={`${rotuloPapel(linha.papel)} — ${t(rotuloTela[tela] ?? tela)}`}
+                            checked={obrigatoria || (visiveis.has(tela) && !bloqueadaOutros)}
+                            disabled={!linha.editavel || travada}
+                            onChange={() => alternar(linha.papel, tela)}
+                          />
+                        </td>
+                      );
+                    })}
                     <td style={{ padding: '8px 6px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                       {linha.editavel && (
                         <Botao

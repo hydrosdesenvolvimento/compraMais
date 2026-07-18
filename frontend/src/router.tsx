@@ -29,6 +29,8 @@ import { ManterCatalogos } from './pages/admin/ManterCatalogos';
 import { GerirUsuarios } from './pages/admin/GerirUsuarios';
 import { GerarMalote } from './pages/admin/GerarMalote';
 import { AdministracaoTelas } from './pages/admin/AdministracaoTelas';
+import { EmConstrucao } from './pages/admin/EmConstrucao';
+import { Fornecedores } from './pages/admin/Fornecedores';
 import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
@@ -36,13 +38,16 @@ const DEMO_EDITAL_ID = 'demo-edital';
 const DEMO_SECRETARIA_ID = 'demo-secretaria';
 
 const ico = { width: 20, height: 20 };
+// Ordem = sidebar do protótipo `spec/Prototipo/portal-fornecedor.html` (Início, Editais, Meus
+// credenciamentos, Documentos, Demandas). Contestação/Procuradores/Privacidade não estão no protótipo
+// (ações do titular sob "Conta") e seguem ao final.
 const MENU_FORNECEDOR: ItemMenu[] = [
   { rotuloKey: 'common.nav.inicio', href: '/inicio', cy: 'nav-inicio', icone: <IconeInicio {...ico} /> },
   { rotuloKey: 'common.nav.editais', href: '/editais', cy: 'nav-editais', icone: <IconeEditais {...ico} /> },
   { rotuloKey: 'common.nav.credenciamentos', href: '/credenciamentos', cy: 'nav-credenciamentos', icone: <IconeCredenciamentos {...ico} /> },
-  { rotuloKey: 'common.nav.contestacao', href: '/contestacao', cy: 'nav-contestacao', icone: <IconeContestacao {...ico} /> },
   { rotuloKey: 'common.nav.documentos', href: '/documentos', cy: 'nav-documentos', icone: <IconeDocumentos {...ico} /> },
   { rotuloKey: 'common.nav.demandas', href: '/transparencia', cy: 'nav-demandas', icone: <IconeDemandas {...ico} /> },
+  { rotuloKey: 'common.nav.contestacao', href: '/contestacao', cy: 'nav-contestacao', icone: <IconeContestacao {...ico} /> },
   { rotuloKey: 'common.nav.procuradores', href: '/procuradores', cy: 'nav-procuradores', icone: <IconeUsuario {...ico} /> },
   { rotuloKey: 'common.nav.privacidade', href: '/privacidade', cy: 'nav-privacidade', icone: <IconeDocumentos {...ico} /> },
 ];
@@ -83,6 +88,18 @@ const rAdminLgpd = createRoute({ getParentRoute: () => adminLayout, path: '/admi
 const rAdminAudit = createRoute({ getParentRoute: () => adminLayout, path: '/admin/auditoria', beforeLoad: () => exigirTelaAdmin('auditoria'), component: ConsultaAuditoria });
 const rAdminPerfis = createRoute({ getParentRoute: () => adminLayout, path: '/admin/perfis', beforeLoad: () => exigirTelaAdmin('perfis'), component: AdministracaoTelas });
 
+// Telas novas do catálogo de perfis ainda sem UI própria — placeholder navegável ("Em construção").
+const rAdminFornecedores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/fornecedores', beforeLoad: () => exigirTelaAdmin('fornecedores'), component: Fornecedores });
+const rAdminEditaisOp = createRoute({ getParentRoute: () => adminLayout, path: '/admin/operacao/editais', beforeLoad: () => exigirTelaAdmin('editais'), component: () => <EmConstrucao tituloKey="common.nav.editais" /> });
+const rAdminCredenciamento = createRoute({ getParentRoute: () => adminLayout, path: '/admin/credenciamento', beforeLoad: () => exigirTelaAdmin('credenciamento'), component: () => <EmConstrucao tituloKey="common.nav.credenciamento" /> });
+const rAdminAnaliseDoc = createRoute({ getParentRoute: () => adminLayout, path: '/admin/analise-documental', beforeLoad: () => exigirTelaAdmin('analiseDocumental'), component: () => <EmConstrucao tituloKey="common.nav.analiseDocumental" /> });
+const rAdminDistribuicao = createRoute({ getParentRoute: () => adminLayout, path: '/admin/distribuicao', beforeLoad: () => exigirTelaAdmin('distribuicao'), component: () => <EmConstrucao tituloKey="common.nav.distribuicao" /> });
+const rAdminCadastroReserva = createRoute({ getParentRoute: () => adminLayout, path: '/admin/cadastro-reserva', beforeLoad: () => exigirTelaAdmin('cadastroReserva'), component: () => <EmConstrucao tituloKey="common.nav.cadastroReserva" /> });
+const rAdminDesistencias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/desistencias', beforeLoad: () => exigirTelaAdmin('desistencias'), component: () => <EmConstrucao tituloKey="common.nav.desistencias" /> });
+const rAdminSecretarias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/secretarias', beforeLoad: () => exigirTelaAdmin('secretarias'), component: () => <EmConstrucao tituloKey="common.nav.secretarias" /> });
+const rAdminSetores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/setores-industriais', beforeLoad: () => exigirTelaAdmin('setoresIndustriais'), component: () => <EmConstrucao tituloKey="common.nav.setoresIndustriais" /> });
+const rAdminTiposArquivos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/tipos-arquivos', beforeLoad: () => exigirTelaAdmin('tiposArquivos'), component: () => <EmConstrucao tituloKey="common.nav.tiposArquivos" /> });
+
 const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '*', beforeLoad: () => { throw redirect({ to: '/cadastro' }); } });
 
 const routeTree = rootRoute.addChildren([
@@ -90,7 +107,12 @@ const routeTree = rootRoute.addChildren([
   cadastroRoute,
   redefinirSenhaRoute,
   fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rMeusCredenciamentos, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rTitular]),
-  adminLayout.addChildren([rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos, rAdminUsuarios, rAdminLgpd, rAdminAudit, rAdminPerfis]),
+  adminLayout.addChildren([
+    rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos,
+    rAdminUsuarios, rAdminLgpd, rAdminAudit, rAdminPerfis,
+    rAdminFornecedores, rAdminEditaisOp, rAdminCredenciamento, rAdminAnaliseDoc, rAdminDistribuicao,
+    rAdminCadastroReserva, rAdminDesistencias, rAdminSecretarias, rAdminSetores, rAdminTiposArquivos,
+  ]),
   naoEncontrada,
 ]);
 

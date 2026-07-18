@@ -18,7 +18,7 @@ describe('menuAdminVisivel — filtro do menu admin por telas visíveis', () => 
 
 describe('homeAdmin — home do papel no Painel Admin', () => {
   it('retorna a href da primeira tela visível (ordem do catálogo)', () => {
-    expect(homeAdmin(['auditoria', 'covalidacao'])).toBe('/admin/covalidacao');
+    expect(homeAdmin(['auditoria', 'painel'])).toBe('/admin/dashboard'); // painel vem antes no catálogo
     expect(homeAdmin(['auditoria'])).toBe('/admin/auditoria');
   });
   it('cai no dashboard quando não há telas conhecidas ou o cache é nulo', () => {

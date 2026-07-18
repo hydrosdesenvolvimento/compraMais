@@ -30,10 +30,19 @@ export class FornecedorRepositoryPg implements FornecedorRepository {
   async porId(id: string): Promise<Fornecedor | null> { return this.buscarUm('id = $1', [id]); }
   async porCnpj(cnpj: Cnpj): Promise<Fornecedor | null> { return this.buscarUm('cnpj = $1', [cnpj.valor]); }
 
+  /** Todos os fornecedores, mais recentes primeiro — matéria-prima da listagem administrativa. */
+  async listar(): Promise<Fornecedor[]> {
+    const r = await this.pool.query('SELECT * FROM fornecedores ORDER BY register_date DESC');
+    return (r.rows as Record<string, unknown>[]).map((row) => this.reconstruir(row));
+  }
+
   private async buscarUm(where: string, params: unknown[]): Promise<Fornecedor | null> {
     const r = await this.pool.query(`SELECT * FROM fornecedores WHERE ${where} LIMIT 1`, params);
     const row = r.rows[0] as Record<string, unknown> | undefined;
-    if (!row) return null;
+    return row ? this.reconstruir(row) : null;
+  }
+
+  private reconstruir(row: Record<string, unknown>): Fornecedor {
     return Fornecedor.deEstado({
       meta: { id: String(row.id), registerDate: iso(row.register_date), updateDate: iso(row.update_date), lastUserUpdate: String(row.last_user_update) },
       cnpj: String(row.cnpj),

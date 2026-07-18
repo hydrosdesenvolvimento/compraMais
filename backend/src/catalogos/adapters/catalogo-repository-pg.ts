@@ -86,15 +86,16 @@ export class SetorCnaeRepositoryPg extends CatalogoPgBase<SetorCnae> {
   protected async upsert(s: SetorCnae): Promise<void> {
     const e = s.estado();
     await this.pool.query(
-      `INSERT INTO setores_cnae (id, codigo, descricao, situacao, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)
-       ON CONFLICT (id) DO UPDATE SET codigo=$2, descricao=$3, situacao=$4, update_date=$6, last_user_update=$7`,
-      [e.meta.id, e.codigo, e.descricao, e.situacao, e.meta.registerDate, e.meta.updateDate, e.meta.lastUserUpdate],
+      `INSERT INTO setores_cnae (id, codigo, descricao, categoria, situacao, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+       ON CONFLICT (id) DO UPDATE SET codigo=$2, descricao=$3, categoria=$4, situacao=$5, update_date=$7, last_user_update=$8`,
+      [e.meta.id, e.codigo, e.descricao, e.categoria ?? null, e.situacao, e.meta.registerDate, e.meta.updateDate, e.meta.lastUserUpdate],
     );
   }
   protected mapear(row: Record<string, unknown>): SetorCnae {
     return SetorCnae.deEstado({
-      meta: meta(row), codigo: String(row.codigo), descricao: String(row.descricao), situacao: row.situacao as SituacaoCatalogo,
+      meta: meta(row), codigo: String(row.codigo), descricao: String(row.descricao),
+      categoria: row.categoria == null ? undefined : String(row.categoria), situacao: row.situacao as SituacaoCatalogo,
     });
   }
 }

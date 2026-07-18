@@ -167,6 +167,46 @@
     }
   },
   "admin": {
+    "setoresIndustriais": {
+      "titulo": "Setores Industriais (CNAE)",
+      "subtitulo": "Códigos de atividade econômica aceitos",
+      "novoCadastro": "Novo setor",
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar os setores. Verifique suas permissões.",
+      "vazioTitulo": "Nenhum setor cadastrado",
+      "vazioDica": "Clique em \"Novo setor\" para adicionar o primeiro.",
+      "semCategoria": "—",
+      "fechar": "Fechar",
+      "campos": {
+        "codigo": "Código",
+        "descricao": "Descrição",
+        "categoria": "Categoria",
+        "status": "Situação",
+        "acoes": "Ações"
+      },
+      "status": {
+        "ativo": "Ativo",
+        "inativo": "Inativo"
+      },
+      "acao": {
+        "editar": "Editar setor",
+        "inativar": "Inativar setor",
+        "reativar": "Reativar setor"
+      },
+      "modal": {
+        "tituloCriar": "Novo setor industrial",
+        "tituloEditar": "Editar setor industrial",
+        "subtitulo": "Preencha os campos e salve",
+        "codigoPlaceholder": "0000-0/00",
+        "descricaoPlaceholder": "Descrição da atividade",
+        "categoriaLabel": "Categoria",
+        "categoriaPlaceholder": "Indústria têxtil, Alimentos…",
+        "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo, preservando os editais que já exigiram o código.",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "erroSalvar": "Não foi possível salvar. Verifique o código CNAE (7 dígitos) e a descrição."
+      }
+    },
     "perfis": {
       "titulo": "Administração de telas por perfil",
       "subtitulo": "Defina quais telas do Painel Admin cada papel enxerga. As permissões do Administrador também são editáveis, mas ele nunca perde o acesso a esta tela.",

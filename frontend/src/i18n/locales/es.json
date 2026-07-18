@@ -167,6 +167,46 @@
     }
   },
   "admin": {
+    "setoresIndustriais": {
+      "titulo": "Sectores Industriales (CNAE)",
+      "subtitulo": "Códigos de actividad económica aceptados",
+      "novoCadastro": "Nuevo sector",
+      "carregando": "Cargando…",
+      "erroCarregar": "No se pudieron cargar los sectores. Verifique sus permisos.",
+      "vazioTitulo": "Ningún sector registrado",
+      "vazioDica": "Haga clic en \"Nuevo sector\" para agregar el primero.",
+      "semCategoria": "—",
+      "fechar": "Cerrar",
+      "campos": {
+        "codigo": "Código",
+        "descricao": "Descripción",
+        "categoria": "Categoría",
+        "status": "Situación",
+        "acoes": "Acciones"
+      },
+      "status": {
+        "ativo": "Activo",
+        "inativo": "Inactivo"
+      },
+      "acao": {
+        "editar": "Editar sector",
+        "inativar": "Inactivar sector",
+        "reativar": "Reactivar sector"
+      },
+      "modal": {
+        "tituloCriar": "Nuevo sector industrial",
+        "tituloEditar": "Editar sector industrial",
+        "subtitulo": "Complete los campos y guarde",
+        "codigoPlaceholder": "0000-0/00",
+        "descricaoPlaceholder": "Descripción de la actividad",
+        "categoriaLabel": "Categoría",
+        "categoriaPlaceholder": "Industria textil, Alimentos…",
+        "avisoHistorico": "Los registros nunca se eliminan definitivamente — la eliminación los convierte en Inactivo, preservando los avisos que ya exigieron el código.",
+        "cancelar": "Cancelar",
+        "salvar": "Guardar",
+        "erroSalvar": "No se pudo guardar. Verifique el código CNAE (7 dígitos) y la descripción."
+      }
+    },
     "perfis": {
       "titulo": "Administración de pantallas por perfil",
       "subtitulo": "Defina qué pantallas del Panel Admin ve cada rol. Los permisos del Administrador también son editables, pero nunca pierde el acceso a esta pantalla.",

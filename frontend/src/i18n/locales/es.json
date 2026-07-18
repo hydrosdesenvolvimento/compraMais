@@ -232,6 +232,19 @@
         "editar": "Editar contacto",
         "bloquearIndisponivel": "El bloqueo por morosidad se realiza en el módulo de acreditación (RN002)."
       },
+      "modal": {
+        "tituloCriar": "Nuevo proveedor",
+        "subtituloCriar": "Complete los campos y guarde",
+        "tituloVer": "Detalles del proveedor",
+        "tituloEditar": "Editar proveedor",
+        "subtituloVerEditar": "Los datos oficiales son de solo lectura; edite los datos de contacto.",
+        "razaoPlaceholder": "Razón social de la empresa",
+        "avisoHistorico": "Los registros nunca se eliminan de forma definitiva — la eliminación los convierte en Inactivo o Bloqueado, preservando el historial.",
+        "cancelar": "Cancelar",
+        "salvar": "Guardar",
+        "editar": "Editar",
+        "erroCriar": "No se pudo registrar. Verifique el CNPJ y los campos obligatorios."
+      },
       "endereco": {
         "logradouro": "Dirección",
         "numero": "Número",

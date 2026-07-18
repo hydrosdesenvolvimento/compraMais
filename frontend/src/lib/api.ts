@@ -223,6 +223,8 @@ export const api = {
     const qs = p.toString();
     return get<PaginaFornecedoresView>(`/admin/fornecedores${qs ? `?${qs}` : ''}`);
   },
+  fornecedorAdminCriar: (body: { cnpj: string; razaoSocial: string; porte: string; cnaePrincipal: string; nomeFantasia?: string; telefone?: string }) =>
+    send<{ fornecedorId: string; origem: string; status: string }>('/admin/fornecedores', 'POST', body),
   fornecedorAdminDetalhe: (id: string) => get<FornecedorPerfil>(`/admin/fornecedores/${id}`),
   fornecedorAdminEditarContato: (id: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) =>
     send<void>(`/admin/fornecedores/${id}/contato`, 'PATCH', patch),

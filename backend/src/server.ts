@@ -18,6 +18,7 @@ import { FornecedorRepositoryPg } from './catalogo/adapters/fornecedor-repositor
 import type { FornecedorRepository } from './catalogo/application/fornecedor-repository.js';
 import { registrarRotasCadastro } from './catalogo/adapters/cadastro-controller.js';
 import { ListarFornecedores } from './catalogo/application/listar-fornecedores.js';
+import { CriarFornecedorAdmin } from './catalogo/application/criar-fornecedor-admin.js';
 import { registrarRotasFornecedoresAdmin } from './catalogo/adapters/fornecedores-admin-controller.js';
 import { ContaRepositoryMemory, type ContaRepository } from './shared/identity/conta-repository.js';
 import { ContaRepositoryPg } from './shared/identity/conta-repository-pg.js';
@@ -222,7 +223,7 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // Painel Admin · Gestão de Fornecedores (Operação): listagem RBAC (smga/administrador) + detalhe,
   // edição de contato (RN009) e re-sincronização (RF018) reusando o MESMO GerirConta do portal.
-  registrarRotasFornecedoresAdmin(app, { listar: new ListarFornecedores(fornecedores), conta });
+  registrarRotasFornecedoresAdmin(app, { listar: new ListarFornecedores(fornecedores), criar: new CriarFornecedorAdmin(fornecedores, bus), conta });
 
   // Catálogos base (UC020 / RF020-RF022): Secretarias + Setores/CNAE + Tipos de Documento. CRUD com
   // inativação lógica (RN015), mantido pelo Administrador. Durável em Postgres quando disponível (como

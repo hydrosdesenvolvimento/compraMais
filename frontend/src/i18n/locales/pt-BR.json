@@ -232,6 +232,19 @@
         "editar": "Editar contato",
         "bloquearIndisponivel": "Bloqueio por inadimplência é feito no módulo de credenciamento (RN002)."
       },
+      "modal": {
+        "tituloCriar": "Novo fornecedor",
+        "subtituloCriar": "Preencha os campos e salve",
+        "tituloVer": "Detalhes do fornecedor",
+        "tituloEditar": "Editar fornecedor",
+        "subtituloVerEditar": "Dados oficiais são somente leitura; edite os dados de contato.",
+        "razaoPlaceholder": "Razão social da empresa",
+        "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "editar": "Editar",
+        "erroCriar": "Não foi possível cadastrar. Verifique o CNPJ e os campos obrigatórios."
+      },
       "endereco": {
         "logradouro": "Logradouro",
         "numero": "Número",

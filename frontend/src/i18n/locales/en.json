@@ -232,6 +232,19 @@
         "editar": "Edit contact",
         "bloquearIndisponivel": "Debt-based blocking is handled in the accreditation module (RN002)."
       },
+      "modal": {
+        "tituloCriar": "New supplier",
+        "subtituloCriar": "Fill in the fields and save",
+        "tituloVer": "Supplier details",
+        "tituloEditar": "Edit supplier",
+        "subtituloVerEditar": "Official data is read-only; edit the contact details.",
+        "razaoPlaceholder": "Company legal name",
+        "avisoHistorico": "Records are never permanently deleted — deletion converts to Inactive or Blocked, preserving history.",
+        "cancelar": "Cancel",
+        "salvar": "Save",
+        "editar": "Edit",
+        "erroCriar": "Could not register. Check the tax ID and required fields."
+      },
       "endereco": {
         "logradouro": "Street",
         "numero": "Number",

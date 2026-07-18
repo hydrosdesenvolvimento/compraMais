@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { ListarFornecedores, FiltroFornecedores, OrdemFornecedores } from '../application/listar-fornecedores.js';
+import type { CriarFornecedorAdmin } from '../application/criar-fornecedor-admin.js';
 import type { GerirConta } from '../application/gerir-conta.js';
 import type { Papel } from '../../shared/identity/identity-provider.js';
 import type { SituacaoCadastral, StatusCredenciamento } from '../domain/fornecedor.js';
@@ -26,11 +27,29 @@ const ORDENS: readonly OrdemFornecedores[] = ['cnpj', 'razaoSocial', 'porte', 's
 
 export function registrarRotasFornecedoresAdmin(
   app: FastifyInstance,
-  deps: { listar: ListarFornecedores; conta: GerirConta },
+  deps: { listar: ListarFornecedores; criar: CriarFornecedorAdmin; conta: GerirConta },
 ): void {
   app.get('/admin/fornecedores', async (req, reply) => {
     if (!exigirPapel(req, reply, PERFIS)) return reply;
     return reply.send(await deps.listar.executar(lerFiltro(req)));
+  });
+
+  // Cadastro administrativo (manual): o servidor insere a empresa; sem login/consent (ver caso de uso).
+  app.post('/admin/fornecedores', async (req, reply) => {
+    const ator = exigirPapel(req, reply, PERFIS);
+    if (!ator) return reply;
+    const b = req.body as Record<string, unknown>;
+    try {
+      const out = await deps.criar.executar({
+        cnpjRaw: String(b.cnpjRaw ?? b.cnpj ?? ''),
+        razaoSocial: String(b.razaoSocial ?? ''),
+        porte: String(b.porte ?? ''),
+        cnaePrincipal: String(b.cnaePrincipal ?? ''),
+        nomeFantasia: b.nomeFantasia != null ? String(b.nomeFantasia) : undefined,
+        telefone: b.telefone != null ? String(b.telefone) : undefined,
+      }, { userId: ator.userId });
+      return reply.code(201).send(out);
+    } catch (e) { return falha(reply, e); }
   });
 
   app.get('/admin/fornecedores/:id', async (req, reply) => {
@@ -83,6 +102,9 @@ function lerFiltro(req: FastifyRequest): FiltroFornecedores {
 function falha(reply: FastifyReply, e: unknown): FastifyReply {
   const n = (e as Error).name;
   if (n === 'FornecedorNaoEncontrado') return reply.code(404).send({ codigo: n, mensagem: (e as Error).message });
-  if (n === 'CampoNaoEditavel') return reply.code(422).send({ codigo: n, mensagem: (e as Error).message });
+  if (n === 'CnpjJaCadastrado') return reply.code(409).send({ codigo: n, mensagem: (e as Error).message });
+  if (n === 'CampoNaoEditavel' || n === 'CnpjInvalido' || n === 'DadosFornecedorInvalidos' || n === 'SituacaoNaoApta') {
+    return reply.code(422).send({ codigo: n, mensagem: (e as Error).message });
+  }
   return reply.code(400).send({ codigo: n, mensagem: (e as Error).message });
 }

@@ -162,6 +162,7 @@ input[type="date"], input[type="number"], input[type="tel"], select, textarea {
 .pill-warn { background: var(--atencao-bg); color: var(--ambar-700); }
 .pill-error { background: var(--erro-bg); color: var(--erro); }
 .pill-info { background: var(--info-bg); color: var(--azul-700); }
+.pill-neutral { background: var(--cinza-100); color: var(--cinza-700); }
 .tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .03em; padding: 3px 8px; border-radius: 6px; background: var(--azul-50); color: var(--azul-700); }
 
 /* ---- Toasts (feedback efêmero das respostas do backend) ---- */

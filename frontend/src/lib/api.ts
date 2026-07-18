@@ -78,7 +78,7 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 // --- Tipos de leitura ---
 export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null; quantitativos: number }
 export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }
-export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: 'pendente' | 'aprovado' | 'reprovado'; dataValidade: string | null }
+export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: 'pendente' | 'aprovado' | 'reprovado'; dataValidade: string | null; motivoReprovacao: string | null }
 /** Resumo de um credenciamento do fornecedor (home) — estado + objeto/secretaria do edital vinculado. */
 export interface CredenciamentoResumoView {
   id: string; editalId: string; estado: 'iniciado' | 'aceito' | 'cancelado';

@@ -19,7 +19,7 @@ describe('permissoes/telas — visibilidade por papel', () => {
     expect(res.statusCode).toBe(200);
     const body = res.json() as { papel: string; telas: string[] };
     expect(body.papel).toBe('cpl');
-    expect(body.telas).toEqual(['editais', 'credenciamento', 'analiseDocumental']);
+    expect(body.telas).toEqual(['gestaoEditais', 'credenciamento', 'analiseDocumental']);
     await app.close();
   });
 

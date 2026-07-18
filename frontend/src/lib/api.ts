@@ -77,7 +77,7 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 
 // --- Tipos de leitura ---
 export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null; quantitativos: number }
-export interface EditalGestao { id: string; objeto: string; secretariaId: string; situacao: string }
+export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }
 export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: 'pendente' | 'aprovado' | 'reprovado'; dataValidade: string | null }
 /** Resumo de um credenciamento do fornecedor (home) — estado + objeto/secretaria do edital vinculado. */
 export interface CredenciamentoResumoView {
@@ -230,6 +230,9 @@ export const api = {
     send<void>(`/admin/fornecedores/${id}/contato`, 'PATCH', patch),
   fornecedorAdminSincronizar: (id: string) => send<SincronizacaoResultado>(`/admin/fornecedores/${id}/sincronizar`, 'POST'),
   gestaoEditais: (secretariaId: string, situacao: string) => get<EditalGestao[]>(`/gestao/editais?secretariaId=${encodeURIComponent(secretariaId)}&situacao=${encodeURIComponent(situacao)}`),
+  // Operação · Editais (Painel Admin) — QBE sem probe = todos os editais (todas as secretarias/situações),
+  // filtrável por situação. `size` amplo evita truncar a listagem operacional (paginação é client-side).
+  editaisOperacao: (situacao?: string) => get<EditalGestao[]>(`/gestao/editais?size=200${situacao ? `&situacao=${encodeURIComponent(situacao)}` : ''}`),
   criarEdital: (body: unknown) => send('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),

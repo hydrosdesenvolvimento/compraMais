@@ -14,7 +14,7 @@ import {
  * seguem no código para reuso — por isso continua no tipo, sem entrada em `TELAS_ADMIN`.
  */
 export type TelaAdminKey =
-  | 'painel' | 'fornecedores' | 'editais' | 'gestaoEditais' | 'credenciamento'
+  | 'painel' | 'fornecedores' | 'gestaoEditais' | 'credenciamento'
   | 'analiseDocumental' | 'distribuicao' | 'cadastroReserva' | 'desistencias'
   | 'malote' | 'contestacoes' | 'catalogos' | 'secretarias' | 'setoresIndustriais'
   | 'tiposArquivos' | 'usuarios' | 'lgpd' | 'auditoria' | 'perfis'
@@ -31,7 +31,6 @@ const ico = { width: 20, height: 20 };
 export const TELAS_ADMIN: Array<{ key: TelaAdminKey; item: ItemMenu }> = [
   { key: 'painel', item: { rotuloKey: 'common.nav.painel', href: '/admin/dashboard', cy: 'nav-admin', icone: <IconeInicio {...ico} /> } },
   { key: 'fornecedores', item: { rotuloKey: 'common.nav.fornecedores', href: '/admin/fornecedores', cy: 'nav-fornecedores', icone: <IconePredio {...ico} /> } },
-  { key: 'editais', item: { rotuloKey: 'common.nav.editais', href: '/admin/operacao/editais', cy: 'nav-editais-op', icone: <IconeEditais {...ico} /> } },
   { key: 'credenciamento', item: { rotuloKey: 'common.nav.credenciamento', href: '/admin/credenciamento', cy: 'nav-credenciamento', icone: <IconeCredenciamentos {...ico} /> } },
   { key: 'analiseDocumental', item: { rotuloKey: 'common.nav.analiseDocumental', href: '/admin/analise-documental', cy: 'nav-analise-documental', icone: <IconeDocumentos {...ico} /> } },
   { key: 'distribuicao', item: { rotuloKey: 'common.nav.distribuicao', href: '/admin/distribuicao', cy: 'nav-distribuicao', icone: <IconeDemandas {...ico} /> } },
@@ -75,9 +74,9 @@ export function menuAdminVisivel(visiveis: readonly string[]): ItemMenu[] {
 const TODAS = TELAS_ADMIN.map((t) => t.key);
 const PADRAO_POR_PAPEL: Record<string, TelaAdminKey[]> = {
   administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'perfis'],
-  cpl: ['editais', 'credenciamento', 'analiseDocumental'],
+  cpl: ['gestaoEditais', 'credenciamento', 'analiseDocumental'],
   smga: [
-    'painel', 'fornecedores', 'editais', 'credenciamento', 'analiseDocumental', 'distribuicao',
+    'painel', 'fornecedores', 'credenciamento', 'analiseDocumental', 'distribuicao',
     'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'lgpd',
   ],
   auditor: ['auditoria'],

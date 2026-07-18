@@ -18,7 +18,6 @@ import type { Papel } from '../../shared/identity/identity-provider.js';
 export const TELAS_ADMIN = [
   'painel',
   'fornecedores',
-  'editais',
   'credenciamento',
   'analiseDocumental',
   'distribuicao',
@@ -76,16 +75,16 @@ export function telasObrigatorias(papel: string): readonly TelaAdminKey[] {
 /**
  * Matriz PADRÃO (semente lógica) — usada quando o Administrador ainda não customizou um papel:
  * - administrador: Malote, Secretarias, Usuários, Setores Industriais, Tipos de Arquivos, Auditoria, Telas por perfil
- * - smga (Secretaria/Gestor) — operação: fornecedores, editais, credenciamento, análise documental,
+ * - smga (Secretaria/Gestor) — operação: fornecedores, credenciamento, análise documental,
  *   distribuição, cadastro de reserva, desistências, malote, contestações, gestão de editais, catálogos, LGPD
- * - cpl: editais, credenciamento, análise documental (fluxo novo)
+ * - cpl: gestão de editais, credenciamento, análise documental (fluxo novo)
  * - auditor: Auditoria; dpo: LGPD; leitura: Painel (visão macro, somente leitura)
  */
 export const VISIBILIDADE_PADRAO: Record<PapelConfiguravel, TelaAdminKey[]> = {
   administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'perfis'],
-  cpl: ['editais', 'credenciamento', 'analiseDocumental'],
+  cpl: ['gestaoEditais', 'credenciamento', 'analiseDocumental'],
   smga: [
-    'painel', 'fornecedores', 'editais', 'credenciamento', 'analiseDocumental', 'distribuicao',
+    'painel', 'fornecedores', 'credenciamento', 'analiseDocumental', 'distribuicao',
     'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'lgpd',
   ],
   auditor: ['auditoria'],

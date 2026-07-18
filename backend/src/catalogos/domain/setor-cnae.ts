@@ -1,10 +1,11 @@
 import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-base.js';
-import { ItemCatalogo, type SituacaoCatalogo, type CampoDiff, normalizarChave, exigirTexto } from './item-catalogo.js';
+import { ItemCatalogo, type SituacaoCatalogo, type CampoDiff, normalizarChave, exigirTexto, textoOpcional } from './item-catalogo.js';
 
 export interface SetorCnaeState {
   meta: MetadadosBase;
   codigo: string;
   descricao: string;
+  categoria?: string;
   situacao: SituacaoCatalogo;
 }
 
@@ -28,34 +29,37 @@ export class SetorCnae extends ItemCatalogo {
     meta: MetadadosBase,
     private _codigo: string,
     private _descricao: string,
+    private _categoria: string | undefined,
     situacao: SituacaoCatalogo,
   ) { super(meta, situacao); }
 
-  static criar(input: { id: string; codigo: string; descricao: string; userName?: string }): SetorCnae {
+  static criar(input: { id: string; codigo: string; descricao: string; categoria?: string; userName?: string }): SetorCnae {
     return new SetorCnae(
       EntidadeBase.metaNova(input.id, input.userName),
       exigirCnae(input.codigo),
       exigirTexto(input.descricao, 'descricao'),
+      textoOpcional(input.categoria),
       'ativo',
     );
   }
 
   static deEstado(s: SetorCnaeState): SetorCnae {
-    return new SetorCnae(s.meta, s.codigo, s.descricao, s.situacao);
+    return new SetorCnae(s.meta, s.codigo, s.descricao, s.categoria, s.situacao);
   }
 
   estado(): SetorCnaeState {
     return {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
-      codigo: this._codigo, descricao: this._descricao, situacao: this._situacao,
+      codigo: this._codigo, descricao: this._descricao, categoria: this._categoria, situacao: this._situacao,
     };
   }
 
   get codigo(): string { return this._codigo; }
   get descricao(): string { return this._descricao; }
+  get categoria(): string | undefined { return this._categoria; }
   chave(): string { return normalizarChave(this._codigo); }
 
-  editar(campos: Partial<{ codigo: string; descricao: string }>, userName: string): CampoDiff[] {
+  editar(campos: Partial<{ codigo: string; descricao: string; categoria: string }>, userName: string): CampoDiff[] {
     const diff: CampoDiff[] = [];
     if (campos.codigo !== undefined) {
       const novo = exigirCnae(campos.codigo);
@@ -64,6 +68,10 @@ export class SetorCnae extends ItemCatalogo {
     if (campos.descricao !== undefined) {
       const novo = exigirTexto(campos.descricao, 'descricao');
       if (novo !== this._descricao) { diff.push({ campo: 'descricao', antes: this._descricao, depois: novo }); this._descricao = novo; }
+    }
+    if (campos.categoria !== undefined) {
+      const novo = textoOpcional(campos.categoria);
+      if (novo !== this._categoria) { diff.push({ campo: 'categoria', antes: this._categoria, depois: novo }); this._categoria = novo; }
     }
     if (diff.length) this.marcarAtualizacao(userName);
     return diff;

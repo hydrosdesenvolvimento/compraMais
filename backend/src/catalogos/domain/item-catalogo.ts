@@ -76,3 +76,10 @@ export function emailOpcional(valor: string | undefined | null, campo: string): 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)) throw new EmailInvalido(campo);
   return t.toLowerCase();
 }
+
+/** Normaliza um texto **opcional** (só trim). Vazio → `undefined` (campo não informado). Preserva a
+ *  capitalização original — é um rótulo exibido, não uma chave. */
+export function textoOpcional(valor: string | undefined | null): string | undefined {
+  const t = (valor ?? '').trim();
+  return t || undefined;
+}

@@ -84,6 +84,16 @@ describe('Rotas de catálogos base (UC020 — HTTP)', () => {
     expect(ok.statusCode).toBe(201);
   });
 
+  it('setor com categoria opcional é persistido e devolvido na listagem (RF021)', async () => {
+    const criado = await app.inject({ method: 'POST', url: '/catalogos/setores-cnae', headers: admin, payload: { codigo: '1412601', descricao: 'Confecção de peças de vestuário', categoria: 'Indústria têxtil' } });
+    expect(criado.statusCode).toBe(201);
+    const { id } = criado.json() as { id: string };
+
+    const lista = await app.inject({ method: 'GET', url: '/catalogos/setores-cnae' });
+    const setor = (lista.json() as Array<{ id: string; codigo: string; categoria?: string }>).find((s) => s.id === id);
+    expect(setor).toMatchObject({ codigo: '1412601', categoria: 'Indústria têxtil' });
+  });
+
   it('tipo de documento com categoria inválida → 422', async () => {
     const r = await app.inject({ method: 'POST', url: '/catalogos/tipos-documento', headers: admin, payload: { nome: 'Contrato', formato: 'pdf', categoria: 'outra' } });
     expect(r.statusCode).toBe(422);

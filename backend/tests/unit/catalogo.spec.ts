@@ -57,6 +57,23 @@ describe('Catálogos base — domínio (UC020)', () => {
       expect(ok.codigo).toBe('1091101');
       expect(ok.chave()).toBe('1091101');
     });
+
+    it('categoria é opcional: vazio vira undefined, texto é preservado', () => {
+      expect(SetorCnae.criar({ id: 'c1', codigo: '1091101', descricao: 'Panificação' }).categoria).toBeUndefined();
+      expect(SetorCnae.criar({ id: 'c1', codigo: '1091101', descricao: 'Panificação', categoria: '  ' }).categoria).toBeUndefined();
+      const s = SetorCnae.criar({ id: 'c1', codigo: '1091101', descricao: 'Panificação', categoria: ' Alimentos ' });
+      expect(s.categoria).toBe('Alimentos');
+    });
+
+    it('editar troca categoria com diff (RF021)', () => {
+      const s = SetorCnae.criar({ id: 'c1', codigo: '1412601', descricao: 'Confecção', categoria: 'Têxtil' });
+      const diff = s.editar({ categoria: 'Indústria têxtil' }, 'admin1');
+      expect(diff.map((d) => d.campo)).toEqual(['categoria']);
+      expect(s.categoria).toBe('Indústria têxtil');
+      // limpar a categoria (texto vazio → undefined) também gera diff
+      expect(s.editar({ categoria: '' }, 'admin1').map((d) => d.campo)).toEqual(['categoria']);
+      expect(s.categoria).toBeUndefined();
+    });
   });
 
   describe('TipoDocumento (RF022)', () => {

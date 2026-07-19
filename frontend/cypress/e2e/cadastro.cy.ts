@@ -26,6 +26,7 @@ describe('Cadastro do fornecedor (US1) — CNPJ → QSA → endereço → CEP', 
   it('consulta o CNPJ e autopreenche razão social, porte, situação, QSA e endereço', () => {
     cy.intercept('POST', '/fornecedores/consulta-cnpj', { statusCode: 200, body: CNPJ_OK }).as('cnpj');
     cy.visit('/#/cadastro');
+    cy.get('[data-cy=aba-criar]').click(); // login é a aba padrão; abre "Criar conta"
     cy.get('[data-cy=cnpj]').type(CNPJ_TESTE);
     cy.get('[data-cy=consultar]').click();
     cy.wait('@cnpj');
@@ -43,6 +44,7 @@ describe('Cadastro do fornecedor (US1) — CNPJ → QSA → endereço → CEP', 
     cy.intercept('POST', '/fornecedores/consulta-cnpj', { statusCode: 200, body: CNPJ_OK });
     cy.intercept('GET', '/fornecedores/consulta-cep/*', { statusCode: 200, body: CEP_OK }).as('cep');
     cy.visit('/#/cadastro');
+    cy.get('[data-cy=aba-criar]').click(); // login é a aba padrão; abre "Criar conta"
     cy.get('[data-cy=cnpj]').type(CNPJ_TESTE);
     cy.get('[data-cy=consultar]').click();
     cy.get('[data-cy=cep]').clear().type('01001000');
@@ -55,6 +57,7 @@ describe('Cadastro do fornecedor (US1) — CNPJ → QSA → endereço → CEP', 
     cy.intercept('POST', '/fornecedores', { statusCode: 201, body: { fornecedorId: 'f1', status: 'requerente', origem: 'oficial' } }).as('cadastro');
     cy.intercept('POST', '/auth/login', { statusCode: 200, body: { token: 'jwt.mock', expiraEm: 3600, usuario: { userId: 'u1', papel: 'titular' } } }).as('login');
     cy.visit('/#/cadastro');
+    cy.get('[data-cy=aba-criar]').click(); // login é a aba padrão; abre "Criar conta"
     cy.get('[data-cy=cnpj]').type(CNPJ_TESTE);
     cy.get('[data-cy=consultar]').click();
     cy.get('[data-cy=email-cadastro]').type('lojista@empresa.com');
@@ -70,6 +73,7 @@ describe('Cadastro do fornecedor (US1) — CNPJ → QSA → endereço → CEP', 
   it('exibe fallback manual quando a Receita está indisponível (503)', () => {
     cy.intercept('POST', '/fornecedores/consulta-cnpj', { statusCode: 503, body: { frescor: 'indisponivel' } });
     cy.visit('/#/cadastro');
+    cy.get('[data-cy=aba-criar]').click(); // login é a aba padrão; abre "Criar conta"
     cy.get('[data-cy=cnpj]').type(CNPJ_TESTE);
     cy.get('[data-cy=consultar]').click();
     cy.get('[data-cy=preencher-manual]').should('be.visible');

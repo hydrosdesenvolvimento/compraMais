@@ -66,7 +66,9 @@ const inputEstilo: React.CSSProperties = { width: '100%', padding: '12px 14px', 
 export function AuthPanel() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [aba, setAba] = useState<'entrar' | 'criar'>('criar');
+  // Login é a aba principal (retorno de usuários já cadastrados é o caso comum); "Criar conta" fica
+  // a um clique de distância. O AuthLayout redireciona '/' → '/cadastro', mas o painel abre em "Entrar".
+  const [aba, setAba] = useState<'entrar' | 'criar'>('entrar');
   const [esqueci, setEsqueci] = useState(false);
   const [verSenha, setVerSenha] = useState(false);
   const [verSenhaCad, setVerSenhaCad] = useState(false);

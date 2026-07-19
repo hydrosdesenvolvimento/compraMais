@@ -606,6 +606,32 @@
         "atualizar": "Refresh",
         "vazio": "No packages found."
       }
+    },
+    "analiseDocumental": {
+      "migalha": "Operations · Document Review",
+      "titulo": "Document Review",
+      "tituloComplemento": "(co-validation)",
+      "subtitulo": "Approval or rejection with mandatory justification (RN003)",
+      "carregando": "Loading queue…",
+      "erroCarregar": "Could not load the review queue.",
+      "vazioTitulo": "No documents in the queue",
+      "vazioDica": "All reviews have been completed.",
+      "pendente": "Pending",
+      "enviadoEm": "sent on {{data}}",
+      "visualizar": "View document",
+      "reprovar": "Reject",
+      "aprovar": "Approve",
+      "toastAprovado": "Document from {{empresa}} approved.",
+      "toastReprovado": "Document from {{empresa}} rejected.",
+      "toastErro": "Could not record the decision.",
+      "modal": {
+        "titulo": "Reject document",
+        "label": "Rejection justification",
+        "placeholder": "Describe the reason (e.g., unreadable image, expired document, divergent data…). The supplier will see this justification.",
+        "aviso": "The justification is mandatory and is recorded in the audit trail (RN003).",
+        "cancelar": "Cancel",
+        "confirmar": "Confirm rejection"
+      }
     }
   },
   "erros": {

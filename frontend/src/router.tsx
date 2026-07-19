@@ -33,6 +33,7 @@ import { EmConstrucao } from './pages/admin/EmConstrucao';
 import { Fornecedores } from './pages/admin/Fornecedores';
 import { Secretarias } from './pages/admin/Secretarias';
 import { SetoresIndustriais } from './pages/admin/SetoresIndustriais';
+import { AnaliseDocumental } from './pages/admin/AnaliseDocumental';
 import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
@@ -92,7 +93,7 @@ const rAdminPerfis = createRoute({ getParentRoute: () => adminLayout, path: '/ad
 // Telas novas do catálogo de perfis ainda sem UI própria — placeholder navegável ("Em construção").
 const rAdminFornecedores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/fornecedores', beforeLoad: () => exigirTelaAdmin('fornecedores'), component: Fornecedores });
 const rAdminCredenciamento = createRoute({ getParentRoute: () => adminLayout, path: '/admin/credenciamento', beforeLoad: () => exigirTelaAdmin('credenciamento'), component: () => <EmConstrucao tituloKey="common.nav.credenciamento" /> });
-const rAdminAnaliseDoc = createRoute({ getParentRoute: () => adminLayout, path: '/admin/analise-documental', beforeLoad: () => exigirTelaAdmin('analiseDocumental'), component: () => <EmConstrucao tituloKey="common.nav.analiseDocumental" /> });
+const rAdminAnaliseDoc = createRoute({ getParentRoute: () => adminLayout, path: '/admin/analise-documental', beforeLoad: () => exigirTelaAdmin('analiseDocumental'), component: AnaliseDocumental });
 const rAdminDistribuicao = createRoute({ getParentRoute: () => adminLayout, path: '/admin/distribuicao', beforeLoad: () => exigirTelaAdmin('distribuicao'), component: () => <EmConstrucao tituloKey="common.nav.distribuicao" /> });
 const rAdminCadastroReserva = createRoute({ getParentRoute: () => adminLayout, path: '/admin/cadastro-reserva', beforeLoad: () => exigirTelaAdmin('cadastroReserva'), component: () => <EmConstrucao tituloKey="common.nav.cadastroReserva" /> });
 const rAdminDesistencias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/desistencias', beforeLoad: () => exigirTelaAdmin('desistencias'), component: () => <EmConstrucao tituloKey="common.nav.desistencias" /> });

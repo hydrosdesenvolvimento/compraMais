@@ -88,6 +88,8 @@ export interface CredenciamentoResumoView {
   criadoEm: string; atualizadoEm: string; // ISO-8601
 }
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
+/** Item da fila global da tela "Análise Documental" (covalidação) — inclui empresa e CNPJ resolvidos. */
+export interface AnaliseDocItem { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string; fornecedorId: string; empresa: string; cnpj: string | null }
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
 export interface Transparencia { editaisVigentes: number; secretarias: string[]; segmentos: string[] }
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
@@ -238,6 +240,8 @@ export const api = {
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),
   docsPendentes: (fid: string, params: URLSearchParams) => get<DocPendente[]>(`/fornecedores/${fid}/documentos/pendentes?${params.toString()}`),
+  // Tela "Análise Documental" (covalidação): fila global de pendentes de todos os fornecedores (RBAC CPL/SMGA).
+  filaAnalise: () => get<AnaliseDocItem[]>('/documentos/analise'),
   covalidar: (docId: string, body: unknown) => send(`/documentos/${docId}/covalidar`, 'POST', body),
   contestacoesDoEdital: (editalId: string) => get<ContestacaoView[]>(`/editais/${editalId}/contestacoes-cnae`),
   acatarContestacao: (id: string, novoCnaes: string[]) => send(`/contestacoes-cnae/${id}/acatar`, 'POST', { novoCnaes }),

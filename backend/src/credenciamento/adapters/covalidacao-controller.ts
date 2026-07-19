@@ -18,6 +18,14 @@ export function registrarRotasCovalidacao(app: FastifyInstance, deps: { covalida
     return reply.send(await deps.covalidar.buscarFila(id, { status, tipo }, paginacao));
   });
 
+  // Fila GLOBAL da tela "Análise Documental" (todos os fornecedores). Expõe pendentes de várias
+  // empresas — dado sensível de controle: só CPL/SMGA (mesmo RBAC do veredito); anônimo → 401, demais → 403.
+  app.get('/documentos/analise', async (req, reply) => {
+    const id = exigirPapel(req, reply, PERFIS_CPL);
+    if (!id) return reply;
+    return reply.send(await deps.covalidar.filaAnalise());
+  });
+
   app.post('/documentos/:docId/covalidar', async (req, reply) => {
     const id = exigirPapel(req, reply, PERFIS_CPL);
     if (!id) return reply;

@@ -16,6 +16,13 @@ export class DocumentoNaoEncontrado extends Error {
 export interface ItemFila { id: string; tipo: string; status: StatusDoc; enviadoEm: string }
 
 /**
+ * Item da fila GLOBAL de análise documental (tela "Análise Documental"): o veredito é por documento,
+ * mas a fila cruza todos os fornecedores. Além do documento, carrega a empresa e o CNPJ já resolvidos
+ * para exibição (o front não precisa de um segundo request por linha).
+ */
+export interface ItemFilaAnalise { id: string; tipo: string; status: StatusDoc; enviadoEm: string; fornecedorId: string; empresa: string; cnpj: string | null }
+
+/**
  * Caso de uso Covalidar (UC006 / RF004). A decisão é sempre humana (a CPL aciona este fluxo) — não há
  * aprovação automática de declaratórios; reprovação exige justificativa (RN003). Além do veredito por
  * documento, o **conjunto** aprovado promove o fornecedor a `credenciado` (UC006 passo 3) e qualquer
@@ -50,6 +57,27 @@ export class Covalidar {
       page,
     );
     return docs.map((d) => ({ id: d.id, tipo: d.tipo, status: d.status, enviadoEm: d.registerDate }));
+  }
+
+  /**
+   * Fila GLOBAL de análise documental (RF004 / tela "Análise Documental"): todos os documentos
+   * pendentes de covalidação, de TODOS os fornecedores, com a empresa e o CNPJ resolvidos para
+   * exibição. Junta o read model de documentos (probe só por `status: 'pendente'`, sem fornecedor) ao
+   * catálogo de fornecedores na aplicação — escala do MVP (a matéria-prima cabe em memória). Um documento
+   * sem fornecedor casado cai no fallback (o próprio id), nunca desaparece da fila. `size` amplo evita
+   * truncar a fila operacional (a paginação da tela é client-side).
+   */
+  async filaAnalise(): Promise<ItemFilaAnalise[]> {
+    const docs = await this.docs.buscarPorExemplo({ status: 'pendente' }, { page: 1, size: 500 });
+    const fornecedores = (await this.fornecedores?.listar()) ?? [];
+    const porId = new Map(fornecedores.map((f) => [f.id, f]));
+    return docs.map((d) => {
+      const f = porId.get(d.fornecedorId);
+      return {
+        id: d.id, tipo: d.tipo, status: d.status, enviadoEm: d.registerDate,
+        fornecedorId: d.fornecedorId, empresa: f?.razaoSocial ?? d.fornecedorId, cnpj: f?.cnpj.valor ?? null,
+      };
+    });
   }
 
   async aprovar(documentoId: string, analistaId: string, empresaId: string): Promise<void> {

@@ -625,6 +625,24 @@
     "malote": {
       "titulo": "Valija SEI",
       "subtitulo": "Consolide la documentación aprobada de un proveedor en un expediente ordenado (CNPJ → Personal → Anexos → Certificados) y optimizado para la carga en el SEI. La generación es asíncrona y durable; una pieza indivisible por encima del límite se señala para tratamiento manual.",
+      "novoMalote": "Generar valija",
+      "carregando": "Cargando valijas…",
+      "erroCarregar": "No se pudieron cargar las valijas.",
+      "vazioTitulo": "Aún no hay valijas",
+      "vazioDica": "Genere una valija a partir de la documentación aprobada de un proveedor.",
+      "campos": {
+        "fornecedor": "Proveedor",
+        "edital": "Convocatoria",
+        "status": "Estado",
+        "fragmentos": "Fragmentos",
+        "acoes": "Acciones"
+      },
+      "modal": {
+        "subtitulo": "El orden legal (CNPJ → Personal → Anexos → Certificados) y la fragmentación por el límite del SEI se aplican automáticamente en la generación.",
+        "fechar": "Cerrar",
+        "cancelar": "Cancelar",
+        "removerPeca": "Quitar pieza"
+      },
       "gerar": {
         "titulo": "Generar nueva valija",
         "fornecedorId": "ID del proveedor",

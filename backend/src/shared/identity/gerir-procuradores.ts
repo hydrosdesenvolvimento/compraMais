@@ -21,6 +21,8 @@ export class ProcuradorNaoEncontrado extends Error {
 export interface ProcuradorView {
   contaId: string;
   identificador: string;
+  /** Nome de exibição resolvido de `usuarios` pelo identificador; `null` quando o convidado não tem cadastro. */
+  nome: string | null;
   ativo: boolean;
   convidadoPor: string | null;
   desde: string;
@@ -37,6 +39,15 @@ export interface TitularDirectory {
 }
 
 /**
+ * Resolve nomes de exibição de procuradores a partir do identificador (e-mail) — fonte: `usuarios`.
+ * Procurador só convidado (ainda sem cadastro) não é retornado no mapa → a tela cai no identificador.
+ * O mapa é chaveado pelo identificador normalizado (minúsculas/trim).
+ */
+export interface DiretorioNomes {
+  nomesPorIdentificadores(identificadores: string[]): Promise<Map<string, string>>;
+}
+
+/**
  * Caso de uso: gestão de procuradores (UC019 / RN010, AD-30). Só o titular convida/lista/remove; cada
  * ação registra ator + empresa na trilha (AD-30). Um procurador que tente convidar/gerir é bloqueado
  * (ApenasTitularGere → 403). A remoção é lógica (append-only, RN015): a conta fica inativa, preservando o rastro.
@@ -46,6 +57,7 @@ export class GerirProcuradores {
     private readonly contas: ContaRepository,
     private readonly bus: EventBus,
     private readonly titularDir?: TitularDirectory,
+    private readonly nomesDir?: DiretorioNomes,
     private readonly now: () => string = () => new Date().toISOString(),
   ) {}
 
@@ -63,10 +75,19 @@ export class GerirProcuradores {
   /** UC019 passo 1: o titular abre "Procuradores" e vê os vínculos (ativos e o rastro dos removidos). */
   async listar(fornecedorId: string, titularContaId: string): Promise<ProcuradorView[]> {
     await this.exigirTitular(fornecedorId, titularContaId);
-    const contas = await this.contas.listarPorFornecedor(fornecedorId);
-    return contas
-      .filter((c) => c.papel === 'procurador')
-      .map((c) => ({ contaId: c.id, identificador: c.identificador, ativo: c.ativo, convidadoPor: c.convidadoPor, desde: c.registerDate }));
+    const procuradores = (await this.contas.listarPorFornecedor(fornecedorId)).filter((c) => c.papel === 'procurador');
+    // Resolve o nome de exibição em lote (evita N+1); ausentes ficam null e a tela cai no identificador.
+    const nomes = this.nomesDir
+      ? await this.nomesDir.nomesPorIdentificadores(procuradores.map((c) => c.identificador))
+      : new Map<string, string>();
+    return procuradores.map((c) => ({
+      contaId: c.id,
+      identificador: c.identificador,
+      nome: nomes.get(c.identificador.trim().toLowerCase()) ?? null,
+      ativo: c.ativo,
+      convidadoPor: c.convidadoPor,
+      desde: c.registerDate,
+    }));
   }
 
   async remover(fornecedorId: string, titularContaId: string, procuradorContaId: string): Promise<void> {

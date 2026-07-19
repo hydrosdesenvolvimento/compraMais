@@ -179,6 +179,19 @@ export async function buildServer(): Promise<FastifyInstance> {
       const u = await usuarioRepo.porId(userId);
       return u && u.papel === 'titular' && u.fornecedorId === fornecedorId ? { identificador: u.email } : null;
     },
+  }, {
+    // Nome de exibição do procurador (UC019): resolvido de `usuarios` pelo e-mail do convite. Quem foi
+    // só convidado e ainda não tem cadastro não é encontrado → a tela cai no identificador.
+    nomesPorIdentificadores: async (identificadores) => {
+      const mapa = new Map<string, string>();
+      for (const bruto of identificadores) {
+        const email = bruto.trim().toLowerCase();
+        if (mapa.has(email)) continue;
+        const u = await usuarioRepo.porEmail(email).catch(() => null);
+        if (u?.nome) mapa.set(email, u.nome);
+      }
+      return mapa;
+    },
   });
   registrarRotasIdentidade(app, { procuradores });
 

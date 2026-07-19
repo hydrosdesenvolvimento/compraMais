@@ -154,6 +154,8 @@ export interface CnaeView { codigoSubclasse: string; tipo: 'principal' | 'secund
 export interface ProcuradorView {
   contaId: string;
   identificador: string;
+  /** Nome de exibição resolvido de usuários cadastrados; `null` quando o convidado ainda não tem cadastro. */
+  nome: string | null;
   ativo: boolean;
   convidadoPor: string | null;
   desde: string;

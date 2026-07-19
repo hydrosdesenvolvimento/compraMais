@@ -980,11 +980,13 @@
       "identificadorPlaceholder": "nome@empresa.com",
       "enviar": "Convidar",
       "enviando": "Convidando…",
-      "erro": "Não foi possível convidar. Verifique os dados e tente novamente."
+      "erro": "Não foi possível convidar. Verifique os dados e tente novamente.",
+      "dica": "Enviaremos um convite para vincular o acesso à empresa."
     },
     "lista": {
       "titulo": "Procuradores ativos",
       "vazio": "Nenhum procurador vinculado ainda.",
+      "vazioDica": "Convide alguém pelo e-mail ou CPF para agir em nome da empresa.",
       "ativo": "Ativo",
       "removido": "Removido",
       "convidadoEm": "Vinculado em {{data}}",
@@ -992,7 +994,8 @@
       "removendo": "Removendo…"
     },
     "removidos": {
-      "titulo": "Histórico de remoções"
+      "titulo": "Histórico de remoções",
+      "subtitulo": "Registro imutável de acessos revogados, preservado para auditoria."
     },
     "estado": {
       "carregando": "Carregando procuradores…",

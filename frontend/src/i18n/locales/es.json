@@ -980,11 +980,13 @@
       "identificadorPlaceholder": "nombre@empresa.com",
       "enviar": "Invitar",
       "enviando": "Invitando…",
-      "erro": "No se pudo invitar. Verifique los datos e inténtelo de nuevo."
+      "erro": "No se pudo invitar. Verifique los datos e inténtelo de nuevo.",
+      "dica": "Enviaremos una invitación para vincular el acceso a la empresa."
     },
     "lista": {
       "titulo": "Apoderados activos",
       "vazio": "Aún no hay apoderados vinculados.",
+      "vazioDica": "Invite a alguien por correo o documento para actuar en nombre de la empresa.",
       "ativo": "Activo",
       "removido": "Eliminado",
       "convidadoEm": "Vinculado el {{data}}",
@@ -992,7 +994,8 @@
       "removendo": "Eliminando…"
     },
     "removidos": {
-      "titulo": "Historial de eliminaciones"
+      "titulo": "Historial de eliminaciones",
+      "subtitulo": "Registro inmutable de accesos revocados, conservado para auditoría."
     },
     "estado": {
       "carregando": "Cargando apoderados…",

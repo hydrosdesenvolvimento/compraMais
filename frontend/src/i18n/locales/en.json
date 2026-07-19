@@ -980,11 +980,13 @@
       "identificadorPlaceholder": "name@company.com",
       "enviar": "Invite",
       "enviando": "Inviting…",
-      "erro": "Could not invite. Check the details and try again."
+      "erro": "Could not invite. Check the details and try again.",
+      "dica": "We'll send an invitation to link access to the company."
     },
     "lista": {
       "titulo": "Active attorneys",
       "vazio": "No attorneys linked yet.",
+      "vazioDica": "Invite someone by e-mail or ID to act on behalf of the company.",
       "ativo": "Active",
       "removido": "Removed",
       "convidadoEm": "Linked on {{data}}",
@@ -992,7 +994,8 @@
       "removendo": "Removing…"
     },
     "removidos": {
-      "titulo": "Removal history"
+      "titulo": "Removal history",
+      "subtitulo": "Immutable record of revoked access, kept for auditing."
     },
     "estado": {
       "carregando": "Loading attorneys…",

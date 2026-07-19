@@ -11,8 +11,9 @@ configure({ testIdAttribute: 'data-cy' });
  * remover (callback) e o rastro dos removidos (append-only, RN015). i18n é inicializado no setup;
  * as asserções usam o texto pt-BR (idioma padrão).
  */
-const ATIVO: ProcuradorView = { contaId: 'c1', identificador: 'proc@empresa.com', ativo: true, convidadoPor: 't1', desde: '2026-07-01T00:00:00Z' };
-const REMOVIDO: ProcuradorView = { contaId: 'c2', identificador: 'ex@empresa.com', ativo: false, convidadoPor: 't1', desde: '2026-06-01T00:00:00Z' };
+const ATIVO: ProcuradorView = { contaId: 'c1', identificador: 'proc@empresa.com', nome: null, ativo: true, convidadoPor: 't1', desde: '2026-07-01T00:00:00Z' };
+const REMOVIDO: ProcuradorView = { contaId: 'c2', identificador: 'ex@empresa.com', nome: null, ativo: false, convidadoPor: 't1', desde: '2026-06-01T00:00:00Z' };
+const ATIVO_COM_NOME: ProcuradorView = { contaId: 'c3', identificador: 'ana@empresa.com', nome: 'Ana Souza', ativo: true, convidadoPor: 't1', desde: '2026-07-01T00:00:00Z' };
 
 function noop() { /* */ }
 
@@ -22,6 +23,13 @@ describe('Procuradores (UC019)', () => {
     expect(screen.getByText('proc@empresa.com')).toBeInTheDocument();
     expect(screen.getByText('Procuradores ativos')).toBeInTheDocument();
     expect(screen.queryByText('Histórico de remoções')).not.toBeInTheDocument();
+  });
+
+  it('exibe o nome do procurador (quando resolvido) com o identificador como secundário', () => {
+    render(<Procuradores procuradores={[ATIVO_COM_NOME]} onConvidar={noop} onRemover={noop} />);
+    const item = screen.getByTestId('proc-item');
+    expect(within(item).getByText('Ana Souza')).toBeInTheDocument();
+    expect(within(item).getByText(/ana@empresa\.com/)).toBeInTheDocument();
   });
 
   it('mostra o estado vazio quando não há procuradores ativos', () => {

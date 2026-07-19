@@ -48,6 +48,17 @@ describe('GerirProcuradores (UC019 — use case)', () => {
     expect(lista.every((p) => p.ativo)).toBe(true);
   });
 
+  it('listar → resolve o nome de exibição de usuários cadastrados; ausente cai em null', async () => {
+    const nomesDir = { nomesPorIdentificadores: async (ids: string[]) =>
+      new Map(ids.filter((i) => i === 'a@empresa.com').map((i) => [i, 'Ana Souza'])) };
+    const comNomes = new GerirProcuradores(contas, bus, undefined, nomesDir);
+    await comNomes.convidar(FID, TID, 'a@empresa.com'); // cadastrado
+    await comNomes.convidar(FID, TID, 'b@empresa.com'); // só convidado
+    const lista = await comNomes.listar(FID, TID);
+    expect(lista.find((p) => p.identificador === 'a@empresa.com')?.nome).toBe('Ana Souza');
+    expect(lista.find((p) => p.identificador === 'b@empresa.com')?.nome).toBeNull();
+  });
+
   it('remover → remoção lógica: conta inativa, rastro preservado (RN015)', async () => {
     const { procuradorContaId } = await uc.convidar(FID, TID, 'proc@empresa.com');
     await uc.remover(FID, TID, procuradorContaId);

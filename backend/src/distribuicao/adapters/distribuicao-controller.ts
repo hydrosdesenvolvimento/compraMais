@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import type { ExecutarDistribuicao, DistribuicaoRepository } from '../application/executar-distribuicao.js';
 import type { ListarDemandasFornecedor } from '../application/listar-demandas-fornecedor.js';
 import type { ResumoDistribuicaoEdital } from '../application/resumir-distribuicao-edital.js';
+import type { ListarCadastroReserva } from '../application/listar-cadastro-reserva.js';
 import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
 import { exigirPapel } from '../../shared/http/autenticacao.js';
 
@@ -20,7 +21,7 @@ function empresaDe(id: Identidade): string { return String(id.empresaId ?? id.us
  */
 export function registrarRotasDistribuicao(
   app: FastifyInstance,
-  deps: { executar: ExecutarDistribuicao; repo: DistribuicaoRepository; demandas: ListarDemandasFornecedor; resumo: ResumoDistribuicaoEdital },
+  deps: { executar: ExecutarDistribuicao; repo: DistribuicaoRepository; demandas: ListarDemandasFornecedor; resumo: ResumoDistribuicaoEdital; reserva: ListarCadastroReserva },
 ): void {
   app.post('/editais/:id/distribuir', async (req, reply) => {
     const ator = exigirPapel(req, reply, PERFIS_GESTAO);
@@ -52,6 +53,13 @@ export function registrarRotasDistribuicao(
     } catch (e) {
       return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message });
     }
+  });
+
+  // Painel Admin · "Cadastro de Reserva": fila cronológica global dos retardatários (aptos fora da
+  // matriz vigente), sem alterar as cotas já distribuídas (UC009 / RN004). Somente leitura.
+  app.get('/gestao/cadastro-reserva', async (req, reply) => {
+    if (!exigirPapel(req, reply, PERFIS_GESTAO)) return reply;
+    return reply.send(await deps.reserva.listar());
   });
 
   app.get('/distribuicao/minhas', async (req, reply) => {

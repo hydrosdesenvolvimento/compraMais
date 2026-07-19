@@ -110,6 +110,7 @@ import { registrarRotasPermissoes } from './permissoes/adapters/permissoes-contr
 import { ExecutarDistribuicao, type DistribuicaoRepository } from './distribuicao/application/executar-distribuicao.js';
 import { ListarDemandasFornecedor } from './distribuicao/application/listar-demandas-fornecedor.js';
 import { ResumoDistribuicaoEdital } from './distribuicao/application/resumir-distribuicao-edital.js';
+import { ListarCadastroReserva } from './distribuicao/application/listar-cadastro-reserva.js';
 import { DistribuicaoRepositoryMemory } from './distribuicao/adapters/distribuicao-repository-memory.js';
 import { DistribuicaoRepositoryPg } from './distribuicao/adapters/distribuicao-repository-pg.js';
 import { registrarRotasDistribuicao } from './distribuicao/adapters/distribuicao-controller.js';
@@ -334,7 +335,16 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Painel Admin · "Distribuição Inteligente": resumo por edital (cabeçalho + totais + rateio). Reusa o
   // `editaisRepo` como leitura (a instância `Edital` satisfaz o lookup mínimo, inclui `quantitativos`).
   const resumoDistribuicao = new ResumoDistribuicaoEdital(editaisRepo, credRepo, fornecedores, distribuicaoRepo, secretariaLookup);
-  registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas, resumo: resumoDistribuicao });
+  // Painel Admin · "Cadastro de Reserva": fila cronológica global dos retardatários (UC009/RN004).
+  // Candidatos = editais publicados (no develop a distribuição roda em publicado e o edital ali permanece).
+  const editaisComReserva = {
+    distribuidos: async () =>
+      (await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })).map((e) => ({
+        id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId,
+      })),
+  };
+  const listarCadastroReserva = new ListarCadastroReserva(editaisComReserva, credRepo, distribuicaoRepo, fornecedores, secretariaLookup);
+  registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas, resumo: resumoDistribuicao, reserva: listarCadastroReserva });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();

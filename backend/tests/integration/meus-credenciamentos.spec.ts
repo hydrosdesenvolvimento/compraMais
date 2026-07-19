@@ -40,6 +40,18 @@ describe('ListarCredenciamentos — projeção de "Meus Credenciamentos" (UC004)
     expect(c.estado).toBe('iniciado');
   });
 
+  it('expõe passoAtual (onde parou) e totalPassos=4 do domínio (Etapa n/N — não 5 do protótipo)', async () => {
+    const emPasso2 = Credenciamento.iniciar({ id: 'c4', fornecedorId: 'f1', editalId: 'e1', capacidadeTeto: 20 });
+    emPasso2.registrarPasso(2);
+    await repo.salvar(emPasso2);
+    const uc = new ListarCredenciamentos(repo, editais, secretarias);
+    const lista = await uc.doFornecedor('f1', { incluirCancelados: true });
+    expect(lista.every((c) => c.totalPassos === 4)).toBe(true);
+    expect(lista.find((c) => c.id === 'c4')?.passoAtual).toBe(2); // parou em Documentos
+    expect(lista.find((c) => c.id === 'c1')?.passoAtual).toBe(1); // recém-iniciado (Capacidade)
+    expect(lista.find((c) => c.id === 'c2')?.passoAtual).toBe(4); // aceito → Concluído
+  });
+
   it('expõe criadoEm/atualizadoEm a partir da auditoria de linha (AD-33), sem coluna nova', async () => {
     const uc = new ListarCredenciamentos(repo, editais, secretarias);
     const [aceito] = (await uc.doFornecedor('f1')).filter((x) => x.id === 'c2');

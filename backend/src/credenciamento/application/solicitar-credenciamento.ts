@@ -89,6 +89,19 @@ export class SolicitarCredenciamento {
     return { estado: 'aceito', status: 'pendente_analise' };
   }
 
+  /**
+   * Registra o passo do wizard em que o fornecedor está (UC004) para a tela "Meus Credenciamentos"
+   * mostrar "Etapa n/N" e o "Continuar" retomar de onde parou. É estado de UI do agregado — não gera
+   * evento de negócio (a trilha AD-18 guarda início/aceite/cancelamento, não a navegação do wizard).
+   */
+  async registrarPasso(credenciamentoId: string, passo: number, actor: Actor): Promise<{ passoAtual: number }> {
+    const cred = await this.repo.porId(credenciamentoId);
+    if (!cred) throw new CredenciamentoNaoEncontrado();
+    cred.registrarPasso(passo, actor.userId);
+    await this.repo.salvar(cred);
+    return { passoAtual: cred.passoAtual };
+  }
+
   async cancelar(credenciamentoId: string, actor: Actor): Promise<{ estado: 'cancelado' }> {
     const cred = await this.repo.porId(credenciamentoId);
     if (!cred) throw new CredenciamentoNaoEncontrado();

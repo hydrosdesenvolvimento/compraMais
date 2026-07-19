@@ -61,6 +61,14 @@ export function Credenciamento() {
     : step === 2 ? aceito
     : true;
 
+  // Reporta ao backend o passo do wizard (UC004) para "Meus Credenciamentos" mostrar "Etapa n/N" e o
+  // "Continuar" retomar de onde parou. `step` (0..3) → passo do domínio (step+1). Melhor-esforço: só a
+  // partir do Documentos (passo do Concluído vem do aceite) e nunca trava a navegação se a rede falhar.
+  const reportarPasso = (novoStep: number, id: string | null = credId) => {
+    if (!id || novoStep < 0 || novoStep >= 3) return;
+    void api.registrarPassoCredenciamento(id, novoStep + 1).catch(() => {});
+  };
+
   async function avancar() {
     setErro(null);
     // Passo 0 → 1: declara a capacidade (teto, RN005) iniciando o credenciamento no backend.
@@ -71,6 +79,7 @@ export function Credenciamento() {
         const r = await api.iniciarCredenciamento(editalId, capNum);
         setCredId(r.credenciamentoId);
         setStep(1);
+        reportarPasso(1, r.credenciamentoId); // entrou no Documentos (passo 2)
       } catch { setErro(t('credenciamento.erroGenerico')); }
       finally { setEnviando(false); }
       return;
@@ -86,10 +95,10 @@ export function Credenciamento() {
       finally { setEnviando(false); }
       return;
     }
-    setStep((s) => Math.min(3, s + 1));
+    setStep((s) => { const n = Math.min(3, s + 1); reportarPasso(n); return n; });
   }
 
-  const wPrev = () => { setErro(null); setStep((s) => Math.max(0, s - 1)); };
+  const wPrev = () => { setErro(null); setStep((s) => { const n = Math.max(0, s - 1); reportarPasso(n); return n; }); };
 
   async function cancelWizard() {
     if (credId) { try { await api.cancelarCredenciamento(credId); } catch { /* segue para a vitrine mesmo assim */ } }

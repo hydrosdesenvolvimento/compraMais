@@ -14,13 +14,13 @@ export class CredenciamentoRepositoryPg implements CredenciamentoRepository {
     const s = c.estado();
     await this.pool.query(
       `INSERT INTO credenciamentos
-         (id, fornecedor_id, edital_id, capacidade_teto, estado, termo, distribuido_em, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+         (id, fornecedor_id, edital_id, capacidade_teto, estado, passo_atual, termo, distribuido_em, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        ON CONFLICT (id) DO UPDATE SET
-         capacidade_teto = $4, estado = $5, termo = $6, distribuido_em = $7,
-         update_date = $9, last_user_update = $10`,
+         capacidade_teto = $4, estado = $5, passo_atual = $6, termo = $7, distribuido_em = $8,
+         update_date = $10, last_user_update = $11`,
       [
-        s.meta.id, s.fornecedorId, s.editalId, s.capacidadeTeto, s.estado,
+        s.meta.id, s.fornecedorId, s.editalId, s.capacidadeTeto, s.estado, s.passoAtual,
         s.termo ? JSON.stringify(s.termo) : null, s.distribuidoEm,
         s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate,
       ],
@@ -71,6 +71,7 @@ function mapear(row: Record<string, unknown>): Credenciamento {
     editalId: String(row.edital_id),
     capacidadeTeto: Number(row.capacidade_teto),
     estado: row.estado as EstadoCredenciamento,
+    passoAtual: row.passo_atual == null ? 1 : Number(row.passo_atual),
     termo: (row.termo as TermoAceite | null) ?? null, // jsonb já vem parseado pelo driver pg
     distribuidoEm: row.distribuido_em == null ? null : String(row.distribuido_em),
   });

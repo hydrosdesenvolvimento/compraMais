@@ -1179,6 +1179,7 @@
   "meusCredenciamentos": {
     "titulo": "Mis Acreditaciones",
     "subtitulo": "Siga todas las acreditaciones de su empresa y continúe donde lo dejó.",
+    "etapa": "Paso {{atual}}/{{total}}",
     "carregando": "Cargando…",
     "semEmpresa": "Ninguna empresa vinculada a su cuenta.",
     "editalRemovido": "Convocatoria eliminada",
@@ -1205,6 +1206,7 @@
     },
     "acao": {
       "continuar": "Continuar",
+      "visualizar": "Ver",
       "recredenciar": "Acreditar de nuevo",
       "cancelar": "Cancelar acreditación"
     },
@@ -1214,5 +1216,26 @@
     "vazioFiltroDica": "Ajuste la búsqueda o elija otro estado.",
     "paginacaoInfo": "Mostrando {{de}}–{{ate}} de {{total}} acreditaciones",
     "irParaPagina": "Ir a la página {{n}}"
+  },
+  "credenciamentoDetalhe": {
+    "titulo": "Detalle de la acreditación",
+    "voltar": "Volver a las acreditaciones",
+    "carregando": "Cargando…",
+    "naoEncontrado": "Acreditación no encontrada.",
+    "naoEncontradoDica": "Puede haber sido eliminada o no pertenece a su empresa.",
+    "edital": "Convocatoria",
+    "objeto": "Objeto",
+    "secretaria": "Secretaría",
+    "situacao": "Estado",
+    "capacidade": "Capacidad declarada",
+    "capacidadeUnidades": "{{n}} unidades",
+    "etapa": "Paso",
+    "termoTitulo": "Término de Aceptación",
+    "termoVersao": "Versión",
+    "termoFinalidade": "Finalidad",
+    "termoAceitoEm": "Aceptado el",
+    "semTermo": "Término de Aceptación aún no firmado.",
+    "criadoEm": "Creado el",
+    "atualizadoEm": "Última actualización"
   }
 }

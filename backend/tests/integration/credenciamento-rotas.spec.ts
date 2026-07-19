@@ -151,4 +151,42 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     const denovo = await iniciar(edital, 150);
     expect(denovo.statusCode).toBe(201);
   });
+
+  it('registra o passo do wizard (PATCH /passo) e o expõe no resumo (Etapa n/N)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 400)).json().credenciamentoId as string;
+    const patch = await app.inject({ method: 'PATCH', url: `/credenciamentos/${credId}/passo`, headers: forn(), payload: { passo: 2 } });
+    expect(patch.statusCode).toBe(200);
+    expect(patch.json()).toMatchObject({ passoAtual: 2 });
+
+    const lista = await app.inject({ method: 'GET', url: `/fornecedores/${empresaId}/credenciamentos?incluirCancelados=true`, headers: forn() });
+    const item = (lista.json() as { id: string; passoAtual: number; totalPassos: number }[]).find((c) => c.id === credId);
+    expect(item).toMatchObject({ passoAtual: 2, totalPassos: 4 });
+  });
+
+  it('passo fora de 1..N-1 → 422 (PassoInvalido)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 400)).json().credenciamentoId as string;
+    const r = await app.inject({ method: 'PATCH', url: `/credenciamentos/${credId}/passo`, headers: forn(), payload: { passo: 9 } });
+    expect(r.statusCode).toBe(422);
+    expect(r.json()).toMatchObject({ codigo: 'PassoInvalido' });
+  });
+
+  it('GET /credenciamentos/:id devolve o detalhe do dono, com o Termo após o aceite (RN016)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 250)).json().credenciamentoId as string;
+    await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
+    const det = await app.inject({ method: 'GET', url: `/credenciamentos/${credId}`, headers: forn() });
+    expect(det.statusCode).toBe(200);
+    expect(det.json()).toMatchObject({ id: credId, estado: 'aceito', capacidadeTeto: 250, passoAtual: 4, totalPassos: 4 });
+    expect(det.json().termo).toMatchObject({ versao: 'v1', finalidade: 'credenciamento' });
+  });
+
+  it('GET /credenciamentos/:id de outra empresa → 404 (não vaza o vínculo alheio)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 100)).json().credenciamentoId as string;
+    const outraEmpresa = comoPapel('titular', { userId: 'intruso', empresaId: 'empresa-alheia' });
+    const det = await app.inject({ method: 'GET', url: `/credenciamentos/${credId}`, headers: outraEmpresa });
+    expect(det.statusCode).toBe(404);
+  });
 });

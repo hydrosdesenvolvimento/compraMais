@@ -7,6 +7,8 @@ describe('Credenciamento por Termo de Aceite (UC004)', () => {
   beforeEach(() => {
     cy.intercept('GET', '/editais', { body: [{ id: 'e1', objeto: 'Merenda escolar' }] }).as('vitrine');
     cy.intercept('POST', '/editais/e1/credenciamentos', { body: { credenciamentoId: 'c1', estado: 'iniciado' } }).as('iniciar');
+    // O wizard reporta o passo (UC004) ao navegar — best-effort; stub para determinismo.
+    cy.intercept('PATCH', '/credenciamentos/c1/passo', { body: { passoAtual: 2 } }).as('passo');
     cy.intercept('POST', '/credenciamentos/c1/termo', { body: { estado: 'aceito', status: 'pendente_analise' } }).as('termo');
   });
 

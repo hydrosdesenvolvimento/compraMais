@@ -2,6 +2,14 @@ import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-b
 
 export type EstadoCredenciamento = 'iniciado' | 'aceito' | 'cancelado';
 
+/**
+ * Total de passos do wizard de credenciamento (UC004): Capacidade(1) → Documentos(2) → Termo(3) →
+ * Concluído(4). São **4**, não 5 como no protótipo de UI: a prova de vida/biometria (UC007) é R2 e
+ * está fora do MVP — o credenciamento conclui pelo Termo de Aceite. A tela exibe "Etapa n/N" com este
+ * N como fonte de verdade do domínio.
+ */
+export const TOTAL_PASSOS_CREDENCIAMENTO = 4;
+
 /** Termo de Aceite (RN016) — rastro do aceite: finalidade + versão + timestamp. */
 export interface TermoAceite {
   versao: string;
@@ -16,6 +24,7 @@ export interface CredenciamentoState {
   editalId: string;
   capacidadeTeto: number; // teto declarado, base do water-filling (RN005)
   estado: EstadoCredenciamento;
+  passoAtual: number; // 1..TOTAL_PASSOS_CREDENCIAMENTO — passo do wizard em que o fornecedor parou (UC004)
   termo: TermoAceite | null;
   distribuidoEm: string | null; // A2: fica null no MVP (motor de distribuição é Épico 5) — habilita a guarda de cancelamento
 }
@@ -32,6 +41,7 @@ export class Credenciamento extends EntidadeBase {
     readonly editalId: string,
     private _capacidadeTeto: number,
     private _estado: EstadoCredenciamento,
+    private _passoAtual: number,
     private _termo: TermoAceite | null,
     private _distribuidoEm: string | null,
   ) {
@@ -44,16 +54,19 @@ export class Credenciamento extends EntidadeBase {
     if (!Number.isInteger(input.capacidadeTeto) || input.capacidadeTeto <= 0) {
       throw new CapacidadeInvalida(input.capacidadeTeto);
     }
+    // Passo 1 (Capacidade) é o marco de nascimento do agregado (RN005).
     return new Credenciamento(
       EntidadeBase.metaNova(input.id, input.userName),
-      input.fornecedorId, input.editalId, input.capacidadeTeto, 'iniciado', null, null,
+      input.fornecedorId, input.editalId, input.capacidadeTeto, 'iniciado', 1, null, null,
     );
   }
 
   /** Reconstrução a partir da persistência (sem regra de criação — aceita qualquer estado do ciclo). */
   static deEstado(s: CredenciamentoState): Credenciamento {
     return new Credenciamento(
-      s.meta, s.fornecedorId, s.editalId, s.capacidadeTeto, s.estado, s.termo, s.distribuidoEm,
+      s.meta, s.fornecedorId, s.editalId, s.capacidadeTeto, s.estado,
+      // Linhas anteriores à migration 0024 não têm passo; caem no passo 1 (comportamento anterior).
+      s.passoAtual ?? 1, s.termo, s.distribuidoEm,
     );
   }
 
@@ -62,14 +75,30 @@ export class Credenciamento extends EntidadeBase {
     return {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
       fornecedorId: this.fornecedorId, editalId: this.editalId, capacidadeTeto: this._capacidadeTeto,
-      estado: this._estado, termo: this._termo ? { ...this._termo } : null, distribuidoEm: this._distribuidoEm,
+      estado: this._estado, passoAtual: this._passoAtual, termo: this._termo ? { ...this._termo } : null, distribuidoEm: this._distribuidoEm,
     };
   }
 
   get capacidadeTeto(): number { return this._capacidadeTeto; }
   get situacao(): EstadoCredenciamento { return this._estado; }
+  get passoAtual(): number { return this._passoAtual; }
   get termo(): Readonly<TermoAceite> | null { return this._termo; }
   get distribuidoEm(): string | null { return this._distribuidoEm; }
+
+  /**
+   * Registra o passo do wizard em que o fornecedor está (UC004) para a tela "Meus Credenciamentos"
+   * mostrar "Etapa n/N" e o "Continuar" retomar de onde parou. Só faz sentido enquanto `iniciado`:
+   * o aceite do termo leva ao passo final (4) e o cancelamento congela o registro. Aceita 1..N-1
+   * (o passo N/Concluído é atingido apenas por `aceitarTermo`). Não impõe monotonicidade — o wizard
+   * permite voltar.
+   */
+  registrarPasso(passo: number, userName = 'sistema'): void {
+    if (this._estado !== 'iniciado') throw new TransicaoCredenciamentoInvalida(this._estado, 'passo');
+    if (!Number.isInteger(passo) || passo < 1 || passo >= TOTAL_PASSOS_CREDENCIAMENTO) throw new PassoInvalido(passo);
+    if (passo === this._passoAtual) return; // navegação sem mudança de passo não é mutação
+    this._passoAtual = passo;
+    this.marcarAtualizacao(userName);
+  }
 
   /** Passo 4 do UC004: assina o Termo de Aceite (RN016) → conclui o credenciamento em `aceito`. */
   aceitarTermo(dados: { versao: string; finalidade: string }, userName = 'sistema', agoraIso: string = new Date().toISOString()): void {
@@ -77,6 +106,7 @@ export class Credenciamento extends EntidadeBase {
     if (!dados.versao?.trim() || !dados.finalidade?.trim()) throw new TermoIncompleto();
     this._termo = { versao: dados.versao, finalidade: dados.finalidade, aceitoEm: agoraIso };
     this._estado = 'aceito';
+    this._passoAtual = TOTAL_PASSOS_CREDENCIAMENTO; // Concluído
     this.marcarAtualizacao(userName, agoraIso);
   }
 
@@ -94,6 +124,9 @@ export class CapacidadeInvalida extends Error {
 }
 export class TermoIncompleto extends Error {
   constructor() { super('Acceptance term requires a version and a purpose (RN016).'); this.name = 'TermoIncompleto'; }
+}
+export class PassoInvalido extends Error {
+  constructor(passo: number) { super(`Wizard step must be an integer in 1..${TOTAL_PASSOS_CREDENCIAMENTO - 1} (received: ${passo}).`); this.name = 'PassoInvalido'; }
 }
 export class TransicaoCredenciamentoInvalida extends Error {
   constructor(de: string, para: string) { super(`Invalid credenciamento transition from '${de}' to '${para}'.`); this.name = 'TransicaoCredenciamentoInvalida'; }

@@ -248,6 +248,17 @@
       "posicaoLabel": "Posição {{posicao}} na fila de reserva",
       "chip": "Reserva"
     },
+    "desistencias": {
+      "eyebrow": "Operação · Desistências",
+      "titulo": "Desistências",
+      "subtitulo": "Registro de fornecedores que declinaram de cotas atribuídas",
+      "carregando": "Carregando desistências…",
+      "erroCarregar": "Não foi possível carregar as desistências.",
+      "vazioTitulo": "Nenhuma desistência registrada",
+      "vazioDica": "Quando um fornecedor titular declinar de uma cota, o registro aparece aqui e o próximo da fila de reserva é acionado automaticamente.",
+      "cota": "Cota {{cota}} un/mês",
+      "chip": "Desistência"
+    },
     "setoresIndustriais": {
       "titulo": "Setores Industriais (CNAE)",
       "subtitulo": "Códigos de atividade econômica aceitos",

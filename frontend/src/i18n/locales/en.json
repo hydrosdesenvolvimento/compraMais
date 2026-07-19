@@ -248,6 +248,17 @@
       "posicaoLabel": "Position {{posicao}} in the reserve queue",
       "chip": "Reserve"
     },
+    "desistencias": {
+      "eyebrow": "Operations · Withdrawals",
+      "titulo": "Withdrawals",
+      "subtitulo": "Record of suppliers who declined assigned quotas",
+      "carregando": "Loading withdrawals…",
+      "erroCarregar": "Could not load withdrawals.",
+      "vazioTitulo": "No withdrawals recorded",
+      "vazioDica": "When a holder supplier declines a quota, the record appears here and the next in the reserve queue is triggered automatically.",
+      "cota": "Quota {{cota}} units/mo",
+      "chip": "Withdrawal"
+    },
     "setoresIndustriais": {
       "titulo": "Industrial Sectors (CNAE)",
       "subtitulo": "Accepted economic activity codes",

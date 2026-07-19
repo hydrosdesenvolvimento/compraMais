@@ -34,6 +34,7 @@ import { EmConstrucao } from './pages/admin/EmConstrucao';
 import { Fornecedores } from './pages/admin/Fornecedores';
 import { Secretarias } from './pages/admin/Secretarias';
 import { SetoresIndustriais } from './pages/admin/SetoresIndustriais';
+import { TiposArquivos } from './pages/admin/TiposArquivos';
 import { AnaliseDocumental } from './pages/admin/AnaliseDocumental';
 import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
@@ -101,7 +102,7 @@ const rAdminCadastroReserva = createRoute({ getParentRoute: () => adminLayout, p
 const rAdminDesistencias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/desistencias', beforeLoad: () => exigirTelaAdmin('desistencias'), component: () => <EmConstrucao tituloKey="common.nav.desistencias" /> });
 const rAdminSecretarias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/secretarias', beforeLoad: () => exigirTelaAdmin('secretarias'), component: Secretarias });
 const rAdminSetores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/setores-industriais', beforeLoad: () => exigirTelaAdmin('setoresIndustriais'), component: SetoresIndustriais });
-const rAdminTiposArquivos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/tipos-arquivos', beforeLoad: () => exigirTelaAdmin('tiposArquivos'), component: () => <EmConstrucao tituloKey="common.nav.tiposArquivos" /> });
+const rAdminTiposArquivos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/tipos-arquivos', beforeLoad: () => exigirTelaAdmin('tiposArquivos'), component: TiposArquivos });
 
 const naoEncontrada = createRoute({ getParentRoute: () => rootRoute, path: '*', beforeLoad: () => { throw redirect({ to: '/cadastro' }); } });
 

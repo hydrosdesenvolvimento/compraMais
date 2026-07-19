@@ -122,7 +122,7 @@ export interface CatalogoItemView {
   // Setor/CNAE
   codigo?: string; descricao?: string;
   // Tipo de documento
-  formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean;
+  formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number;
 }
 /** UC021 — servidor interno exibido no Painel Admin de usuários (sem segredos). */
 export interface UsuarioInternoView {

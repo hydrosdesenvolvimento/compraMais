@@ -207,6 +207,66 @@
         "erroSalvar": "Não foi possível salvar. Verifique o código CNAE (7 dígitos) e a descrição."
       }
     },
+    "tiposArquivos": {
+      "titulo": "Tipos de Arquivos",
+      "subtitulo": "Documentos exigidos no credenciamento",
+      "novoCadastro": "Novo tipo",
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar os tipos de arquivo. Verifique suas permissões.",
+      "vazioTitulo": "Nenhum tipo cadastrado",
+      "vazioDica": "Clique em \"Novo tipo\" para adicionar o primeiro.",
+      "fechar": "Fechar",
+      "campos": {
+        "documento": "Documento",
+        "formato": "Formato",
+        "categoria": "Categoria",
+        "validade": "Validade",
+        "status": "Situação",
+        "acoes": "Ações"
+      },
+      "status": {
+        "ativo": "Ativo",
+        "inativo": "Inativo"
+      },
+      "categorias": {
+        "cadastral": "Cadastral",
+        "fiscal": "Fiscal",
+        "contratual": "Contratual"
+      },
+      "validade": {
+        "sem": "Sem validade",
+        "exige": "Exige validade",
+        "exercicio": "Exercício",
+        "dias": "{{dias}} dias"
+      },
+      "acao": {
+        "editar": "Editar tipo",
+        "inativar": "Inativar tipo",
+        "reativar": "Reativar tipo"
+      },
+      "modal": {
+        "tituloCriar": "Novo tipo de arquivo",
+        "tituloEditar": "Editar tipo de arquivo",
+        "subtitulo": "Preencha os campos e salve",
+        "nomePlaceholder": "Ex.: Certidão FGTS",
+        "formatoLabel": "Formato aceito",
+        "formatoPlaceholder": "PDF",
+        "categoriaLabel": "Categoria",
+        "categoriaPlaceholder": "Selecione a categoria",
+        "validadeLabel": "Validade",
+        "validadeModo": {
+          "sem": "Sem validade",
+          "dias": "Prazo em dias",
+          "exercicio": "Exercício (ex.: Balanço)"
+        },
+        "diasLabel": "Prazo (dias)",
+        "diasPlaceholder": "90",
+        "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo, preservando os vínculos históricos (editais e uploads).",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "erroSalvar": "Não foi possível salvar. Verifique o documento, o formato e a categoria."
+      }
+    },
     "perfis": {
       "titulo": "Administração de telas por perfil",
       "subtitulo": "Defina quais telas do Painel Admin cada papel enxerga. As permissões do Administrador também são editáveis, mas ele nunca perde o acesso a esta tela.",

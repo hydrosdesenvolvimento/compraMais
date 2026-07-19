@@ -201,6 +201,39 @@
       "vazioTitulo": "No eligible suppliers",
       "vazioDica": "No company with a compatible CNAE for this notice."
     },
+    "distribuicao": {
+      "eyebrow": "Operations · Distribution",
+      "titulo": "Smart Distribution",
+      "subtitulo": "Equitable allocation respecting the declared capacity (RN005)",
+      "seletorLabel": "Notice",
+      "carregando": "Loading distribution…",
+      "erroCarregar": "Could not load the distribution.",
+      "semEditais": "No published notice available for distribution.",
+      "chip": {
+        "emDistribuicao": "In Distribution",
+        "homologada": "Approved"
+      },
+      "stats": {
+        "total": "Total demand",
+        "distribuido": "Distributed",
+        "habilitados": "Qualified"
+      },
+      "resultadoTitulo": "Distribution result",
+      "col": {
+        "fornecedor": "Supplier",
+        "capacidade": "Capacity",
+        "cota": "Assigned quota",
+        "percentual": "% of demand"
+      },
+      "capacidade": "{{cap}} units/mo",
+      "vazioTitulo": "No qualified suppliers",
+      "vazioDica": "There are no accepted credentials yet to allocate this notice's demand.",
+      "deficitAviso": "Supply shortfall: the declared capacity ({{distribuido}}) does not cover the demand ({{total}}). Uncovered balance: {{deficit}}.",
+      "homologar": "Approve distribution",
+      "homologando": "Approving…",
+      "homologadaEm": "Distribution approved · version {{versao}}",
+      "erroHomologar": "Could not approve the distribution."
+    },
     "setoresIndustriais": {
       "titulo": "Industrial Sectors (CNAE)",
       "subtitulo": "Accepted economic activity codes",

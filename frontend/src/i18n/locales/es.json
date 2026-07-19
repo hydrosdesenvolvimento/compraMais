@@ -201,6 +201,39 @@
       "vazioTitulo": "Ningún proveedor elegible",
       "vazioDica": "Ninguna empresa con CNAE compatible para esta convocatoria."
     },
+    "distribuicao": {
+      "eyebrow": "Operación · Distribución",
+      "titulo": "Distribución Inteligente",
+      "subtitulo": "Reparto equitativo respetando la capacidad declarada (RN005)",
+      "seletorLabel": "Convocatoria",
+      "carregando": "Cargando distribución…",
+      "erroCarregar": "No se pudo cargar la distribución.",
+      "semEditais": "No hay convocatoria publicada para distribución.",
+      "chip": {
+        "emDistribuicao": "En Distribución",
+        "homologada": "Homologada"
+      },
+      "stats": {
+        "total": "Demanda total",
+        "distribuido": "Distribuido",
+        "habilitados": "Habilitados"
+      },
+      "resultadoTitulo": "Resultado de la distribución",
+      "col": {
+        "fornecedor": "Proveedor",
+        "capacidade": "Capacidad",
+        "cota": "Cuota asignada",
+        "percentual": "% de la demanda"
+      },
+      "capacidade": "{{cap}} un/mes",
+      "vazioTitulo": "Sin proveedores habilitados",
+      "vazioDica": "Aún no hay credenciales aceptadas para repartir la demanda de esta convocatoria.",
+      "deficitAviso": "Déficit de abastecimiento: la capacidad declarada ({{distribuido}}) no cubre la demanda ({{total}}). Saldo no cubierto: {{deficit}}.",
+      "homologar": "Homologar distribución",
+      "homologando": "Homologando…",
+      "homologadaEm": "Distribución homologada · versión {{versao}}",
+      "erroHomologar": "No se pudo homologar la distribución."
+    },
     "setoresIndustriais": {
       "titulo": "Sectores Industriales (CNAE)",
       "subtitulo": "Códigos de actividad económica aceptados",

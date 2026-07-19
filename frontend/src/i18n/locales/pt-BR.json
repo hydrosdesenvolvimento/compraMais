@@ -201,6 +201,39 @@
       "vazioTitulo": "Nenhum fornecedor elegível",
       "vazioDica": "Nenhuma empresa com CNAE compatível para este edital."
     },
+    "distribuicao": {
+      "eyebrow": "Operação · Distribuição",
+      "titulo": "Distribuição Inteligente",
+      "subtitulo": "Rateio equitativo respeitando a capacidade declarada (RN005)",
+      "seletorLabel": "Edital",
+      "carregando": "Carregando distribuição…",
+      "erroCarregar": "Não foi possível carregar a distribuição.",
+      "semEditais": "Nenhum edital publicado para distribuição.",
+      "chip": {
+        "emDistribuicao": "Em Distribuição",
+        "homologada": "Homologada"
+      },
+      "stats": {
+        "total": "Total da demanda",
+        "distribuido": "Distribuído",
+        "habilitados": "Habilitados"
+      },
+      "resultadoTitulo": "Resultado da distribuição",
+      "col": {
+        "fornecedor": "Fornecedor",
+        "capacidade": "Capacidade",
+        "cota": "Cota atribuída",
+        "percentual": "% da demanda"
+      },
+      "capacidade": "{{cap}} un/mês",
+      "vazioTitulo": "Sem fornecedores habilitados",
+      "vazioDica": "Ainda não há credenciados aceitos para ratear a demanda deste edital.",
+      "deficitAviso": "Déficit de abastecimento: a capacidade declarada ({{distribuido}}) não cobre a demanda ({{total}}). Saldo não coberto: {{deficit}}.",
+      "homologar": "Homologar distribuição",
+      "homologando": "Homologando…",
+      "homologadaEm": "Distribuição homologada · versão {{versao}}",
+      "erroHomologar": "Não foi possível homologar a distribuição."
+    },
     "setoresIndustriais": {
       "titulo": "Setores Industriais (CNAE)",
       "subtitulo": "Códigos de atividade econômica aceitos",

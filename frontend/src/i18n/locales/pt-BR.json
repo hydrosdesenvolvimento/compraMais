@@ -1076,6 +1076,25 @@
       "erro": "Não foi possível concluir a ação."
     }
   },
+  "demandasDistribuidas": {
+    "titulo": "Demandas distribuídas",
+    "subtitulo": "O rateio é igualitário entre os fornecedores aptos e sempre limitado à sua capacidade declarada (teto).",
+    "carregando": "Carregando…",
+    "vazioTitulo": "Nenhuma demanda distribuída ainda",
+    "vazioDica": "Assim que uma distribuição for realizada em um edital em que você é apto, ela aparece aqui.",
+    "semEmpresa": "Entre como fornecedor para ver suas demandas distribuídas.",
+    "status": {
+      "emExecucao": "Em execução",
+      "reserva": "Cadastro de Reserva · 2ª Demanda"
+    },
+    "rateioLabel": "RATEIO MATEMÁTICO DESTA DEMANDA",
+    "demandaTotal": "Demanda total",
+    "fornecedoresAptos": "Fornecedores aptos",
+    "cotaFinal": "Sua cota final",
+    "capacidadeLabel": "Cota alocada vs. sua capacidade (teto)",
+    "dentroDoTeto": "Dentro do teto declarado",
+    "reservaAviso": "<b>Você concluiu o credenciamento após a distribuição inicial.</b> Foi classificado no <b>Cadastro de Reserva (2ª Demanda)</b>. Os contratos vigentes não são alterados — você será acionado automaticamente, por ordem de fila, caso um fornecedor titular não cumpra a entrega."
+  },
   "meusCredenciamentos": {
     "titulo": "Meus Credenciamentos",
     "subtitulo": "Acompanhe todos os credenciamentos da sua empresa e continue de onde parou.",

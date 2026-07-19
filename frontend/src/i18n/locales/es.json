@@ -1076,6 +1076,25 @@
       "erro": "No se pudo completar la acción."
     }
   },
+  "demandasDistribuidas": {
+    "titulo": "Demandas distribuidas",
+    "subtitulo": "El reparto es igualitario entre los proveedores aptos y siempre limitado a su capacidad declarada (tope).",
+    "carregando": "Cargando…",
+    "vazioTitulo": "Aún no hay demandas distribuidas",
+    "vazioDica": "En cuanto se realice una distribución en un edicto en el que usted es apto, aparecerá aquí.",
+    "semEmpresa": "Inicie sesión como proveedor para ver sus demandas distribuidas.",
+    "status": {
+      "emExecucao": "En ejecución",
+      "reserva": "Registro de Reserva · 2.ª Demanda"
+    },
+    "rateioLabel": "REPARTO MATEMÁTICO DE ESTA DEMANDA",
+    "demandaTotal": "Demanda total",
+    "fornecedoresAptos": "Proveedores aptos",
+    "cotaFinal": "Su cuota final",
+    "capacidadeLabel": "Cuota asignada vs. su capacidad (tope)",
+    "dentroDoTeto": "Dentro del tope declarado",
+    "reservaAviso": "<b>Concluyó la acreditación después de la distribución inicial.</b> Fue clasificado en el <b>Registro de Reserva (2.ª Demanda)</b>. Los contratos vigentes no se modifican: será convocado automáticamente, por orden de fila, si un proveedor titular no cumple la entrega."
+  },
   "meusCredenciamentos": {
     "titulo": "Mis Acreditaciones",
     "subtitulo": "Siga todas las acreditaciones de su empresa y continúe donde lo dejó.",

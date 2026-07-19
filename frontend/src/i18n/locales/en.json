@@ -1076,6 +1076,25 @@
       "erro": "The action could not be completed."
     }
   },
+  "demandasDistribuidas": {
+    "titulo": "Distributed demands",
+    "subtitulo": "The split is equal among eligible suppliers and always capped at your declared capacity (ceiling).",
+    "carregando": "Loading…",
+    "vazioTitulo": "No distributed demand yet",
+    "vazioDica": "As soon as a distribution runs on a tender where you are eligible, it will appear here.",
+    "semEmpresa": "Sign in as a supplier to see your distributed demands.",
+    "status": {
+      "emExecucao": "In progress",
+      "reserva": "Reserve List · 2nd Demand"
+    },
+    "rateioLabel": "MATHEMATICAL SPLIT OF THIS DEMAND",
+    "demandaTotal": "Total demand",
+    "fornecedoresAptos": "Eligible suppliers",
+    "cotaFinal": "Your final quota",
+    "capacidadeLabel": "Allocated quota vs. your capacity (ceiling)",
+    "dentroDoTeto": "Within declared ceiling",
+    "reservaAviso": "<b>You completed your accreditation after the initial distribution.</b> You were placed on the <b>Reserve List (2nd Demand)</b>. Active contracts are not changed — you will be called automatically, in queue order, if a primary supplier fails to deliver."
+  },
   "meusCredenciamentos": {
     "titulo": "My Accreditations",
     "subtitulo": "Track all of your company’s accreditations and pick up where you left off.",

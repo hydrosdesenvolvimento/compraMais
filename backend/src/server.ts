@@ -105,6 +105,11 @@ import { VisibilidadeRepositoryMemory } from './permissoes/adapters/visibilidade
 import { VisibilidadeRepositoryPg } from './permissoes/adapters/visibilidade-repository-pg.js';
 import type { VisibilidadeRepository } from './permissoes/application/visibilidade-repository.js';
 import { registrarRotasPermissoes } from './permissoes/adapters/permissoes-controller.js';
+import { ExecutarDistribuicao, type DistribuicaoRepository } from './distribuicao/application/executar-distribuicao.js';
+import { ListarDemandasFornecedor } from './distribuicao/application/listar-demandas-fornecedor.js';
+import { DistribuicaoRepositoryMemory } from './distribuicao/adapters/distribuicao-repository-memory.js';
+import { DistribuicaoRepositoryPg } from './distribuicao/adapters/distribuicao-repository-pg.js';
+import { registrarRotasDistribuicao } from './distribuicao/adapters/distribuicao-controller.js';
 
 /**
  * Bootstrap (camada de INFRA) + composition root. O Fastify é detalhe plugável: o domínio e os
@@ -155,6 +160,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'CatalogoItemCriado', 'CatalogoItemEditado', 'CatalogoItemInativado', 'CatalogoItemReativado',
     'UsuarioInternoCriado', 'UsuarioInternoEditado', 'UsuarioSenhaResetada', 'UsuarioInternoInativado', 'UsuarioInternoReativado',
     'VisibilidadeTelasAlterada',
+    'DistribuicaoExecutada',
   ]);
 
   // Identidade (US1): contas + procuradores. Persistência durável em Postgres quando disponível (como
@@ -287,6 +293,28 @@ export async function buildServer(): Promise<FastifyInstance> {
   };
   const listarCredenciamentos = new ListarCredenciamentos(credRepo, editaisRepo, secretariaLookup);
   registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos });
+
+  // Motor de Distribuição (Épico 5 / UC008 / RF005). A gestão dispara o rateio de um edital
+  // distribuível (publicado); a matriz canônica append-only é durável em Postgres quando disponível
+  // (como `editais`/`credenciamentos`), senão memória (testes sem banco). O fornecedor lê suas
+  // "Demandas distribuídas" (rateio + Cadastro de Reserva) derivadas da matriz vigente + credenciamento.
+  const distribuicaoRepo: DistribuicaoRepository = pool ? new DistribuicaoRepositoryPg(pool) : new DistribuicaoRepositoryMemory();
+  const editalParaDistribuir = {
+    porId: async (id: string) => {
+      const e = await editaisRepo.porId(id);
+      // Guarda de estado: só distribui edital publicado (develop não tem a máquina AD-37/em_distribuicao).
+      return e ? { podeDistribuir: e.situacao === 'publicado', quantitativos: e.quantitativos } : null;
+    },
+  };
+  const executarDistribuicao = new ExecutarDistribuicao(editalParaDistribuir, credRepo, fornecedores, distribuicaoRepo, bus);
+  const editalResumoDemanda = {
+    porId: async (id: string) => {
+      const e = await editaisRepo.porId(id);
+      return e ? { numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao } : null;
+    },
+  };
+  const listarDemandas = new ListarDemandasFornecedor(credRepo, distribuicaoRepo, editalResumoDemanda, secretariaLookup);
+  registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();

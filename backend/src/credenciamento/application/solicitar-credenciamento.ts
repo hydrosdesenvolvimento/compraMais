@@ -12,6 +12,8 @@ export interface CredenciamentoRepository {
   porFornecedorEEdital(fornecedorId: string, editalId: string): Promise<Credenciamento | null>;
   /** Todos os credenciamentos do fornecedor (qualquer estado), do mais recente ao mais antigo. */
   listarPorFornecedor(fornecedorId: string): Promise<Credenciamento[]>;
+  /** Todos os credenciamentos de um edital (qualquer estado) — base dos aptos do Motor (UC008). */
+  listarPorEdital(editalId: string): Promise<Credenciamento[]>;
 }
 
 export type Actor = { userId: string; empresaId?: string };

@@ -92,6 +92,24 @@ export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'a
 export interface AnaliseDocItem { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string; fornecedorId: string; empresa: string; cnpj: string | null }
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
 export interface Transparencia { editaisVigentes: number; secretarias: string[]; segmentos: string[] }
+/**
+ * UC008 — uma demanda distribuída ao fornecedor. `titular` recebeu cota no rateio (total/aptos/cota
+ * presentes); `reserva` é apto mas ficou fora da matriz vigente (Cadastro de Reserva / 2ª demanda) e
+ * traz apenas o teto declarado. `total`/`aptos`/`cota` são `null` no caso de reserva.
+ */
+export interface DemandaDistribuidaView {
+  editalId: string;
+  numero: string;
+  secretariaSigla: string | null;
+  objeto: string;
+  classificacao: 'titular' | 'reserva';
+  total: number | null;
+  aptos: number | null;
+  cota: number | null;
+  teto: number;
+  geradoEm: string;
+  hash: string;
+}
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
@@ -177,6 +195,8 @@ export const api = {
   fornecedor: (fid: string) => get<FornecedorPerfil>(`/fornecedores/${fid}`),
   editaisCompativeis: () => get<EditalItem[]>('/editais'),
   transparencia: () => get<Transparencia>('/transparencia'),
+  // UC008 — Demandas distribuídas: o rateio que o Motor atribuiu ao fornecedor (empresa vem do token).
+  demandasDistribuidas: () => get<DemandaDistribuidaView[]>('/distribuicao/minhas'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   // Credenciamentos do fornecedor. Sem `incluirCancelados` o backend devolve só os "em andamento"
   // (recorte da home); a tela "Meus Credenciamentos" pede o histórico completo para o filtro de cancelados.

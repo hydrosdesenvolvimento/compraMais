@@ -207,6 +207,66 @@
         "erroSalvar": "Could not save. Check the CNAE code (7 digits) and the description."
       }
     },
+    "tiposArquivos": {
+      "titulo": "File Types",
+      "subtitulo": "Documents required for registration",
+      "novoCadastro": "New type",
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load file types. Check your permissions.",
+      "vazioTitulo": "No type registered",
+      "vazioDica": "Click \"New type\" to add the first one.",
+      "fechar": "Close",
+      "campos": {
+        "documento": "Document",
+        "formato": "Format",
+        "categoria": "Category",
+        "validade": "Validity",
+        "status": "Status",
+        "acoes": "Actions"
+      },
+      "status": {
+        "ativo": "Active",
+        "inativo": "Inactive"
+      },
+      "categorias": {
+        "cadastral": "Registration",
+        "fiscal": "Fiscal",
+        "contratual": "Contractual"
+      },
+      "validade": {
+        "sem": "No validity",
+        "exige": "Requires validity",
+        "exercicio": "Fiscal year",
+        "dias": "{{dias}} days"
+      },
+      "acao": {
+        "editar": "Edit type",
+        "inativar": "Deactivate type",
+        "reativar": "Reactivate type"
+      },
+      "modal": {
+        "tituloCriar": "New file type",
+        "tituloEditar": "Edit file type",
+        "subtitulo": "Fill in the fields and save",
+        "nomePlaceholder": "e.g. FGTS Certificate",
+        "formatoLabel": "Accepted format",
+        "formatoPlaceholder": "PDF",
+        "categoriaLabel": "Category",
+        "categoriaPlaceholder": "Select the category",
+        "validadeLabel": "Validity",
+        "validadeModo": {
+          "sem": "No validity",
+          "dias": "Term in days",
+          "exercicio": "Fiscal year (e.g. Balance sheet)"
+        },
+        "diasLabel": "Term (days)",
+        "diasPlaceholder": "90",
+        "avisoHistorico": "Records are never permanently deleted — deletion converts to Inactive, preserving historical links (notices and uploads).",
+        "cancelar": "Cancel",
+        "salvar": "Save",
+        "erroSalvar": "Could not save. Check the document, format and category."
+      }
+    },
     "perfis": {
       "titulo": "Screen access by role",
       "subtitulo": "Choose which Admin Panel screens each role can see. The Administrator's own access is editable too, but they never lose this screen.",

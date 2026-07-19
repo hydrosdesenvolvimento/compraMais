@@ -207,6 +207,66 @@
         "erroSalvar": "No se pudo guardar. Verifique el código CNAE (7 dígitos) y la descripción."
       }
     },
+    "tiposArquivos": {
+      "titulo": "Tipos de Archivo",
+      "subtitulo": "Documentos exigidos en el registro",
+      "novoCadastro": "Nuevo tipo",
+      "carregando": "Cargando…",
+      "erroCarregar": "No se pudieron cargar los tipos de archivo. Verifique sus permisos.",
+      "vazioTitulo": "Ningún tipo registrado",
+      "vazioDica": "Haga clic en \"Nuevo tipo\" para agregar el primero.",
+      "fechar": "Cerrar",
+      "campos": {
+        "documento": "Documento",
+        "formato": "Formato",
+        "categoria": "Categoría",
+        "validade": "Validez",
+        "status": "Situación",
+        "acoes": "Acciones"
+      },
+      "status": {
+        "ativo": "Activo",
+        "inativo": "Inactivo"
+      },
+      "categorias": {
+        "cadastral": "Registro",
+        "fiscal": "Fiscal",
+        "contratual": "Contractual"
+      },
+      "validade": {
+        "sem": "Sin validez",
+        "exige": "Exige validez",
+        "exercicio": "Ejercicio",
+        "dias": "{{dias}} días"
+      },
+      "acao": {
+        "editar": "Editar tipo",
+        "inativar": "Inactivar tipo",
+        "reativar": "Reactivar tipo"
+      },
+      "modal": {
+        "tituloCriar": "Nuevo tipo de archivo",
+        "tituloEditar": "Editar tipo de archivo",
+        "subtitulo": "Complete los campos y guarde",
+        "nomePlaceholder": "Ej.: Certificado FGTS",
+        "formatoLabel": "Formato aceptado",
+        "formatoPlaceholder": "PDF",
+        "categoriaLabel": "Categoría",
+        "categoriaPlaceholder": "Seleccione la categoría",
+        "validadeLabel": "Validez",
+        "validadeModo": {
+          "sem": "Sin validez",
+          "dias": "Plazo en días",
+          "exercicio": "Ejercicio (ej.: Balance)"
+        },
+        "diasLabel": "Plazo (días)",
+        "diasPlaceholder": "90",
+        "avisoHistorico": "Los registros nunca se eliminan definitivamente — la eliminación los convierte en Inactivo, preservando los vínculos históricos (avisos y cargas).",
+        "cancelar": "Cancelar",
+        "salvar": "Guardar",
+        "erroSalvar": "No se pudo guardar. Verifique el documento, el formato y la categoría."
+      }
+    },
     "perfis": {
       "titulo": "Administración de pantallas por perfil",
       "subtitulo": "Defina qué pantallas del Panel Admin ve cada rol. Los permisos del Administrador también son editables, pero nunca pierde el acceso a esta pantalla.",

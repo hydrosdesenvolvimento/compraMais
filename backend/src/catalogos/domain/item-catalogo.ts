@@ -57,6 +57,9 @@ export class CampoObrigatorio extends Error {
 export class EmailInvalido extends Error {
   constructor(campo: string) { super(`Field '${campo}' must be a valid e-mail.`); this.name = 'EmailInvalido'; }
 }
+export class InteiroInvalido extends Error {
+  constructor(campo: string) { super(`Field '${campo}' must be a positive integer.`); this.name = 'InteiroInvalido'; }
+}
 
 /** Valida e devolve o texto sem espaços nas bordas; lança CampoObrigatorio quando vazio. */
 export function exigirTexto(valor: string | undefined | null, campo: string): string {
@@ -82,4 +85,16 @@ export function emailOpcional(valor: string | undefined | null, campo: string): 
 export function textoOpcional(valor: string | undefined | null): string | undefined {
   const t = (valor ?? '').trim();
   return t || undefined;
+}
+
+/**
+ * Normaliza um inteiro positivo **opcional** (ex.: validade em dias de um tipo de documento). Vazio/nullish
+ * → `undefined` (campo não informado); valor não-inteiro ou ≤ 0 → InteiroInvalido (mapeado a 422 no
+ * controller). Aceita number ou string numérica (o corpo HTTP pode chegar como texto).
+ */
+export function inteiroPositivoOpcional(valor: number | string | undefined | null, campo: string): number | undefined {
+  if (valor === undefined || valor === null || valor === '') return undefined;
+  const n = typeof valor === 'number' ? valor : Number(String(valor).trim());
+  if (!Number.isInteger(n) || n <= 0) throw new InteiroInvalido(campo);
+  return n;
 }

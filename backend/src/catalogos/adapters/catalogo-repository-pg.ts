@@ -105,10 +105,10 @@ export class TipoDocumentoRepositoryPg extends CatalogoPgBase<TipoDocumento> {
   protected async upsert(t: TipoDocumento): Promise<void> {
     const e = t.estado();
     await this.pool.query(
-      `INSERT INTO tipos_documento (id, nome, formato, categoria, exige_validade, exige_exercicio, situacao, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-       ON CONFLICT (id) DO UPDATE SET nome=$2, formato=$3, categoria=$4, exige_validade=$5, exige_exercicio=$6, situacao=$7, update_date=$9, last_user_update=$10`,
-      [e.meta.id, e.nome, e.formato, e.categoria, e.exigeValidade, e.exigeExercicio, e.situacao, e.meta.registerDate, e.meta.updateDate, e.meta.lastUserUpdate],
+      `INSERT INTO tipos_documento (id, nome, formato, categoria, exige_validade, exige_exercicio, validade_dias, situacao, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+       ON CONFLICT (id) DO UPDATE SET nome=$2, formato=$3, categoria=$4, exige_validade=$5, exige_exercicio=$6, validade_dias=$7, situacao=$8, update_date=$10, last_user_update=$11`,
+      [e.meta.id, e.nome, e.formato, e.categoria, e.exigeValidade, e.exigeExercicio, e.validadeDias ?? null, e.situacao, e.meta.registerDate, e.meta.updateDate, e.meta.lastUserUpdate],
     );
   }
   protected mapear(row: Record<string, unknown>): TipoDocumento {
@@ -116,6 +116,7 @@ export class TipoDocumentoRepositoryPg extends CatalogoPgBase<TipoDocumento> {
       meta: meta(row), nome: String(row.nome), formato: String(row.formato),
       categoria: row.categoria as CategoriaDocumento,
       exigeValidade: Boolean(row.exige_validade), exigeExercicio: Boolean(row.exige_exercicio),
+      validadeDias: row.validade_dias == null ? undefined : Number(row.validade_dias),
       situacao: row.situacao as SituacaoCatalogo,
     });
   }

@@ -102,4 +102,12 @@ describe('ManterCatalogos (UC020)', () => {
     expect(t?.categoria).toBe('cadastral');
     expect(t?.exigeExercicio).toBe(true);
   });
+
+  it('tipos de documento: valida prazo de validade em dias e persiste (RF022)', async () => {
+    const { id } = await manter.tiposDocumento.criar(
+      { nome: 'Certidão FGTS', formato: 'pdf', categoria: 'fiscal', exigeValidade: true, validadeDias: 30 }, actor);
+    expect((await manter.tiposDocumento.porId(id))?.validadeDias).toBe(30);
+    await manter.tiposDocumento.editar(id, { validadeDias: 90 }, actor);
+    expect((await manter.tiposDocumento.porId(id))?.validadeDias).toBe(90);
+  });
 });

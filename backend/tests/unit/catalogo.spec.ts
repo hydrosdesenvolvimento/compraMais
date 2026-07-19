@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { Secretaria } from '../../src/catalogos/domain/secretaria.js';
 import { SetorCnae, CnaeInvalido } from '../../src/catalogos/domain/setor-cnae.js';
 import { TipoDocumento, CategoriaInvalida } from '../../src/catalogos/domain/tipo-documento.js';
-import { CampoObrigatorio } from '../../src/catalogos/domain/item-catalogo.js';
+import { CampoObrigatorio, InteiroInvalido } from '../../src/catalogos/domain/item-catalogo.js';
 
 describe('Catálogos base — domínio (UC020)', () => {
   describe('Secretaria (RF020)', () => {
@@ -96,6 +96,30 @@ describe('Catálogos base — domínio (UC020)', () => {
       const diff = t.editar({ exigeExercicio: true, categoria: 'cadastral' }, 'admin1');
       expect(diff.map((d) => d.campo).sort()).toEqual(['categoria', 'exigeExercicio']);
       expect(t.categoria).toBe('cadastral');
+    });
+
+    it('validadeDias é opcional: ausente vira undefined; inteiro positivo é guardado (RF022)', () => {
+      expect(TipoDocumento.criar(base).validadeDias).toBeUndefined();
+      const t = TipoDocumento.criar({ ...base, validadeDias: 90 });
+      expect(t.validadeDias).toBe(90);
+    });
+
+    it('validadeDias recusa não-inteiro ou ≤ 0', () => {
+      expect(() => TipoDocumento.criar({ ...base, validadeDias: 0 })).toThrow(InteiroInvalido);
+      expect(() => TipoDocumento.criar({ ...base, validadeDias: -5 })).toThrow(InteiroInvalido);
+      expect(() => TipoDocumento.criar({ ...base, validadeDias: 1.5 })).toThrow(InteiroInvalido);
+    });
+
+    it('editar altera e limpa validadeDias com diff (round-trip fiel)', () => {
+      const t = TipoDocumento.criar({ ...base, validadeDias: 30 });
+      expect(t.editar({ validadeDias: 30 }, 'admin1')).toHaveLength(0); // igual → sem diff
+      expect(t.editar({ validadeDias: undefined as unknown as number }, 'admin1')).toHaveLength(0); // undefined = campo não enviado
+      expect(t.editar({ validadeDias: 90 }, 'admin1').map((d) => d.campo)).toEqual(['validadeDias']);
+      expect(t.validadeDias).toBe(90);
+      expect(TipoDocumento.deEstado(t.estado()).validadeDias).toBe(90); // round-trip fiel (AD-33)
+      // limpar o prazo: null (JSON) → undefined, gerando diff
+      expect(t.editar({ validadeDias: null as unknown as number }, 'admin1').map((d) => d.campo)).toEqual(['validadeDias']);
+      expect(t.validadeDias).toBeUndefined();
     });
   });
 });

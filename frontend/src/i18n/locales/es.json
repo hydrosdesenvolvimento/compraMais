@@ -606,6 +606,32 @@
         "atualizar": "Actualizar",
         "vazio": "No se encontraron valijas."
       }
+    },
+    "analiseDocumental": {
+      "migalha": "Operación · Análisis Documental",
+      "titulo": "Análisis Documental",
+      "tituloComplemento": "(covalidación)",
+      "subtitulo": "Aprobación o rechazo con justificación obligatoria (RN003)",
+      "carregando": "Cargando cola…",
+      "erroCarregar": "No se pudo cargar la cola de análisis.",
+      "vazioTitulo": "Ningún documento en la cola",
+      "vazioDica": "Todos los análisis se han completado.",
+      "pendente": "Pendiente",
+      "enviadoEm": "enviado el {{data}}",
+      "visualizar": "Ver documento",
+      "reprovar": "Rechazar",
+      "aprovar": "Aprobar",
+      "toastAprovado": "Documento de {{empresa}} aprobado.",
+      "toastReprovado": "Documento de {{empresa}} rechazado.",
+      "toastErro": "No se pudo registrar el veredicto.",
+      "modal": {
+        "titulo": "Rechazar documento",
+        "label": "Justificación del rechazo",
+        "placeholder": "Describa el motivo (p. ej.: imagen ilegible, documento vencido, datos divergentes…). El proveedor verá esta justificación.",
+        "aviso": "La justificación es obligatoria y queda registrada en la auditoría (RN003).",
+        "cancelar": "Cancelar",
+        "confirmar": "Confirmar rechazo"
+      }
     }
   },
   "erros": {

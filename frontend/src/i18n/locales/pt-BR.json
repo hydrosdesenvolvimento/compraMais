@@ -606,6 +606,32 @@
         "atualizar": "Atualizar",
         "vazio": "Nenhum malote encontrado."
       }
+    },
+    "analiseDocumental": {
+      "migalha": "Operação · Análise Documental",
+      "titulo": "Análise Documental",
+      "tituloComplemento": "(covalidação)",
+      "subtitulo": "Aprovação ou reprovação com justificativa obrigatória (RN003)",
+      "carregando": "Carregando fila…",
+      "erroCarregar": "Não foi possível carregar a fila de análise.",
+      "vazioTitulo": "Nenhum documento na fila",
+      "vazioDica": "Todas as análises foram concluídas.",
+      "pendente": "Pendente",
+      "enviadoEm": "enviado em {{data}}",
+      "visualizar": "Visualizar documento",
+      "reprovar": "Reprovar",
+      "aprovar": "Aprovar",
+      "toastAprovado": "Documento de {{empresa}} aprovado.",
+      "toastReprovado": "Documento de {{empresa}} reprovado.",
+      "toastErro": "Não foi possível registrar o veredito.",
+      "modal": {
+        "titulo": "Reprovar documento",
+        "label": "Justificativa da reprovação",
+        "placeholder": "Descreva o motivo (ex.: imagem ilegível, documento vencido, dados divergentes…). O fornecedor verá esta justificativa.",
+        "aviso": "A justificativa é obrigatória e fica registrada na auditoria (RN003).",
+        "cancelar": "Cancelar",
+        "confirmar": "Confirmar reprovação"
+      }
     }
   },
   "erros": {

@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { ExecutarDistribuicao, DistribuicaoRepository } from '../application/executar-distribuicao.js';
 import type { ListarDemandasFornecedor } from '../application/listar-demandas-fornecedor.js';
+import type { ResumoDistribuicaoEdital } from '../application/resumir-distribuicao-edital.js';
 import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
 import { exigirPapel } from '../../shared/http/autenticacao.js';
 
@@ -19,7 +20,7 @@ function empresaDe(id: Identidade): string { return String(id.empresaId ?? id.us
  */
 export function registrarRotasDistribuicao(
   app: FastifyInstance,
-  deps: { executar: ExecutarDistribuicao; repo: DistribuicaoRepository; demandas: ListarDemandasFornecedor },
+  deps: { executar: ExecutarDistribuicao; repo: DistribuicaoRepository; demandas: ListarDemandasFornecedor; resumo: ResumoDistribuicaoEdital },
 ): void {
   app.post('/editais/:id/distribuir', async (req, reply) => {
     const ator = exigirPapel(req, reply, PERFIS_GESTAO);
@@ -39,6 +40,18 @@ export function registrarRotasDistribuicao(
     const matriz = await deps.repo.ultimaDoEdital(id);
     if (!matriz) return reply.code(404).send({ codigo: 'SemDistribuicao', mensagem: 'No distribution has been run for this tender.' });
     return reply.send(matriz);
+  });
+
+  // Painel Admin · "Distribuição Inteligente": cabeçalho + totais + rateio enriquecido (nome +
+  // capacidade + cota). Mostra a matriz homologada se já existir, senão o preview do Motor (RN005).
+  app.get('/gestao/editais/:id/distribuicao', async (req, reply) => {
+    if (!exigirPapel(req, reply, PERFIS_GESTAO)) return reply;
+    const { id } = req.params as { id: string };
+    try {
+      return reply.send(await deps.resumo.resumir(id));
+    } catch (e) {
+      return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message });
+    }
   });
 
   app.get('/distribuicao/minhas', async (req, reply) => {

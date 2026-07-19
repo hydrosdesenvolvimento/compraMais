@@ -90,6 +90,24 @@ export interface EditalElegiveisView {
   edital: { id: string; numero: string; objeto: string; secretariaSigla: string | null; cnaesAlvo: string[]; situacao: string };
   elegiveis: FornecedorElegivelView[];
 }
+/** Tela "Distribuição Inteligente" (Painel Admin · Operação) — uma linha do rateio (UC008/RN005). */
+export interface RateioLinhaView { fornecedorId: string; nome: string; capacidade: number; cota: number }
+/**
+ * Resumo da distribuição de um edital. `homologada=true` = matriz congelada (append-only); `false` =
+ * preview determinístico do Motor, ainda por homologar. `total` = demanda; `distribuido` = soma das
+ * cotas (< total quando há `deficit`, RN005); `habilitados` = fornecedores no rateio.
+ */
+export interface ResumoDistribuicaoView {
+  edital: { id: string; numero: string; objeto: string; secretariaSigla: string | null; situacao: string };
+  homologada: boolean;
+  versao: number | null;
+  total: number;
+  distribuido: number;
+  habilitados: number;
+  deficit: boolean;
+  deficitQuantidade: number;
+  rateio: RateioLinhaView[];
+}
 export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: 'pendente' | 'aprovado' | 'reprovado'; dataValidade: string | null; motivoReprovacao: string | null }
 /** Resumo de um credenciamento do fornecedor (home) — estado + objeto/secretaria do edital vinculado. */
 export interface CredenciamentoResumoView {
@@ -287,6 +305,10 @@ export const api = {
   editaisOperacao: (situacao?: string) => get<EditalGestao[]>(`/gestao/editais?size=200${situacao ? `&situacao=${encodeURIComponent(situacao)}` : ''}`),
   // Tela "Credenciamento em Edital": fornecedores elegíveis de um edital (filtro CNAE RN001 + regularidade RN002).
   editaisElegiveis: (editalId: string) => get<EditalElegiveisView>(`/gestao/editais/${editalId}/elegiveis`),
+  // Tela "Distribuição Inteligente": resumo do rateio de um edital (matriz homologada ou preview do Motor).
+  resumoDistribuicao: (editalId: string) => get<ResumoDistribuicaoView>(`/gestao/editais/${editalId}/distribuicao`),
+  // Homologar = executar + congelar a matriz append-only (UC008: "frações homologadas"). Reusa POST /distribuir.
+  homologarDistribuicao: (editalId: string) => send<unknown>(`/editais/${editalId}/distribuir`, 'POST'),
   criarEdital: (body: unknown) => send('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),

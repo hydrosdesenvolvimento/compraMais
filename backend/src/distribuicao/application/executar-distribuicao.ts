@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
-import { distribuir, type AptoDistribuicao } from '../domain/motor.js';
+import { distribuir } from '../domain/motor.js';
 import { montarRegistro, type RegistroDistribuicao } from '../domain/registro-distribuicao.js';
 import { DistribuicaoExecutada } from '../domain/eventos.js';
+import { montarAptosDoEdital } from './montar-aptos.js';
 import type { EventBus } from '../../shared/events/event-bus.js';
 import type { CredenciamentoRepository } from '../../credenciamento/application/solicitar-credenciamento.js';
 import type { FornecedorRepository } from '../../catalogo/application/fornecedor-repository.js';
@@ -58,17 +59,7 @@ export class ExecutarDistribuicao {
     if (!e) throw new EditalNaoEncontrado();
     if (!e.podeDistribuir) throw new EditalNaoDistribuivel(); // guarda de estado
 
-    const aceitos = (await this.creds.listarPorEdital(editalId)).filter((c) => c.situacao === 'aceito');
-    const aptos: AptoDistribuicao[] = [];
-    for (const c of aceitos) {
-      const f = await this.fornecedores.porId(c.fornecedorId);
-      aptos.push({
-        id: c.fornecedorId,
-        teto: c.capacidadeTeto, // teto declarado (RN005)
-        ordemCredenciamento: Date.parse(c.registerDate), // ordem de credenciamento — desempate primário (§8)
-        cnpj: f?.cnpj.valor ?? c.fornecedorId, // desempate secundário; fallback estável se o fornecedor sumiu
-      });
-    }
+    const aptos = await montarAptosDoEdital(this.creds, this.fornecedores, editalId);
 
     // Kernel puro (AD-7/AD-24): lança SemAptos se `aptos` vazio, DemandaInvalida se demanda ≤ 0.
     const resultado = distribuir({ demanda: e.quantitativos, aptos });

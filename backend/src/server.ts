@@ -109,6 +109,7 @@ import type { VisibilidadeRepository } from './permissoes/application/visibilida
 import { registrarRotasPermissoes } from './permissoes/adapters/permissoes-controller.js';
 import { ExecutarDistribuicao, type DistribuicaoRepository } from './distribuicao/application/executar-distribuicao.js';
 import { ListarDemandasFornecedor } from './distribuicao/application/listar-demandas-fornecedor.js';
+import { ResumoDistribuicaoEdital } from './distribuicao/application/resumir-distribuicao-edital.js';
 import { DistribuicaoRepositoryMemory } from './distribuicao/adapters/distribuicao-repository-memory.js';
 import { DistribuicaoRepositoryPg } from './distribuicao/adapters/distribuicao-repository-pg.js';
 import { registrarRotasDistribuicao } from './distribuicao/adapters/distribuicao-controller.js';
@@ -330,7 +331,10 @@ export async function buildServer(): Promise<FastifyInstance> {
     },
   };
   const listarDemandas = new ListarDemandasFornecedor(credRepo, distribuicaoRepo, editalResumoDemanda, secretariaLookup);
-  registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas });
+  // Painel Admin · "Distribuição Inteligente": resumo por edital (cabeçalho + totais + rateio). Reusa o
+  // `editaisRepo` como leitura (a instância `Edital` satisfaz o lookup mínimo, inclui `quantitativos`).
+  const resumoDistribuicao = new ResumoDistribuicaoEdital(editaisRepo, credRepo, fornecedores, distribuicaoRepo, secretariaLookup);
+  registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas, resumo: resumoDistribuicao });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();

@@ -234,6 +234,20 @@
       "homologadaEm": "Distribuição homologada · versão {{versao}}",
       "erroHomologar": "Não foi possível homologar a distribuição."
     },
+    "reserva": {
+      "eyebrow": "Operação · Cadastro de Reserva",
+      "titulo": "Cadastro de Reserva",
+      "subtitulo": "Gestão de retardatários sem alterar contratos vigentes (RN004)",
+      "avisoTitulo": "Fila de reserva.",
+      "avisoTexto": "Fornecedores aprovados após a distribuição inicial são alocados aqui sem alterar as cotas já distribuídas. Serão acionados em ordem cronológica caso algum titular descumpra a entrega.",
+      "carregando": "Carregando fila de reserva…",
+      "erroCarregar": "Não foi possível carregar o cadastro de reserva.",
+      "vazioTitulo": "Nenhum fornecedor em reserva",
+      "vazioDica": "Fornecedores aprovados após a distribuição inicial aparecerão aqui, em ordem cronológica.",
+      "capacidade": "Cap. {{cap}} un/mês",
+      "posicaoLabel": "Posição {{posicao}} na fila de reserva",
+      "chip": "Reserva"
+    },
     "setoresIndustriais": {
       "titulo": "Setores Industriais (CNAE)",
       "subtitulo": "Códigos de atividade econômica aceitos",

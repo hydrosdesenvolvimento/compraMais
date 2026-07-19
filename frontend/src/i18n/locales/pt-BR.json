@@ -625,6 +625,24 @@
     "malote": {
       "titulo": "Malote SEI",
       "subtitulo": "Consolide a documentação aprovada de um fornecedor em um dossiê ordenado (CNPJ → Pessoal → Anexos → Certidões) e otimizado para upload no SEI. A geração é assíncrona e durável; peça indivisível acima do limite é sinalizada para tratamento manual.",
+      "novoMalote": "Gerar malote",
+      "carregando": "Carregando malotes…",
+      "erroCarregar": "Não foi possível carregar os malotes.",
+      "vazioTitulo": "Nenhum malote ainda",
+      "vazioDica": "Gere um malote a partir da documentação aprovada de um fornecedor.",
+      "campos": {
+        "fornecedor": "Fornecedor",
+        "edital": "Edital",
+        "status": "Status",
+        "fragmentos": "Fragmentos",
+        "acoes": "Ações"
+      },
+      "modal": {
+        "subtitulo": "A ordem legal (CNPJ → Pessoal → Anexos → Certidões) e a fragmentação pelo limite do SEI são aplicadas automaticamente na geração.",
+        "fechar": "Fechar",
+        "cancelar": "Cancelar",
+        "removerPeca": "Remover peça"
+      },
       "gerar": {
         "titulo": "Gerar novo malote",
         "fornecedorId": "ID do fornecedor",

@@ -625,6 +625,24 @@
     "malote": {
       "titulo": "SEI Package",
       "subtitulo": "Consolidate a supplier's approved documents into an ordered dossier (Company ID → Personal → Attachments → Certificates) optimized for SEI upload. Generation is asynchronous and durable; an indivisible piece above the limit is flagged for manual handling.",
+      "novoMalote": "Generate package",
+      "carregando": "Loading packages…",
+      "erroCarregar": "Could not load the packages.",
+      "vazioTitulo": "No packages yet",
+      "vazioDica": "Generate a package from a supplier's approved documents.",
+      "campos": {
+        "fornecedor": "Supplier",
+        "edital": "Notice",
+        "status": "Status",
+        "fragmentos": "Fragments",
+        "acoes": "Actions"
+      },
+      "modal": {
+        "subtitulo": "The legal order (Company ID → Personal → Attachments → Certificates) and fragmentation by the SEI limit are applied automatically on generation.",
+        "fechar": "Close",
+        "cancelar": "Cancel",
+        "removerPeca": "Remove piece"
+      },
       "gerar": {
         "titulo": "Generate new package",
         "fornecedorId": "Supplier ID",

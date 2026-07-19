@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { api, type CredenciamentoResumoView } from '../../lib/api';
 import { obterUsuario } from '../../lib/auth';
 import { exportarCsv } from '../../lib/exportar';
-import { celula, siglaTag, botaoExportar, cabecalho, setaOrdem, Paginacao, type Direcao } from '../../design-system/tabela';
+import { celula, botaoExportar, cabecalho, setaOrdem, Paginacao, type Direcao } from '../../design-system/tabela';
 import { IconeBusca, IconeDownload, IconeSeta, IconeFechar } from '../../design-system/icons';
 
 /** Colunas ordenáveis. `criadoEm`/`atualizadoEm` ordenam por data (ISO), não pelo texto exibido. */
@@ -15,22 +15,23 @@ type Filtro = 'all' | 'iniciado' | 'aceito' | 'cancelado';
 const POR_PAGINA = 5;
 
 /**
- * Aparência e ação de cada estado do credenciamento.
+ * Aparência e ação primária de cada estado do credenciamento (protótipo `spec/Prototipo/portal-fornecedor.html`).
  *
- * O spec prevê 4 situações (Em andamento / Finalizado / Cancelado / Não iniciado); o domínio (UC004)
- * só tem 3 — `naoiniciado` não existe aqui porque o credenciamento só nasce quando o fornecedor
- * declara a capacidade (RN005). As ações seguem o que o domínio permite de fato:
- *  - `iniciado`  → "Continuar": reabre o wizard do edital.
- *  - `aceito`    → sem ação primária: o termo já foi assinado (RN016) e não há tela de detalhe;
- *                  a saída daqui é o cancelamento (A2), enquanto não houver distribuição.
+ * O protótipo mostra 4 chips (Todos / Em andamento / Finalizados / Cancelados); o domínio (UC004) tem 3
+ * estados — não há "Não iniciado" porque o credenciamento só nasce quando o fornecedor declara a
+ * capacidade (RN005). Cada estado tem uma ação primária:
+ *  - `iniciado`  → "Continuar": reabre o wizard do edital de onde parou (Etapa n/N).
+ *  - `aceito`    → "Visualizar": abre o detalhe read-only do credenciamento concluído (termo RN016).
  *  - `cancelado` → "Credenciar novamente": inicia um NOVO credenciamento — o backend só barra
- *                  duplicidade quando existe um credenciamento ativo, e cancelado não é ativo.
- *                  (O "Reabrir" do spec não existe: cancelar é terminal para aquele registro.)
+ *                  duplicidade quando há um ativo, e cancelado não é ativo. (Cancelar é terminal.)
+ *
+ * O `×` de cancelar (A2) aparece só em `iniciado`, como no protótipo — o finalizado sai por "Visualizar".
  */
-const ESTADOS: Record<CredenciamentoResumoView['estado'], { bg: string; fg: string; dot: string; temAcao: boolean }> = {
-  iniciado: { bg: 'var(--atencao-bg)', fg: '#8A5410', dot: 'var(--atencao)', temAcao: true },
-  aceito: { bg: 'var(--sucesso-bg)', fg: 'var(--sucesso)', dot: 'var(--sucesso)', temAcao: false },
-  cancelado: { bg: 'var(--erro-bg)', fg: 'var(--erro-700)', dot: 'var(--erro)', temAcao: true },
+type AcaoEstado = 'continuar' | 'visualizar' | 'recredenciar';
+const ESTADOS: Record<CredenciamentoResumoView['estado'], { bg: string; fg: string; dot: string; acao: AcaoEstado }> = {
+  iniciado: { bg: 'var(--atencao-bg)', fg: '#8A5410', dot: 'var(--atencao)', acao: 'continuar' },
+  aceito: { bg: 'var(--sucesso-bg)', fg: 'var(--sucesso)', dot: 'var(--sucesso)', acao: 'visualizar' },
+  cancelado: { bg: 'var(--erro-bg)', fg: 'var(--erro-700)', dot: 'var(--erro)', acao: 'recredenciar' },
 };
 
 const pill: CSSProperties = {
@@ -46,12 +47,11 @@ const botaoCancelar: CSSProperties = {
 /**
  * Meus Credenciamentos (UC004) — acompanha os credenciamentos da empresa e retoma o que está em andamento.
  *
- * Layout adaptado de `spec/AI-UI-Design/portal-fornecedor.html` (chips com contagem + busca + export +
- * tabela ordenável + paginação). Divergências deliberadas em relação ao spec, por falta de lastro no
- * domínio: (1) a coluna "Etapa n/5" não existe — o backend não persiste o passo do wizard, então a
- * situação real do credenciamento já é o que a coluna Status mostra; (2) o wizard tem 4 passos, não 5
- * (a prova de vida/UC007 está fora do MVP). Busca, filtro, ordenação e paginação são client-side sobre
- * a lista do fornecedor.
+ * Layout adaptado de `spec/Prototipo/portal-fornecedor.html` (chips com contagem + busca + export +
+ * tabela ordenável + paginação). O subtítulo do objeto mostra "SIGLA · Etapa n/N" (passo do wizard
+ * persistido no domínio, UC004). Divergência deliberada em relação ao protótipo: o total de passos é
+ * 4/4, não 5/5 — a prova de vida/UC007 está fora do MVP. Busca, filtro, ordenação e paginação são
+ * client-side sobre a lista do fornecedor.
  */
 export function MeusCredenciamentos({ fornecedorId }: { fornecedorId: string }) {
   const { t } = useTranslation();
@@ -155,6 +155,16 @@ export function MeusCredenciamentos({ fornecedorId }: { fornecedorId: string }) 
   );
 
   const irParaWizard = (editalId: string) => navigate({ to: '/credenciamento/$editalId', params: { editalId } });
+  const irParaDetalhe = (id: string) => navigate({ to: '/credenciamentos/$id', params: { id } });
+
+  // Subtítulo do objeto (protótipo): "SIGLA · Etapa n/N". A etapa acompanha o passo do wizard nos
+  // ativos; no cancelado fica só a sigla (o passo congelou e não há para onde continuar).
+  const subObjeto = (c: CredenciamentoResumoView): string | null => {
+    const sig = c.secretariaSigla;
+    if (c.estado === 'cancelado') return sig;
+    const etapa = t('meusCredenciamentos.etapa', { atual: c.passoAtual, total: c.totalPassos });
+    return sig ? `${sig} · ${etapa}` : etapa;
+  };
 
   return (
     <div className="stack" data-cy="meus-credenciamentos">
@@ -275,8 +285,10 @@ export function MeusCredenciamentos({ fornecedorId }: { fornecedorId: string }) 
                           </td>
                           <td style={{ ...celula, fontSize: 14, color: 'var(--cinza-900)', minWidth: 220 }}>
                             {objeto(c)}
-                            {c.secretariaSigla && (
-                              <div style={{ marginTop: 4 }}><span style={siglaTag}>{c.secretariaSigla}</span></div>
+                            {subObjeto(c) && (
+                              <div data-cy="sub-objeto" style={{ marginTop: 3, fontSize: 12.5, color: 'var(--cinza-500)' }}>
+                                {subObjeto(c)}
+                              </div>
                             )}
                           </td>
                           <td style={celula}>
@@ -293,8 +305,8 @@ export function MeusCredenciamentos({ fornecedorId }: { fornecedorId: string }) 
                           </td>
                           <td style={{ ...celula, textAlign: 'right' }}>
                             <div style={{ display: 'inline-flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
-                              {/* Cancelamento (A2) — permitido enquanto não houver distribuição; cancelado é terminal. */}
-                              {c.estado !== 'cancelado' && (
+                              {/* Cancelamento (A2) — só em "Em andamento", como no protótipo; o finalizado sai por "Visualizar". */}
+                              {c.estado === 'iniciado' && (
                                 <button
                                   type="button"
                                   data-cy="cancelar"
@@ -307,18 +319,16 @@ export function MeusCredenciamentos({ fornecedorId }: { fornecedorId: string }) 
                                   <IconeFechar width={16} height={16} />
                                 </button>
                               )}
-                              {meta.temAcao && (
-                                <button
-                                  type="button"
-                                  data-cy={c.estado === 'iniciado' ? 'continuar' : 'recredenciar'}
-                                  className="btn btn-primary"
-                                  onClick={() => irParaWizard(c.editalId)}
-                                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' }}
-                                >
-                                  {c.estado === 'iniciado' ? t('meusCredenciamentos.acao.continuar') : t('meusCredenciamentos.acao.recredenciar')}
-                                  <IconeSeta width={15} height={15} />
-                                </button>
-                              )}
+                              <button
+                                type="button"
+                                data-cy={meta.acao}
+                                className="btn btn-primary"
+                                onClick={() => (meta.acao === 'visualizar' ? irParaDetalhe(c.id) : irParaWizard(c.editalId))}
+                                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, whiteSpace: 'nowrap' }}
+                              >
+                                {t(`meusCredenciamentos.acao.${meta.acao}`)}
+                                <IconeSeta width={15} height={15} />
+                              </button>
                             </div>
                           </td>
                         </tr>

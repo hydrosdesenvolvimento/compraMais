@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { SolicitarCredenciamento, Actor } from '../application/solicitar-credenciamento.js';
 import type { ListarCredenciamentos } from '../application/listar-credenciamentos.js';
+import type { DetalharCredenciamento } from '../application/detalhar-credenciamento.js';
 import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
 import { exigirPapel } from '../../shared/http/autenticacao.js';
 
@@ -13,7 +14,7 @@ const PERFIS_FORNECEDOR: readonly Papel[] = ['titular', 'procurador'];
  * um titular podia credenciar em nome de qualquer empresa só trocando o header.
  * Conclusão por Termo de Aceite (RN016) e cancelamento antes da distribuição (A2).
  */
-export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento; listar: ListarCredenciamentos }): void {
+export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento; listar: ListarCredenciamentos; detalhar: DetalharCredenciamento }): void {
   // Leitura: credenciamentos do fornecedor para o portal. Somente "em andamento" por padrão (não
   // cancelados) — recorte da home; resolvido por `:id` como as demais rotas de leitura do fornecedor
   // (documentos). `?incluirCancelados=true` devolve o histórico completo, que a tela "Meus
@@ -22,6 +23,18 @@ export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solic
     const { id } = req.params as { id: string };
     const { incluirCancelados } = req.query as { incluirCancelados?: string };
     return reply.send(await deps.listar.doFornecedor(id, { incluirCancelados: incluirCancelados === 'true' }));
+  });
+
+  // Detalhe read-only de um credenciamento (ação "Visualizar" da tela "Meus Credenciamentos"). A posse
+  // é do dono do vínculo: a projeção só devolve se o credenciamento é da empresa do token (AD-20) —
+  // fora disso, 404 (não vaza a existência do id para outra empresa).
+  app.get('/credenciamentos/:id', async (req, reply) => {
+    const identidade = exigirPapel(req, reply, PERFIS_FORNECEDOR);
+    if (!identidade) return reply;
+    const { id } = req.params as { id: string };
+    const detalhe = await deps.detalhar.doFornecedor(id, empresaDe(identidade));
+    if (!detalhe) return reply.code(404).send({ codigo: 'CredenciamentoNaoEncontrado', mensagem: 'Credenciamento not found.' });
+    return reply.send(detalhe);
   });
 
   app.post('/editais/:id/credenciamentos', async (req, reply) => {
@@ -44,6 +57,21 @@ export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solic
     const { versaoTermo, finalidade } = req.body as { versaoTermo: string; finalidade: string };
     try {
       const out = await deps.solicitar.aceitarTermo(id, { versaoTermo, finalidade }, ator(identidade));
+      return reply.send(out);
+    } catch (e) {
+      return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message });
+    }
+  });
+
+  // O wizard reporta o passo em que o fornecedor está (UC004) para "Meus Credenciamentos" mostrar
+  // "Etapa n/N" e o "Continuar" retomar de onde parou. Mesmo perfil dono do vínculo das demais escritas.
+  app.patch('/credenciamentos/:id/passo', async (req, reply) => {
+    const identidade = exigirPapel(req, reply, PERFIS_FORNECEDOR);
+    if (!identidade) return reply;
+    const { id } = req.params as { id: string };
+    const { passo } = req.body as { passo: number };
+    try {
+      const out = await deps.solicitar.registrarPasso(id, passo, ator(identidade));
       return reply.send(out);
     } catch (e) {
       return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message });

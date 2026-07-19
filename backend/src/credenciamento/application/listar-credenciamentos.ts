@@ -1,5 +1,5 @@
 import type { CredenciamentoRepository } from './solicitar-credenciamento.js';
-import type { EstadoCredenciamento } from '../domain/credenciamento.js';
+import { TOTAL_PASSOS_CREDENCIAMENTO, type EstadoCredenciamento } from '../domain/credenciamento.js';
 
 /** Fonte de leitura mínima de editais para enriquecer o resumo (número/objeto/secretaria por editalId). */
 export interface EditalLookup {
@@ -24,6 +24,8 @@ export interface CredenciamentoResumo {
   objeto: string | null; // do edital vinculado (null se o edital sumiu)
   secretariaId: string | null;
   secretariaSigla: string | null; // sigla do catálogo; cai para o id quando não catalogada
+  passoAtual: number; // passo do wizard em que o fornecedor parou (UC004) — base do "Etapa n/N"
+  totalPassos: number; // N do "Etapa n/N" — fonte de verdade do domínio (4, não 5 do protótipo)
   criadoEm: string; // ISO-8601 — auditoria de linha do próprio agregado (AD-33), sem coluna nova
   atualizadoEm: string; // ISO-8601
 }
@@ -55,6 +57,8 @@ export class ListarCredenciamentos {
           objeto: e?.objeto ?? null,
           secretariaId: e?.secretariaId ?? null,
           secretariaSigla: await this.sigla(e?.secretariaId ?? null),
+          passoAtual: c.passoAtual,
+          totalPassos: TOTAL_PASSOS_CREDENCIAMENTO,
           criadoEm: c.registerDate,
           atualizadoEm: c.updateDate,
         };

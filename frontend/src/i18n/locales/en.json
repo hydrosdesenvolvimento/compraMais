@@ -1179,6 +1179,7 @@
   "meusCredenciamentos": {
     "titulo": "My Accreditations",
     "subtitulo": "Track all of your company’s accreditations and pick up where you left off.",
+    "etapa": "Step {{atual}}/{{total}}",
     "carregando": "Loading…",
     "semEmpresa": "No company linked to your account.",
     "editalRemovido": "Notice removed",
@@ -1205,6 +1206,7 @@
     },
     "acao": {
       "continuar": "Continue",
+      "visualizar": "View",
       "recredenciar": "Apply again",
       "cancelar": "Cancel accreditation"
     },
@@ -1214,5 +1216,26 @@
     "vazioFiltroDica": "Adjust the search or pick another status.",
     "paginacaoInfo": "Showing {{de}}–{{ate}} of {{total}} accreditations",
     "irParaPagina": "Go to page {{n}}"
+  },
+  "credenciamentoDetalhe": {
+    "titulo": "Accreditation detail",
+    "voltar": "Back to accreditations",
+    "carregando": "Loading…",
+    "naoEncontrado": "Accreditation not found.",
+    "naoEncontradoDica": "It may have been removed or does not belong to your company.",
+    "edital": "Notice",
+    "objeto": "Subject",
+    "secretaria": "Department",
+    "situacao": "Status",
+    "capacidade": "Declared capacity",
+    "capacidadeUnidades": "{{n}} units",
+    "etapa": "Step",
+    "termoTitulo": "Acceptance Term",
+    "termoVersao": "Version",
+    "termoFinalidade": "Purpose",
+    "termoAceitoEm": "Accepted on",
+    "semTermo": "Acceptance Term not signed yet.",
+    "criadoEm": "Created on",
+    "atualizadoEm": "Last update"
   }
 }

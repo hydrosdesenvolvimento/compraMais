@@ -85,7 +85,17 @@ export interface CredenciamentoResumoView {
   numeroEdital: string | null; // ED-AAAA/NNN — null se o edital sumiu
   objeto: string | null; secretariaId: string | null;
   secretariaSigla: string | null; // sigla do catálogo; cai para o id quando não catalogada
+  passoAtual: number; totalPassos: number; // "Etapa n/N" — N é do domínio (4), não os 5 do protótipo
   criadoEm: string; atualizadoEm: string; // ISO-8601
+}
+/** Termo de Aceite (RN016) — rastro do aceite exibido no detalhe read-only. */
+export interface TermoAceiteView { versao: string; finalidade: string; aceitoEm: string }
+/** Detalhe read-only de um credenciamento (ação "Visualizar" — UC004). Sem dados restritos. */
+export interface CredenciamentoDetalheView {
+  id: string; editalId: string; estado: 'iniciado' | 'aceito' | 'cancelado';
+  numeroEdital: string | null; objeto: string | null; secretariaSigla: string | null;
+  capacidadeTeto: number; passoAtual: number; totalPassos: number;
+  termo: TermoAceiteView | null; criadoEm: string; atualizadoEm: string;
 }
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
 /** Item da fila global da tela "Análise Documental" (covalidação) — inclui empresa e CNPJ resolvidos. */
@@ -230,6 +240,11 @@ export const api = {
   iniciarCredenciamento: (editalId: string, capacidade: number) => send<{ credenciamentoId: string; estado: string }>(`/editais/${editalId}/credenciamentos`, 'POST', { capacidade }),
   aceitarTermo: (credId: string, body: { versaoTermo: string; finalidade: string }) => send<{ estado: string; status: string }>(`/credenciamentos/${credId}/termo`, 'POST', body),
   cancelarCredenciamento: (credId: string) => send<{ estado: string }>(`/credenciamentos/${credId}/cancelar`, 'POST'),
+  // O wizard reporta o passo em que o fornecedor está (UC004) para "Meus Credenciamentos" mostrar
+  // "Etapa n/N" e o "Continuar" retomar de onde parou. Melhor-esforço: falha aqui não trava o wizard.
+  registrarPassoCredenciamento: (credId: string, passo: number) => send<{ passoAtual: number }>(`/credenciamentos/${credId}/passo`, 'PATCH', { passo }),
+  // Detalhe read-only para a ação "Visualizar" do credenciamento finalizado.
+  detalharCredenciamento: (credId: string) => get<CredenciamentoDetalheView>(`/credenciamentos/${credId}`),
 
   // Painel admin
   dashboardAdmin: () => get<Funil>('/admin/dashboard'),

@@ -23,6 +23,7 @@ const CRED = (over: Partial<CredenciamentoResumoView> = {}): CredenciamentoResum
   id: 'c1', editalId: 'e1', estado: 'iniciado',
   numeroEdital: 'ED-2026/003', objeto: 'Uniformes de educação infantil',
   secretariaId: 'sec-seme', secretariaSigla: 'SEME',
+  passoAtual: 1, totalPassos: 4,
   criadoEm: '2026-06-10T09:12:00.000Z', atualizadoEm: '2026-06-14T16:40:00.000Z',
   ...over,
 });
@@ -50,7 +51,8 @@ describe('MeusCredenciamentos (UC004) — layout do spec portal-fornecedor', () 
     const linha = await screen.findByTestId('credenciamento-item');
     expect(within(linha).getByText('ED-2026/003')).toBeInTheDocument();
     expect(within(linha).getByText('Uniformes de educação infantil')).toBeInTheDocument();
-    expect(within(linha).getByText('SEME')).toBeInTheDocument();
+    // Sigla + etapa no subtítulo do objeto (protótipo): "SEME · Etapa 1/4".
+    expect(within(linha).getByTestId('sub-objeto')).toHaveTextContent('SEME · Etapa 1/4');
     expect(within(linha).getByTestId('status')).toHaveTextContent('Em andamento');
   });
 
@@ -62,13 +64,16 @@ describe('MeusCredenciamentos (UC004) — layout do spec portal-fornecedor', () 
     expect(navigate).toHaveBeenCalledWith({ to: '/credenciamento/$editalId', params: { editalId: 'e1' } });
   });
 
-  it('finalizado não oferece ação primária (termo já assinado, sem tela de detalhe)', async () => {
-    meusCredenciamentos.mockResolvedValue([CRED({ estado: 'aceito' })]);
+  it('finalizado oferece "Visualizar" (detalhe read-only) e não oferece cancelar', async () => {
+    meusCredenciamentos.mockResolvedValue([CRED({ estado: 'aceito', passoAtual: 4 })]);
     renderTela();
 
     expect(await screen.findByTestId('status')).toHaveTextContent('Finalizado');
     expect(screen.queryByTestId('continuar')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('recredenciar')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('cancelar')).not.toBeInTheDocument(); // × só em "Em andamento"
+
+    fireEvent.click(screen.getByTestId('visualizar'));
+    expect(navigate).toHaveBeenCalledWith({ to: '/credenciamentos/$id', params: { id: 'c1' } });
   });
 
   it('cancelado oferece recredenciar e não oferece cancelar (cancelar é terminal)', async () => {

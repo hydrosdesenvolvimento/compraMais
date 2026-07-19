@@ -5,6 +5,8 @@ import {
   TermoIncompleto,
   TransicaoCredenciamentoInvalida,
   CredenciamentoJaDistribuido,
+  PassoInvalido,
+  TOTAL_PASSOS_CREDENCIAMENTO,
 } from '../../src/credenciamento/domain/credenciamento.js';
 
 const base = { id: 'c1', fornecedorId: 'f1', editalId: 'e1', capacidadeTeto: 500 };
@@ -15,6 +17,37 @@ describe('Credenciamento (domínio — UC004)', () => {
     expect(c.situacao).toBe('iniciado');
     expect(c.capacidadeTeto).toBe(500);
     expect(c.termo).toBeNull();
+    expect(c.passoAtual).toBe(1); // Capacidade é o passo de nascimento
+  });
+
+  it('registra o passo do wizard enquanto "iniciado" (UC004 — "Etapa n/N")', () => {
+    const c = Credenciamento.iniciar(base);
+    c.registrarPasso(2, 'f1'); // Documentos
+    expect(c.passoAtual).toBe(2);
+    c.registrarPasso(3, 'f1'); // Termo
+    expect(c.passoAtual).toBe(3);
+    c.registrarPasso(2, 'f1'); // o wizard permite voltar
+    expect(c.passoAtual).toBe(2);
+  });
+
+  it('rejeita passo fora de 1..N-1 (o passo N/Concluído só vem pelo aceite)', () => {
+    const c = Credenciamento.iniciar(base);
+    expect(() => c.registrarPasso(0)).toThrow(PassoInvalido);
+    expect(() => c.registrarPasso(TOTAL_PASSOS_CREDENCIAMENTO)).toThrow(PassoInvalido);
+    expect(() => c.registrarPasso(1.5)).toThrow(PassoInvalido);
+  });
+
+  it('não registra passo fora de "iniciado" (aceito/cancelado congelam o passo)', () => {
+    const aceito = Credenciamento.iniciar(base);
+    aceito.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' });
+    expect(() => aceito.registrarPasso(2)).toThrow(TransicaoCredenciamentoInvalida);
+  });
+
+  it('o aceite do termo leva ao passo final (Concluído = N)', () => {
+    const c = Credenciamento.iniciar(base);
+    c.registrarPasso(2, 'f1');
+    c.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' });
+    expect(c.passoAtual).toBe(TOTAL_PASSOS_CREDENCIAMENTO);
   });
 
   it('rejeita capacidade não positiva ou não inteira (RN005)', () => {

@@ -72,6 +72,7 @@ import { registrarRotasElegibilidade } from './credenciamento/adapters/elegibili
 import { registrarRotasRegularizacao } from './credenciamento/adapters/regularizacao-controller.js';
 import { SolicitarCredenciamento, type CredenciamentoRepository } from './credenciamento/application/solicitar-credenciamento.js';
 import { ListarCredenciamentos, type SecretariaLookup } from './credenciamento/application/listar-credenciamentos.js';
+import { DetalharCredenciamento } from './credenciamento/application/detalhar-credenciamento.js';
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
@@ -305,7 +306,8 @@ export async function buildServer(): Promise<FastifyInstance> {
     siglaPorId: async (id) => (await secretariasRepo.porId(id))?.sigla ?? null,
   };
   const listarCredenciamentos = new ListarCredenciamentos(credRepo, editaisRepo, secretariaLookup);
-  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos });
+  const detalharCredenciamento = new DetalharCredenciamento(credRepo, editaisRepo, secretariaLookup);
+  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento });
 
   // Motor de Distribuição (Épico 5 / UC008 / RF005). A gestão dispara o rateio de um edital
   // distribuível (publicado); a matriz canônica append-only é durável em Postgres quando disponível

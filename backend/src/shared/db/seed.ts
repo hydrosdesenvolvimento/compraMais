@@ -8,7 +8,9 @@ import type { Papel } from '../identity/identity-provider.js';
 import { GerirDocumentos } from '../../credenciamento/application/gerir-documentos.js';
 import { DocumentoRepositoryPg, ObjectStoragePg } from '../../credenciamento/adapters/documentos-pg.js';
 import { PiiCipherAesGcm } from '../crypto/pii-cipher-aes.js';
-import type { FormatoDoc } from '../../credenciamento/domain/documento.js';
+import { Documento, type FormatoDoc } from '../../credenciamento/domain/documento.js';
+import { Fornecedor } from '../../catalogo/domain/fornecedor.js';
+import { FornecedorRepositoryPg } from '../../catalogo/adapters/fornecedor-repository-pg.js';
 import type { Pool } from 'pg';
 
 /**
@@ -73,6 +75,48 @@ async function seedDocumentos(pool: Pool, piiKey: Buffer): Promise<void> {
   console.log(`[seed] documentos: ${criados} criado(s) para demo-fornecedor.`);
 }
 
+/**
+ * Fila da tela "Análise Documental" (Painel Admin · covalidação). Semeia fornecedores em
+ * `pendente_analise`, cada um com um Balanço Patrimonial pendente — o alvo da covalidação humana
+ * (RN003/RF004). Sem isto a tela nasce vazia ("Nenhum documento na fila"), o que parece "em
+ * construção". CNPJs são válidos (dígitos verificadores conferem — `Fornecedor.deEstado` reidrata via
+ * `Cnpj.criar`). Idempotente: só age no fornecedor que ainda não existe.
+ */
+const ANALISE_SEED: Array<{ fornecedorId: string; razaoSocial: string; cnpj: string; porte: string; cnae: string; enviadoEm: string }> = [
+  { fornecedorId: 'demo-malharia-maria', razaoSocial: 'Malharia Maria', cnpj: '12345678000195', porte: 'ME', cnae: '1412601', enviadoEm: '2026-06-15T12:00:00.000Z' },
+  { fornecedorId: 'demo-textil-amazonia', razaoSocial: 'Têxtil Amazônia', cnpj: '77888999000181', porte: 'EPP', cnae: '1311100', enviadoEm: '2026-06-20T12:00:00.000Z' },
+];
+
+async function seedFilaAnalise(pool: Pool, piiKey: Buffer): Promise<void> {
+  const fornecedorRepo = new FornecedorRepositoryPg(pool);
+  const docRepo = new DocumentoRepositoryPg(pool);
+  const storage = new ObjectStoragePg(pool);
+  const cipher = new PiiCipherAesGcm(piiKey);
+  let criados = 0;
+  for (const s of ANALISE_SEED) {
+    if (await fornecedorRepo.porId(s.fornecedorId)) {
+      console.log(`[seed] análise: ${s.razaoSocial} já existe, pulando.`);
+      continue;
+    }
+    const meta = { id: s.fornecedorId, registerDate: s.enviadoEm, updateDate: s.enviadoEm, lastUserUpdate: 'seed' };
+    await fornecedorRepo.salvar(Fornecedor.deEstado({
+      meta, cnpj: s.cnpj, razaoSocial: s.razaoSocial, porte: s.porte,
+      cnaes: [{ codigoSubclasse: s.cnae, tipo: 'principal', ativo: true }],
+      situacao: 'ativa', origem: 'manual', contato: {}, status: 'pendente_analise', sincronizadoEm: null,
+    }));
+    const docId = randomUUID();
+    const ref = await storage.put(`${s.fornecedorId}/${docId}`, cipher.encrypt(`DEMO-Balanço Patrimonial-${s.fornecedorId}`));
+    await docRepo.salvar(Documento.deEstado({
+      meta: { id: docId, registerDate: s.enviadoEm, updateDate: s.enviadoEm, lastUserUpdate: 'seed' },
+      fornecedorId: s.fornecedorId, tipo: 'Balanço Patrimonial', arquivoRef: ref, formato: 'pdf',
+      dataValidade: null, status: 'pendente', motivoReprovacao: null,
+    }));
+    criados++;
+    console.log(`[seed] análise: ${s.razaoSocial} + Balanço Patrimonial (pendente).`);
+  }
+  console.log(`[seed] análise documental: ${criados} fornecedor(es) semeado(s).`);
+}
+
 async function seed(): Promise<void> {
   if (!temPostgresConfigurado()) {
     console.error('[seed] Postgres not configured (set POSTGRES_HOST or DATABASE_URL). Aborting.');
@@ -106,6 +150,7 @@ async function seed(): Promise<void> {
     if (falhas) process.exitCode = 1; // visível em CI sem abortar os demais
 
     await seedDocumentos(pool, config.crypto.piiKey);
+    await seedFilaAnalise(pool, config.crypto.piiKey);
   } finally {
     await pool.end();
   }

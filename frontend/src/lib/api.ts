@@ -108,6 +108,22 @@ export interface ResumoDistribuicaoView {
   deficitQuantidade: number;
   rateio: RateioLinhaView[];
 }
+/**
+ * Uma posição na fila do Cadastro de Reserva (UC009 / RN004). Fornecedor apto (credenciamento aceito)
+ * que ficou fora da matriz vigente por ter se credenciado após a distribuição inicial. `posicao` é
+ * 1-based na ordem cronológica de aceite (1 = próximo a ser acionado); `teto` é o único quantitativo.
+ */
+export interface CadastroReservaView {
+  posicao: number;
+  fornecedorId: string;
+  nome: string;
+  editalId: string;
+  numero: string;
+  objeto: string;
+  secretariaSigla: string | null;
+  teto: number;
+  credenciadoEm: string;
+}
 export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: 'pendente' | 'aprovado' | 'reprovado'; dataValidade: string | null; motivoReprovacao: string | null }
 /** Resumo de um credenciamento do fornecedor (home) — estado + objeto/secretaria do edital vinculado. */
 export interface CredenciamentoResumoView {
@@ -309,6 +325,8 @@ export const api = {
   resumoDistribuicao: (editalId: string) => get<ResumoDistribuicaoView>(`/gestao/editais/${editalId}/distribuicao`),
   // Homologar = executar + congelar a matriz append-only (UC008: "frações homologadas"). Reusa POST /distribuir.
   homologarDistribuicao: (editalId: string) => send<unknown>(`/editais/${editalId}/distribuir`, 'POST'),
+  // Tela "Cadastro de Reserva": fila cronológica global dos retardatários fora da matriz vigente (UC009/RN004).
+  cadastroReserva: () => get<CadastroReservaView[]>('/gestao/cadastro-reserva'),
   criarEdital: (body: unknown) => send('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),

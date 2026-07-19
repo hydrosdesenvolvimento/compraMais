@@ -234,6 +234,20 @@
       "homologadaEm": "Distribution approved · version {{versao}}",
       "erroHomologar": "Could not approve the distribution."
     },
+    "reserva": {
+      "eyebrow": "Operations · Reserve List",
+      "titulo": "Reserve List",
+      "subtitulo": "Managing latecomers without changing active contracts (RN004)",
+      "avisoTitulo": "Reserve queue.",
+      "avisoTexto": "Suppliers approved after the initial distribution are placed here without changing the quotas already distributed. They will be called in chronological order if a holder fails to deliver.",
+      "carregando": "Loading reserve queue…",
+      "erroCarregar": "Could not load the reserve list.",
+      "vazioTitulo": "No suppliers on reserve",
+      "vazioDica": "Suppliers approved after the initial distribution will appear here, in chronological order.",
+      "capacidade": "Cap. {{cap}} units/mo",
+      "posicaoLabel": "Position {{posicao}} in the reserve queue",
+      "chip": "Reserve"
+    },
     "setoresIndustriais": {
       "titulo": "Industrial Sectors (CNAE)",
       "subtitulo": "Accepted economic activity codes",

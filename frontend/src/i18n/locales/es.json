@@ -234,6 +234,20 @@
       "homologadaEm": "Distribución homologada · versión {{versao}}",
       "erroHomologar": "No se pudo homologar la distribución."
     },
+    "reserva": {
+      "eyebrow": "Operación · Registro de Reserva",
+      "titulo": "Registro de Reserva",
+      "subtitulo": "Gestión de rezagados sin alterar contratos vigentes (RN004)",
+      "avisoTitulo": "Cola de reserva.",
+      "avisoTexto": "Los proveedores aprobados después de la distribución inicial se ubican aquí sin alterar las cuotas ya distribuidas. Serán convocados en orden cronológico si algún titular incumple la entrega.",
+      "carregando": "Cargando cola de reserva…",
+      "erroCarregar": "No se pudo cargar el registro de reserva.",
+      "vazioTitulo": "Ningún proveedor en reserva",
+      "vazioDica": "Los proveedores aprobados después de la distribución inicial aparecerán aquí, en orden cronológico.",
+      "capacidade": "Cap. {{cap}} un/mes",
+      "posicaoLabel": "Posición {{posicao}} en la cola de reserva",
+      "chip": "Reserva"
+    },
     "setoresIndustriais": {
       "titulo": "Sectores Industriales (CNAE)",
       "subtitulo": "Códigos de actividad económica aceptados",

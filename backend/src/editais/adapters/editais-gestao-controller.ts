@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { GerirEditais } from '../application/gerir-editais.js';
 import type { BuscarEditais } from '../application/buscar-editais.js';
+import type { ListarElegiveisEdital } from '../application/listar-elegiveis-edital.js';
 import type { SituacaoEdital } from '../domain/edital.js';
 import type { Papel } from '../../shared/identity/identity-provider.js';
 import { exigirPapel } from '../../shared/http/autenticacao.js';
@@ -69,6 +70,21 @@ export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir:
     };
     const paginacao = (page || size) ? { page: page ? Number(page) : undefined, size: size ? Number(size) : undefined } : undefined;
     return reply.send(await deps.buscar.buscar({ secretariaId, situacao, cnae }, paginacao));
+  });
+}
+
+/**
+ * Tela "Credenciamento em Edital" (Painel Admin · Operação): fornecedores elegíveis de um edital
+ * (filtro CNAE RN001 + regularidade RN002 + situação do credenciamento). Registrada à parte porque
+ * a projeção cruza módulos (fornecedores/credenciamento/bloqueios) cujos repositórios só existem mais
+ * adiante no server; mesmo RBAC de gestão. Só leitura.
+ */
+export function registrarRotaElegiveisEdital(app: FastifyInstance, deps: { elegiveis: ListarElegiveisEdital }): void {
+  app.get('/gestao/editais/:id/elegiveis', async (req, reply) => {
+    if (!exigirPapel(req, reply, PERFIS_GESTAO)) return reply;
+    const { id } = req.params as { id: string };
+    try { return reply.send(await deps.elegiveis.listar(id)); }
+    catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
   });
 }
 

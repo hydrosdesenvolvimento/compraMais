@@ -52,7 +52,8 @@ import { BuscarEditais } from './editais/application/buscar-editais.js';
 import { ContestarCnae, ResolverContestacao, type ContestacaoRepository } from './editais/application/contestar-cnae.js';
 import { ContestacaoRepositoryMemory } from './editais/adapters/contestacao-repository-memory.js';
 import { ContestacaoRepositoryPg } from './editais/adapters/contestacao-repository-pg.js';
-import { registrarRotasGestaoEditais } from './editais/adapters/editais-gestao-controller.js';
+import { registrarRotasGestaoEditais, registrarRotaElegiveisEdital } from './editais/adapters/editais-gestao-controller.js';
+import { ListarElegiveisEdital } from './editais/application/listar-elegiveis-edital.js';
 import { registrarRotasContestacao } from './editais/adapters/contestacao-controller.js';
 import { GerirDocumentos } from './credenciamento/application/gerir-documentos.js';
 import { DocumentoRepositoryMemory, ObjectStorageMemory } from './credenciamento/adapters/documentos-memory.js';
@@ -344,6 +345,12 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // Credenciamento — regularização/contestação (002 US3): ponto único de pendências
   registrarRotasRegularizacao(app, { docs: docRepo, bloqueios, elegibilidade });
+
+  // Operação · "Credenciamento em Edital": elegíveis de um edital (RN001/RN002 + situação do
+  // credenciamento). Registrada aqui porque cruza fornecedores/credenciamento/bloqueios (definidos
+  // acima); reusa o `editaisRepo` como leitura do edital (a instância satisfaz o lookup mínimo).
+  const listarElegiveisEdital = new ListarElegiveisEdital(editaisRepo, fornecedores, credRepo, bloqueios, secretariaLookup);
+  registrarRotaElegiveisEdital(app, { elegiveis: listarElegiveisEdital });
 
   // Auditoria — leitura/exportação da trilha (004). SOMENTE LEITURA: lê o mesmo auditRepo do escritor único.
   const consultarTrilha = new ConsultarTrilha(auditRepo);

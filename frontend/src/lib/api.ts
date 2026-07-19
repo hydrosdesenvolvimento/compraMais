@@ -78,6 +78,18 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 // --- Tipos de leitura ---
 export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null; quantitativos: number }
 export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }
+/** Tela "Credenciamento em Edital" (Painel Admin · Operação) — situação do fornecedor perante o edital. */
+export type StatusElegivel = 'credenciado' | 'requerente' | 'elegivel';
+export interface FornecedorElegivelView {
+  fornecedorId: string; nome: string; cnpj: string;
+  capacidade: number | null; // teto declarado no credenciamento deste edital (RN005); null se sem adesão
+  regular: boolean; // sem bloqueio ativo de inadimplência (RN002)
+  status: StatusElegivel;
+}
+export interface EditalElegiveisView {
+  edital: { id: string; numero: string; objeto: string; secretariaSigla: string | null; cnaesAlvo: string[]; situacao: string };
+  elegiveis: FornecedorElegivelView[];
+}
 export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: 'pendente' | 'aprovado' | 'reprovado'; dataValidade: string | null; motivoReprovacao: string | null }
 /** Resumo de um credenciamento do fornecedor (home) — estado + objeto/secretaria do edital vinculado. */
 export interface CredenciamentoResumoView {
@@ -273,6 +285,8 @@ export const api = {
   // Operação · Editais (Painel Admin) — QBE sem probe = todos os editais (todas as secretarias/situações),
   // filtrável por situação. `size` amplo evita truncar a listagem operacional (paginação é client-side).
   editaisOperacao: (situacao?: string) => get<EditalGestao[]>(`/gestao/editais?size=200${situacao ? `&situacao=${encodeURIComponent(situacao)}` : ''}`),
+  // Tela "Credenciamento em Edital": fornecedores elegíveis de um edital (filtro CNAE RN001 + regularidade RN002).
+  editaisElegiveis: (editalId: string) => get<EditalElegiveisView>(`/gestao/editais/${editalId}/elegiveis`),
   criarEdital: (body: unknown) => send('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),

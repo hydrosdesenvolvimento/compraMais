@@ -167,6 +167,40 @@
     }
   },
   "admin": {
+    "credenciamentoEdital": {
+      "titulo": "Acreditación en Convocatoria",
+      "subtitulo": "Adhesión filtrada por CNAE (RN001) y verificación de morosidad (RN002)",
+      "seletorLabel": "Convocatoria",
+      "cnaeExigido": "CNAE exigido: {{cnae}}",
+      "elegiveisTitulo": "Proveedores elegibles",
+      "elegiveisFiltro": "(filtro CNAE aplicado)",
+      "capacidade": "Cap. {{cap}} un/mes",
+      "semCapacidade": "Capacidad no declarada",
+      "pills": {
+        "pgm": "PGM: {{estado}}",
+        "sicaf": "SICAF: {{estado}}",
+        "cnaeCompativel": "CNAE compatible"
+      },
+      "regularidade": {
+        "regular": "Regular",
+        "irregular": "Irregular"
+      },
+      "status": {
+        "credenciado": "Acreditado",
+        "requerente": "Solicitante",
+        "elegivel": "Elegible"
+      },
+      "situacaoEdital": {
+        "rascunho": "Borrador",
+        "publicado": "Abierta",
+        "encerrado": "Cerrada"
+      },
+      "carregando": "Cargando…",
+      "erroCarregar": "No se pudieron cargar los proveedores elegibles.",
+      "semEditais": "No hay convocatorias abiertas por el momento.",
+      "vazioTitulo": "Ningún proveedor elegible",
+      "vazioDica": "Ninguna empresa con CNAE compatible para esta convocatoria."
+    },
     "setoresIndustriais": {
       "titulo": "Sectores Industriales (CNAE)",
       "subtitulo": "Códigos de actividad económica aceptados",

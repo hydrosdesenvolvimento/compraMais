@@ -167,6 +167,40 @@
     }
   },
   "admin": {
+    "credenciamentoEdital": {
+      "titulo": "Accreditation in Notice",
+      "subtitulo": "Membership filtered by CNAE (RN001) and default check (RN002)",
+      "seletorLabel": "Notice",
+      "cnaeExigido": "Required CNAE: {{cnae}}",
+      "elegiveisTitulo": "Eligible suppliers",
+      "elegiveisFiltro": "(CNAE filter applied)",
+      "capacidade": "Cap. {{cap}} units/month",
+      "semCapacidade": "Capacity not declared",
+      "pills": {
+        "pgm": "PGM: {{estado}}",
+        "sicaf": "SICAF: {{estado}}",
+        "cnaeCompativel": "CNAE compatible"
+      },
+      "regularidade": {
+        "regular": "Regular",
+        "irregular": "Irregular"
+      },
+      "status": {
+        "credenciado": "Accredited",
+        "requerente": "Applicant",
+        "elegivel": "Eligible"
+      },
+      "situacaoEdital": {
+        "rascunho": "Draft",
+        "publicado": "Open",
+        "encerrado": "Closed"
+      },
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load eligible suppliers.",
+      "semEditais": "No open notices at the moment.",
+      "vazioTitulo": "No eligible suppliers",
+      "vazioDica": "No company with a compatible CNAE for this notice."
+    },
     "setoresIndustriais": {
       "titulo": "Industrial Sectors (CNAE)",
       "subtitulo": "Accepted economic activity codes",

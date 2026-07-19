@@ -167,6 +167,40 @@
     }
   },
   "admin": {
+    "credenciamentoEdital": {
+      "titulo": "Credenciamento em Edital",
+      "subtitulo": "Adesão filtrada por CNAE (RN001) e checagem de inadimplência (RN002)",
+      "seletorLabel": "Edital",
+      "cnaeExigido": "CNAE exigido: {{cnae}}",
+      "elegiveisTitulo": "Fornecedores elegíveis",
+      "elegiveisFiltro": "(filtro CNAE aplicado)",
+      "capacidade": "Cap. {{cap}} un/mês",
+      "semCapacidade": "Capacidade não declarada",
+      "pills": {
+        "pgm": "PGM: {{estado}}",
+        "sicaf": "SICAF: {{estado}}",
+        "cnaeCompativel": "CNAE compatível"
+      },
+      "regularidade": {
+        "regular": "Regular",
+        "irregular": "Irregular"
+      },
+      "status": {
+        "credenciado": "Credenciado",
+        "requerente": "Requerente",
+        "elegivel": "Elegível"
+      },
+      "situacaoEdital": {
+        "rascunho": "Rascunho",
+        "publicado": "Aberto",
+        "encerrado": "Encerrado"
+      },
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar os fornecedores elegíveis.",
+      "semEditais": "Nenhum edital aberto no momento.",
+      "vazioTitulo": "Nenhum fornecedor elegível",
+      "vazioDica": "Nenhuma empresa com CNAE compatível para este edital."
+    },
     "setoresIndustriais": {
       "titulo": "Setores Industriais (CNAE)",
       "subtitulo": "Códigos de atividade econômica aceitos",

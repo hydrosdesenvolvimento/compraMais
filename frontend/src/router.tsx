@@ -37,6 +37,7 @@ import { Secretarias } from './pages/admin/Secretarias';
 import { SetoresIndustriais } from './pages/admin/SetoresIndustriais';
 import { TiposArquivos } from './pages/admin/TiposArquivos';
 import { AnaliseDocumental } from './pages/admin/AnaliseDocumental';
+import { CredenciamentoEmEdital } from './pages/admin/CredenciamentoEmEdital';
 import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
@@ -97,7 +98,7 @@ const rAdminPerfis = createRoute({ getParentRoute: () => adminLayout, path: '/ad
 
 // Telas novas do catálogo de perfis ainda sem UI própria — placeholder navegável ("Em construção").
 const rAdminFornecedores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/fornecedores', beforeLoad: () => exigirTelaAdmin('fornecedores'), component: Fornecedores });
-const rAdminCredenciamento = createRoute({ getParentRoute: () => adminLayout, path: '/admin/credenciamento', beforeLoad: () => exigirTelaAdmin('credenciamento'), component: () => <EmConstrucao tituloKey="common.nav.credenciamento" /> });
+const rAdminCredenciamento = createRoute({ getParentRoute: () => adminLayout, path: '/admin/credenciamento', beforeLoad: () => exigirTelaAdmin('credenciamento'), component: CredenciamentoEmEdital });
 const rAdminAnaliseDoc = createRoute({ getParentRoute: () => adminLayout, path: '/admin/analise-documental', beforeLoad: () => exigirTelaAdmin('analiseDocumental'), component: AnaliseDocumental });
 const rAdminDistribuicao = createRoute({ getParentRoute: () => adminLayout, path: '/admin/distribuicao', beforeLoad: () => exigirTelaAdmin('distribuicao'), component: () => <EmConstrucao tituloKey="common.nav.distribuicao" /> });
 const rAdminCadastroReserva = createRoute({ getParentRoute: () => adminLayout, path: '/admin/cadastro-reserva', beforeLoad: () => exigirTelaAdmin('cadastroReserva'), component: () => <EmConstrucao tituloKey="common.nav.cadastroReserva" /> });

@@ -40,6 +40,21 @@ export function validarCpf(v: string): boolean {
   return dv(9) === Number(d[9]) && dv(10) === Number(d[10]);
 }
 
+/**
+ * Tempo decorrido desde `desdeIso` até `agora`, localizado (RN011 — a fila mostra a espera, sem SLA
+ * fixo). Usa Intl.RelativeTimeFormat na maior unidade sensível (dias→horas→minutos→"agora").
+ */
+export function tempoDecorrido(desdeIso: string, locale = 'pt-BR', agora: Date = new Date()): string {
+  const ms = agora.getTime() - new Date(desdeIso).getTime();
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
+  const min = Math.floor(ms / 60000);
+  if (min < 1) return rtf.format(0, 'minute');
+  if (min < 60) return rtf.format(-min, 'minute');
+  const horas = Math.floor(min / 60);
+  if (horas < 24) return rtf.format(-horas, 'hour');
+  return rtf.format(-Math.floor(horas / 24), 'day');
+}
+
 export interface EnderecoCep {
   cep: string; estado: string; cidade: string; bairro: string; rua: string;
   latitude?: number; longitude?: number;
@@ -76,11 +91,59 @@ export async function consultarCnpj(cnpj: string): Promise<DadosCnpj | null> {
   return j.valor ?? null;
 }
 
-export interface ResultadoLogin { token: string; expiraEm: number; usuario: { userId: string; papel: string; empresaId?: string } }
+export interface EnderecoEstruturado {
+  logradouro: string; numero: string; complemento?: string; bairro: string;
+  cidade: string; uf: string; cep: string; latitude?: number; longitude?: number;
+}
+
+export interface CadastroFornecedorInput {
+  cnpjRaw: string;
+  contato: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoEstruturado };
+  consentimento: { finalidade: string; versaoTermo: string };
+  titular: { identificador: string };
+  senha: string;
+  nome?: string;
+  manual?: { razaoSocial: string; porte: string; cnaes: Array<{ codigoSubclasse: string; tipo: string; ativo: boolean }> };
+}
+
+export interface CadastroErro extends Error { status: number; codigo?: string }
+
+/** Cadastro de fornecedor (POST /fornecedores → UC001). Lança CadastroErro com {status, codigo} em falha. */
+export async function cadastrarFornecedor(body: CadastroFornecedorInput): Promise<{ fornecedorId: string; status: string; origem: string }> {
+  const r = await fetch('/fornecedores', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  if (!r.ok) {
+    const j = (await r.json().catch(() => ({}))) as { codigo?: string; mensagem?: string };
+    throw Object.assign(new Error(j.mensagem ?? 'Falha no cadastro'), { status: r.status, codigo: j.codigo }) as CadastroErro;
+  }
+  return (await r.json()) as { fornecedorId: string; status: string; origem: string };
+}
+
+export interface ResultadoLogin { token: string; expiraEm: number; usuario: { userId: string; papel: string; empresaId?: string; nome?: string } }
 
 /** Login local (POST /auth/login → JWT). Lança CredenciaisInvalidas em 401. */
 export async function login(email: string, senha: string): Promise<ResultadoLogin> {
   const r = await fetch('/auth/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email, senha }) });
   if (!r.ok) throw new Error('Credenciais inválidas.');
   return (await r.json()) as ResultadoLogin;
+}
+
+/**
+ * UC015 · A1 — Solicita redefinição de senha (POST /auth/senha/esqueci). SEMPRE resolve: o backend
+ * responde 204 mesmo quando a conta não existe (não revela existência). Só rejeita em falha de rede.
+ */
+export async function solicitarResetSenha(email: string): Promise<void> {
+  const r = await fetch('/auth/senha/esqueci', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email }) });
+  if (!r.ok) throw new Error('Falha ao solicitar redefinição.');
+}
+
+/**
+ * UC015 · A1 — Redefine a senha com o token recebido (POST /auth/senha/redefinir). Lança CadastroErro
+ * com {status, codigo}: 400 = token inválido/expirado (TokenResetInvalido); 422 = senha fraca (SenhaFraca).
+ */
+export async function redefinirSenha(token: string, novaSenha: string): Promise<void> {
+  const r = await fetch('/auth/senha/redefinir', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, novaSenha }) });
+  if (!r.ok) {
+    const j = (await r.json().catch(() => ({}))) as { codigo?: string; mensagem?: string };
+    throw Object.assign(new Error(j.mensagem ?? 'Falha ao redefinir a senha'), { status: r.status, codigo: j.codigo }) as CadastroErro;
+  }
 }

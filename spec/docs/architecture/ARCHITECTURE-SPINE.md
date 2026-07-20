@@ -7,10 +7,10 @@ paradigm: 'monolito modular + DDD (anti-corruption layer nas bordas)'
 scope: 'Plataforma B2G de compras municipalizadas (Rio Branco) — credenciamento, covalidação, distribuição, malote SEI, transparência'
 status: final
 created: '2026-06-29'
-updated: '2026-07-02'
+updated: '2026-07-16'
 binds: [Catalogo/Cadastros, Credenciamento/Covalidacao, Editais, Distribuicao, Malote/SEI, Auditoria, Transparencia, RF001-RF023, RNF001-RNF008, RN001-RN016]
 sources: ['../prd.md', '../../source/04-Arquitetura.md', '../matriz-lacunas.md', '../plano-releases.md', '../CONVERGENCIA.md']
-companions: ['../ux/DESIGN.md', '../ux/EXPERIENCE.md']
+companions: ['../ux/DESIGN.md', '../ux/EXPERIENCE.md', '../../Prototipo/portal-fornecedor.html', '../../Prototipo/painel-administrativo.html', '../../Prototipo/index.html']
 ---
 
 # Architecture Spine — Compra Mais
@@ -64,7 +64,7 @@ graph TD
 ### AD-3 — Dois bundles SPA
 - **Binds:** Transparencia, Painel Admin, RF010/RF013
 - **Prevents:** acoplamento público/admin
-- **Rule:** Portal Público/Transparência e Painel Admin são bundles separados, compartilham o **design system** (tokens em [DESIGN.md](../ux/DESIGN.md): Poppins, azul-700 #0061AE, raio 8px/999px) e a IA de navegação ([EXPERIENCE.md](../ux/EXPERIENCE.md): Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas), ambos consumindo a API via REST/JSON. Nenhum acesso direto a banco pelo frontend.
+- **Rule:** Portal Público/Transparência e Painel Admin são bundles separados, compartilham o **design system** (tokens em [DESIGN.md](../ux/DESIGN.md): Poppins, raio 8px/999px, âmbar #FFB300; **paleta em arbitragem — ver 0.7**) e a IA de navegação ([EXPERIENCE.md](../ux/EXPERIENCE.md): Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas), ambos consumindo a API via REST/JSON. Nenhum acesso direto a banco pelo frontend. O contrato de UX tem **duas metades normativas** (AD-39): a **escrita** (DESIGN.md + EXPERIENCE.md) e o **artefato** ([`Prototipo/`](../../Prototipo/)); divergência entre elas é defeito, não preferência.
 
 ### AD-4 — Integrações via ACL + circuit breaker `[ADOPTED]`
 - **Binds:** Receita, PGM, bases de dívida, SEI, mensageria; RNF001
@@ -267,6 +267,16 @@ graph TD
 - **Binds:** all os cadastros administrativos (Secretaria, Setor/CNAE, Tipo de Documento, Usuário, Fornecedor, Edital); RN015
 - **Prevents:** perda de histórico/integridade referencial por DELETE físico; órfãos em processos vinculados
 - **Rule:** entidades de cadastro **não são apagadas fisicamente** — recebem estado `Inativo` (flag/soft-delete), somem das seleções ativas mas preservam histórico e referências. DELETE físico é proibido para entidades referenciadas por processos. Complementa a trilha append-only (AD-18) e a `EntidadeBase` (AD-33). Identificado na validação de mockups (2026-07-02).
+
+### AD-39 — Um contrato, um lugar
+- **Binds:** toda a documentação normativa (`spec/docs/`, `spec/Prototipo/`)
+- **Prevents:** canônico fantasma — documento normativo não-versionado, referência a arquivo inexistente, cópia divergente sem dono
+- **Rule:** três invariantes documentais, verificáveis mecanicamente:
+  1. **Documento normativo que não está versionado não é normativo.** Se não está no git, não obriga ninguém.
+  2. **Referência a arquivo inexistente é erro**, não nota de rodapé. Um link quebrado em documento normativo é um defeito de build da documentação e bloqueia o merge.
+  3. **Um artefato, um endereço.** Cópia byte-idêntica em segundo lugar é lixo; cópia divergente sem dono declarado é um fork silencioso. O contrato de UX são os bundles de `spec/Prototipo/` — não um resumo deles.
+- **Exceção:** registros datados (`docs/dev/`, `docs/prompts/`, `docs/qa/`, changelogs, atas) preservam suas referências históricas — descrevem o que era verdade na data, não o que obriga hoje.
+- **Motivação (2026-07-16):** o `CONVERGENCIA.md` §1 matou o "canônico fantasma" em 2026-07-02; ele reabriu em 11 dias. A divergência **D1** (paleta) bloqueou ratificação por duas semanas por citar `ux/DESIGN.md` — um arquivo que **nunca existiu**. A referência tinha mais autoridade que a coisa referida.
 
 ## Consistency Conventions
 

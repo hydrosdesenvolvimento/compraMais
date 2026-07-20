@@ -38,6 +38,29 @@ export class ContaAcesso extends EntidadeBase {
   get ativo(): boolean { return this._ativo; }
   remover(userName = 'sistema'): void { this._ativo = false; this.marcarAtualizacao(userName); }
   podeExercerDireitoTitular(): boolean { return this.papel === 'titular'; }
+
+  /** Snapshot para persistência durável (mesmo padrão de Fornecedor.estado — AD-28/AD-33). */
+  estado(): ContaAcessoEstado {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      fornecedorId: this.fornecedorId, papel: this.papel, identificador: this.identificador,
+      convidadoPor: this.convidadoPor, ativo: this._ativo,
+    };
+  }
+
+  /** Reidrata o agregado a partir do snapshot (usado pelo adaptador Postgres). */
+  static deEstado(s: ContaAcessoEstado): ContaAcesso {
+    return new ContaAcesso(s.meta, s.fornecedorId, s.papel, s.identificador, s.convidadoPor, s.ativo);
+  }
+}
+
+export interface ContaAcessoEstado {
+  meta: MetadadosBase;
+  fornecedorId: string;
+  papel: Papel;
+  identificador: string;
+  convidadoPor: string | null;
+  ativo: boolean;
 }
 
 export class ApenasTitularConvida extends Error {

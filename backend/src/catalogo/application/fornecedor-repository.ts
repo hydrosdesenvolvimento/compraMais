@@ -6,6 +6,12 @@ export interface FornecedorRepository {
   porId(id: string): Promise<Fornecedor | null>;
   porCnpj(cnpj: Cnpj): Promise<Fornecedor | null>;
   salvar(f: Fornecedor): Promise<void>;
+  /**
+   * Todos os fornecedores (mais recentes primeiro), para a listagem administrativa (UC — Gestão de
+   * Fornecedores). Filtro/paginação ficam no read model: na escala do MVP a matéria-prima cabe em
+   * memória, e o adaptador mantém o mesmo contrato do resto da porta.
+   */
+  listar(): Promise<Fornecedor[]>;
 }
 
 export class CnpjJaCadastrado extends Error {

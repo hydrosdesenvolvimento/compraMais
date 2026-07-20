@@ -3,8 +3,9 @@ import { useForm } from '@tanstack/react-form';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { Trans, useTranslation } from 'react-i18next';
-import { consultarCnpj, consultarCep, login, mascaraCnpj, mascaraCep, type DadosCnpj, type EnderecoCep } from '../../lib/br';
-import { salvarToken } from '../../lib/auth';
+import { cadastrarFornecedor, consultarCnpj, consultarCep, login, solicitarResetSenha, mascaraCnpj, mascaraCep, soDigitos, type CadastroErro, type DadosCnpj, type EnderecoCep, type EnderecoEstruturado } from '../../lib/br';
+import { salvarSessao } from '../../lib/auth';
+import { destinoAposLogin } from '../../lib/guardas';
 
 /**
  * AuthPanel — cartão de acesso do AuthLayout (mockup Compra Mais). Abas Entrar / Criar conta.
@@ -27,6 +28,31 @@ function numeroInicial(numero: string): string {
   return /^\s*s\/?n\s*$/i.test(numero) ? '' : numero;
 }
 
+/** Monta o endereço estruturado geolocalizável (RF019) a partir do CNPJ/CEP + número/complemento. */
+function montarEndereco(
+  dados: DadosCnpj | null,
+  cep: EnderecoCep | null,
+  campos: { cep: string; numero: string; complemento: string },
+): EnderecoEstruturado | undefined {
+  const base = cep
+    ? { logradouro: cep.rua, bairro: cep.bairro, cidade: cep.cidade, uf: cep.estado, latitude: cep.latitude, longitude: cep.longitude }
+    : dados?.endereco
+      ? { logradouro: dados.endereco.logradouro, bairro: dados.endereco.bairro, cidade: dados.endereco.cidade, uf: dados.endereco.uf }
+      : null;
+  if (!base) return undefined;
+  return { ...base, numero: campos.numero, complemento: campos.complemento || undefined, cep: soDigitos(campos.cep) };
+}
+
+/** Mapeia o erro do backend para a chave i18n de mensagem do cadastro. */
+function chaveErroCadastro(e: unknown): string {
+  const codigo = (e as CadastroErro)?.codigo;
+  if (codigo === 'CnpjInvalido') return 'auth.signup.errors.cnpjInvalido';
+  if (codigo === 'SituacaoNaoApta') return 'auth.signup.errors.situacao';
+  if (codigo === 'CnpjJaCadastrado') return 'auth.signup.errors.cnpjDuplicado';
+  if (codigo === 'EmailJaCadastrado') return 'auth.signup.errors.emailDuplicado';
+  return 'auth.signup.errors.generico';
+}
+
 /** Rótulo maiúsculo (mockup) para campos de leitura/edição. */
 function Rotulo({ children }: { children: React.ReactNode }) {
   return <div style={{ font: '600 11.5px var(--font-body)', color: 'var(--cinza-500)', marginBottom: 5, letterSpacing: '.02em' }}>{children}</div>;
@@ -40,15 +66,20 @@ const inputEstilo: React.CSSProperties = { width: '100%', padding: '12px 14px', 
 export function AuthPanel() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [aba, setAba] = useState<'entrar' | 'criar'>('criar');
+  // Login é a aba principal (retorno de usuários já cadastrados é o caso comum); "Criar conta" fica
+  // a um clique de distância. O AuthLayout redireciona '/' → '/cadastro', mas o painel abre em "Entrar".
+  const [aba, setAba] = useState<'entrar' | 'criar'>('entrar');
+  const [esqueci, setEsqueci] = useState(false);
   const [verSenha, setVerSenha] = useState(false);
+  const [verSenhaCad, setVerSenhaCad] = useState(false);
+  const [consentido, setConsentido] = useState(false);
   const [manter, setManter] = useState(true);
 
   const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
 
   const cadastro = useForm({
-    defaultValues: { cnpj: '', cep: '', numero: '', complemento: '' },
-    onSubmit: async () => { /* criar conta — próxima fase */ },
+    defaultValues: { cnpj: '', cep: '', numero: '', complemento: '', nomeFantasia: '', telefone: '', email: '', senha: '' },
+    onSubmit: async () => { /* submissão via cadastroMut (usa dados do CNPJ/CEP em closure) */ },
   });
 
   const cnpjMut = useMutation({
@@ -65,9 +96,30 @@ export function AuthPanel() {
   const dados = cnpjMut.data ?? null;
   const indisponivel = (cnpjMut.isSuccess && !cnpjMut.data) || cnpjMut.isError;
 
+  // Submissão do cadastro (UC001): POST /fornecedores → auto-login → portal (pós-condição "acesso ao Portal").
+  const cadastroMut = useMutation({
+    mutationFn: async (v: { cnpj: string; cep: string; numero: string; complemento: string; nomeFantasia: string; telefone: string; email: string; senha: string }) => {
+      const endereco = montarEndereco(dados, cepMut.data ?? null, v);
+      await cadastrarFornecedor({
+        cnpjRaw: v.cnpj,
+        contato: { nomeFantasia: v.nomeFantasia || undefined, telefone: v.telefone || undefined, endereco },
+        consentimento: { finalidade: 'credenciamento', versaoTermo: 'v1' },
+        titular: { identificador: v.email },
+        senha: v.senha,
+        nome: dados?.razaoSocial,
+      });
+      return login(v.email, v.senha);
+    },
+    onSuccess: (r) => { salvarSessao({ token: r.token, usuario: r.usuario }); void navigate({ to: '/inicio' }); },
+  });
+
   const loginMut = useMutation({
     mutationFn: (v: { email: string; senha: string }) => login(v.email, v.senha),
-    onSuccess: (r) => { salvarToken(r.token); void navigate({ to: '/inicio' }); },
+    // Roteia pelo papel: servidor interno → Painel Admin (sua home); fornecedor → Início.
+    onSuccess: (r) => {
+      salvarSessao({ token: r.token, usuario: r.usuario });
+      void destinoAposLogin().then((to) => navigate({ to: to as '/inicio' }));
+    },
   });
   const formLogin = useForm({ defaultValues: { email: '', senha: '' }, onSubmit: async ({ value }) => { await loginMut.mutateAsync(value).catch(() => { /* erro via loginMut.isError */ }); } });
 
@@ -81,7 +133,7 @@ export function AuthPanel() {
       </div>
 
       {aba === 'criar' ? (
-        <form onSubmit={(e) => { e.preventDefault(); void cadastro.handleSubmit(); }}>
+        <form onSubmit={(e) => { e.preventDefault(); if (dados && consentido) cadastroMut.mutate(cadastro.state.values); }}>
           <h2 style={{ fontSize: 21, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{t('auth.signup.title')}</h2>
           <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--cinza-500)', lineHeight: 1.5 }}>{t('auth.signup.subtitle')}</p>
 
@@ -150,6 +202,30 @@ export function AuthPanel() {
                   </ul>
                 </div>
               )}
+
+              {/* Contato editável (RN009) */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
+                <cadastro.Field name="nomeFantasia">{(f) => <div><Rotulo>{t('auth.signup.nomeFantasia')}</Rotulo><input data-cy="nome-fantasia" placeholder={t('auth.signup.nomeFantasiaPlaceholder')} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} style={inputEstilo} /></div>}</cadastro.Field>
+                <cadastro.Field name="telefone">{(f) => <div><Rotulo>{t('auth.signup.telefone')}</Rotulo><input data-cy="telefone" inputMode="tel" placeholder={t('auth.signup.telefonePlaceholder')} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} style={inputEstilo} /></div>}</cadastro.Field>
+              </div>
+
+              {/* Credencial de login (UC001 passo 4) */}
+              <cadastro.Field name="email">{(f) => <div><Rotulo>{t('auth.signup.email')}</Rotulo><input data-cy="email-cadastro" type="email" autoComplete="email" placeholder={t('auth.signup.emailPlaceholder')} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} style={inputEstilo} /></div>}</cadastro.Field>
+              <cadastro.Field name="senha">{(f) => (
+                <div>
+                  <Rotulo>{t('auth.signup.senha')}</Rotulo>
+                  <div style={{ position: 'relative' }}>
+                    <input data-cy="senha-cadastro" type={verSenhaCad ? 'text' : 'password'} autoComplete="new-password" placeholder={t('auth.signup.senhaPlaceholder')} value={f.state.value} onChange={(e) => f.handleChange(e.target.value)} style={{ ...inputEstilo, paddingRight: 88 }} />
+                    <button type="button" onClick={() => setVerSenhaCad((v) => !v)} aria-label={verSenhaCad ? t('auth.login.hideAria') : t('auth.login.showAria')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', border: 'none', background: 'transparent', cursor: 'pointer', font: '600 12.5px var(--font-body)', color: 'var(--azul-700)', padding: '6px 8px' }}>{verSenhaCad ? t('auth.login.hide') : t('auth.login.show')}</button>
+                  </div>
+                </div>
+              )}</cadastro.Field>
+
+              {/* Consentimento LGPD */}
+              <button type="button" role="checkbox" aria-checked={consentido} data-cy="consentimento" onClick={() => setConsentido((v) => !v)} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', font: '400 13px var(--font-body)', color: 'var(--cinza-700)' }}>
+                <span aria-hidden style={{ flexShrink: 0, width: 18, height: 18, marginTop: 1, borderRadius: 5, border: `2px solid ${consentido ? 'var(--azul-700)' : 'var(--border)'}`, background: consentido ? 'var(--azul-700)' : '#fff', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{consentido ? '✓' : ''}</span>
+                <span>{t('auth.signup.consent')}</span>
+              </button>
             </div>
           )}
 
@@ -159,9 +235,12 @@ export function AuthPanel() {
             </div>
           )}
 
-          <button data-cy="criar-conta" type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24, padding: 13, fontSize: 15 }}>{t('auth.signup.submit')}</button>
+          {cadastroMut.isError && <p data-cy="cadastro-erro" style={{ color: 'var(--erro)', margin: '16px 0 0', fontSize: 13 }}>{t(chaveErroCadastro(cadastroMut.error))}</p>}
+          <button data-cy="criar-conta" type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24, padding: 13, fontSize: 15 }} disabled={!dados || !consentido || cadastroMut.isPending}>{cadastroMut.isPending ? t('auth.signup.submitting') : t('auth.signup.submit')}</button>
           {dados && <p style={{ margin: '12px 0 0', textAlign: 'center', fontSize: 12.5, color: 'var(--cinza-400)' }}><Trans i18nKey="auth.signup.statusNote" components={{ b: <strong style={{ color: 'var(--azul-700)' }} /> }} /></p>}
         </form>
+      ) : esqueci ? (
+        <RecuperarSenha onVoltar={() => setEsqueci(false)} />
       ) : (
         <form onSubmit={(e) => { e.preventDefault(); void formLogin.handleSubmit(); }}>
           <h2 style={{ fontSize: 21, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{t('auth.login.title')}</h2>
@@ -190,7 +269,7 @@ export function AuthPanel() {
             <button type="button" role="checkbox" aria-checked={manter} onClick={() => setManter((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: '500 13px var(--font-body)', color: 'var(--cinza-700)' }}>
               {t('auth.login.keep')}
             </button>
-            <a href="#recuperar" style={{ font: '500 12.5px var(--font-body)', color: 'var(--azul-700)', textDecoration: 'none' }}>{t('auth.login.forgot')}</a>
+            <button type="button" data-cy="esqueci-senha" onClick={() => setEsqueci(true)} style={{ border: 'none', background: 'none', font: '500 12.5px var(--font-body)', color: 'var(--azul-700)', cursor: 'pointer', padding: 0 }}>{t('auth.login.forgot')}</button>
           </div>
 
           {loginMut.isError && <p data-cy="login-erro" style={{ color: 'var(--erro)', marginBottom: 12, fontSize: 13 }}>{t('auth.login.error')}</p>}
@@ -198,5 +277,41 @@ export function AuthPanel() {
         </form>
       )}
     </>
+  );
+}
+
+/**
+ * UC015 · A1 — "Esqueci minha senha". Solicita o link de redefinição (POST /auth/senha/esqueci). Por
+ * design, o backend responde igual exista ou não a conta (não revela existência): a tela sempre mostra
+ * a mesma mensagem de sucesso. O link chega por fora (e-mail/SMS no futuro; log no MVP) e leva a
+ * /redefinir-senha. `inputEstilo` é o mesmo do restante do painel.
+ */
+function RecuperarSenha({ onVoltar }: { onVoltar: () => void }) {
+  const { t } = useTranslation();
+  const [email, setEmail] = useState('');
+  const solicitar = useMutation({ mutationFn: () => solicitarResetSenha(email) });
+
+  if (solicitar.isSuccess) {
+    return (
+      <div data-cy="reset-enviado">
+        <h2 style={{ fontSize: 21, margin: '0 0 10px', letterSpacing: '-0.01em' }}>{t('auth.reset.enviadoTitle')}</h2>
+        <p style={{ margin: '0 0 22px', fontSize: 14, color: 'var(--cinza-500)', lineHeight: 1.55 }}>{t('auth.reset.enviadoInfo')}</p>
+        <button type="button" data-cy="reset-voltar" onClick={onVoltar} className="btn btn-primary btn-block" style={{ padding: 13, fontSize: 15 }}>{t('auth.reset.voltar')}</button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={(e) => { e.preventDefault(); solicitar.mutate(); }}>
+      <h2 style={{ fontSize: 21, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{t('auth.reset.title')}</h2>
+      <p style={{ margin: '0 0 22px', fontSize: 14, color: 'var(--cinza-500)', lineHeight: 1.5 }}>{t('auth.reset.subtitle')}</p>
+
+      <label className="label" htmlFor="reset-email" style={{ marginBottom: 7 }}>{t('auth.login.email')}</label>
+      <input id="reset-email" data-cy="reset-email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('auth.login.emailPlaceholder')} style={{ ...inputEstilo, marginBottom: 20 }} />
+
+      {solicitar.isError && <p data-cy="reset-erro" style={{ color: 'var(--erro)', marginBottom: 12, fontSize: 13 }}>{t('auth.reset.erro')}</p>}
+      <button data-cy="reset-enviar" type="submit" className="btn btn-primary btn-block" style={{ padding: 13, fontSize: 15 }} disabled={solicitar.isPending || !email}>{solicitar.isPending ? t('auth.reset.enviando') : t('auth.reset.enviar')}</button>
+      <button type="button" onClick={onVoltar} style={{ display: 'block', width: '100%', marginTop: 14, border: 'none', background: 'none', font: '500 13px var(--font-body)', color: 'var(--azul-700)', cursor: 'pointer' }}>{t('auth.reset.voltarLogin')}</button>
+    </form>
   );
 }

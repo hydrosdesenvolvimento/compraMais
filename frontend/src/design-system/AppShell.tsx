@@ -1,7 +1,7 @@
 import { useState, type ComponentProps, type ReactNode } from 'react';
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
-import { limparToken } from '../lib/auth';
+import { limparSessao } from '../lib/auth';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import {
   IconePredio, IconeBusca, IconeSino, IconeChevron, IconeMenu,
@@ -103,8 +103,10 @@ export function AppShell({
             {notifOpen && (
               <>
                 <div className="cm-menu-pop" style={{ width: 340 }} role="region" aria-label={t('common.shell.notificationsAria')}>
+                  <div className="cm-menu-head" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
                     <span style={{ font: '600 14px var(--font-body)', color: 'var(--azul-900)' }}>{t('common.shell.notificationsTitle')}</span>
                     <span style={{ fontSize: 11, color: 'var(--cinza-400)' }}>{t('common.shell.notificationsSubtitle')}</span>
+                  </div>
                   <div style={{ padding: 8, display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {notificacoes.length === 0 && (
                       <div style={{ padding: '16px 12px', fontSize: 13, color: 'var(--cinza-500)' }}>{t('common.shell.notificationsEmpty')}</div>
@@ -140,16 +142,18 @@ export function AppShell({
             {profileOpen && (
               <>
                 <div className="cm-menu-pop" style={{ width: 272 }} role="region" aria-label={t('common.shell.userMenuAria')}>
+                  <div className="cm-menu-head">
                     <span className="cm-avatar-sm" style={{ width: 44, height: 44, fontSize: 16 }}>{usuario.iniciais}</span>
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>{usuario.nome}</div>
-                      <div style={{ fontSize: 12, color: 'var(--cinza-500)', marginTop: 2 }}>{usuario.papel}{usuario.fantasia ? ` · ${usuario.fantasia}` : ''}</div>
+                      <div className="cm-menu-name">{usuario.nome}</div>
+                      <div className="cm-menu-role">{usuario.papel}{usuario.fantasia ? ` · ${usuario.fantasia}` : ''}</div>
                     </div>
+                  </div>
                   <div style={{ padding: 8 }}>
                     <button className="cm-menu-item" onClick={() => { setProfileOpen(false); navigate({ to: contaHref }); }}>
                       <IconeUsuario width={18} height={18} />{t('common.shell.myAccount')}
                     </button>
-                    <button className="cm-menu-item danger" data-cy="sair" onClick={() => { setProfileOpen(false); limparToken(); navigate({ to: '/cadastro' }); }}>
+                    <button className="cm-menu-item danger" data-cy="sair" onClick={() => { setProfileOpen(false); limparSessao(); navigate({ to: '/cadastro' }); }}>
                       <IconeSair width={18} height={18} />{t('common.shell.logout')}
                     </button>
                   </div>

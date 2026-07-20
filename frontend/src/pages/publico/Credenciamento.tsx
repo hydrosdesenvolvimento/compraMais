@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation, Trans } from 'react-i18next';
 import { Stepper } from '../../design-system/components';
-import { IconeSeta, IconeVoltar, IconeFechar, IconeCheck, IconeCamera, IconeUpload } from '../../design-system/icons';
+import { IconeSeta, IconeVoltar, IconeFechar, IconeCheck, IconeUpload } from '../../design-system/icons';
+import { api } from '../../lib/api';
 
-/** Wizard de credenciamento em um edital (dados de demonstração). */
+/**
+ * Wizard de credenciamento em um edital (UC004). Passos: Capacidade (teto declarado, RN005) →
+ * Documentos → Termo de Aceite (RN016) → Concluído. A conclusão é por Termo de Aceite; a biometria/
+ * "prova de vida" (UC007) está fora do MVP (Release 2, condicional a RIPD).
+ */
 
 type DocReq = { nome: string; reuse: boolean };
-type FacialEstado = 'idle' | 'checking' | 'done';
 
-const EDITAL = { num: 'Edital nº 004/2025 · Uniformes Escolares' };
+const VERSAO_TERMO = 'v1';
 
 const REQ_DOCS: DocReq[] = [
   { nome: 'Cartão CNPJ atualizado', reuse: true },
@@ -26,14 +30,18 @@ const varAzul100 = 'var(--azul-100)';
 export function Credenciamento() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { editalId } = useParams({ strict: false }) as { editalId?: string };
   const [step, setStep] = useState(0); // 0..3
   const [cap, setCap] = useState('');
-  const [facial, setFacial] = useState<FacialEstado>('idle');
+  const [credId, setCredId] = useState<string | null>(null);
+  const [aceito, setAceito] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   const PASSOS = [
     t('credenciamento.passos.capacidade'),
     t('credenciamento.passos.documentos'),
-    t('credenciamento.passos.provaVida'),
+    t('credenciamento.passos.termo'),
     t('credenciamento.passos.concluido'),
   ];
 
@@ -41,24 +49,68 @@ export function Credenciamento() {
   const showFooter = !isSucesso;
   const showBack = step > 0;
 
-  const nextLabel = step === 2 ? t('credenciamento.acoes.enviar') : t('credenciamento.acoes.continuar');
+  const nextLabel = enviando
+    ? t('credenciamento.acoes.enviando')
+    : step === 2 ? t('credenciamento.acoes.enviar') : t('credenciamento.acoes.continuar');
 
-  const wNext = () => setStep((s) => Math.min(3, s + 1));
-  const wPrev = () => setStep((s) => Math.max(0, s - 1));
-  const cancelWizard = () => void navigate({ to: '/editais' });
-  const skipFacial = () => setStep(3);
+  const capNum = Number(cap);
+  const capValida = Number.isInteger(capNum) && capNum > 0;
+  const podeAvancar = enviando
+    ? false
+    : step === 0 ? capValida
+    : step === 2 ? aceito
+    : true;
 
-  const runFacial = () => {
-    setFacial('checking');
-    window.setTimeout(() => setFacial('done'), 1400);
+  // Reporta ao backend o passo do wizard (UC004) para "Meus Credenciamentos" mostrar "Etapa n/N" e o
+  // "Continuar" retomar de onde parou. `step` (0..3) → passo do domínio (step+1). Melhor-esforço: só a
+  // partir do Documentos (passo do Concluído vem do aceite) e nunca trava a navegação se a rede falhar.
+  const reportarPasso = (novoStep: number, id: string | null = credId) => {
+    if (!id || novoStep < 0 || novoStep >= 3) return;
+    void api.registrarPassoCredenciamento(id, novoStep + 1).catch(() => {});
   };
+
+  async function avancar() {
+    setErro(null);
+    // Passo 0 → 1: declara a capacidade (teto, RN005) iniciando o credenciamento no backend.
+    if (step === 0) {
+      if (!editalId) { setErro(t('credenciamento.erroGenerico')); return; }
+      setEnviando(true);
+      try {
+        const r = await api.iniciarCredenciamento(editalId, capNum);
+        setCredId(r.credenciamentoId);
+        setStep(1);
+        reportarPasso(1, r.credenciamentoId); // entrou no Documentos (passo 2)
+      } catch { setErro(t('credenciamento.erroGenerico')); }
+      finally { setEnviando(false); }
+      return;
+    }
+    // Passo 2 → 3: assina o Termo de Aceite (RN016) → fornecedor Pendente de Análise.
+    if (step === 2) {
+      if (!credId) { setErro(t('credenciamento.erroGenerico')); return; }
+      setEnviando(true);
+      try {
+        await api.aceitarTermo(credId, { versaoTermo: VERSAO_TERMO, finalidade: t('credenciamento.termo.finalidade') });
+        setStep(3);
+      } catch { setErro(t('credenciamento.erroGenerico')); }
+      finally { setEnviando(false); }
+      return;
+    }
+    setStep((s) => { const n = Math.min(3, s + 1); reportarPasso(n); return n; });
+  }
+
+  const wPrev = () => { setErro(null); setStep((s) => { const n = Math.max(0, s - 1); reportarPasso(n); return n; }); };
+
+  async function cancelWizard() {
+    if (credId) { try { await api.cancelarCredenciamento(credId); } catch { /* segue para a vitrine mesmo assim */ } }
+    void navigate({ to: '/editais' });
+  }
 
   return (
     <div
       data-cy="credenciamento"
       style={{ maxWidth: 940, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 22 }}
     >
-      {/* Topo: voltar à vitrine + título do edital */}
+      {/* Topo: voltar à vitrine + edital em credenciamento */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <button
           type="button"
@@ -80,7 +132,7 @@ export function Credenciamento() {
           <IconeVoltar width={16} height={16} />
           {t('credenciamento.voltarVitrine')}
         </button>
-        <div style={{ font: '600 13px var(--font-body)', color: 'var(--cinza-500)' }}>{EDITAL.num}</div>
+        <div style={{ font: '600 13px var(--font-body)', color: 'var(--cinza-500)' }}>{t('credenciamento.noEdital')}</div>
       </div>
 
       {/* Stepper */}
@@ -91,9 +143,15 @@ export function Credenciamento() {
         <div style={{ padding: '28px 30px 26px' }}>
           {step === 0 && <PassoCapacidade cap={cap} setCap={setCap} />}
           {step === 1 && <PassoDocumentos />}
-          {step === 2 && <PassoFacial estado={facial} onRun={runFacial} />}
+          {step === 2 && <PassoTermo aceito={aceito} setAceito={setAceito} />}
           {step === 3 && <PassoSucesso onPainel={() => void navigate({ to: '/inicio' })} />}
         </div>
+
+        {erro && (
+          <div data-cy="erro-credenciamento" style={{ padding: '0 30px 18px', color: 'var(--erro, #B42318)', font: '600 13.5px var(--font-body)' }}>
+            {erro}
+          </div>
+        )}
 
         {showFooter && (
           <div
@@ -112,6 +170,7 @@ export function Credenciamento() {
                   type="button"
                   data-cy="voltar"
                   onClick={wPrev}
+                  disabled={enviando}
                   style={footerGhostStyle}
                 >
                   <IconeVoltar width={16} height={16} />
@@ -121,7 +180,8 @@ export function Credenciamento() {
                 <button
                   type="button"
                   data-cy="cancelar"
-                  onClick={cancelWizard}
+                  onClick={() => void cancelWizard()}
+                  disabled={enviando}
                   style={footerGhostStyle}
                 >
                   <IconeFechar width={16} height={16} />
@@ -129,29 +189,11 @@ export function Credenciamento() {
                 </button>
               )}
 
-              {step === 2 && (
-                <button
-                  type="button"
-                  data-cy="pular"
-                  onClick={skipFacial}
-                  style={{
-                    padding: '11px 18px',
-                    border: 'none',
-                    background: 'none',
-                    color: 'var(--cinza-500)',
-                    font: '600 14px var(--font-body)',
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                  }}
-                >
-                  {t('credenciamento.acoes.pular')}
-                </button>
-              )}
-
               <button
                 type="button"
                 data-cy="avancar"
-                onClick={wNext}
+                onClick={() => void avancar()}
+                disabled={!podeAvancar}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -159,10 +201,10 @@ export function Credenciamento() {
                   padding: '12px 24px',
                   border: 'none',
                   borderRadius: 9,
-                  background: 'var(--azul-700)',
+                  background: podeAvancar ? 'var(--azul-700)' : 'var(--cinza-300)',
                   color: '#fff',
                   font: '600 14.5px var(--font-body)',
-                  cursor: 'pointer',
+                  cursor: podeAvancar ? 'pointer' : 'not-allowed',
                 }}
               >
                 {nextLabel}
@@ -223,6 +265,7 @@ function PassoCapacidade({ cap, setCap }: { cap: string; setCap: (v: string) => 
             value={cap}
             onChange={(e) => setCap(e.target.value)}
             type="number"
+            min={1}
             placeholder={t('credenciamento.capacidade.placeholder')}
             style={{
               width: '100%',
@@ -457,13 +500,13 @@ function PassoDocumentos() {
   );
 }
 
-/* ---------- Passo 3: Autenticação facial ---------- */
-function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => void }) {
+/* ---------- Passo 3: Termo de Aceite (RN016) ---------- */
+function PassoTermo({ aceito, setAceito }: { aceito: boolean; setAceito: (v: boolean) => void }) {
   const { t } = useTranslation();
   return (
-    <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center' }}>
+    <div data-cy="termo-aceite" style={{ maxWidth: 640, margin: '0 auto' }}>
       <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.1em', color: 'var(--azul-700)', marginBottom: 6 }}>
-        {t('credenciamento.provaVida.passo')}
+        {t('credenciamento.termo.passo')}
       </div>
       <h2
         style={{
@@ -474,112 +517,65 @@ function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => voi
           margin: '0 0 8px',
         }}
       >
-        {t('credenciamento.provaVida.titulo')}
+        {t('credenciamento.termo.titulo')}
       </h2>
-      <p style={{ fontSize: 14.5, color: 'var(--cinza-500)', lineHeight: 1.55, margin: '0 0 24px' }}>
-        {t('credenciamento.provaVida.descricao')}
+      <p style={{ fontSize: 14.5, color: 'var(--cinza-500)', lineHeight: 1.55, margin: '0 0 20px' }}>
+        <Trans i18nKey="credenciamento.termo.descricao" components={{ b: <strong /> }} />
       </p>
+
+      <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap', marginBottom: 16 }}>
+        <div>
+          <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--cinza-400)', marginBottom: 3 }}>
+            {t('credenciamento.termo.versaoLabel')}
+          </div>
+          <div data-cy="termo-versao" style={{ font: '600 14px var(--font-body)', color: 'var(--azul-800)' }}>{VERSAO_TERMO}</div>
+        </div>
+        <div>
+          <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.06em', textTransform: 'uppercase', color: 'var(--cinza-400)', marginBottom: 3 }}>
+            {t('credenciamento.termo.finalidadeLabel')}
+          </div>
+          <div style={{ font: '600 14px var(--font-body)', color: 'var(--azul-800)' }}>{t('credenciamento.termo.finalidade')}</div>
+        </div>
+      </div>
 
       <div
         style={{
-          width: 170,
-          height: 210,
-          margin: '0 auto 22px',
-          borderRadius: 18,
           background: varAzul50,
-          border: `2px solid ${varAzul100}`,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          position: 'relative',
-          overflow: 'hidden',
+          border: `1px solid ${varAzul100}`,
+          borderRadius: 12,
+          padding: '18px 20px',
+          fontSize: 13.5,
+          color: 'var(--azul-900)',
+          lineHeight: 1.6,
+          marginBottom: 18,
         }}
       >
-        {estado === 'idle' && (
-          <svg width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="var(--azul-300)" strokeWidth={1.3} strokeLinecap="round" strokeLinejoin="round">
-            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-          </svg>
-        )}
-        {estado === 'checking' && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 14,
-            }}
-          >
-            <span
-              style={{
-                width: 40,
-                height: 40,
-                border: `3px solid ${varAzul100}`,
-                borderTopColor: 'var(--azul-700)',
-                borderRadius: '50%',
-                animation: 'cmspin .7s linear infinite',
-              }}
-            />
-            <span style={{ font: '600 12px var(--font-body)', color: 'var(--azul-700)' }}>{t('credenciamento.provaVida.verificando')}</span>
-          </div>
-        )}
-        {estado === 'done' && (
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 12,
-              background: 'var(--sucesso-bg)',
-            }}
-          >
-            <span
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: '50%',
-                background: 'var(--sucesso)',
-                color: '#fff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <IconeCheck width={28} height={28} strokeWidth={2.4} />
-            </span>
-            <span style={{ font: '600 13px var(--font-body)', color: 'var(--sucesso)' }}>{t('credenciamento.provaVida.validada')}</span>
-          </div>
-        )}
+        {t('credenciamento.termo.resumo')}
       </div>
 
-      {estado === 'idle' && (
-        <button
-          type="button"
-          data-cy="prova-de-vida"
-          onClick={onRun}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 9,
-            padding: '13px 24px',
-            border: 'none',
-            borderRadius: 10,
-            background: 'var(--azul-700)',
-            color: '#fff',
-            font: '600 15px var(--font-body)',
-            cursor: 'pointer',
-          }}
-        >
-          <IconeCamera width={18} height={18} />
-          {t('credenciamento.provaVida.realizar')}
-        </button>
-      )}
+      <label
+        style={{
+          display: 'flex',
+          gap: 11,
+          alignItems: 'flex-start',
+          padding: '14px 16px',
+          border: `1.5px solid ${aceito ? 'var(--azul-500)' : 'var(--border)'}`,
+          borderRadius: 11,
+          background: aceito ? varAzul50 : '#fff',
+          cursor: 'pointer',
+        }}
+      >
+        <input
+          data-cy="aceitar-termo"
+          type="checkbox"
+          checked={aceito}
+          onChange={(e) => setAceito(e.target.checked)}
+          style={{ width: 18, height: 18, marginTop: 1, flexShrink: 0, accentColor: 'var(--azul-700)' }}
+        />
+        <span style={{ font: '600 14px var(--font-body)', color: 'var(--cinza-900)', lineHeight: 1.5 }}>
+          {t('credenciamento.termo.checkbox')}
+        </span>
+      </label>
     </div>
   );
 }
@@ -588,7 +584,7 @@ function PassoFacial({ estado, onRun }: { estado: FacialEstado; onRun: () => voi
 function PassoSucesso({ onPainel }: { onPainel: () => void }) {
   const { t } = useTranslation();
   return (
-    <div style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center', padding: '14px 0' }}>
+    <div data-cy="credenciamento-enviado" style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center', padding: '14px 0' }}>
       <div
         style={{
           width: 74,
@@ -616,13 +612,10 @@ function PassoSucesso({ onPainel }: { onPainel: () => void }) {
         {t('credenciamento.enviado.titulo')}
       </h2>
       <p style={{ fontSize: 15, color: 'var(--cinza-500)', lineHeight: 1.6, margin: '0 0 8px' }}>
-        <Trans
-          i18nKey="credenciamento.enviado.descricao"
-          components={{ b: <strong /> }}
-          values={{ edital: EDITAL.num }}
-        />
+        {t('credenciamento.enviado.descricao')}
       </p>
       <div
+        data-cy="status-pendente"
         style={{
           display: 'inline-flex',
           alignItems: 'center',

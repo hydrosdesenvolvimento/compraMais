@@ -33,6 +33,20 @@ describe('ConsultarTrilha (US1)', () => {
     expect(r.map((x) => x.id)).toEqual(['a1']);
   });
 
+  it('filtra por fornecedorId — casa contra empresa do ator ou fornecedorId do payload (UC012)', async () => {
+    // ator representando a empresa CNPJ-9 (AD-30) e um evento com fornecedorId explícito no payload
+    await repo.append(AuditRecord.fromEvent('a4', null, {
+      eventId: 'a4', eventName: 'TermoAceito', eventVersion: 1, aggregateId: 'C1', occurredAt: '2026-03-04T10:00:00Z',
+      actor: { userId: 'titular9', empresaId: 'CNPJ-9' }, payload: {},
+    }));
+    await repo.append(AuditRecord.fromEvent('a5', null, {
+      eventId: 'a5', eventName: 'FornecedorCredenciado', eventVersion: 1, aggregateId: 'C2', occurredAt: '2026-03-05T10:00:00Z',
+      actor: { userId: 'cpl1' }, payload: { fornecedorId: 'CNPJ-9' },
+    }));
+    const r = await uc.consultar({ fornecedorId: 'CNPJ-9' });
+    expect(r.map((x) => x.id).sort()).toEqual(['a4', 'a5']);
+  });
+
   it('intervalo inválido (de>ate) → erro (FR-010)', async () => {
     await expect(uc.consultar({ de: '2026-05-01', ate: '2026-01-01' })).rejects.toBeInstanceOf(IntervaloInvalido);
   });

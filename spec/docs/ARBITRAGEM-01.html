@@ -1,0 +1,770 @@
+<title>Compra Mais — 7 definições pendentes</title>
+
+<style>
+  :root {
+    --papel:      #F7F6F2;
+    --superficie: #FFFFFF;
+    --tinta:      #16181A;
+    --grafite:    #55595E;
+    --fantasma:   #8B9097;
+    --linha:      #DAD8D1;
+    --linha-forte:#B4B1A8;
+    --sinal:      #A32B1E;
+    --sinal-fundo:#F6E9E6;
+
+    /* As duas cores da decisão. NÃO respondem a tema — são medições. */
+    --azul-proto:    #0A2A52;
+    --azul-oficial:  #0061AE;
+
+    --serif: Georgia, "Times New Roman", serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono:  ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --papel:      #131416;
+      --superficie: #1B1D20;
+      --tinta:      #ECEAE4;
+      --grafite:    #A2A6AC;
+      --fantasma:   #6C7176;
+      --linha:      #2E3134;
+      --linha-forte:#4A4E52;
+      --sinal:      #E8796A;
+      --sinal-fundo:#2A1D1B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --papel:      #131416;
+    --superficie: #1B1D20;
+    --tinta:      #ECEAE4;
+    --grafite:    #A2A6AC;
+    --fantasma:   #6C7176;
+    --linha:      #2E3134;
+    --linha-forte:#4A4E52;
+    --sinal:      #E8796A;
+    --sinal-fundo:#2A1D1B;
+  }
+  :root[data-theme="light"] {
+    --papel:      #F7F6F2;
+    --superficie: #FFFFFF;
+    --tinta:      #16181A;
+    --grafite:    #55595E;
+    --fantasma:   #8B9097;
+    --linha:      #DAD8D1;
+    --linha-forte:#B4B1A8;
+    --sinal:      #A32B1E;
+    --sinal-fundo:#F6E9E6;
+  }
+
+  body {
+    background: var(--papel);
+    color: var(--tinta);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .folha {
+    max-width: 47rem;
+    margin: 0 auto;
+    padding: 3.5rem 1.75rem 6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.75rem;
+  }
+
+  /* ── Cabeçalho ─────────────────────────────────────── */
+  .timbre {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    border-bottom: 2px solid var(--tinta);
+    padding-bottom: 1.5rem;
+  }
+  .protocolo {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: .5rem 1.5rem;
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--fantasma);
+  }
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(1.9rem, 5vw, 2.6rem);
+    font-weight: 400;
+    line-height: 1.15;
+    text-wrap: balance;
+    letter-spacing: -.015em;
+  }
+  .chamada {
+    font-family: var(--serif);
+    font-size: 1.15rem;
+    line-height: 1.5;
+    color: var(--grafite);
+    max-width: 34rem;
+  }
+  .chamada strong { color: var(--tinta); font-weight: 700; }
+
+  /* ── Selo de respondido ────────────────────────────── */
+  .respondido {
+    border: 2px solid var(--tinta);
+    background: var(--superficie);
+    padding: 1.3rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .respondido-selo {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--tinta);
+    font-weight: 700;
+  }
+  .placar { display: flex; gap: .5rem; flex-wrap: wrap; }
+  .voto {
+    font-family: var(--mono);
+    font-size: .95rem;
+    border: 1px solid var(--linha-forte);
+    padding: .35rem .6rem;
+    display: flex;
+    gap: .45rem;
+    align-items: baseline;
+    font-variant-numeric: tabular-nums;
+  }
+  .voto b { color: var(--fantasma); font-weight: 400; font-size: .72rem; }
+  .voto--pendente {
+    border-color: var(--sinal);
+    background: var(--sinal-fundo);
+    color: var(--sinal);
+  }
+  .voto--pendente b { color: var(--sinal); opacity: .7; }
+  .respondido-nota { font-size: .88rem; color: var(--grafite); line-height: 1.6; max-width: 40rem; }
+  .respondido-nota strong { color: var(--tinta); }
+
+  /* ── Roteamento ────────────────────────────────────── */
+  .roteiro {
+    border: 1px solid var(--linha);
+    background: var(--superficie);
+  }
+  .roteiro-titulo {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--fantasma);
+    padding: .8rem 1.1rem;
+    border-bottom: 1px solid var(--linha);
+  }
+  .rota {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: baseline;
+    padding: .8rem 1.1rem;
+    border-bottom: 1px solid var(--linha);
+  }
+  .rota:last-child { border-bottom: 0; }
+  .rota-quem { font-weight: 600; }
+  .rota-quem span { display: block; font-weight: 400; font-size: .85rem; color: var(--grafite); }
+  .rota-quais {
+    font-family: var(--mono);
+    font-size: .8rem;
+    color: var(--grafite);
+    white-space: nowrap;
+  }
+
+  /* ── Envelope ──────────────────────────────────────── */
+  .envelope { display: flex; flex-direction: column; gap: 2rem; }
+  .envelope-cabeca {
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+    padding-bottom: .7rem;
+    border-bottom: 1px solid var(--linha-forte);
+  }
+  .envelope-eyebrow {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--fantasma);
+  }
+  .envelope-cabeca h2 {
+    font-family: var(--serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+  }
+
+  /* ── Questão ───────────────────────────────────────── */
+  .questao { display: flex; flex-direction: column; gap: 1rem; }
+  .questao-cabeca { display: flex; gap: 1rem; align-items: baseline; }
+  .questao-num {
+    font-family: var(--serif);
+    font-size: 2.1rem;
+    line-height: 1;
+    color: var(--linha-forte);
+    font-variant-numeric: tabular-nums;
+    flex: none;
+    width: 1.6rem;
+  }
+  .questao-cabeca h3 {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    font-weight: 400;
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  .contexto { color: var(--grafite); padding-left: 2.6rem; max-width: 38rem; }
+  .contexto strong { color: var(--tinta); }
+
+  /* ── Opções ────────────────────────────────────────── */
+  .opcoes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 1px;
+    background: var(--linha);
+    border: 1px solid var(--linha);
+    margin-left: 2.6rem;
+  }
+  .opcao {
+    background: var(--superficie);
+    padding: 1.1rem 1.2rem 1.3rem;
+    display: flex;
+    flex-direction: column;
+    gap: .7rem;
+  }
+  .opcao-letra {
+    font-family: var(--mono);
+    font-size: .7rem;
+    letter-spacing: .1em;
+    color: var(--fantasma);
+  }
+  .opcao-titulo { font-weight: 600; font-size: 1.02rem; line-height: 1.35; }
+  .opcao dl { display: flex; flex-direction: column; gap: .45rem; font-size: .88rem; }
+  .opcao dt {
+    font-family: var(--mono);
+    font-size: .62rem;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--fantasma);
+  }
+  .opcao dd { color: var(--grafite); }
+  .opcao dd strong { color: var(--tinta); font-weight: 600; }
+
+  /* Os dois quadrados. A única cor do documento. */
+  .amostra {
+    height: 5.5rem;
+    border: 1px solid rgba(0,0,0,.18);
+    display: flex;
+    align-items: flex-end;
+    padding: .5rem .6rem;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .amostra code {
+    font-family: var(--mono);
+    font-size: .72rem;
+    color: #fff;
+    letter-spacing: .04em;
+    opacity: .82;
+  }
+  .amostra--proto   { background: var(--azul-proto); }
+  .amostra--oficial { background: var(--azul-oficial); }
+
+  /* ── Marcação ──────────────────────────────────────── */
+  .marcar {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-left: 2.6rem;
+    padding-top: .3rem;
+  }
+  .marcar-rotulo {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    color: var(--fantasma);
+  }
+  .caixa { display: flex; align-items: center; gap: .5rem; font-size: .95rem; }
+  .caixa i {
+    width: 1.05rem; height: 1.05rem;
+    border: 1.5px solid var(--tinta);
+    flex: none;
+    display: block;
+  }
+  .caixa em { font-style: normal; color: var(--grafite); font-size: .85rem; }
+
+  /* ── Notas ─────────────────────────────────────────── */
+  .nota {
+    margin-left: 2.6rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--linha-forte);
+    font-size: .89rem;
+    color: var(--grafite);
+    max-width: 36rem;
+  }
+  .nota strong { color: var(--tinta); }
+  .nota--sinal {
+    border-left-color: var(--sinal);
+    background: var(--sinal-fundo);
+    padding: .8rem 1rem;
+    color: var(--tinta);
+  }
+  .nota--sinal strong { color: var(--sinal); }
+
+  /* ── Assinatura ────────────────────────────────────── */
+  .assinatura {
+    border: 1px solid var(--linha-forte);
+    background: var(--superficie);
+    padding: 1.5rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.6rem;
+  }
+  .assinatura-titulo {
+    font-family: var(--mono);
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--fantasma);
+  }
+  .campos { display: flex; flex-direction: column; gap: 1.5rem; }
+  .campo { display: flex; flex-direction: column; gap: .35rem; }
+  .campo span {
+    font-family: var(--mono);
+    font-size: .62rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--fantasma);
+  }
+  .campo i { display: block; border-bottom: 1px solid var(--linha-forte); height: 1.5rem; }
+  .campos-duplo { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+  .fecho {
+    font-family: var(--serif);
+    font-size: 1.02rem;
+    line-height: 1.55;
+    color: var(--grafite);
+    border-top: 1px solid var(--linha);
+    padding-top: 1.4rem;
+    max-width: 38rem;
+  }
+  .fecho strong { color: var(--tinta); }
+
+  .rodape {
+    font-family: var(--mono);
+    font-size: .68rem;
+    line-height: 1.7;
+    color: var(--fantasma);
+    border-top: 2px solid var(--tinta);
+    padding-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+  }
+
+  @media (max-width: 34rem) {
+    .questao-num { font-size: 1.5rem; width: 1.2rem; }
+    .contexto, .opcoes, .marcar, .nota { margin-left: 0; padding-left: 0; }
+    .nota { padding-left: 1rem; }
+    .campos-duplo { grid-template-columns: 1fr; }
+  }
+
+  @media print {
+    :root {
+      --papel: #fff; --superficie: #fff; --tinta: #000;
+      --grafite: #333; --fantasma: #666; --linha: #ccc; --linha-forte: #888;
+      --sinal: #A32B1E; --sinal-fundo: #F6E9E6;
+    }
+    .folha { padding: 0; max-width: none; gap: 2rem; }
+    .envelope { break-inside: avoid; }
+    .questao { break-inside: avoid; }
+    .assinatura { break-inside: avoid; }
+  }
+</style>
+
+<div class="folha">
+
+  <header class="timbre">
+    <div class="protocolo">
+      <span>Compra Mais &middot; Prefeitura de Rio Branco</span>
+      <span>Arbitragem 01 &middot; 16 jul 2026</span>
+    </div>
+    <h1>Sete definições pendentes</h1>
+    <p class="chamada">
+      Duas versões das regras do sistema foram escritas, com um dia de diferença, e elas se
+      contradizem. <strong>Precisamos que a Prefeitura diga qual vale.</strong>
+      São 7 perguntas. Cada uma tem 2 opções. Marque um X.
+    </p>
+  </header>
+
+  <section class="respondido" aria-label="Situação">
+    <p class="respondido-selo">Respondido &middot; 16 jul 2026 &middot; Prefeitura de Rio Branco</p>
+    <div class="placar">
+      <span class="voto"><b>1</b> B</span>
+      <span class="voto"><b>2</b> B</span>
+      <span class="voto"><b>3</b> B</span>
+      <span class="voto"><b>4</b> A</span>
+      <span class="voto voto--pendente"><b>5</b> B</span>
+      <span class="voto voto--pendente"><b>6</b> B</span>
+      <span class="voto"><b>7</b> A</span>
+    </div>
+    <p class="respondido-nota">
+      <strong>1, 2, 3, 4 e 7 estão fechadas</strong> — são decisão da Prefeitura e viraram trabalho.
+      <br>
+      <strong>5 e 6 seguem para parecer.</strong> Foram endereçadas à Procuradoria (envelope 2) e ao
+      encarregado de dados (envelope 3) por serem mérito jurídico, e foram respondidas pela
+      Prefeitura. A posição do cliente está registrada; a regra se fecha com o parecer. O encarregado
+      de dados <strong>ainda precisa ser designado</strong> — exigência da Lei 13.709/2018, art. 41.
+    </p>
+    <p class="respondido-nota">
+      Registro completo, consequências e parecer contrário da equipe:
+      <strong>spec/docs/ARBITRAGEM-01.md</strong>
+    </p>
+  </section>
+
+  <section class="roteiro" aria-label="Roteamento das perguntas">
+    <p class="roteiro-titulo">As perguntas vão para 4 destinatários e podem ser respondidas em paralelo</p>
+    <div class="rota">
+      <p class="rota-quem">Prefeitura de Rio Branco <span>uma reunião</span></p>
+      <p class="rota-quais">1 &middot; 2 &middot; 3 &middot; 4</p>
+    </div>
+    <div class="rota">
+      <p class="rota-quem">Procuradoria <span>parecer jurídico</span></p>
+      <p class="rota-quais">5</p>
+    </div>
+    <div class="rota">
+      <p class="rota-quem">Encarregado de dados (DPO) <span>parecer</span></p>
+      <p class="rota-quais">6</p>
+    </div>
+    <div class="rota">
+      <p class="rota-quem">SMGA <span>uma conversa técnica</span></p>
+      <p class="rota-quais">7</p>
+    </div>
+  </section>
+
+  <!-- ══ ENVELOPE 1 ══════════════════════════════════ -->
+  <section class="envelope">
+    <div class="envelope-cabeca">
+      <p class="envelope-eyebrow">Envelope 1 de 4</p>
+      <h2>Prefeitura de Rio Branco</h2>
+    </div>
+
+    <!-- Q1 — a cor -->
+    <div class="questao">
+      <div class="questao-cabeca">
+        <p class="questao-num">1</p>
+        <h3>O sistema vai usar a cor da Prefeitura?</h3>
+      </div>
+      <p class="contexto">
+        O manual de identidade visual da Prefeitura define um azul. O protótipo que a Prefeitura
+        viu e aprovou usa <strong>outro azul</strong>, mais escuro. O sistema foi construído
+        seguindo o protótipo.
+      </p>
+      <div class="opcoes">
+        <div class="opcao">
+          <p class="opcao-letra">Opção A</p>
+          <div class="amostra amostra--proto"><code>#0A2A52</code></div>
+          <p class="opcao-titulo">Manter o azul do protótipo</p>
+          <dl>
+            <div><dt>É o que</dt><dd>a Prefeitura <strong>aprovou na validação</strong></dd></div>
+            <div><dt>Custo</dt><dd><strong>Zero</strong> — já está pronto</dd></div>
+            <div><dt>Risco</dt><dd>o sistema não usa a cor oficial</dd></div>
+          </dl>
+        </div>
+        <div class="opcao">
+          <p class="opcao-letra">Opção B</p>
+          <div class="amostra amostra--oficial"><code>#0061AE</code></div>
+          <p class="opcao-titulo">Usar o azul do manual da Prefeitura</p>
+          <dl>
+            <div><dt>É o que</dt><dd>está no <strong>manual de identidade</strong></dd></div>
+            <div><dt>Custo</dt><dd>ajuste de cores em todas as telas</dd></div>
+            <div><dt>Risco</dt><dd>retrabalho visual</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="marcar">
+        <span class="marcar-rotulo">Resposta</span>
+        <span class="caixa"><i></i>A</span>
+        <span class="caixa"><i></i>B</span>
+      </div>
+      <p class="nota">
+        Esta é a única pergunta que não depende de nenhuma outra. <strong>Pode ser respondida hoje.</strong>
+      </p>
+    </div>
+
+    <!-- Q2 -->
+    <div class="questao">
+      <div class="questao-cabeca">
+        <p class="questao-num">2</p>
+        <h3>Qual conjunto de regras é o contrato?</h3>
+      </div>
+      <p class="contexto">
+        Existem dois documentos completos descrevendo o sistema, escritos com um dia de diferença.
+        Um foi feito pela equipe técnica; o outro é o que foi apresentado e validado com a Prefeitura.
+      </p>
+      <div class="opcoes">
+        <div class="opcao">
+          <p class="opcao-letra">Opção A</p>
+          <p class="opcao-titulo">Conjunto técnico <span style="font-weight:400;color:var(--grafite)">— 2 de julho</span></p>
+          <dl>
+            <div><dt>Tem</dt><dd>23 requisitos, proteção de dados pessoais completa, perfis de acesso, trilha de auditoria</dd></div>
+            <div><dt>Foi</dt><dd><strong>escrito pela equipe</strong> — ninguém da Prefeitura assinou</dd></div>
+            <div><dt>Se vencer</dt><dd>o que foi validado com a Prefeitura precisa ser reincorporado</dd></div>
+          </dl>
+        </div>
+        <div class="opcao">
+          <p class="opcao-letra">Opção B</p>
+          <p class="opcao-titulo">Conjunto validado <span style="font-weight:400;color:var(--grafite)">— 3 de julho</span></p>
+          <dl>
+            <div><dt>Tem</dt><dd>17 requisitos, <strong>sem nenhuma regra de proteção de dados</strong></dd></div>
+            <div><dt>Foi</dt><dd><strong>apresentado e validado</strong> com a Prefeitura (visitas 5 e 6)</dd></div>
+            <div><dt>Se vencer</dt><dd>as regras de proteção de dados precisam ser reescritas do zero</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="marcar">
+        <span class="marcar-rotulo">Resposta</span>
+        <span class="caixa"><i></i>A</span>
+        <span class="caixa"><i></i>B</span>
+        <span class="caixa"><i></i>C — vale o A, com os itens novos do B incorporados <em>(recomendação da equipe)</em></span>
+      </div>
+      <p class="nota">
+        O sistema foi construído seguindo o conjunto A. <strong>A opção C preserva o que está pronto
+        e adiciona o que a Prefeitura pediu.</strong>
+      </p>
+    </div>
+
+    <!-- Q3 -->
+    <div class="questao">
+      <div class="questao-cabeca">
+        <p class="questao-num">3</p>
+        <h3>Oito itens têm o mesmo número e significados diferentes. Qual vale?</h3>
+      </div>
+      <p class="contexto">
+        Consequência direta da pergunta 2. Por exemplo, o item <strong>RF016</strong> significa
+        &ldquo;tela de contestação&rdquo; num documento e &ldquo;baixar o edital em PDF&rdquo; no
+        outro. Enquanto isso não for definido, uma tarefa escrita como &ldquo;implementar o item
+        16&rdquo; <strong>pode virar duas coisas opostas — e as duas passariam na revisão.</strong>
+      </p>
+      <div class="marcar">
+        <span class="marcar-rotulo">Resposta</span>
+        <span class="caixa"><i></i>A — renumerar o conjunto validado <em>(recomendação: o sistema já usa os códigos do técnico)</em></span>
+        <span class="caixa"><i></i>B — renumerar o conjunto técnico</span>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="questao">
+      <div class="questao-cabeca">
+        <p class="questao-num">4</p>
+        <h3>A verificação por foto (prova de vida) entra?</h3>
+      </div>
+      <p class="contexto">
+        O protótipo aprovado mostra uma etapa opcional de reconhecimento facial no credenciamento.
+        Os dois documentos discordam sobre o motivo de ela estar fora: um diz proteção de dados, o
+        outro diz custo. <strong>O sistema hoje não tem essa etapa.</strong>
+      </p>
+      <div class="opcoes">
+        <div class="opcao">
+          <p class="opcao-letra">Opção A</p>
+          <p class="opcao-titulo">Fica fora desta entrega</p>
+          <dl>
+            <div><dt>Custo</dt><dd><strong>Zero</strong></dd></div>
+            <div><dt>Consequência</dt><dd>o protótipo mostra uma etapa que o sistema não terá</dd></div>
+          </dl>
+        </div>
+        <div class="opcao">
+          <p class="opcao-letra">Opção B</p>
+          <p class="opcao-titulo">Entra</p>
+          <dl>
+            <div><dt>Custo</dt><dd>integração + parecer de proteção de dados obrigatório</dd></div>
+            <div><dt>Consequência</dt><dd>atrasa a entrega</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="marcar">
+        <span class="marcar-rotulo">Resposta</span>
+        <span class="caixa"><i></i>A <em>(recomendação)</em></span>
+        <span class="caixa"><i></i>B</span>
+      </div>
+    </div>
+
+    <div class="assinatura">
+      <p class="assinatura-titulo">Assinatura &middot; Envelope 1</p>
+      <div class="campos">
+        <div class="campos-duplo">
+          <label class="campo"><span>Nome</span><i></i></label>
+          <label class="campo"><span>Cargo</span><i></i></label>
+        </div>
+        <div class="campos-duplo">
+          <label class="campo"><span>Data</span><i></i></label>
+          <label class="campo"><span>Assinatura</span><i></i></label>
+        </div>
+      </div>
+    </div>
+
+    <p class="fecho">
+      Enquanto estas quatro definições não existirem, a construção do sistema segue em
+      <strong>risco de retrabalho</strong>. Não é um pedido de aprovação de gasto: é a definição de
+      qual regra vale. <strong>Toda semana sem ela é uma semana construindo sobre a interpretação
+      de alguém.</strong>
+    </p>
+  </section>
+
+  <!-- ══ ENVELOPE 2 ══════════════════════════════════ -->
+  <section class="envelope">
+    <div class="envelope-cabeca">
+      <p class="envelope-eyebrow">Envelope 2 de 4</p>
+      <h2>Procuradoria &middot; parecer</h2>
+    </div>
+
+    <div class="questao">
+      <div class="questao-cabeca">
+        <p class="questao-num">5</p>
+        <h3>Uma empresa com dívida fica impedida para sempre, ou até quitar?</h3>
+      </div>
+      <p class="contexto">Os dois documentos discordam frontalmente.</p>
+      <div class="opcoes">
+        <div class="opcao">
+          <p class="opcao-letra">Opção A</p>
+          <p class="opcao-titulo">Impedimento temporário</p>
+          <dl>
+            <div><dt>Regra</dt><dd>a empresa fica bloqueada <strong>enquanto</strong> houver débito; quita, volta</dd></div>
+            <div><dt>Está em</dt><dd>conjunto técnico</dd></div>
+          </dl>
+        </div>
+        <div class="opcao">
+          <p class="opcao-letra">Opção B</p>
+          <p class="opcao-titulo">Impedimento permanente &mdash; &ldquo;Tolerância Zero&rdquo;</p>
+          <dl>
+            <div><dt>Regra</dt><dd>débito ativo detectado = <strong>fora da plataforma para sempre</strong></dd></div>
+            <div><dt>Está em</dt><dd>conjunto validado</dd></div>
+          </dl>
+        </div>
+      </div>
+      <p class="nota nota--sinal">
+        <strong>A equipe registrou risco jurídico na opção B.</strong> A avaliação interna aponta
+        possível conflito com a <strong>LC 123/2006</strong> e com a <strong>Lei 14.133/2021</strong>,
+        além de contrariar o objetivo declarado do programa — incluir MEI e microempresas locais na
+        compra pública municipal. Não é escolha de gestão: é mérito jurídico. <strong>Assinar não
+        torna legal.</strong>
+      </p>
+      <div class="marcar">
+        <span class="marcar-rotulo">Parecer</span>
+        <span class="caixa"><i></i>A</span>
+        <span class="caixa"><i></i>B</span>
+        <span class="caixa"><i></i>Outro</span>
+      </div>
+      <p class="nota">Esta pergunta <strong>não bloqueia</strong> as demais. Corre em paralelo.</p>
+    </div>
+  </section>
+
+  <!-- ══ ENVELOPE 3 ══════════════════════════════════ -->
+  <section class="envelope">
+    <div class="envelope-cabeca">
+      <p class="envelope-eyebrow">Envelope 3 de 4</p>
+      <h2>Encarregado de dados (DPO) &middot; parecer</h2>
+    </div>
+
+    <div class="questao">
+      <div class="questao-cabeca">
+        <p class="questao-num">6</p>
+        <h3>As regras de proteção de dados permanecem?</h3>
+      </div>
+      <p class="contexto">
+        O conjunto validado com a Prefeitura <strong>não menciona proteção de dados pessoais em
+        momento algum</strong> — sem encarregado, sem relatório de impacto, sem regras de retenção,
+        sem base legal. O sistema <strong>já tem essa parte construída e funcionando</strong>:
+        painel do titular, atendimento de solicitações, trilha de auditoria.
+      </p>
+      <div class="opcoes">
+        <div class="opcao">
+          <p class="opcao-letra">Opção A</p>
+          <p class="opcao-titulo">Mantém</p>
+          <dl>
+            <div><dt>Consequência</dt><dd>é preciso designar formalmente um encarregado e emitir o relatório de impacto</dd></div>
+          </dl>
+        </div>
+        <div class="opcao">
+          <p class="opcao-letra">Opção B</p>
+          <p class="opcao-titulo">Remove</p>
+          <dl>
+            <div><dt>Consequência</dt><dd><strong>apaga-se conformidade já construída</strong> de um sistema que trata CNPJ e documentos de empresas reais</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div class="marcar">
+        <span class="marcar-rotulo">Parecer</span>
+        <span class="caixa"><i></i>A <em>(recomendação unânime da equipe)</em></span>
+        <span class="caixa"><i></i>B</span>
+      </div>
+      <p class="nota nota--sinal">
+        <strong>Pendência independente da resposta:</strong> o projeto ainda não tem encarregado de
+        dados designado. Isso é exigência legal, não preferência técnica.
+      </p>
+    </div>
+  </section>
+
+  <!-- ══ ENVELOPE 4 ══════════════════════════════════ -->
+  <section class="envelope">
+    <div class="envelope-cabeca">
+      <p class="envelope-eyebrow">Envelope 4 de 4</p>
+      <h2>SMGA &middot; técnico</h2>
+    </div>
+
+    <div class="questao">
+      <div class="questao-cabeca">
+        <p class="questao-num">7</p>
+        <h3>A distribuição é por item ou por lote?</h3>
+      </div>
+      <p class="contexto">
+        O cálculo de rateio foi construído assumindo <strong>item</strong>. Se o funcionamento real
+        for por <strong>lote</strong>, não é ajuste de configuração — é reconstrução da parte central
+        do sistema.
+      </p>
+      <div class="opcoes">
+        <div class="opcao">
+          <p class="opcao-letra">Opção A</p>
+          <p class="opcao-titulo">Item</p>
+          <dl><div><dt>Consequência</dt><dd>o cálculo <strong>já está pronto</strong></dd></div></dl>
+        </div>
+        <div class="opcao">
+          <p class="opcao-letra">Opção B</p>
+          <p class="opcao-titulo">Lote</p>
+          <dl><div><dt>Consequência</dt><dd>reconstrução do motor de distribuição</dd></div></dl>
+        </div>
+      </div>
+      <div class="marcar">
+        <span class="marcar-rotulo">Resposta</span>
+        <span class="caixa"><i></i>A</span>
+        <span class="caixa"><i></i>B</span>
+      </div>
+      <p class="nota nota--sinal">
+        <strong>Esta é a pergunta mais cara do documento.</strong> A distribuição justa de cotas —
+        a razão de existir do Compra Mais — está parada esperando por ela <strong>desde
+        junho</strong>. O cálculo está construído e testado; as telas estão desenhadas e aprovadas;
+        nada foi ligado porque ninguém confirmou item ou lote. É a resposta que
+        <strong>destrava mais trabalho por menos esforço</strong>.
+      </p>
+    </div>
+  </section>
+
+  <footer class="rodape">
+    <p>Compra Mais &middot; Sistema Digital de Compras Públicas da Prefeitura de Rio Branco</p>
+    <p>Lei nº 14.133/2021 &middot; Lei Municipal 2.027 &middot; Decreto 1043/2022 &middot; SMGA / CPL</p>
+    <p>Instrumento de coleta de assinatura. O registro normativo, com anexo técnico e rastreabilidade, é <strong>spec/docs/ARBITRAGEM-01.md</strong> — em caso de divergência, o registro prevalece.</p>
+  </footer>
+
+</div>

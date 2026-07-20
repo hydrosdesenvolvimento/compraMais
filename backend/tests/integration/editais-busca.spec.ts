@@ -39,4 +39,13 @@ describe('Busca de editais — QBE (US3 / FR-011)', () => {
     const r = await buscar.buscar({ situacao: 'publicado' }, { page: 1, size: 1 });
     expect(r).toHaveLength(1);
   });
+
+  // A tela "Operação · Editais" (Painel Admin) consome número, quantitativo e prazo desta busca.
+  it('expõe número oficial, quantitativo e prazo no read model', async () => {
+    const [merenda] = await buscar.buscar({ secretariaId: 's1', situacao: 'publicado' });
+    expect(merenda.numero).toMatch(/^ED-\d{4}\/\d{3}$/);
+    expect(merenda.quantitativos).toBe(5);
+    expect(merenda.prazoVigencia).toBe('2099-12-31');
+    expect(merenda.cnaesAlvo).toEqual(['1091101']);
+  });
 });

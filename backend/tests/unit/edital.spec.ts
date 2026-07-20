@@ -1,13 +1,23 @@
 import { describe, it, expect } from 'vitest';
 import { Edital, EditalSemSecretaria, EditalIncompleto, TransicaoInvalida } from '../../src/editais/domain/edital.js';
+import { NumeroEditalInvalido } from '../../src/editais/domain/numero-edital.js';
 
 function rascunho(over: Partial<{ cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }> = {}) {
-  return Edital.criar({ id: 'e1', secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2099-12-31', ...over });
+  return Edital.criar({ id: 'e1', numero: 'ED-2026/001', secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2099-12-31', ...over });
 }
 
 describe('Edital (US1)', () => {
   it('exige exatamente uma secretaria (RN007/AD-11)', () => {
-    expect(() => Edital.criar({ id: 'e', secretariaId: '', objeto: 'x', cnaesAlvo: ['1091101'] })).toThrow(EditalSemSecretaria);
+    expect(() => Edital.criar({ id: 'e', numero: 'ED-2026/001', secretariaId: '', objeto: 'x', cnaesAlvo: ['1091101'] })).toThrow(EditalSemSecretaria);
+  });
+
+  it('exige numeração oficial válida (ED-AAAA/NNN)', () => {
+    expect(() => Edital.criar({ id: 'e', numero: '123', secretariaId: 's1', objeto: 'x', cnaesAlvo: ['1091101'] })).toThrow(NumeroEditalInvalido);
+  });
+
+  it('a numeração sobrevive ao round-trip estado/deEstado (AD-33)', () => {
+    const e = rascunho();
+    expect(Edital.deEstado(e.estado()).numero).toBe('ED-2026/001');
   });
 
   it('nasce em rascunho', () => {
@@ -37,5 +47,18 @@ describe('Edital (US1)', () => {
   it('editar sem mudança real não gera diff', () => {
     const e = rascunho();
     expect(e.editar({ objeto: 'merenda' }, 'g').diff).toHaveLength(0);
+  });
+
+  it('estado()/deEstado() faz round-trip fiel (persistência durável — AD-33)', () => {
+    const e = rascunho(); e.publicar('gestor1');
+    const clone = Edital.deEstado(e.estado());
+    expect(clone.estado()).toEqual(e.estado());
+    expect(clone.id).toBe(e.id);
+    expect(clone.situacao).toBe('publicado');
+    expect([...clone.cnaesAlvo]).toEqual([...e.cnaesAlvo]);
+    expect(clone.lastUserUpdate).toBe('gestor1');
+    // deEstado reconstrói fora das regras de criação (aceita já-publicado, sem revalidar completude)
+    clone.encerrar('gestor2');
+    expect(clone.situacao).toBe('encerrado');
   });
 });

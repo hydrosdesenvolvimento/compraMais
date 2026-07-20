@@ -3,9 +3,9 @@ import type { CampoDiff } from './edital.js';
 
 type Actor = { userId: string; empresaId?: string };
 
-export class EditalCriado extends DomainEvent<{ editalId: string; secretariaId: string }> {
+export class EditalCriado extends DomainEvent<{ editalId: string; numero: string; secretariaId: string }> {
   readonly eventName = 'EditalCriado'; readonly eventVersion = 1;
-  constructor(aggregateId: string, payload: { editalId: string; secretariaId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+  constructor(aggregateId: string, payload: { editalId: string; numero: string; secretariaId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
 }
 export class EditalPublicado extends DomainEvent<{ editalId: string }> {
   readonly eventName = 'EditalPublicado'; readonly eventVersion = 1;

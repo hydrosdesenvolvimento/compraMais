@@ -1,13 +1,14 @@
 ---
 stepsCompleted: ["step-01-validate-prerequisites", "step-02-design-epics", "step-03-create-stories", "step-04-final-validation"]
 inputDocuments:
-  - _bmad-output/planning-artifacts/prd.md
-  - _bmad-output/planning-artifacts/architecture/architecture-comparMaisSpec-2026-06-29/ARCHITECTURE-SPINE.md
-  - _bmad-output/planning-artifacts/ux-designs/ux-compra-mais-2026-06-29/DESIGN.md
-  - _bmad-output/planning-artifacts/ux-designs/ux-compra-mais-2026-06-29/EXPERIENCE.md
-  - _bmad-output/planning-artifacts/plano-releases.md
-  - _bmad-output/planning-artifacts/matriz-lacunas.md
-  - source/05-HistoriasUsuario.md
+  - spec/docs/prd.md
+  - spec/docs/architecture/ARCHITECTURE-SPINE.md
+  - spec/Prototipo/portal-fornecedor.html
+  - spec/Prototipo/painel-administrativo.html
+  - spec/Prototipo/index.html
+  - spec/docs/plano-releases.md
+  - spec/docs/matriz-lacunas.md
+  - spec/source/05-HistoriasUsuario.md
   - source/06-CasosUso.md
 ---
 
@@ -50,7 +51,7 @@ NFR002 (RNF002): Compressão + fragmentação do malote; limite SEI como parâme
 NFR003 (RNF003): Trilha de auditoria em JSON imutável (usuário, evento, timestamp, IP, payload).
 NFR004 (RNF004): Conformidade Lei 14.133/21 (art.79), Lei 2.027, TCE (preferência "por item").
 NFR005 (RNF005): Disponibilidade com SLA numérico (a ratificar); credenciamento contínuo.
-NFR006 (RNF006): Identidade visual e acessibilidade conforme o contrato de UX (paleta azul-700 #0061AE, Poppins, e-MAG/WCAG 2.1 AA).
+NFR006 (RNF006): Identidade visual e acessibilidade conforme o contrato de UX — DESIGN.md/EXPERIENCE.md + bundles de `../Prototipo/` (Poppins, e-MAG/WCAG 2.1 AA; paleta em arbitragem 0.7).
 NFR007 (RNF007): LGPD — base legal, cifra repouso/trânsito, retenção/descarte, RIPD, DPO, acordos Art.26.
 NFR008 (RNF008): Determinismo/reprodutibilidade do motor.
 ```
@@ -83,10 +84,10 @@ Regras de negócio (PRD §9): RN001–RN008 + **RN009 (dados Receita read-only)*
 
 ### UX Design Requirements
 
-Do contrato de UX (DESIGN.md + EXPERIENCE.md), ratificado a partir de `source/AI-UI-Design/`:
+Do contrato de UX — metade escrita ([DESIGN.md](ux/DESIGN.md) + [EXPERIENCE.md](ux/EXPERIENCE.md)) + metade artefato ([`../Prototipo/`](../Prototipo/)), ambas normativas (AD-39):
 
 ```
-UX-DR1: Design system compartilhado entre os 2 SPAs — Poppins, azul-700 #0061AE + escala, âmbar #FFB300 (ação), raio 8px/999px, espaçamento 8/12/14/16/20.
+UX-DR1: Design system compartilhado entre os 2 SPAs — Poppins, âmbar #FFB300 (ação), raio 8px/999px, espaçamento 8/12/14/16/20. ⚠️ PALETA EM ARBITRAGEM (0.7): brandbook oficial #0061AE/#003A68 × navy #0A2A52/#0E3A6E/#14467F (bundles + implementação). Decisão da Prefeitura.
 UX-DR2: AuthPanel — painel dividido (institucional + autenticação); toggle Entrar/Criar conta; CNPJ + Consultar; estado de fallback "Receita indisponível? Preencher manualmente" visível.
 UX-DR3: Vitrine de editais filtrada por CNAE (esconde incompatíveis).
 UX-DR4: "Minha conta" — dados oficiais da Receita read-only; "Sincronizar agora" com timestamp/status; campos editáveis = Nome Fantasia/Endereço/Telefone.
@@ -505,14 +506,16 @@ As a usuário dos dois portais,
 I want consistência visual e de interação conforme o contrato de UX,
 So that a experiência seja coerente e acessível (UX-DR1/7/8/10, RNF006, AD-3).
 
-> ✅ Contrato de UX: [DESIGN.md](ux/DESIGN.md) / [EXPERIENCE.md](ux/EXPERIENCE.md).
+> ✅ Contrato de UX: [DESIGN.md](ux/DESIGN.md) / [EXPERIENCE.md](ux/EXPERIENCE.md) + bundles de [`../Prototipo/`](../Prototipo/) (AD-39).
 
 **Acceptance Criteria:**
-**Given** os tokens (Poppins; azul-700 #0061AE + escala; âmbar #FFB300; raio 8px/999px; espaçamento 8/12/14/16/20),
+**Given** os tokens de [DESIGN.md](ux/DESIGN.md) (Poppins; âmbar #FFB300; raio 8px/999px; espaçamento 8/12/14/16/20) e a **paleta que a arbitragem 0.7 definir**,
 **When** os dois SPAs consomem o design system,
 **Then** componentes (AuthPanel, sidebar, cards, labels/tags, botões, barra de acessibilidade) e paleta são consistentes,
 **And** a acessibilidade atende e-MAG/WCAG 2.1 AA (foco visível âmbar 3px, alto contraste, teclado),
-**And** a IA segue o EXPERIENCE.md (Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas).
+**And** a IA segue [EXPERIENCE.md](ux/EXPERIENCE.md) e os bundles (Início, Editais, Meus credenciamentos, Documentos, Demandas distribuídas).
+
+> ⚠️ **Bloqueada pela arbitragem 0.7.** Esta história não é testável antes da Prefeitura decidir a paleta: o brandbook oficial diz `#0061AE`/`#003A68`, os bundles e a implementação dizem navy `#0A2A52`/`#0E3A6E`/`#14467F`.
 
 ---
 
@@ -562,7 +565,7 @@ resgatadas aqui como **critérios de aceite adicionais**, vinculados à históri
 
 ## Cobertura dos Mockups — Gaps do Painel Admin e do wizard (validação 2026-07-02)
 
-Histórias novas identificadas ao validar `AI-UI-Design/` contra a doc (ver [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)). Complementam os épicos existentes; AC em Given/When/Then.
+Histórias novas identificadas ao validar os bundles contra a doc (ver [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)). Complementam os épicos existentes; AC em Given/When/Then.
 
 ### Story 3.4 — Ciclo de vida do Edital *(gap G6 · RN014, AD-37)*
 As a Secretaria/Gestor, I want gerir o estado do edital ao longo do processo, So that a vitrine e a distribuição respeitem a fase correta.

@@ -32,7 +32,8 @@ export class AutenticarLocal {
   constructor(private readonly repo: UsuarioRepository, private readonly tokens: TokenService, private readonly bus: EventBus) {}
   async executar(input: { email: string; senha: string }): Promise<ResultadoLogin> {
     const u = await this.repo.porEmail((input.email ?? '').trim().toLowerCase());
-    if (!u || !u.temSenhaLocal || !u.verificarSenha(input.senha)) throw new CredenciaisInvalidas();
+    // Usuário inativo (RN015 — servidor desligado) não autentica; mensagem genérica (sem enumeração).
+    if (!u || !u.ativo || !u.temSenhaLocal || !u.verificarSenha(input.senha)) throw new CredenciaisInvalidas();
     const t = this.tokens.emitir(u.toIdentidade());
     await this.bus.publish(new UsuarioAutenticado(u.id, { metodo: 'local' }, u.toIdentidade()).toEnvelope(randomUUID(), agora()));
     return { ...t, usuario: u.toIdentidade() };

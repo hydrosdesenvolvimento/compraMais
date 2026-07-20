@@ -24,7 +24,7 @@ export function registrarRotasRegularizacao(app: FastifyInstance, deps: {
     const doc = await deps.docs.porId(docId);
     if (!doc) return reply.code(404).send({ codigo: 'DocumentoNaoEncontrado', mensagem: 'Document not found' });
     try {
-      doc.reenviar(actor(req));
+      doc.reenviar(ator(req));
       await deps.docs.salvar(doc);
       return reply.code(201).send({ status: 'pendente' });
     } catch (e) {
@@ -36,9 +36,12 @@ export function registrarRotasRegularizacao(app: FastifyInstance, deps: {
   app.post('/fornecedores/:id/reconsultar', async (req, reply) => {
     const { id } = req.params as { id: string };
     const { cnpj } = req.body as { cnpj: string };
-    const r = await deps.elegibilidade.verificar(id, cnpj, 'credenciamento', { userId: actor(req) });
+    const r = await deps.elegibilidade.verificar(id, cnpj, 'credenciamento', { userId: ator(req) });
     return reply.send(r);
   });
 }
 
-function actor(req: { headers: Record<string, unknown> }): string { return String(req.headers['x-user-id'] ?? 'anon'); }
+/** Ator do rastro (AD-30). Rotas sem guard: chamador anônimo é registrado como `anon`, nunca forjado por header. */
+function ator(req: { identidade: { userId: string } | null }): string {
+  return req.identidade?.userId ?? 'anon';
+}

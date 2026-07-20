@@ -16,6 +16,7 @@ export interface AuditQuery {
   de?: string; // ISO-8601
   ate?: string; // ISO-8601
   editalId?: string;
+  fornecedorId?: string; // UC012: casa contra o fornecedor/empresa do payload
 }
 
 /** Paginação/ordenação — parâmetros separados do probe (FR-002/004). */

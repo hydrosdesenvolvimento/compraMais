@@ -1,7 +1,20 @@
 import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-base.js';
+import { exigirNumeroEdital } from './numero-edital.js';
 
 export type SituacaoEdital = 'rascunho' | 'publicado' | 'encerrado';
 export interface CampoDiff { campo: string; antes: unknown; depois: unknown }
+
+/** Snapshot plano do agregado para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
+export interface EditalState {
+  meta: MetadadosBase;
+  numero: string; // numeração oficial ED-AAAA/NNN (identificador humano; o `id` segue sendo o UUID)
+  secretariaId: string;
+  objeto: string;
+  cnaesAlvo: string[];
+  quantitativos: number;
+  prazoVigencia: string | null;
+  situacao: SituacaoEdital;
+}
 
 /**
  * Edital — entidade rica que estende EntidadeBase (AD-33). Invariante RN007/AD-11: UMA secretaria,
@@ -11,6 +24,7 @@ export interface CampoDiff { campo: string; antes: unknown; depois: unknown }
 export class Edital extends EntidadeBase {
   private constructor(
     meta: MetadadosBase,
+    readonly numero: string,
     readonly secretariaId: string,
     private _objeto: string,
     private _cnaesAlvo: string[], // CNAE subclasse 7 dígitos (D2)
@@ -22,7 +36,7 @@ export class Edital extends EntidadeBase {
   }
 
   static criar(input: {
-    id: string; secretariaId: string; objeto: string;
+    id: string; numero: string; secretariaId: string; objeto: string;
     cnaesAlvo?: string[]; subclassesExigidas?: string[]; // alias legado aceito
     quantitativos?: number; prazoVigencia?: string | null; userName?: string;
   }): Edital {
@@ -30,9 +44,28 @@ export class Edital extends EntidadeBase {
     const cnaes = input.cnaesAlvo ?? input.subclassesExigidas ?? [];
     return new Edital(
       EntidadeBase.metaNova(input.id, input.userName),
+      exigirNumeroEdital(input.numero),
       input.secretariaId, input.objeto, [...cnaes], input.quantitativos ?? 0,
       input.prazoVigencia ?? null, 'rascunho',
     );
+  }
+
+  /** Reconstrução a partir da persistência (sem regra de criação — aceita qualquer situação do ciclo). */
+  static deEstado(s: EditalState): Edital {
+    return new Edital(
+      s.meta, exigirNumeroEdital(s.numero), s.secretariaId, s.objeto, [...s.cnaesAlvo],
+      s.quantitativos, s.prazoVigencia, s.situacao,
+    );
+  }
+
+  /** Snapshot plano para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
+  estado(): EditalState {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      numero: this.numero,
+      secretariaId: this.secretariaId, objeto: this._objeto, cnaesAlvo: [...this._cnaesAlvo],
+      quantitativos: this._quantitativos, prazoVigencia: this._prazoVigencia, situacao: this._situacao,
+    };
   }
 
   get objeto(): string { return this._objeto; }

@@ -2,9 +2,11 @@ import type { FastifyInstance } from 'fastify';
 import type { ConsultarTrilha } from '../application/consultar-trilha.js';
 import type { ExportarTrilha, FormatoExport } from '../application/exportar-trilha.js';
 import type { AuditQuery, AuditPage } from '../infra/audit-repository.js';
+import type { Papel } from '../../shared/identity/identity-provider.js';
+import { exigirPapel } from '../../shared/http/autenticacao.js';
 
-// RBAC (FR-008 / clarify Q2): controle + auditor somente-leitura. Demais → 403.
-const PERFIS_AUDITORIA = ['cpl', 'administrador', 'auditor'];
+// RBAC (FR-008 / clarify Q2): controle + auditor somente-leitura. Demais → 403; anônimo → 401.
+const PERFIS_AUDITORIA: readonly Papel[] = ['cpl', 'administrador', 'auditor'];
 
 /**
  * Superfície de LEITURA da trilha (FR-001..011). Nenhuma rota aqui escreve na trilha (AD-18 / FR-003).
@@ -12,7 +14,7 @@ const PERFIS_AUDITORIA = ['cpl', 'administrador', 'auditor'];
  */
 export function registrarRotasAuditoria(app: FastifyInstance, deps: { consultar: ConsultarTrilha; exportar: ExportarTrilha }): void {
   app.get('/auditoria', async (req, reply) => {
-    if (!autorizado(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Access restricted to control/audit roles.' });
+    if (!exigirPapel(req, reply, PERFIS_AUDITORIA)) return reply;
     const { probe, page } = parseFiltro(req);
     try {
       return reply.send(await deps.consultar.consultar(probe, page));
@@ -22,7 +24,7 @@ export function registrarRotasAuditoria(app: FastifyInstance, deps: { consultar:
   });
 
   app.get('/auditoria/exportar', async (req, reply) => {
-    if (!autorizado(req)) return reply.code(403).send({ codigo: 'RBAC', mensagem: 'Access restricted to control/audit roles.' });
+    if (!exigirPapel(req, reply, PERFIS_AUDITORIA)) return reply;
     const { probe } = parseFiltro(req);
     const { formato } = req.query as { formato?: FormatoExport };
     const fmt: FormatoExport = formato === 'json' ? 'json' : 'csv';
@@ -40,15 +42,11 @@ export function registrarRotasAuditoria(app: FastifyInstance, deps: { consultar:
 
 function parseFiltro(req: { query: unknown }): { probe: AuditQuery; page: AuditPage } {
   const q = req.query as Record<string, string | undefined>;
-  const probe: AuditQuery = { usuario: q.usuario, evento: q.evento, de: q.de, ate: q.ate, editalId: q.editalId };
+  const probe: AuditQuery = { usuario: q.usuario, evento: q.evento, de: q.de, ate: q.ate, editalId: q.editalId, fornecedorId: q.fornecedorId };
   const page: AuditPage = {
     page: q.page ? Number(q.page) : undefined,
     size: q.size ? Number(q.size) : undefined,
     ordem: q.sort === 'asc' ? 'asc' : q.sort === 'desc' ? 'desc' : undefined,
   };
   return { probe, page };
-}
-
-function autorizado(req: { headers: Record<string, unknown> }): boolean {
-  return PERFIS_AUDITORIA.includes(String(req.headers['x-papel'] ?? ''));
 }

@@ -162,7 +162,35 @@ input[type="date"], input[type="number"], input[type="tel"], select, textarea {
 .pill-warn { background: var(--atencao-bg); color: var(--ambar-700); }
 .pill-error { background: var(--erro-bg); color: var(--erro); }
 .pill-info { background: var(--info-bg); color: var(--azul-700); }
+.pill-neutral { background: var(--cinza-100); color: var(--cinza-700); }
 .tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .03em; padding: 3px 8px; border-radius: 6px; background: var(--azul-50); color: var(--azul-700); }
+
+/* ---- Toasts (feedback efêmero das respostas do backend) ---- */
+.cm-toasts {
+  position: fixed; top: 18px; right: 18px; z-index: 200;
+  display: flex; flex-direction: column; gap: 10px;
+  width: min(380px, calc(100vw - 36px)); pointer-events: none;
+}
+.cm-toast {
+  pointer-events: auto; display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 12px 12px 14px; border-radius: var(--radius-md);
+  border: 1px solid var(--border); background: #fff; box-shadow: var(--shadow-lg);
+  border-left-width: 4px; animation: cmfade .2s ease;
+}
+.cm-toast-ico { display: inline-flex; flex-shrink: 0; margin-top: 1px; }
+.cm-toast-txt { flex: 1; min-width: 0; font-size: 13.5px; line-height: 1.4; color: var(--cinza-900); word-break: break-word; }
+.cm-toast-x {
+  flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border: none; border-radius: 6px; background: transparent;
+  color: var(--cinza-500); cursor: pointer;
+}
+.cm-toast-x:hover { background: var(--divider); color: var(--cinza-700); }
+.cm-toast-ok { border-left-color: var(--sucesso); }
+.cm-toast-ok .cm-toast-ico { color: var(--sucesso); }
+.cm-toast-erro { border-left-color: var(--erro); }
+.cm-toast-erro .cm-toast-ico { color: var(--erro); }
+.cm-toast-info { border-left-color: var(--info); }
+.cm-toast-info .cm-toast-ico { color: var(--info); }
 
 .avatar { display: inline-flex; align-items: center; justify-content: center; background: var(--azul-100); color: var(--azul-800); font-weight: 600; border-radius: 50%; }
 
@@ -217,6 +245,9 @@ input[type="date"], input[type="number"], input[type="tel"], select, textarea {
 .cm-profile-btn:hover { background: var(--azul-50); }
 .cm-avatar-sm { width: 36px; height: 36px; border-radius: 50%; background: var(--azul-100); color: var(--azul-800); display: flex; align-items: center; justify-content: center; font: 600 14px var(--font-body); flex-shrink: 0; }
 .cm-menu-pop { position: absolute; right: 0; top: 52px; width: 300px; background: #fff; border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-lg); z-index: 60; overflow: hidden; animation: cmfade .18s; }
+.cm-menu-head { display: flex; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid var(--divider); }
+.cm-menu-name { font: 600 14.5px var(--font-body); color: var(--azul-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cm-menu-role { font-size: 12px; color: var(--cinza-500); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cm-menu-scrim { position: fixed; inset: 0; z-index: 55; }
 .cm-menu-item { display: flex; align-items: center; gap: 11px; width: 100%; padding: 10px 12px; border: none; border-radius: 9px; background: transparent; cursor: pointer; font: 500 14px var(--font-body); color: var(--cinza-700); text-align: left; }
 .cm-menu-item:hover { background: var(--azul-50); }

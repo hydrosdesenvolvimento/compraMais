@@ -1,0 +1,61 @@
+/* ============================================================
+   ACCESSIBILITY UTILITIES — Prefeitura de Rio Branco
+   The portal requires real-time, user-driven interface
+   modifications. These data-attribute hooks drive the
+   accessibility toolbar (A+/A/A-, high contrast, grayscale,
+   highlight links, focus ring, reading mask, pause animations).
+   Apply the data-attribute on a wrapper element.
+   ============================================================ */
+
+/* Text resize — preserves layout */
+[data-fs="sm"] { zoom: 0.9; }
+[data-fs="md"] { zoom: 1; }
+[data-fs="lg"] { zoom: 1.16; }
+[data-fs="xl"] { zoom: 1.32; }
+
+/* Line height & alignment helpers */
+[data-line-height="loose"] * { line-height: 1.9 !important; }
+[data-text-align="left"] p,
+[data-text-align="left"] li { text-align: left !important; }
+
+/* Readable font */
+[data-readable="on"],
+[data-readable="on"] * { font-family: var(--font-readable) !important; }
+
+/* High contrast */
+[data-contrast="on"] { filter: contrast(1.4); }
+
+/* Grayscale */
+[data-gray="on"] { filter: grayscale(1); }
+[data-contrast="on"][data-gray="on"] { filter: contrast(1.4) grayscale(1); }
+
+/* Hide images */
+[data-hideimg="on"] img,
+[data-hideimg="on"] [data-role="image"] { visibility: hidden !important; }
+
+/* Pause animations */
+[data-noanim="on"] * { animation: none !important; transition: none !important; }
+
+/* Highlight links */
+[data-hllinks="on"] a {
+  background: var(--ambar-300) !important;
+  color: var(--azul-900) !important;
+  text-decoration: underline !important;
+  border-radius: 3px;
+  box-shadow: 0 0 0 2px var(--ambar-300);
+}
+
+/* Reinforced focus outline */
+[data-focusring="on"] :focus {
+  outline: var(--focus-width) solid var(--focus-ring) !important;
+  outline-offset: var(--focus-offset) !important;
+}
+
+/* Default visible focus for keyboard users */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+/* Selection */
+::selection { background: var(--azul-100); }

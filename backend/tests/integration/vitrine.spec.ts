@@ -8,7 +8,7 @@ import { ListarEditaisCompativeis, EditalIncompativel } from '../../src/editais/
 
 function fornecedor(id: string, subclasse: string) {
   return Fornecedor.cadastrar({
-    id, cnpj: Cnpj.criar('12.345.678/0001-90'), razaoSocial: 'X', porte: 'ME',
+    id, cnpj: Cnpj.criar('11.222.333/0001-81'), razaoSocial: 'X', porte: 'ME',
     cnaes: [{ codigoSubclasse: subclasse, tipo: 'principal', ativo: true }],
     situacao: 'ativa', origem: 'oficial', contato: {},
   });
@@ -18,8 +18,8 @@ describe('Vitrine filtrada por CNAE (US2 / D2)', () => {
   let editais: EditalRepositoryMemory; let fr: FornecedorRepositoryMemory; let vitrine: ListarEditaisCompativeis;
   beforeEach(async () => {
     editais = new EditalRepositoryMemory(); fr = new FornecedorRepositoryMemory();
-    editais.semear(Edital.criar({ id: 'eX', secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2099-12-31' }));
-    editais.semear(Edital.criar({ id: 'eY', secretariaId: 's2', objeto: 'mobiliario', cnaesAlvo: ['3101200'], quantitativos: 50, prazoVigencia: '2099-12-31' }));
+    editais.semear(Edital.criar({ id: 'eX', numero: 'ED-2026/001', secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2099-12-31' }));
+    editais.semear(Edital.criar({ id: 'eY', numero: 'ED-2026/002', secretariaId: 's2', objeto: 'mobiliario', cnaesAlvo: ['3101200'], quantitativos: 50, prazoVigencia: '2099-12-31' }));
     await fr.salvar(fornecedor('f1', '1091101'));
     vitrine = new ListarEditaisCompativeis(editais, fr);
   });

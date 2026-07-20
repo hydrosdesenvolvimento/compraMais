@@ -4,6 +4,8 @@ import { useTranslation, Trans } from 'react-i18next';
 import { Stepper } from '../../design-system/components';
 import { IconeSeta, IconeVoltar, IconeFechar, IconeCheck, IconeUpload } from '../../design-system/icons';
 import { api } from '../../lib/api';
+import { textoDoErro } from '../../lib/erros';
+import { toastBus } from '../../design-system/components/toast-bus';
 
 /**
  * Wizard de credenciamento em um edital (UC004). Passos: Capacidade (teto declarado, RN005) →
@@ -69,29 +71,37 @@ export function Credenciamento() {
     void api.registrarPassoCredenciamento(id, novoStep + 1).catch(() => {});
   };
 
+  // Feedback de falha em dois canais: toast (o pedido) + inline (persiste como contexto até a próxima
+  // ação). Os catches passam a mensagem específica de `textoDoErro` (mapeada do `codigo` do backend,
+  // ex.: CredenciamentoDuplicado); os guards internos usam o texto genérico.
+  const mostrarErro = (texto: string) => {
+    setErro(texto);
+    toastBus.emitir({ tom: 'erro', texto });
+  };
+
   async function avancar() {
     setErro(null);
     // Passo 0 → 1: declara a capacidade (teto, RN005) iniciando o credenciamento no backend.
     if (step === 0) {
-      if (!editalId) { setErro(t('credenciamento.erroGenerico')); return; }
+      if (!editalId) { mostrarErro(t('credenciamento.erroGenerico')); return; }
       setEnviando(true);
       try {
         const r = await api.iniciarCredenciamento(editalId, capNum);
         setCredId(r.credenciamentoId);
         setStep(1);
         reportarPasso(1, r.credenciamentoId); // entrou no Documentos (passo 2)
-      } catch { setErro(t('credenciamento.erroGenerico')); }
+      } catch (e) { mostrarErro(textoDoErro(e)); }
       finally { setEnviando(false); }
       return;
     }
     // Passo 2 → 3: assina o Termo de Aceite (RN016) → fornecedor Pendente de Análise.
     if (step === 2) {
-      if (!credId) { setErro(t('credenciamento.erroGenerico')); return; }
+      if (!credId) { mostrarErro(t('credenciamento.erroGenerico')); return; }
       setEnviando(true);
       try {
         await api.aceitarTermo(credId, { versaoTermo: VERSAO_TERMO, finalidade: t('credenciamento.termo.finalidade') });
         setStep(3);
-      } catch { setErro(t('credenciamento.erroGenerico')); }
+      } catch (e) { mostrarErro(textoDoErro(e)); }
       finally { setEnviando(false); }
       return;
     }

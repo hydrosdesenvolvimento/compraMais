@@ -1,11 +1,13 @@
 import { useMemo, useState, type CSSProperties } from 'react';
 import { useForm } from '@tanstack/react-form';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { api, type EditalGestao, type CatalogoItemView } from '../../lib/api';
-import { celula, cabecalho } from '../../design-system/tabela';
+import { api, type EditalGestao, type CatalogoItemView, type FiltroEditais } from '../../lib/api';
+import { celula, cabecalho, Paginacao } from '../../design-system/tabela';
 import { Botao, Campo } from '../../design-system/components';
-import { IconeOlho, IconeFechar } from '../../design-system/icons';
+import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro } from '../../design-system/icons';
+
+const POR_PAGINA = 10;
 
 /**
  * Gestão de Editais (SGMA) — tela única de editais do Painel Admin em `/admin/editais` (FR-001/003/004).
@@ -40,10 +42,37 @@ export function GerirEditais() {
   const qc = useQueryClient();
   const [verId, setVerId] = useState<string | null>(null);
   const [criando, setCriando] = useState(false);
+  const [busca, setBusca] = useState('');
+  const [situacao, setSituacao] = useState('');
+  const [secretariaFiltro, setSecretariaFiltro] = useState('');
+  const [cnaeFiltro, setCnaeFiltro] = useState('');
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [pagina, setPagina] = useState(1);
 
-  const { data: editais = [], isLoading, isError } = useQuery({ queryKey: ['gestao-editais'], queryFn: () => api.editaisOperacao() });
+  const filtro: FiltroEditais = {
+    texto: busca.trim() || undefined,
+    situacao: situacao || undefined,
+    secretariaId: secretariaFiltro || undefined,
+    cnae: cnaeFiltro.replace(/\D/g, '') || undefined, // backend casa por subclasse (só dígitos)
+    page: pagina,
+    size: POR_PAGINA,
+  };
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['gestao-editais', filtro],
+    queryFn: () => api.buscarEditaisGestao(filtro),
+    placeholderData: keepPreviousData,
+  });
   const { data: secretarias } = useQuery({ queryKey: ['catalogo', 'secretarias'], queryFn: () => api.catalogoListar('secretarias') });
   const secretariasLista = (secretarias as CatalogoItemView[] | undefined) ?? [];
+
+  const editais = data?.items ?? [];
+  const total = data?.total ?? 0;
+  const totalPaginas = Math.max(1, Math.ceil(total / POR_PAGINA));
+  const temFiltro = Boolean(filtro.texto || filtro.situacao || filtro.secretariaId || filtro.cnae);
+
+  // Toda mudança de filtro/busca volta à página 1 (senão o pager pode apontar página inexistente).
+  const aoFiltrar = <T,>(set: (v: T) => void) => (v: T) => { set(v); setPagina(1); };
 
   const invalidar = () => qc.invalidateQueries({ queryKey: ['gestao-editais'] });
 
@@ -89,6 +118,61 @@ export function GerirEditais() {
         </Botao>
       </div>
 
+      {/* Toolbar: busca por número/objeto + botão de filtros */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 240 }}>
+          <IconeBusca width={19} height={19} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--cinza-400)' }} />
+          <input
+            className="input"
+            data-cy="busca"
+            aria-label={t('admin.gerirEditais.buscaAriaLabel')}
+            placeholder={t('admin.gerirEditais.buscaPlaceholder')}
+            value={busca}
+            onChange={(e) => aoFiltrar(setBusca)(e.target.value)}
+            style={{ width: '100%', paddingLeft: 38 }}
+          />
+        </div>
+        <Botao data-cy="btn-filtros" variante="secundario" aria-expanded={mostrarFiltros} onClick={() => setMostrarFiltros((v) => !v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <IconeFiltro width={18} height={18} />{t('admin.gerirEditais.filtros')}
+        </Botao>
+      </div>
+
+      {/* Painel de filtros (colapsável): situação, secretaria e CNAE — todos server-side (QBE) */}
+      {mostrarFiltros && (
+        <div className="card" data-cy="painel-filtros" style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <label className="label" style={{ display: 'grid', gap: 4 }}>
+            {t('admin.gerirEditais.colStatus')}
+            <select className="input" data-cy="filtro-situacao" value={situacao} onChange={(e) => aoFiltrar(setSituacao)(e.target.value)}>
+              <option value="">{t('admin.gerirEditais.filtroSituacaoTodas')}</option>
+              {(['rascunho', 'publicado', 'encerrado'] as const).map((s) => <option key={s} value={s}>{rotuloSituacao(s)}</option>)}
+            </select>
+          </label>
+          <label className="label" style={{ display: 'grid', gap: 4 }}>
+            {t('admin.gerirEditais.colSecretaria')}
+            <select className="input" data-cy="filtro-secretaria" value={secretariaFiltro} onChange={(e) => aoFiltrar(setSecretariaFiltro)(e.target.value)}>
+              <option value="">{t('admin.gerirEditais.filtroSecretariaTodas')}</option>
+              {secretariasLista.map((s) => <option key={s.id} value={s.id}>{s.sigla ?? s.nome ?? s.id}</option>)}
+            </select>
+          </label>
+          <label className="label" style={{ display: 'grid', gap: 4 }}>
+            {t('admin.gerirEditais.filtroCnaeLabel')}
+            <input
+              className="input"
+              data-cy="filtro-cnae"
+              inputMode="numeric"
+              placeholder={t('admin.gerirEditais.filtroCnaePlaceholder')}
+              value={cnaeFiltro}
+              onChange={(e) => aoFiltrar(setCnaeFiltro)(e.target.value)}
+            />
+          </label>
+          {temFiltro && (
+            <Botao data-cy="limpar-filtros" variante="secundario" onClick={() => { setBusca(''); setSituacao(''); setSecretariaFiltro(''); setCnaeFiltro(''); setPagina(1); }}>
+              {t('admin.gerirEditais.limparFiltros')}
+            </Botao>
+          )}
+        </div>
+      )}
+
       {isLoading ? (
         <p data-cy="carregando" className="page-sub">{t('admin.gerirEditais.carregando')}</p>
       ) : isError ? (
@@ -97,8 +181,8 @@ export function GerirEditais() {
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           {editais.length === 0 ? (
             <div data-cy="vazio" style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>
-              <div style={{ font: '600 15px var(--font-body)', color: 'var(--azul-900)', marginBottom: 4 }}>{t('admin.gerirEditais.vazioTitulo')}</div>
-              <div style={{ fontSize: 13.5 }}>{t('admin.gerirEditais.vazioDica')}</div>
+              <div style={{ font: '600 15px var(--font-body)', color: 'var(--azul-900)', marginBottom: 4 }}>{t(temFiltro ? 'admin.gerirEditais.vazioFiltroTitulo' : 'admin.gerirEditais.vazioTitulo')}</div>
+              <div style={{ fontSize: 13.5 }}>{t(temFiltro ? 'admin.gerirEditais.vazioFiltroDica' : 'admin.gerirEditais.vazioDica')}</div>
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
@@ -147,6 +231,15 @@ export function GerirEditais() {
                 </tbody>
               </table>
             </div>
+          )}
+          {editais.length > 0 && (
+            <Paginacao
+              info={t('admin.gerirEditais.paginacaoInfo', { de: (pagina - 1) * POR_PAGINA + 1, ate: Math.min(pagina * POR_PAGINA, total), total })}
+              pagina={pagina}
+              totalPaginas={totalPaginas}
+              onPagina={setPagina}
+              rotuloPagina={(n) => t('admin.gerirEditais.irParaPagina', { n })}
+            />
           )}
         </div>
       )}

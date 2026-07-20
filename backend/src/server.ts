@@ -111,6 +111,7 @@ import { ExecutarDistribuicao, type DistribuicaoRepository } from './distribuica
 import { ListarDemandasFornecedor } from './distribuicao/application/listar-demandas-fornecedor.js';
 import { ResumoDistribuicaoEdital } from './distribuicao/application/resumir-distribuicao-edital.js';
 import { ListarCadastroReserva } from './distribuicao/application/listar-cadastro-reserva.js';
+import { ListarDesistencias } from './distribuicao/application/listar-desistencias.js';
 import { DistribuicaoRepositoryMemory } from './distribuicao/adapters/distribuicao-repository-memory.js';
 import { DistribuicaoRepositoryPg } from './distribuicao/adapters/distribuicao-repository-pg.js';
 import { registrarRotasDistribuicao } from './distribuicao/adapters/distribuicao-controller.js';
@@ -344,7 +345,10 @@ export async function buildServer(): Promise<FastifyInstance> {
       })),
   };
   const listarCadastroReserva = new ListarCadastroReserva(editaisComReserva, credRepo, distribuicaoRepo, fornecedores, secretariaLookup);
-  registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas, resumo: resumoDistribuicao, reserva: listarCadastroReserva });
+  // Painel Admin · "Desistências": registro dos titulares que declinaram de cotas atribuídas (espelho
+  // do Cadastro de Reserva — reusa o mesmo lookup de editais candidatos). Somente leitura (UC009/RN004).
+  const listarDesistencias = new ListarDesistencias(editaisComReserva, credRepo, distribuicaoRepo, fornecedores, secretariaLookup);
+  registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas, resumo: resumoDistribuicao, reserva: listarCadastroReserva, desistencias: listarDesistencias });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();

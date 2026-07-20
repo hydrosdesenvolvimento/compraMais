@@ -3,6 +3,7 @@ import type { ExecutarDistribuicao, DistribuicaoRepository } from '../applicatio
 import type { ListarDemandasFornecedor } from '../application/listar-demandas-fornecedor.js';
 import type { ResumoDistribuicaoEdital } from '../application/resumir-distribuicao-edital.js';
 import type { ListarCadastroReserva } from '../application/listar-cadastro-reserva.js';
+import type { ListarDesistencias } from '../application/listar-desistencias.js';
 import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
 import { exigirPapel } from '../../shared/http/autenticacao.js';
 
@@ -21,7 +22,7 @@ function empresaDe(id: Identidade): string { return String(id.empresaId ?? id.us
  */
 export function registrarRotasDistribuicao(
   app: FastifyInstance,
-  deps: { executar: ExecutarDistribuicao; repo: DistribuicaoRepository; demandas: ListarDemandasFornecedor; resumo: ResumoDistribuicaoEdital; reserva: ListarCadastroReserva },
+  deps: { executar: ExecutarDistribuicao; repo: DistribuicaoRepository; demandas: ListarDemandasFornecedor; resumo: ResumoDistribuicaoEdital; reserva: ListarCadastroReserva; desistencias: ListarDesistencias },
 ): void {
   app.post('/editais/:id/distribuir', async (req, reply) => {
     const ator = exigirPapel(req, reply, PERFIS_GESTAO);
@@ -60,6 +61,14 @@ export function registrarRotasDistribuicao(
   app.get('/gestao/cadastro-reserva', async (req, reply) => {
     if (!exigirPapel(req, reply, PERFIS_GESTAO)) return reply;
     return reply.send(await deps.reserva.listar());
+  });
+
+  // Painel Admin · "Desistências": registro dos titulares que declinaram de cotas atribuídas (tinham
+  // cota na matriz vigente e não estão mais `aceito`). Espelho do Cadastro de Reserva (UC009 / RN004).
+  // Somente leitura.
+  app.get('/gestao/desistencias', async (req, reply) => {
+    if (!exigirPapel(req, reply, PERFIS_GESTAO)) return reply;
+    return reply.send(await deps.desistencias.listar());
   });
 
   app.get('/distribuicao/minhas', async (req, reply) => {

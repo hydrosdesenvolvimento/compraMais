@@ -31,7 +31,6 @@ import { ManterCatalogos } from './pages/admin/ManterCatalogos';
 import { GerirUsuarios } from './pages/admin/GerirUsuarios';
 import { GerarMalote } from './pages/admin/GerarMalote';
 import { AdministracaoTelas } from './pages/admin/AdministracaoTelas';
-import { EmConstrucao } from './pages/admin/EmConstrucao';
 import { Fornecedores } from './pages/admin/Fornecedores';
 import { Secretarias } from './pages/admin/Secretarias';
 import { SetoresIndustriais } from './pages/admin/SetoresIndustriais';
@@ -40,6 +39,7 @@ import { AnaliseDocumental } from './pages/admin/AnaliseDocumental';
 import { CredenciamentoEmEdital } from './pages/admin/CredenciamentoEmEdital';
 import { DistribuicaoInteligente } from './pages/admin/DistribuicaoInteligente';
 import { CadastroReserva } from './pages/admin/CadastroReserva';
+import { Desistencias } from './pages/admin/Desistencias';
 import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
@@ -104,7 +104,7 @@ const rAdminCredenciamento = createRoute({ getParentRoute: () => adminLayout, pa
 const rAdminAnaliseDoc = createRoute({ getParentRoute: () => adminLayout, path: '/admin/analise-documental', beforeLoad: () => exigirTelaAdmin('analiseDocumental'), component: AnaliseDocumental });
 const rAdminDistribuicao = createRoute({ getParentRoute: () => adminLayout, path: '/admin/distribuicao', beforeLoad: () => exigirTelaAdmin('distribuicao'), component: DistribuicaoInteligente });
 const rAdminCadastroReserva = createRoute({ getParentRoute: () => adminLayout, path: '/admin/cadastro-reserva', beforeLoad: () => exigirTelaAdmin('cadastroReserva'), component: CadastroReserva });
-const rAdminDesistencias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/desistencias', beforeLoad: () => exigirTelaAdmin('desistencias'), component: () => <EmConstrucao tituloKey="common.nav.desistencias" /> });
+const rAdminDesistencias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/desistencias', beforeLoad: () => exigirTelaAdmin('desistencias'), component: Desistencias });
 const rAdminSecretarias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/secretarias', beforeLoad: () => exigirTelaAdmin('secretarias'), component: Secretarias });
 const rAdminSetores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/setores-industriais', beforeLoad: () => exigirTelaAdmin('setoresIndustriais'), component: SetoresIndustriais });
 const rAdminTiposArquivos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/tipos-arquivos', beforeLoad: () => exigirTelaAdmin('tiposArquivos'), component: TiposArquivos });

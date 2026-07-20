@@ -248,6 +248,17 @@
       "posicaoLabel": "Posición {{posicao}} en la cola de reserva",
       "chip": "Reserva"
     },
+    "desistencias": {
+      "eyebrow": "Operación · Desistimientos",
+      "titulo": "Desistimientos",
+      "subtitulo": "Registro de proveedores que declinaron cuotas asignadas",
+      "carregando": "Cargando desistimientos…",
+      "erroCarregar": "No se pudieron cargar los desistimientos.",
+      "vazioTitulo": "Ningún desistimiento registrado",
+      "vazioDica": "Cuando un proveedor titular declina una cuota, el registro aparece aquí y el siguiente de la cola de reserva se activa automáticamente.",
+      "cota": "Cuota {{cota}} un/mes",
+      "chip": "Desistimiento"
+    },
     "setoresIndustriais": {
       "titulo": "Sectores Industriales (CNAE)",
       "subtitulo": "Códigos de actividad económica aceptados",

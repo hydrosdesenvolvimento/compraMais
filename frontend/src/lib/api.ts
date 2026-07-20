@@ -124,6 +124,20 @@ export interface CadastroReservaView {
   teto: number;
   credenciadoEm: string;
 }
+/**
+ * Uma linha da tela "Desistências" (Painel Admin · Operação, UC009 / RN004). Titular que tinha cota na
+ * matriz vigente e declinou dela (credenciamento não está mais `aceito`) — espelho do Cadastro de Reserva.
+ */
+export interface DesistenciaView {
+  fornecedorId: string;
+  nome: string;
+  editalId: string;
+  numero: string;
+  objeto: string;
+  secretariaSigla: string | null;
+  cota: number;
+  desistiuEm: string;
+}
 export interface DocItem { id: string; tipo: string; situacao: 'vigente' | 'expirado'; status: 'pendente' | 'aprovado' | 'reprovado'; dataValidade: string | null; motivoReprovacao: string | null }
 /** Resumo de um credenciamento do fornecedor (home) — estado + objeto/secretaria do edital vinculado. */
 export interface CredenciamentoResumoView {
@@ -327,6 +341,7 @@ export const api = {
   homologarDistribuicao: (editalId: string) => send<unknown>(`/editais/${editalId}/distribuir`, 'POST'),
   // Tela "Cadastro de Reserva": fila cronológica global dos retardatários fora da matriz vigente (UC009/RN004).
   cadastroReserva: () => get<CadastroReservaView[]>('/gestao/cadastro-reserva'),
+  desistencias: () => get<DesistenciaView[]>('/gestao/desistencias'),
   criarEdital: (body: unknown) => send('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),

@@ -2,8 +2,11 @@ import type { Edital, SituacaoEdital } from '../domain/edital.js';
 import type { Fornecedor } from '../../catalogo/domain/fornecedor.js';
 import type { FornecedorRepository } from '../../catalogo/application/fornecedor-repository.js';
 
-/** Probe QBE de Edital (FR-011) — instância parcial usada como critério (AND; ausentes ignorados). */
-export interface EditalProbe { secretariaId?: string; situacao?: SituacaoEdital; cnae?: string }
+/**
+ * Probe QBE de Edital (FR-011) — instância parcial usada como critério (AND; ausentes ignorados).
+ * `texto` é a exceção ao QBE por igualdade: busca parcial case-insensitive em número/objeto (tela de gestão).
+ */
+export interface EditalProbe { secretariaId?: string; situacao?: SituacaoEdital; cnae?: string; texto?: string }
 export interface PaginacaoReq { page?: number; size?: number }
 
 export interface EditalRepository {
@@ -13,6 +16,8 @@ export interface EditalRepository {
   salvar(e: Edital): Promise<void>;
   /** Busca por instância parcial (QBE — FR-011). */
   buscarPorExemplo(probe: EditalProbe, page?: PaginacaoReq): Promise<Edital[]>;
+  /** Total de editais que casam com o probe (mesmo filtro, sem paginação) — alimenta o pager da gestão. */
+  contarPorExemplo(probe: EditalProbe): Promise<number>;
 }
 
 export class EditalIncompativel extends Error {

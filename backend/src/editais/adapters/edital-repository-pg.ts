@@ -42,21 +42,37 @@ export class EditalRepositoryPg implements EditalRepository {
 
   /** QBE (FR-011): cada campo definido filtra por igualdade (AND); CNAE casa por containment no jsonb alvo. */
   async buscarPorExemplo(probe: EditalProbe, page?: PaginacaoReq): Promise<Edital[]> {
-    const cond: string[] = [];
-    const params: unknown[] = [];
-    if (probe.secretariaId !== undefined) { params.push(probe.secretariaId); cond.push(`secretaria_id = $${params.length}`); }
-    if (probe.situacao !== undefined) { params.push(probe.situacao); cond.push(`situacao = $${params.length}`); }
-    if (probe.cnae !== undefined) { params.push(JSON.stringify([probe.cnae])); cond.push(`cnaes_alvo @> $${params.length}::jsonb`); }
+    const { where, params } = filtro(probe);
     const size = page?.size ?? 20;
     const p = page?.page ?? 1;
     params.push(size, (p - 1) * size);
-    const where = cond.length ? `WHERE ${cond.join(' AND ')}` : '';
     const r = await this.pool.query(
       `SELECT * FROM editais ${where} ORDER BY register_date LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params,
     );
     return (r.rows as Record<string, unknown>[]).map(mapear);
   }
+
+  /** Total do mesmo probe (sem LIMIT/OFFSET) para o pager da gestão. */
+  async contarPorExemplo(probe: EditalProbe): Promise<number> {
+    const { where, params } = filtro(probe);
+    const r = await this.pool.query(`SELECT COUNT(*)::int AS total FROM editais ${where}`, params);
+    return (r.rows[0] as { total: number }).total;
+  }
+}
+
+/**
+ * Traduz o probe QBE em cláusula WHERE + parâmetros posicionais, compartilhada entre busca e contagem
+ * (mesma semântica de filtro em ambas). `texto` faz ILIKE em número/objeto; os demais, igualdade/containment.
+ */
+function filtro(probe: EditalProbe): { where: string; params: unknown[] } {
+  const cond: string[] = [];
+  const params: unknown[] = [];
+  if (probe.secretariaId !== undefined) { params.push(probe.secretariaId); cond.push(`secretaria_id = $${params.length}`); }
+  if (probe.situacao !== undefined) { params.push(probe.situacao); cond.push(`situacao = $${params.length}`); }
+  if (probe.cnae !== undefined) { params.push(JSON.stringify([probe.cnae])); cond.push(`cnaes_alvo @> $${params.length}::jsonb`); }
+  if (probe.texto) { params.push(`%${probe.texto}%`); cond.push(`(numero ILIKE $${params.length} OR objeto ILIKE $${params.length})`); }
+  return { where: cond.length ? `WHERE ${cond.join(' AND ')}` : '', params };
 }
 
 function mapear(row: Record<string, unknown>): Edital {

@@ -78,6 +78,10 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 // --- Tipos de leitura ---
 export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null; quantitativos: number }
 export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }
+/** Página da busca de gestão de editais (`GET /gestao/editais`): itens + total do filtro para o pager. */
+export interface PaginaEditais { items: EditalGestao[]; total: number; page: number; size: number }
+/** Filtros da tela de gestão de editais; todos opcionais (QBE). `texto` casa parcial em número/objeto. */
+export interface FiltroEditais { secretariaId?: string; situacao?: string; cnae?: string; texto?: string; page?: number; size?: number }
 /** Tela "Credenciamento em Edital" (Painel Admin · Operação) — situação do fornecedor perante o edital. */
 export type StatusElegivel = 'credenciado' | 'requerente' | 'elegivel';
 export interface FornecedorElegivelView {
@@ -329,10 +333,25 @@ export const api = {
   fornecedorAdminEditarContato: (id: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) =>
     send<void>(`/admin/fornecedores/${id}/contato`, 'PATCH', patch),
   fornecedorAdminSincronizar: (id: string) => send<SincronizacaoResultado>(`/admin/fornecedores/${id}/sincronizar`, 'POST'),
-  gestaoEditais: (secretariaId: string, situacao: string) => get<EditalGestao[]>(`/gestao/editais?secretariaId=${encodeURIComponent(secretariaId)}&situacao=${encodeURIComponent(situacao)}`),
+  gestaoEditais: (secretariaId: string, situacao: string) =>
+    get<PaginaEditais>(`/gestao/editais?secretariaId=${encodeURIComponent(secretariaId)}&situacao=${encodeURIComponent(situacao)}`).then((p) => p.items),
   // Operação · Editais (Painel Admin) — QBE sem probe = todos os editais (todas as secretarias/situações),
-  // filtrável por situação. `size` amplo evita truncar a listagem operacional (paginação é client-side).
-  editaisOperacao: (situacao?: string) => get<EditalGestao[]>(`/gestao/editais?size=200${situacao ? `&situacao=${encodeURIComponent(situacao)}` : ''}`),
+  // filtrável por situação. `size` amplo evita truncar quem só precisa da lista (ex.: cards de Credenciamento/
+  // Distribuição). Desembrulha `.items` do envelope paginado; a tela de gestão usa `buscarEditaisGestao`.
+  editaisOperacao: (situacao?: string) =>
+    get<PaginaEditais>(`/gestao/editais?size=200${situacao ? `&situacao=${encodeURIComponent(situacao)}` : ''}`).then((p) => p.items),
+  // Gestão de Editais (tela `/admin/editais`) — busca paginada e filtrável server-side; retorna o envelope
+  // `{ items, total, page, size }` para montar filtros + pager.
+  buscarEditaisGestao: (f: FiltroEditais = {}) => {
+    const q = new URLSearchParams();
+    if (f.secretariaId) q.set('secretariaId', f.secretariaId);
+    if (f.situacao) q.set('situacao', f.situacao);
+    if (f.cnae) q.set('cnae', f.cnae);
+    if (f.texto) q.set('texto', f.texto);
+    q.set('page', String(f.page ?? 1));
+    q.set('size', String(f.size ?? 10));
+    return get<PaginaEditais>(`/gestao/editais?${q.toString()}`);
+  },
   // Tela "Credenciamento em Edital": fornecedores elegíveis de um edital (filtro CNAE RN001 + regularidade RN002).
   editaisElegiveis: (editalId: string) => get<EditalElegiveisView>(`/gestao/editais/${editalId}/elegiveis`),
   // Tela "Distribuição Inteligente": resumo do rateio de um edital (matriz homologada ou preview do Motor).

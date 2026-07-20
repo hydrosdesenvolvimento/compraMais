@@ -62,14 +62,16 @@ export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir:
     }
   });
 
-  // Busca por instância parcial (QBE — FR-011): probe `secretariaId`/`situacao`/`cnae`; page/size fora do probe.
+  // Busca por instância parcial (QBE — FR-011): probe `secretariaId`/`situacao`/`cnae`/`texto`; page/size fora do
+  // probe. Resposta paginada `{ items, total, page, size }` — `total` alimenta o pager da tela de gestão.
   app.get('/gestao/editais', async (req, reply) => {
     if (!exigirPapel(req, reply, PERFIS_GESTAO)) return reply;
-    const { secretariaId, situacao, cnae, page, size } = req.query as {
-      secretariaId?: string; situacao?: SituacaoEdital; cnae?: string; page?: string; size?: string;
+    const { secretariaId, situacao, cnae, texto, page, size } = req.query as {
+      secretariaId?: string; situacao?: SituacaoEdital; cnae?: string; texto?: string; page?: string; size?: string;
     };
-    const paginacao = (page || size) ? { page: page ? Number(page) : undefined, size: size ? Number(size) : undefined } : undefined;
-    return reply.send(await deps.buscar.buscar({ secretariaId, situacao, cnae }, paginacao));
+    const probe = { secretariaId, situacao, cnae, texto: texto?.trim() || undefined };
+    const paginacao = { page: page ? Number(page) : undefined, size: size ? Number(size) : undefined };
+    return reply.send(await deps.buscar.buscarPagina(probe, paginacao));
   });
 }
 

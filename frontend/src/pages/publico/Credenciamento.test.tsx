@@ -25,12 +25,19 @@ vi.mock('../../lib/api', () => ({
   },
 }));
 
+// O feedback de falha vai para o toast + inline. Espionamos o barramento; a tradução de `codigo`→texto
+// já é coberta por `lib/erros.test.ts`, então aqui `textoDoErro` só devolve a mensagem do erro.
+const emitir = vi.fn();
+vi.mock('../../design-system/components/toast-bus', () => ({ toastBus: { emitir: (t: unknown) => emitir(t) } }));
+vi.mock('../../lib/erros', () => ({ textoDoErro: (e: unknown) => (e as Error).message }));
+
 describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
   beforeEach(() => {
     iniciarCredenciamento.mockReset().mockResolvedValue({ credenciamentoId: 'c1', estado: 'iniciado' });
     aceitarTermo.mockReset().mockResolvedValue({ estado: 'aceito', status: 'pendente_analise' });
     cancelarCredenciamento.mockReset();
     registrarPassoCredenciamento.mockReset().mockResolvedValue({ passoAtual: 2 });
+    emitir.mockReset();
   });
 
   it('não expõe a etapa de prova de vida (UC007 é R2, fora do MVP)', () => {
@@ -60,6 +67,22 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
     fireEvent.click(screen.getByTestId('avancar'));
     expect(await screen.findByTestId('status-pendente')).toBeInTheDocument();
     expect(aceitarTermo).toHaveBeenCalledWith('c1', expect.objectContaining({ versaoTermo: 'v1' }));
+  });
+
+  it('em falha do backend, mostra a mensagem específica no toast e inline, e não avança', async () => {
+    iniciarCredenciamento.mockRejectedValueOnce(new Error('Você já tem um credenciamento ativo neste edital.'));
+    render(<Credenciamento />);
+
+    fireEvent.change(screen.getByTestId('capacidade'), { target: { value: '200' } });
+    fireEvent.click(screen.getByTestId('avancar'));
+
+    const erro = await screen.findByTestId('erro-credenciamento');
+    expect(erro).toHaveTextContent('Você já tem um credenciamento ativo neste edital.');
+    expect(emitir).toHaveBeenCalledWith(
+      expect.objectContaining({ tom: 'erro', texto: 'Você já tem um credenciamento ativo neste edital.' }),
+    );
+    // Continua no passo 1 (Capacidade) — o erro não deixou avançar para Documentos.
+    expect(screen.queryByTestId('upload-doc')).not.toBeInTheDocument();
   });
 
   it('bloqueia o envio do Termo até o aceite (checkbox)', async () => {

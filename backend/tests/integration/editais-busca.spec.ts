@@ -40,6 +40,27 @@ describe('Busca de editais — QBE (US3 / FR-011)', () => {
     expect(r).toHaveLength(1);
   });
 
+  it('filtro por texto (parcial, case-insensitive) em objeto/número', async () => {
+    const r = await buscar.buscar({ texto: 'LIMP' });
+    expect(r.map((e) => e.objeto)).toEqual(['limpeza']);
+  });
+
+  it('buscarPagina expõe total do filtro (não só a página) + eco de page/size', async () => {
+    const p1 = await buscar.buscarPagina({ situacao: 'publicado' }, { page: 1, size: 1 });
+    expect(p1.items).toHaveLength(1);
+    expect(p1.total).toBe(2); // merenda + mobiliario
+    expect(p1).toMatchObject({ page: 1, size: 1 });
+    const p2 = await buscar.buscarPagina({ situacao: 'publicado' }, { page: 2, size: 1 });
+    expect(p2.items).toHaveLength(1);
+    expect(p2.items[0].id).not.toBe(p1.items[0].id); // página seguinte traz outro registro
+  });
+
+  it('buscarPagina sem paginação usa defaults (page 1, size 20)', async () => {
+    const p = await buscar.buscarPagina({});
+    expect(p).toMatchObject({ page: 1, size: 20, total: 3 });
+    expect(p.items).toHaveLength(3);
+  });
+
   // A tela "Operação · Editais" (Painel Admin) consome número, quantitativo e prazo desta busca.
   it('expõe número oficial, quantitativo e prazo no read model', async () => {
     const [merenda] = await buscar.buscar({ secretariaId: 's1', situacao: 'publicado' });

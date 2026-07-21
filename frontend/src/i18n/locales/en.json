@@ -968,7 +968,34 @@
     "reenviarCorrigido": "Resend Corrected Document",
     "reenvioSucesso": "Document resent. The CPL will review it again.",
     "visualizarDocumento": "View {{tipo}}",
-    "baixarDocumento": "Download {{tipo}}"
+    "baixarDocumento": "Download {{tipo}}",
+    "listaVazia": "No documents sent yet. Use the button above to send the first one.",
+    "uploadSucesso": "Document sent. The CPL will review it.",
+    "erroBaixar": "Could not download the document. Please try again.",
+    "modalUpload": {
+      "titulo": "Send document",
+      "subtitulo": "Choose the type, the file and the validity (if any).",
+      "campoTipo": "Document type",
+      "selecioneTipo": "Select the type…",
+      "campoArquivo": "File",
+      "arquivoAjuda": "PDF, JPG or PNG — up to {{mb}} MB.",
+      "campoValidade": "Validity (optional)",
+      "validadeAjuda": "Leave blank for documents without an expiry date.",
+      "enviar": "Send",
+      "cancelar": "Cancel",
+      "erroFormato": "Unsupported format. Send PDF, JPG or PNG.",
+      "erroTamanho": "File exceeds the {{mb}} MB limit.",
+      "erroTipoObrigatorio": "Select the document type.",
+      "erroArquivoObrigatorio": "Select a file to send.",
+      "erroEnviar": "Could not send the document. Please try again."
+    },
+    "preview": {
+      "subtitulo": "Preview of the submitted document.",
+      "carregando": "Loading document…",
+      "erro": "Could not load the document.",
+      "fechar": "Close",
+      "baixar": "Download"
+    }
   },
   "transparencia": {
     "carregando": "Loading…",

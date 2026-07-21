@@ -81,6 +81,7 @@ import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
 import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
 import { registrarRotasAuditoria } from './auditoria/adapters/auditoria-controller.js';
+import { ResolvedorAtoresUsuario } from './auditoria/adapters/resolvedor-atores-usuario.js';
 import { GerarMalote, type MaloteRepository } from './malote/application/gerar-malote.js';
 import { MaloteRepositoryMemory } from './malote/adapters/malote-repository-memory.js';
 import { MaloteRepositoryPg } from './malote/adapters/malote-repository-pg.js';
@@ -371,7 +372,8 @@ export async function buildServer(): Promise<FastifyInstance> {
   registrarRotaElegiveisEdital(app, { elegiveis: listarElegiveisEdital });
 
   // Auditoria — leitura/exportação da trilha (004). SOMENTE LEITURA: lê o mesmo auditRepo do escritor único.
-  const consultarTrilha = new ConsultarTrilha(auditRepo);
+  // Enriquece o ator (UUID → nome/papel) em tempo de leitura; o registro persistido segue imutável (AD-18).
+  const consultarTrilha = new ConsultarTrilha(auditRepo, new ResolvedorAtoresUsuario(usuarioRepo));
   // Teto de sinalização de volume da exportação (§16 — AUDITORIA_EXPORT_TETO); default 50k quando ausente/ inválido.
   const tetoExport = Number(process.env.AUDITORIA_EXPORT_TETO) || undefined;
   const exportarTrilha = new ExportarTrilha(consultarTrilha, tetoExport);

@@ -620,6 +620,7 @@
       "erroConsulta": "Query error.",
       "colQuando": "When",
       "colAtor": "Actor",
+      "colPapel": "Role",
       "colAcao": "Action",
       "colIp": "IP",
       "vazio": "No records for the current filters."

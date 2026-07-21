@@ -23,7 +23,7 @@ describe('ExportarTrilha (US2)', () => {
   it('CSV tem cabeçalho e uma linha por registro (FR-005/007)', async () => {
     const r = await exportar.exportar({}, 'csv');
     const linhas = r.conteudo.split('\n');
-    expect(linhas[0]).toBe('id,usuario,evento,timestamp,ip,payload');
+    expect(linhas[0]).toBe('id,usuario,usuarioNome,papel,evento,timestamp,ip,payload');
     expect(linhas).toHaveLength(3); // cabeçalho + 2
     expect(r.mime).toBe('text/csv');
   });
@@ -37,7 +37,7 @@ describe('ExportarTrilha (US2)', () => {
 
   it('conjunto vazio → arquivo válido (não erro)', async () => {
     const r = await exportar.exportar({ usuario: 'inexistente' }, 'csv');
-    expect(r.conteudo).toBe('id,usuario,evento,timestamp,ip,payload'); // só cabeçalho
+    expect(r.conteudo).toBe('id,usuario,usuarioNome,papel,evento,timestamp,ip,payload'); // só cabeçalho
     expect(r.total).toBe(0);
   });
 

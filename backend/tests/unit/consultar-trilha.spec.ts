@@ -57,4 +57,22 @@ describe('ConsultarTrilha (US1)', () => {
     const r2 = await uc.consultar({});
     expect(r2.map((x) => x.id)).toEqual(r.map((x) => x.id)); // mesma saída e ordem (FR-004/SC-006)
   });
+
+  it('sem resolvedor → nome/papel nulos, mas mantém o UUID do ator', async () => {
+    const r = await uc.consultar({ usuario: 'cpl1' });
+    expect(r[0]).toMatchObject({ usuario: 'cpl1', usuarioNome: null, papel: null });
+  });
+
+  it('com resolvedor → enriquece nome/papel do ator em tempo de leitura (registro imutável intacto)', async () => {
+    const ucRes = new ConsultarTrilha(repo, {
+      resolver: async (ids) => new Map(
+        ids.includes('cpl1') ? [['cpl1', { nome: 'Silas Analista', papel: 'cpl' as const }]] : [],
+      ),
+    });
+    const [reg] = await ucRes.consultar({ usuario: 'cpl1' });
+    expect(reg).toMatchObject({ usuario: 'cpl1', usuarioNome: 'Silas Analista', papel: 'cpl' });
+    // ator sem correspondência no resolvedor permanece com nome/papel nulos
+    const [semNome] = await ucRes.consultar({ usuario: 'sec1' });
+    expect(semNome).toMatchObject({ usuario: 'sec1', usuarioNome: null, papel: null });
+  });
 });

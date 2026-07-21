@@ -186,7 +186,7 @@ export interface DemandaDistribuidaView {
 }
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
-export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
+export interface RegistroAuditoria { id: string; usuario: string | null; usuarioNome: string | null; papel: string | null; evento: string; timestamp: string; ip: string | null }
 /** UC020 — item de catálogo base (superset: cada catálogo acrescenta seus campos). */
 export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento';
 export interface CatalogoItemView {

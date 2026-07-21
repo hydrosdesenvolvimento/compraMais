@@ -620,6 +620,7 @@
       "erroConsulta": "Error al consultar.",
       "colQuando": "Cuándo",
       "colAtor": "Actor",
+      "colPapel": "Rol",
       "colAcao": "Acción",
       "colIp": "IP",
       "vazio": "Ningún registro para los filtros actuales."

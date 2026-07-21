@@ -31,6 +31,33 @@ const USUARIOS_SEED: Array<{ email: string; senha: string; nome: string; papel: 
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
 
+/**
+ * Gera um PDF de 1 página REALMENTE VÁLIDO (xref com offsets corretos) e devolve seus bytes em base64.
+ * O portal envia o `conteudo` do upload como base64 dos bytes do arquivo; o seed precisa fazer o mesmo
+ * para que os documentos demo sejam de fato visualizáveis/baixáveis na tela (antes o conteúdo era um
+ * texto `DEMO-...`, que virava um "PDF" corrompido ao abrir). Como o texto demo é sempre Latin-1, o
+ * comprimento em code units coincide com o número de bytes — por isso os offsets do xref batem.
+ */
+function pdfDemoBase64(texto: string): string {
+  const esc = texto.replace(/([\\()])/g, '\\$1');
+  const conteudoStream = `BT /F1 16 Tf 24 60 Td (${esc}) Tj ET`;
+  const objs = [
+    '<</Type/Catalog/Pages 2 0 R>>',
+    '<</Type/Pages/Kids[3 0 R]/Count 1>>',
+    '<</Type/Page/Parent 2 0 R/MediaBox[0 0 360 120]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>',
+    `<</Length ${conteudoStream.length}>>\nstream\n${conteudoStream}\nendstream`,
+    '<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>',
+  ];
+  let pdf = '%PDF-1.4\n';
+  const offsets: number[] = [];
+  objs.forEach((body, i) => { offsets.push(pdf.length); pdf += `${i + 1} 0 obj\n${body}\nendobj\n`; });
+  const xrefStart = pdf.length;
+  pdf += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n`;
+  offsets.forEach((off) => { pdf += `${String(off).padStart(10, '0')} 00000 n \n`; });
+  pdf += `trailer\n<</Size ${objs.length + 1}/Root 1 0 R>>\nstartxref\n${xrefStart}\n%%EOF`;
+  return Buffer.from(pdf, 'latin1').toString('base64');
+}
+
 /** Situação-alvo de cada documento demo → o seed transiciona o agregado após o upload. */
 type AlvoDoc = 'aprovado' | 'reprovado' | 'pendente';
 
@@ -60,7 +87,7 @@ async function seedDocumentos(pool: Pool, piiKey: Buffer): Promise<void> {
   let criados = 0;
   for (const d of DOCUMENTOS_SEED) {
     const dataValidade = d.dias == null ? null : new Date(agora + d.dias * 86_400_000).toISOString();
-    const { documentoId } = await docs.enviar({ fornecedorId: DEMO_FORNECEDOR_ID, tipo: d.tipo, formato: d.formato, conteudo: `DEMO-${d.tipo}`, dataValidade });
+    const { documentoId } = await docs.enviar({ fornecedorId: DEMO_FORNECEDOR_ID, tipo: d.tipo, formato: d.formato, conteudo: pdfDemoBase64(`Documento demonstrativo — ${d.tipo}`), dataValidade });
     if (d.alvo !== 'pendente') {
       const doc = await repo.porId(documentoId);
       if (doc) {
@@ -105,7 +132,7 @@ async function seedFilaAnalise(pool: Pool, piiKey: Buffer): Promise<void> {
       situacao: 'ativa', origem: 'manual', contato: {}, status: 'pendente_analise', sincronizadoEm: null,
     }));
     const docId = randomUUID();
-    const ref = await storage.put(`${s.fornecedorId}/${docId}`, cipher.encrypt(`DEMO-Balanço Patrimonial-${s.fornecedorId}`));
+    const ref = await storage.put(`${s.fornecedorId}/${docId}`, cipher.encrypt(pdfDemoBase64(`Balanço Patrimonial — ${s.razaoSocial}`)));
     await docRepo.salvar(Documento.deEstado({
       meta: { id: docId, registerDate: s.enviadoEm, updateDate: s.enviadoEm, lastUserUpdate: 'seed' },
       fornecedorId: s.fornecedorId, tipo: 'Balanço Patrimonial', arquivoRef: ref, formato: 'pdf',

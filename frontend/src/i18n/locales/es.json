@@ -968,7 +968,34 @@
     "reenviarCorrigido": "Reenviar Documento Corregido",
     "reenvioSucesso": "Documento reenviado. La CPL lo revisará nuevamente.",
     "visualizarDocumento": "Ver {{tipo}}",
-    "baixarDocumento": "Descargar {{tipo}}"
+    "baixarDocumento": "Descargar {{tipo}}",
+    "listaVazia": "Aún no se han enviado documentos. Use el botón de arriba para enviar el primero.",
+    "uploadSucesso": "Documento enviado. La CPL lo analizará.",
+    "erroBaixar": "No se pudo descargar el documento. Inténtelo de nuevo.",
+    "modalUpload": {
+      "titulo": "Enviar documento",
+      "subtitulo": "Seleccione el tipo, el archivo y la validez (si corresponde).",
+      "campoTipo": "Tipo de documento",
+      "selecioneTipo": "Seleccione el tipo…",
+      "campoArquivo": "Archivo",
+      "arquivoAjuda": "PDF, JPG o PNG — hasta {{mb}} MB.",
+      "campoValidade": "Validez (opcional)",
+      "validadeAjuda": "Deje en blanco para documentos sin fecha de validez.",
+      "enviar": "Enviar",
+      "cancelar": "Cancelar",
+      "erroFormato": "Formato no aceptado. Envíe PDF, JPG o PNG.",
+      "erroTamanho": "El archivo supera el límite de {{mb}} MB.",
+      "erroTipoObrigatorio": "Seleccione el tipo de documento.",
+      "erroArquivoObrigatorio": "Seleccione un archivo para enviar.",
+      "erroEnviar": "No se pudo enviar el documento. Inténtelo de nuevo."
+    },
+    "preview": {
+      "subtitulo": "Vista previa del documento enviado.",
+      "carregando": "Cargando documento…",
+      "erro": "No se pudo cargar el documento.",
+      "fechar": "Cerrar",
+      "baixar": "Descargar"
+    }
   },
   "transparencia": {
     "carregando": "Cargando…",

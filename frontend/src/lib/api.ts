@@ -274,6 +274,13 @@ export const api = {
   // UC008 — Demandas distribuídas: o rateio que o Motor atribuiu ao fornecedor (empresa vem do token).
   demandasDistribuidas: () => get<DemandaDistribuidaView[]>('/distribuicao/minhas'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
+  // FR-007 — envio de documento comprobatório. `conteudo` são os bytes do arquivo em base64 (o
+  // backend cifra em repouso — AD-19). `formato` ∈ pdf|jpg|png; `dataValidade` opcional (ISO).
+  enviarDocumento: (fid: string, body: { tipo: string; formato: string; conteudo: string; dataValidade?: string | null }) =>
+    send<{ documentoId: string; situacao: string }>(`/fornecedores/${fid}/documentos`, 'POST', body),
+  // FR-008 — Visualizar/Baixar: o backend devolve o arquivo decifrado (`conteudo` em base64).
+  baixarConteudo: (docId: string) =>
+    get<{ tipo: string; formato: 'pdf' | 'jpg' | 'png'; conteudo: string; dataValidade: string | null }>(`/documentos/${docId}/conteudo`),
   // Credenciamentos do fornecedor. Sem `incluirCancelados` o backend devolve só os "em andamento"
   // (recorte da home); a tela "Meus Credenciamentos" pede o histórico completo para o filtro de cancelados.
   meusCredenciamentos: (fid: string, incluirCancelados = false) =>

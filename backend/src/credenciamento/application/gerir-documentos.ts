@@ -27,6 +27,8 @@ export interface DocumentoRepository {
 /** Object storage (S3) atrás de adaptador; guarda conteúdo cifrado e devolve um ponteiro. */
 export interface ObjectStorage {
   put(chave: string, conteudoCifrado: string): Promise<string>; // retorna arquivoRef
+  /** Recupera o conteúdo cifrado a partir do arquivoRef devolvido por `put`; null se o blob sumiu. */
+  get(ref: string): Promise<string | null>;
 }
 
 const FORMATOS: FormatoDoc[] = ['pdf', 'jpg', 'png'];
@@ -60,5 +62,19 @@ export class GerirDocumentos {
       id: d.id, tipo: d.tipo, situacao: d.estaVigente(hoje) ? 'vigente' : 'expirado',
       status: d.status, dataValidade: d.dataValidade, motivoReprovacao: d.motivoReprovacao,
     }));
+  }
+
+  /**
+   * Recupera o arquivo para Visualizar/Baixar no portal (FR-007/008). Contraparte de `enviar`: o
+   * storage devolve o blob cifrado e SÓ aqui — onde vive a `PiiCipher` — ele é decifrado (AD-19). O
+   * conteúdo volta como a mesma string que foi enviada (o front trafega bytes binários em base64).
+   * `null` quando o documento não existe ou o blob sumiu do storage — a borda traduz para 404.
+   */
+  async baixar(documentoId: string): Promise<{ tipo: string; formato: FormatoDoc; conteudo: string; dataValidade: string | null } | null> {
+    const doc = await this.repo.porId(documentoId);
+    if (!doc) return null;
+    const cifrado = await this.storage.get(doc.arquivoRef);
+    if (cifrado === null) return null;
+    return { tipo: doc.tipo, formato: doc.formato, conteudo: this.cipher.decrypt(cifrado), dataValidade: doc.dataValidade };
   }
 }

@@ -95,6 +95,20 @@ export class ObjectStoragePg implements ObjectStorage {
     );
     return `pg://${chave}`;
   }
+
+  /**
+   * Recupera o blob cifrado pelo ref (`pg://<chave>`) devolvido por `put`. Remove o esquema para
+   * chegar à `chave` primária. Devolve null quando não há linha — a aplicação traduz para 404 sem
+   * decifrar nada. Não conhece a chave de cifra: o conteúdo sobe cifrado, como desceu.
+   */
+  async get(ref: string): Promise<string | null> {
+    const r = await this.pool.query(
+      'SELECT conteudo_cifrado FROM documentos_conteudo WHERE chave = $1 LIMIT 1',
+      [ref.replace(/^pg:\/\//, '')],
+    );
+    const row = r.rows[0] as { conteudo_cifrado: unknown } | undefined;
+    return row ? String(row.conteudo_cifrado) : null;
+  }
 }
 
 function mapear(row: Record<string, unknown>): Documento {

@@ -893,6 +893,8 @@
   "credenciamento": {
     "voltarVitrine": "Back to showcase",
     "noEdital": "Application to notice",
+    "retomado": "We picked your application up where you left off.",
+    "carregando": "Loading…",
     "erroGenerico": "This step could not be completed. Please try again.",
     "passos": {
       "capacidade": "Capacity",

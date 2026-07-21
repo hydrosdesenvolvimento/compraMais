@@ -893,6 +893,8 @@
   "credenciamento": {
     "voltarVitrine": "Volver a la vitrina",
     "noEdital": "Acreditación en la convocatoria",
+    "retomado": "Retomamos su acreditación desde donde la dejó.",
+    "carregando": "Cargando…",
     "erroGenerico": "No se pudo completar este paso. Inténtelo de nuevo.",
     "passos": {
       "capacidade": "Capacidad",

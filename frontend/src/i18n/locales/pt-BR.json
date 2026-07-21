@@ -893,6 +893,8 @@
   "credenciamento": {
     "voltarVitrine": "Voltar à vitrine",
     "noEdital": "Credenciamento no edital",
+    "retomado": "Retomamos seu credenciamento de onde você parou.",
+    "carregando": "Carregando…",
     "erroGenerico": "Não foi possível concluir esta etapa. Tente novamente.",
     "passos": {
       "capacidade": "Capacidade",

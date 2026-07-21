@@ -37,6 +37,19 @@ export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solic
     return reply.send(detalhe);
   });
 
+  // Credenciamento ATIVO do fornecedor num edital (UC004 · retomada do wizard). O portal consulta na
+  // entrada do wizard para reidratar o passo salvo em vez de recriar — sem isso, reentrar num edital já
+  // iniciado esbarra em `CredenciamentoDuplicado` (409). 204 = nenhum vínculo ativo (pode começar do zero).
+  // Posse pelo token (AD-20): só devolve o vínculo da empresa do chamador.
+  app.get('/editais/:id/credenciamentos/meu', async (req, reply) => {
+    const identidade = exigirPapel(req, reply, PERFIS_FORNECEDOR);
+    if (!identidade) return reply;
+    const { id: editalId } = req.params as { id: string };
+    const detalhe = await deps.detalhar.doFornecedorNoEdital(empresaDe(identidade), editalId);
+    if (!detalhe) return reply.code(204).send();
+    return reply.send(detalhe);
+  });
+
   app.post('/editais/:id/credenciamentos', async (req, reply) => {
     const identidade = exigirPapel(req, reply, PERFIS_FORNECEDOR);
     if (!identidade) return reply;

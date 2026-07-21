@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation, Trans } from 'react-i18next';
 import { Stepper } from '../../design-system/components';
@@ -39,6 +39,35 @@ export function Credenciamento() {
   const [aceito, setAceito] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  // Enquanto consulta se já há credenciamento neste edital, para retomar do passo salvo em vez de
+  // recriar (UC004) — evita o 409 `CredenciamentoDuplicado` ao reentrar num edital já iniciado.
+  const [carregando, setCarregando] = useState(true);
+
+  // Retomada do wizard: na entrada, se o fornecedor já tem um credenciamento ATIVO neste edital,
+  // reidrata o estado (capacidade + passo salvo) em vez de começar do zero. `iniciado` volta ao passo
+  // em que parou (Capacidade→Termo); `aceito` cai direto no Concluído. Sem vínculo ativo (204), começa
+  // limpo. Falha de rede não trava: cai no fluxo novo e o backend ainda protege contra duplicidade.
+  useEffect(() => {
+    if (!editalId) { setCarregando(false); return; }
+    let vivo = true;
+    void (async () => {
+      try {
+        const atual = await api.credenciamentoNoEdital(editalId);
+        if (!vivo || !atual) return;
+        setCredId(atual.id);
+        if (atual.estado === 'aceito') {
+          setStep(3);
+        } else {
+          setCap(String(atual.capacidadeTeto));
+          // passoAtual 1..3 (Capacidade→Termo) → step 0..2; nunca abre no Concluído para um `iniciado`.
+          setStep(Math.min(2, Math.max(0, atual.passoAtual - 1)));
+          toastBus.emitir({ tom: 'info', texto: t('credenciamento.retomado') });
+        }
+      } catch { /* segue no fluxo novo — o iniciar ainda valida no backend */ }
+      finally { if (vivo) setCarregando(false); }
+    })();
+    return () => { vivo = false; };
+  }, [editalId, t]);
 
   const PASSOS = [
     t('credenciamento.passos.capacidade'),
@@ -84,6 +113,9 @@ export function Credenciamento() {
     // Passo 0 → 1: declara a capacidade (teto, RN005) iniciando o credenciamento no backend.
     if (step === 0) {
       if (!editalId) { mostrarErro(t('credenciamento.erroGenerico')); return; }
+      // Retomada: o credenciamento já existe (reidratado na entrada). Não recria — só avança e reporta
+      // o passo. A capacidade declarada é imutável; reeditá-la aqui não gera novo teto.
+      if (credId) { setStep(1); reportarPasso(1, credId); return; }
       setEnviando(true);
       try {
         const r = await api.iniciarCredenciamento(editalId, capNum);
@@ -113,6 +145,16 @@ export function Credenciamento() {
   async function cancelWizard() {
     if (credId) { try { await api.cancelarCredenciamento(credId); } catch { /* segue para a vitrine mesmo assim */ } }
     void navigate({ to: '/editais' });
+  }
+
+  // Evita piscar o passo 0 (Capacidade em branco) antes de resolver a retomada: sem isto, um edital já
+  // iniciado abriria no zero por um instante e só então saltaria ao passo salvo.
+  if (carregando) {
+    return (
+      <div data-cy="credenciamento-carregando" style={{ maxWidth: 940, margin: '0 auto', padding: '80px 0', textAlign: 'center', color: 'var(--cinza-500)', font: '600 14px var(--font-body)' }}>
+        {t('credenciamento.carregando')}
+      </div>
+    );
   }
 
   return (

@@ -20,7 +20,9 @@ function headers(extra?: Record<string, string>): Record<string, string> | undef
 async function get<T>(url: string): Promise<T> {
   const r = await fetch(url, { headers: headers() });
   if (!r.ok) throw await HttpError.de(r, url);
-  return (await r.json()) as T;
+  // 204 (sem corpo) é resposta válida de leitura "não há" — ex.: credenciamento ativo inexistente no
+  // edital. Devolve undefined em vez de estourar no `r.json()` de corpo vazio (simetria com `send`).
+  return (r.status === 204 ? undefined : await r.json()) as T;
 }
 
 async function send<T>(url: string, method: string, body?: unknown): Promise<T> {
@@ -196,7 +198,7 @@ export interface CatalogoItemView {
   // Setor/CNAE
   codigo?: string; descricao?: string;
   // Tipo de documento
-  formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number;
+  formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number; obrigatorio?: boolean;
 }
 /** UC021 — servidor interno exibido no Painel Admin de usuários (sem segredos). */
 export interface UsuarioInternoView {
@@ -316,6 +318,10 @@ export const api = {
   registrarPassoCredenciamento: (credId: string, passo: number) => send<{ passoAtual: number }>(`/credenciamentos/${credId}/passo`, 'PATCH', { passo }),
   // Detalhe read-only para a ação "Visualizar" do credenciamento finalizado.
   detalharCredenciamento: (credId: string) => get<CredenciamentoDetalheView>(`/credenciamentos/${credId}`),
+  // Retomada do wizard (UC004): credenciamento ATIVO do fornecedor neste edital, ou `undefined` (204) se
+  // não há. O wizard consulta na entrada para reidratar o passo salvo em vez de recriar (evita o 409
+  // CredenciamentoDuplicado ao reentrar num edital já iniciado).
+  credenciamentoNoEdital: (editalId: string) => get<CredenciamentoDetalheView | undefined>(`/editais/${editalId}/credenciamentos/meu`),
 
   // Painel admin
   dashboardAdmin: () => get<Funil>('/admin/dashboard'),

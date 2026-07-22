@@ -182,6 +182,38 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect(det.json().termo).toMatchObject({ versao: 'v1', finalidade: 'credenciamento' });
   });
 
+  it('GET /editais/:id/credenciamentos/meu sem vínculo → 204 (pode começar do zero)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const r = await app.inject({ method: 'GET', url: `/editais/${edital}/credenciamentos/meu`, headers: forn() });
+    expect(r.statusCode).toBe(204);
+  });
+
+  it('GET /editais/:id/credenciamentos/meu com iniciado → devolve o vínculo p/ retomar o wizard', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 320)).json().credenciamentoId as string;
+    await app.inject({ method: 'PATCH', url: `/credenciamentos/${credId}/passo`, headers: forn(), payload: { passo: 2 } });
+    const r = await app.inject({ method: 'GET', url: `/editais/${edital}/credenciamentos/meu`, headers: forn() });
+    expect(r.statusCode).toBe(200);
+    // Retomada: id + capacidade declarada + passo salvo, sem tomar CredenciamentoDuplicado.
+    expect(r.json()).toMatchObject({ id: credId, estado: 'iniciado', capacidadeTeto: 320, passoAtual: 2, totalPassos: 4 });
+  });
+
+  it('GET /editais/:id/credenciamentos/meu após cancelar → 204 (A2 reversível, começa do zero)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 100)).json().credenciamentoId as string;
+    await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/cancelar`, headers: forn() });
+    const r = await app.inject({ method: 'GET', url: `/editais/${edital}/credenciamentos/meu`, headers: forn() });
+    expect(r.statusCode).toBe(204);
+  });
+
+  it('GET /editais/:id/credenciamentos/meu de outra empresa → 204 (não vaza o vínculo alheio)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    await iniciar(edital, 150); // vínculo do titular1
+    const outraEmpresa = comoPapel('titular', { userId: 'intruso', empresaId: 'empresa-alheia' });
+    const r = await app.inject({ method: 'GET', url: `/editais/${edital}/credenciamentos/meu`, headers: outraEmpresa });
+    expect(r.statusCode).toBe(204);
+  });
+
   it('GET /credenciamentos/:id de outra empresa → 404 (não vaza o vínculo alheio)', async () => {
     const edital = await criarEPublicar(['1412601']);
     const credId = (await iniciar(edital, 100)).json().credenciamentoId as string;

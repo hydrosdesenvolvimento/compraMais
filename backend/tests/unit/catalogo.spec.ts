@@ -91,6 +91,16 @@ describe('Catálogos base — domínio (UC020)', () => {
       expect(() => TipoDocumento.criar({ ...base, categoria: 'outra' })).toThrow(CategoriaInvalida);
     });
 
+    it('obrigatorio: default false; editar alterna com diff (RF022 parametrizável)', () => {
+      expect(TipoDocumento.criar(base).obrigatorio).toBe(false);
+      expect(TipoDocumento.criar({ ...base, obrigatorio: true }).obrigatorio).toBe(true);
+      const t = TipoDocumento.criar(base);
+      expect(t.editar({ obrigatorio: false }, 'admin1')).toHaveLength(0); // igual → sem diff
+      expect(t.editar({ obrigatorio: true }, 'admin1').map((d) => d.campo)).toEqual(['obrigatorio']);
+      expect(t.obrigatorio).toBe(true);
+      expect(t.estado().obrigatorio).toBe(true); // round-trip do snapshot
+    });
+
     it('editar troca flags e categoria com diff', () => {
       const t = TipoDocumento.criar(base);
       const diff = t.editar({ exigeExercicio: true, categoria: 'cadastral' }, 'admin1');

@@ -2,20 +2,15 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation, Trans } from 'react-i18next';
 import { api, type DocItem, type CatalogoItemView } from '../../lib/api';
+import { MIME, TAMANHO_MAX_MB, formatoDe, lerBase64 } from '../../lib/upload';
 import { Pill, Botao } from '../../design-system/components';
 import { toastBus } from '../../design-system/components/toast-bus';
 import { IconeDocumentos, IconeUpload, IconeDownload, IconeOlho, IconeAlerta, IconeSync, IconeFechar } from '../../design-system/icons';
 
 /** Janela (em dias) para sinalizar "Vence em N dias" antes do vencimento — alinhada ao aviso da topbar. */
 const JANELA_A_VENCER = 30;
-/** Tamanho máximo por arquivo no upload (RN de upload). */
-const TAMANHO_MAX_MB = 10;
-/** Mapa formato → MIME, para montar o data URL de preview/download a partir do base64 do backend. */
-const MIME: Record<Formato, string> = { pdf: 'application/pdf', jpg: 'image/jpeg', png: 'image/png' };
 
 type Tom = 'success' | 'warn' | 'error' | 'neutral';
-/** Formatos aceitos no upload (pdf|jpg|png) — o backend valida o mesmo conjunto (FormatoInvalido). */
-type Formato = 'pdf' | 'jpg' | 'png';
 
 /** Estado visível na tela, derivado do status de covalidação + validade (sem endpoint novo). */
 interface EstadoDoc {
@@ -45,25 +40,6 @@ function derivarEstado(d: DocItem, agora: number): EstadoDoc {
     if (dias <= JANELA_A_VENCER) return { tom: 'warn', chave: 'documentos.statusVenceEm', valores: { count: Math.max(dias, 0) }, reprovado: false, expirado: false };
   }
   return { tom: 'success', chave: 'documentos.statusAprovado', reprovado: false, expirado: false };
-}
-
-/** Extrai o formato aceito a partir da extensão do arquivo (jpeg é normalizado para jpg). */
-function formatoDe(nome: string): Formato | null {
-  const ext = nome.split('.').pop()?.toLowerCase();
-  if (ext === 'pdf') return 'pdf';
-  if (ext === 'jpg' || ext === 'jpeg') return 'jpg';
-  if (ext === 'png') return 'png';
-  return null;
-}
-
-/** Lê o arquivo como base64 puro (sem o prefixo `data:...;base64,`) para trafegar no JSON. */
-function lerBase64(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result).split(',')[1] ?? '');
-    r.onerror = () => reject(r.error ?? new Error('read error'));
-    r.readAsDataURL(file);
-  });
 }
 
 /** Dispara o download de um data URL como arquivo, sem navegar para fora da SPA. */

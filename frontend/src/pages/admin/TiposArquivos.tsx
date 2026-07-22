@@ -13,11 +13,13 @@ import { IconeLapis, IconePower, IconeFechar, IconeInfo } from '../../design-sys
  * (cabeçalho "Documentos exigidos no credenciamento"). Reusa o CRUD genérico de catálogos (GET/POST/PATCH/
  * POST inativar|reativar `/catalogos/tipos-documento`); a lista inclui inativos.
  *
- * Arbitragem HTML×domínio (decisão do solicitante): a coluna "Obrigatório" do protótipo é omitida — a
- * obrigatoriedade documental é definida por edital (RF007), não por tipo — e dá lugar a "Categoria"
- * (cadastral/fiscal/contratual), que já existe no domínio e é obrigatória. A "Validade" é modelada em três
- * modos mutuamente exclusivos mapeados aos campos do domínio: sem validade, prazo fixo em dias
- * (`validadeDias`, ex.: "90 dias") ou por exercício (`exigeExercicio`, ex.: Balanço).
+ * Arbitragem HTML×domínio: além de "Categoria" (cadastral/fiscal/contratual), a tela expõe "Obrigatório"
+ * (2026-07-21, decisão do solicitante) — reintroduzida como atributo POR TIPO no catálogo (RF022
+ * parametrizável, §02), revertendo a omissão anterior que a tratava por edital (RF007). Uso advisório: o
+ * Passo 2 do UC004 destaca os obrigatórios pendentes, mas NÃO bloqueia (conclusão por Termo/RN016;
+ * validação real na covalidação da CPL/UC006). A "Validade" é modelada em três modos mutuamente
+ * exclusivos mapeados aos campos do domínio: sem validade, prazo fixo em dias (`validadeDias`, ex.:
+ * "90 dias") ou por exercício (`exigeExercicio`, ex.: Balanço).
  */
 const SLUG = 'tipos-documento' as const;
 
@@ -68,6 +70,7 @@ export function TiposArquivos() {
     t('admin.tiposArquivos.campos.documento'),
     t('admin.tiposArquivos.campos.formato'),
     t('admin.tiposArquivos.campos.categoria'),
+    t('admin.tiposArquivos.campos.obrigatorio'),
     t('admin.tiposArquivos.campos.validade'),
     t('admin.tiposArquivos.campos.status'),
     t('admin.tiposArquivos.campos.acoes'),
@@ -113,6 +116,13 @@ export function TiposArquivos() {
                       <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-700)', whiteSpace: 'nowrap' }}>{(s.formato ?? '').toUpperCase()}</td>
                       <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap' }}>
                         <span data-cy="categoria" style={{ color: 'var(--cinza-700)' }}>{rotuloCategoria(s.categoria)}</span>
+                      </td>
+                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap' }}>
+                        {s.obrigatorio ? (
+                          <span data-cy="obrigatorio" style={{ ...pill, background: 'var(--azul-50)', color: 'var(--azul-700)' }}>{t('admin.tiposArquivos.obrigatorioSim')}</span>
+                        ) : (
+                          <span data-cy="obrigatorio" style={{ color: 'var(--cinza-400)' }}>{t('admin.tiposArquivos.obrigatorioNao')}</span>
+                        )}
                       </td>
                       <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-700)', whiteSpace: 'nowrap' }}>
                         <span data-cy="validade">{rotuloValidade(s)}</span>
@@ -177,6 +187,7 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
     categoria: (item?.categoria as Categoria | '') ?? '',
     modo: modoDe(item),
     dias: item?.validadeDias != null ? String(item.validadeDias) : '',
+    obrigatorio: item?.obrigatorio ?? false,
   });
 
   useEffect(() => {
@@ -195,6 +206,7 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
         exigeExercicio: form.modo === 'exercicio',
         // Prazo fixo só no modo "dias"; nos demais, null limpa o campo no PATCH.
         validadeDias: form.modo === 'dias' ? Number(form.dias) : null,
+        obrigatorio: form.obrigatorio,
       };
       if (editando) await api.catalogoEditar(SLUG, item!.id, body);
       else await api.catalogoCriar(SLUG, body);
@@ -253,6 +265,13 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
                 </label>
               )}
             </div>
+            <label style={{ display: 'flex', gap: 11, alignItems: 'flex-start', padding: '14px 16px', border: `1.5px solid ${form.obrigatorio ? 'var(--azul-500)' : 'var(--border)'}`, borderRadius: 11, background: form.obrigatorio ? 'var(--azul-50)' : '#fff', cursor: 'pointer' }}>
+              <input data-cy="campo-obrigatorio" type="checkbox" checked={form.obrigatorio} onChange={(e) => setForm({ ...form, obrigatorio: e.target.checked })} style={{ width: 18, height: 18, marginTop: 1, flexShrink: 0, accentColor: 'var(--azul-700)' }} />
+              <span style={{ minWidth: 0 }}>
+                <span style={{ display: 'block', font: '600 14px var(--font-body)', color: 'var(--cinza-900)' }}>{t('admin.tiposArquivos.modal.obrigatorioLabel')}</span>
+                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--cinza-500)', marginTop: 2 }}>{t('admin.tiposArquivos.modal.obrigatorioAjuda')}</span>
+              </span>
+            </label>
             <BannerHistorico />
             {salvar.isError && <p role="alert" data-cy="erro-salvar" style={{ margin: 0, fontSize: 13, color: 'var(--erro)' }}>{t('admin.tiposArquivos.modal.erroSalvar')}</p>}
           </div>

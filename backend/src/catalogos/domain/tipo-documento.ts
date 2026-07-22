@@ -13,6 +13,7 @@ export interface TipoDocumentoState {
   exigeValidade: boolean;
   exigeExercicio: boolean;
   validadeDias?: number;
+  obrigatorio: boolean;
   situacao: SituacaoCatalogo;
 }
 
@@ -32,7 +33,8 @@ function exigirCategoria(v: string): CategoriaDocumento {
  * (Balanço do exercício — RN006), `validadeDias` (prazo fixo de validade em dias — protótipo "90 dias")
  * e `categoria` (retenção legal por categoria — RN015/UC017). `validadeDias` é opcional e independente:
  * quando presente implica `exigeValidade`, mas a UI pode exigir validade sem prazo fixo (`exigeValidade`
- * sem `validadeDias`).
+ * sem `validadeDias`). `obrigatorio` marca o tipo como exigido no credenciamento (RF022 parametrizável,
+ * §02): o Passo 2 do UC004 destaca os obrigatórios pendentes — advisório, não bloqueia (RN016).
  */
 export class TipoDocumento extends ItemCatalogo {
   private constructor(
@@ -43,12 +45,13 @@ export class TipoDocumento extends ItemCatalogo {
     private _exigeValidade: boolean,
     private _exigeExercicio: boolean,
     private _validadeDias: number | undefined,
+    private _obrigatorio: boolean,
     situacao: SituacaoCatalogo,
   ) { super(meta, situacao); }
 
   static criar(input: {
     id: string; nome: string; formato: string; categoria: string;
-    exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number; userName?: string;
+    exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number; obrigatorio?: boolean; userName?: string;
   }): TipoDocumento {
     return new TipoDocumento(
       EntidadeBase.metaNova(input.id, input.userName),
@@ -58,12 +61,13 @@ export class TipoDocumento extends ItemCatalogo {
       input.exigeValidade ?? false,
       input.exigeExercicio ?? false,
       inteiroPositivoOpcional(input.validadeDias, 'validadeDias'),
+      input.obrigatorio ?? false,
       'ativo',
     );
   }
 
   static deEstado(s: TipoDocumentoState): TipoDocumento {
-    return new TipoDocumento(s.meta, s.nome, s.formato, s.categoria, s.exigeValidade, s.exigeExercicio, s.validadeDias, s.situacao);
+    return new TipoDocumento(s.meta, s.nome, s.formato, s.categoria, s.exigeValidade, s.exigeExercicio, s.validadeDias, s.obrigatorio ?? false, s.situacao);
   }
 
   estado(): TipoDocumentoState {
@@ -71,7 +75,7 @@ export class TipoDocumento extends ItemCatalogo {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
       nome: this._nome, formato: this._formato, categoria: this._categoria,
       exigeValidade: this._exigeValidade, exigeExercicio: this._exigeExercicio, validadeDias: this._validadeDias,
-      situacao: this._situacao,
+      obrigatorio: this._obrigatorio, situacao: this._situacao,
     };
   }
 
@@ -81,9 +85,10 @@ export class TipoDocumento extends ItemCatalogo {
   get exigeValidade(): boolean { return this._exigeValidade; }
   get exigeExercicio(): boolean { return this._exigeExercicio; }
   get validadeDias(): number | undefined { return this._validadeDias; }
+  get obrigatorio(): boolean { return this._obrigatorio; }
   chave(): string { return normalizarChave(this._nome); }
 
-  editar(campos: Partial<{ nome: string; formato: string; categoria: string; exigeValidade: boolean; exigeExercicio: boolean; validadeDias: number }>, userName: string): CampoDiff[] {
+  editar(campos: Partial<{ nome: string; formato: string; categoria: string; exigeValidade: boolean; exigeExercicio: boolean; validadeDias: number; obrigatorio: boolean }>, userName: string): CampoDiff[] {
     const diff: CampoDiff[] = [];
     if (campos.nome !== undefined) {
       const novo = exigirTexto(campos.nome, 'nome');
@@ -108,6 +113,10 @@ export class TipoDocumento extends ItemCatalogo {
     if (campos.validadeDias !== undefined) {
       const novo = inteiroPositivoOpcional(campos.validadeDias, 'validadeDias'); // '' / null → undefined (limpa o prazo)
       if (novo !== this._validadeDias) { diff.push({ campo: 'validadeDias', antes: this._validadeDias, depois: novo }); this._validadeDias = novo; }
+    }
+    if (campos.obrigatorio !== undefined && campos.obrigatorio !== this._obrigatorio) {
+      diff.push({ campo: 'obrigatorio', antes: this._obrigatorio, depois: campos.obrigatorio });
+      this._obrigatorio = campos.obrigatorio;
     }
     if (diff.length) this.marcarAtualizacao(userName);
     return diff;

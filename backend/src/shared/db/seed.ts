@@ -144,6 +144,41 @@ async function seedFilaAnalise(pool: Pool, piiKey: Buffer): Promise<void> {
   console.log(`[seed] análise documental: ${criados} fornecedor(es) semeado(s).`);
 }
 
+/**
+ * Catálogo de Tipos de Documento (RF022 / UC020) — os "documentos exigidos" do Passo 2 do
+ * credenciamento e do dropdown de upload da tela de Documentos. Sem este seed o catálogo nasce vazio
+ * e ambas as telas ficam sem tipos. Nomes alinhados aos documentos demo (`DOCUMENTOS_SEED`) para o
+ * fornecedor demo exibir o reaproveitamento (A1). Idempotente via índice único `lower(nome)`.
+ */
+const TIPOS_DOCUMENTO_SEED: Array<{ nome: string; categoria: 'cadastral' | 'fiscal' | 'contratual'; exigeValidade: boolean; exigeExercicio: boolean; validadeDias: number | null; obrigatorio: boolean }> = [
+  // `obrigatorio` é parametrizável (RF022 / §02) — o Administrador ajusta na tela "Tipos de Arquivos".
+  // Defaults abaixo espelham os documentos do protótipo (portal-fornecedor.html) marcados como exigidos;
+  // Atestado de Capacidade Técnica fica opcional (só consta do rascunho v1.0 descartado, não canônico).
+  { nome: 'Cartão CNPJ', categoria: 'cadastral', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: true },
+  { nome: 'Contrato Social', categoria: 'contratual', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: true },
+  { nome: 'Certidão Negativa de Débitos Federais', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 180, obrigatorio: true },
+  { nome: 'Certidão Negativa de Débitos Estaduais', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 90, obrigatorio: true },
+  { nome: 'Certidão Negativa de Débitos Trabalhistas (CNDT)', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 180, obrigatorio: true },
+  { nome: 'Certidão de Regularidade do FGTS', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 90, obrigatorio: true },
+  { nome: 'Balanço Patrimonial', categoria: 'contratual', exigeValidade: false, exigeExercicio: true, validadeDias: null, obrigatorio: true },
+  { nome: 'Atestado de Capacidade Técnica', categoria: 'contratual', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: false },
+];
+
+/** Semeia o catálogo de tipos de documento (idempotente: `ON CONFLICT (lower(nome)) DO NOTHING`). */
+async function seedTiposDocumento(pool: Pool): Promise<void> {
+  let criados = 0;
+  for (const td of TIPOS_DOCUMENTO_SEED) {
+    const r = await pool.query(
+      `INSERT INTO tipos_documento (id, nome, formato, categoria, exige_validade, exige_exercicio, validade_dias, obrigatorio, situacao, last_user_update)
+       VALUES ($1,$2,'pdf',$3,$4,$5,$6,$7,'ativo','seed')
+       ON CONFLICT (lower(nome)) DO NOTHING`,
+      [randomUUID(), td.nome, td.categoria, td.exigeValidade, td.exigeExercicio, td.validadeDias, td.obrigatorio],
+    );
+    if (r.rowCount) { criados++; console.log(`[seed] tipo-documento: ${td.nome}${td.obrigatorio ? ' (obrigatório)' : ''}`); }
+  }
+  console.log(`[seed] tipos-documento: ${criados} criado(s) de ${TIPOS_DOCUMENTO_SEED.length}.`);
+}
+
 async function seed(): Promise<void> {
   if (!temPostgresConfigurado()) {
     console.error('[seed] Postgres not configured (set POSTGRES_HOST or DATABASE_URL). Aborting.');
@@ -176,6 +211,7 @@ async function seed(): Promise<void> {
     console.log(`[seed] completed — ${criados} new, ${falhas} failure(s) of ${USUARIOS_SEED.length}.`);
     if (falhas) process.exitCode = 1; // visível em CI sem abortar os demais
 
+    await seedTiposDocumento(pool);
     await seedDocumentos(pool, config.crypto.piiKey);
     await seedFilaAnalise(pool, config.crypto.piiKey);
   } finally {

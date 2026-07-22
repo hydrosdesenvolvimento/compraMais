@@ -6,10 +6,16 @@
 describe('Credenciamento por Termo de Aceite (UC004)', () => {
   beforeEach(() => {
     cy.intercept('GET', '/editais', { body: [{ id: 'e1', objeto: 'Merenda escolar' }] }).as('vitrine');
+    // Sem credenciamento ativo neste edital (204) → o wizard começa do zero, não retoma.
+    cy.intercept('GET', '/editais/e1/credenciamentos/meu', { statusCode: 204, body: '' }).as('meu');
     cy.intercept('POST', '/editais/e1/credenciamentos', { body: { credenciamentoId: 'c1', estado: 'iniciado' } }).as('iniciar');
     // O wizard reporta o passo (UC004) ao navegar — best-effort; stub para determinismo.
     cy.intercept('PATCH', '/credenciamentos/c1/passo', { body: { passoAtual: 2 } }).as('passo');
     cy.intercept('POST', '/credenciamentos/c1/termo', { body: { estado: 'aceito', status: 'pendente_analise' } }).as('termo');
+    // Passo 2 (RF002): catálogo de tipos exigidos × documentos do fornecedor. Um tipo ainda não enviado
+    // → renderiza a dropzone `upload-doc`.
+    cy.intercept('GET', '/catalogos/tipos-documento*', { body: [{ id: 't1', nome: 'Certidão Negativa de Débitos Estaduais', exigeValidade: true, situacao: 'ativo' }] }).as('tipos');
+    cy.intercept('GET', '/fornecedores/*/documentos', { body: [] }).as('docs');
   });
 
   it('parte da vitrine e conclui em Pendente de Análise', () => {

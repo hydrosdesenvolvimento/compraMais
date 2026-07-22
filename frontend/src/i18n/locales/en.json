@@ -965,6 +965,8 @@
       "descricao": "Your application has been submitted to the Bidding Committee.",
       "status": "Status: Pending Review",
       "baixarPdf": "Download PDF",
+      "baixarPdfProcessando": "Generating…",
+      "baixarPdfErro": "Could not generate the receipt. Please try again.",
       "voltarPainel": "Back to dashboard"
     }
   },

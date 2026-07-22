@@ -965,6 +965,8 @@
       "descricao": "Sua solicitação de credenciamento foi submetida à Comissão de Licitação.",
       "status": "Status: Pendente de Análise",
       "baixarPdf": "Baixar PDF",
+      "baixarPdfProcessando": "Gerando…",
+      "baixarPdfErro": "Não foi possível gerar o comprovante. Tente novamente.",
       "voltarPainel": "Voltar ao painel"
     }
   },

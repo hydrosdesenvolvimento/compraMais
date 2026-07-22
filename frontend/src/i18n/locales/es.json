@@ -965,6 +965,8 @@
       "descricao": "Su solicitud de acreditación fue enviada a la Comisión de Licitación.",
       "status": "Estado: Pendiente de Análisis",
       "baixarPdf": "Descargar PDF",
+      "baixarPdfProcessando": "Generando…",
+      "baixarPdfErro": "No se pudo generar el comprobante. Inténtelo de nuevo.",
       "voltarPainel": "Volver al panel"
     }
   },

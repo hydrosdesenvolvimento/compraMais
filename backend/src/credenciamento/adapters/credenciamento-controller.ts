@@ -2,8 +2,10 @@ import type { FastifyInstance } from 'fastify';
 import type { SolicitarCredenciamento, Actor } from '../application/solicitar-credenciamento.js';
 import type { ListarCredenciamentos } from '../application/listar-credenciamentos.js';
 import type { DetalharCredenciamento } from '../application/detalhar-credenciamento.js';
+import type { GerarComprovanteCredenciamento } from '../application/gerar-comprovante-credenciamento.js';
 import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
 import { exigirPapel } from '../../shared/http/autenticacao.js';
+import { renderComprovantePdf } from './comprovante-pdf.js';
 
 /** Papéis do próprio fornecedor autorizados a operar o credenciamento (dono do vínculo). */
 const PERFIS_FORNECEDOR: readonly Papel[] = ['titular', 'procurador'];
@@ -14,7 +16,7 @@ const PERFIS_FORNECEDOR: readonly Papel[] = ['titular', 'procurador'];
  * um titular podia credenciar em nome de qualquer empresa só trocando o header.
  * Conclusão por Termo de Aceite (RN016) e cancelamento antes da distribuição (A2).
  */
-export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento; listar: ListarCredenciamentos; detalhar: DetalharCredenciamento }): void {
+export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento; listar: ListarCredenciamentos; detalhar: DetalharCredenciamento; comprovante: GerarComprovanteCredenciamento }): void {
   // Leitura: credenciamentos do fornecedor para o portal. Somente "em andamento" por padrão (não
   // cancelados) — recorte da home; resolvido por `:id` como as demais rotas de leitura do fornecedor
   // (documentos). `?incluirCancelados=true` devolve o histórico completo, que a tela "Meus
@@ -35,6 +37,24 @@ export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solic
     const detalhe = await deps.detalhar.doFornecedor(id, empresaDe(identidade));
     if (!detalhe) return reply.code(404).send({ codigo: 'CredenciamentoNaoEncontrado', mensagem: 'Credenciamento not found.' });
     return reply.send(detalhe);
+  });
+
+  // Comprovante em PDF do credenciamento (UC004 · Passo Concluído — botão "Baixar PDF"). Documento
+  // canônico do servidor: mesma posse do detalhe (só o dono do vínculo; fora disso 404, não vaza o id).
+  // O corpo é o PDF (não o `{ codigo, mensagem }` das demais rotas), então o front baixa via Bearer
+  // (ver `baixarArquivo`) em vez de navegar. `.pdf` no path é literal para o cliente sugerir o nome.
+  app.get('/credenciamentos/:id/comprovante.pdf', async (req, reply) => {
+    const identidade = exigirPapel(req, reply, PERFIS_FORNECEDOR);
+    if (!identidade) return reply;
+    const { id } = req.params as { id: string };
+    const comprovante = await deps.comprovante.doFornecedor(id, empresaDe(identidade));
+    if (!comprovante) return reply.code(404).send({ codigo: 'CredenciamentoNaoEncontrado', mensagem: 'Credenciamento not found.' });
+    const pdf = renderComprovantePdf(comprovante);
+    const nome = `comprovante-credenciamento-${(comprovante.numeroEdital ?? comprovante.protocolo).replace(/[^\w.-]+/g, '-')}.pdf`;
+    return reply
+      .header('content-type', 'application/pdf')
+      .header('content-disposition', `attachment; filename="${nome}"`)
+      .send(Buffer.from(pdf));
   });
 
   // Credenciamento ATIVO do fornecedor num edital (UC004 · retomada do wizard). O portal consulta na

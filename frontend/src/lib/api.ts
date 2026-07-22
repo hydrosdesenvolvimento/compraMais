@@ -318,6 +318,9 @@ export const api = {
   registrarPassoCredenciamento: (credId: string, passo: number) => send<{ passoAtual: number }>(`/credenciamentos/${credId}/passo`, 'PATCH', { passo }),
   // Detalhe read-only para a ação "Visualizar" do credenciamento finalizado.
   detalharCredenciamento: (credId: string) => get<CredenciamentoDetalheView>(`/credenciamentos/${credId}`),
+  // Comprovante em PDF (Passo Concluído · botão "Baixar PDF"). Rota protegida → baixa via Bearer
+  // (não navega), como a exportação da auditoria; devolve o blob + nome sugerido pelo servidor.
+  comprovanteCredenciamento: (credId: string) => baixarArquivo(`/credenciamentos/${credId}/comprovante.pdf`),
   // Retomada do wizard (UC004): credenciamento ATIVO do fornecedor neste edital, ou `undefined` (204) se
   // não há. O wizard consulta na entrada para reidratar o passo salvo em vez de recriar (evita o 409
   // CredenciamentoDuplicado ao reentrar num edital já iniciado).

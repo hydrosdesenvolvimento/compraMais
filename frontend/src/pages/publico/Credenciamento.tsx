@@ -197,7 +197,7 @@ export function Credenciamento() {
           {step === 0 && <PassoCapacidade cap={cap} setCap={setCap} />}
           {step === 1 && <PassoDocumentos fornecedorId={fornecedorId} />}
           {step === 2 && <PassoTermo aceito={aceito} setAceito={setAceito} />}
-          {step === 3 && <PassoSucesso onPainel={() => void navigate({ to: '/inicio' })} />}
+          {step === 3 && <PassoSucesso credId={credId} onPainel={() => void navigate({ to: '/inicio' })} />}
         </div>
 
         {erro && (
@@ -727,8 +727,38 @@ function PassoTermo({ aceito, setAceito }: { aceito: boolean; setAceito: (v: boo
 }
 
 /* ---------- Passo 4: Sucesso ---------- */
-function PassoSucesso({ onPainel }: { onPainel: () => void }) {
+
+/** Dispara o download do blob no navegador sem sair da SPA (mesmo padrão da exportação da auditoria). */
+function salvarArquivo(blob: Blob, nome: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nome;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function PassoSucesso({ credId, onPainel }: { credId: string | null; onPainel: () => void }) {
   const { t } = useTranslation();
+  const [baixando, setBaixando] = useState(false);
+
+  // Baixa o comprovante canônico (PDF do servidor). Rota protegida → via Bearer (api.comprovante…),
+  // salvando o blob localmente. Falha vira toast; o botão volta ao estado normal.
+  const baixarPdf = async () => {
+    if (!credId || baixando) return;
+    setBaixando(true);
+    try {
+      const { blob, nome } = await api.comprovanteCredenciamento(credId);
+      salvarArquivo(blob, nome);
+    } catch {
+      toastBus.emitir({ tom: 'erro', texto: t('credenciamento.enviado.baixarPdfErro') });
+    } finally {
+      setBaixando(false);
+    }
+  };
+
   return (
     <div data-cy="credenciamento-enviado" style={{ maxWidth: 520, margin: '0 auto', textAlign: 'center', padding: '14px 0' }}>
       <div
@@ -781,9 +811,8 @@ function PassoSucesso({ onPainel }: { onPainel: () => void }) {
         <button
           type="button"
           data-cy="baixar-pdf"
-          onClick={() => {
-            /* no-op: geração de PDF será integrada posteriormente */
-          }}
+          onClick={() => void baixarPdf()}
+          disabled={!credId || baixando}
           style={{
             padding: '12px 22px',
             border: '1.5px solid var(--azul-700)',
@@ -791,10 +820,11 @@ function PassoSucesso({ onPainel }: { onPainel: () => void }) {
             background: '#fff',
             color: 'var(--azul-700)',
             font: '600 14.5px var(--font-body)',
-            cursor: 'pointer',
+            cursor: !credId || baixando ? 'not-allowed' : 'pointer',
+            opacity: !credId || baixando ? 0.6 : 1,
           }}
         >
-          {t('credenciamento.enviado.baixarPdf')}
+          {baixando ? t('credenciamento.enviado.baixarPdfProcessando') : t('credenciamento.enviado.baixarPdf')}
         </button>
         <button
           type="button"

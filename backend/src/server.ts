@@ -76,6 +76,7 @@ import { registrarRotasRegularizacao } from './credenciamento/adapters/regulariz
 import { SolicitarCredenciamento, type CredenciamentoRepository } from './credenciamento/application/solicitar-credenciamento.js';
 import { ListarCredenciamentos, type SecretariaLookup } from './credenciamento/application/listar-credenciamentos.js';
 import { DetalharCredenciamento } from './credenciamento/application/detalhar-credenciamento.js';
+import { GerarComprovanteCredenciamento } from './credenciamento/application/gerar-comprovante-credenciamento.js';
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
@@ -323,7 +324,17 @@ export async function buildServer(): Promise<FastifyInstance> {
   };
   const listarCredenciamentos = new ListarCredenciamentos(credRepo, editaisRepo, secretariaLookup);
   const detalharCredenciamento = new DetalharCredenciamento(credRepo, editaisRepo, secretariaLookup);
-  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento });
+  // Comprovante em PDF (Passo Concluído): reusa edital/secretaria e resolve a empresa que aderiu
+  // (razão social + CNPJ formatado) via o repo de fornecedores já instanciado. Sem lookup a emissão
+  // ainda funciona — apenas omite o bloco "Adesão" da empresa.
+  const fornecedorIdentidade = {
+    porId: async (id: string) => {
+      const f = await fornecedores.porId(id);
+      return f ? { razaoSocial: f.razaoSocial, cnpj: f.cnpj.valor } : null;
+    },
+  };
+  const gerarComprovanteCredenciamento = new GerarComprovanteCredenciamento(credRepo, editaisRepo, fornecedorIdentidade, secretariaLookup);
+  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento, comprovante: gerarComprovanteCredenciamento });
 
   // Motor de Distribuição (Épico 5 / UC008 / RF005). A gestão dispara o rateio de um edital
   // distribuível (publicado); a matriz canônica append-only é durável em Postgres quando disponível

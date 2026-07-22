@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { GerirDocumentos } from '../../src/credenciamento/application/gerir-documentos.js';
 import { DocumentoRepositoryMemory, ObjectStorageMemory, PiiCipherDev } from '../../src/credenciamento/adapters/documentos-memory.js';
+import { catalogoAceitaTudo } from '../helpers/catalogo.js';
 
 /**
  * Caminho de LEITURA do serviço de arquivos (FR-007/008, AD-19). Antes só existia o `put` (upload);
@@ -13,7 +14,7 @@ describe('GerirDocumentos.baixar — caminho de leitura do serviço de arquivos'
     const repo = new DocumentoRepositoryMemory();
     const storage = new ObjectStorageMemory();
     const cipher = new PiiCipherDev();
-    const docs = new GerirDocumentos(repo, storage, cipher);
+    const docs = new GerirDocumentos(repo, storage, cipher, catalogoAceitaTudo);
     return { docs, storage, cipher };
   }
 
@@ -54,7 +55,7 @@ describe('GerirDocumentos.baixar — caminho de leitura do serviço de arquivos'
     // grava só o agregado (metadados), sem o conteúdo no storage
     const { Documento } = await import('../../src/credenciamento/domain/documento.js');
     await repo.salvar(Documento.enviar({ id: 'd-orfao', fornecedorId: 'f1', tipo: 'X', arquivoRef: 'mem://f1/d-orfao', formato: 'pdf' }));
-    const docs = new GerirDocumentos(repo, storageVazio, cipher);
+    const docs = new GerirDocumentos(repo, storageVazio, cipher, catalogoAceitaTudo);
 
     await expect(docs.baixar('d-orfao')).resolves.toBeNull();
   });

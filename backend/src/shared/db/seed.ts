@@ -7,6 +7,9 @@ import { UsuarioRepositoryPg } from '../identity/usuario-repository-pg.js';
 import type { Papel } from '../identity/identity-provider.js';
 import { GerirDocumentos } from '../../credenciamento/application/gerir-documentos.js';
 import { DocumentoRepositoryPg, ObjectStoragePg } from '../../credenciamento/adapters/documentos-pg.js';
+import { CatalogoTiposDocumentoRepo } from '../../credenciamento/adapters/catalogo-tipos-documento.js';
+import { TipoDocumentoRepositoryPg } from '../../catalogos/adapters/catalogo-repository-pg.js';
+import { TIPOS_DOCUMENTO_BASELINE } from '../../catalogos/domain/tipos-documento-baseline.js';
 import { PiiCipherAesGcm } from '../crypto/pii-cipher-aes.js';
 import { Documento, type FormatoDoc } from '../../credenciamento/domain/documento.js';
 import { Fornecedor } from '../../catalogo/domain/fornecedor.js';
@@ -71,7 +74,7 @@ const DOCUMENTOS_SEED: Array<{ tipo: string; formato: FormatoDoc; dias: number |
   { tipo: 'Cartão CNPJ', formato: 'pdf', dias: null, alvo: 'aprovado' },
   { tipo: 'Certidão Negativa de Débitos Federais', formato: 'pdf', dias: 5, alvo: 'aprovado' },
   { tipo: 'Certidão de Regularidade do FGTS', formato: 'pdf', dias: 390, alvo: 'aprovado' },
-  { tipo: 'Balanço Patrimonial 2025', formato: 'pdf', dias: null, alvo: 'reprovado', motivo: 'Imagem ilegível na página 3. Reenvie o PDF digitalizado em 300 dpi, sem cortes.' },
+  { tipo: 'Balanço Patrimonial', formato: 'pdf', dias: null, alvo: 'reprovado', motivo: 'Imagem ilegível na página 3. Reenvie o PDF digitalizado em 300 dpi, sem cortes.' },
   { tipo: 'Atestado de Capacidade Técnica', formato: 'pdf', dias: null, alvo: 'pendente' },
 ];
 
@@ -82,7 +85,7 @@ async function seedDocumentos(pool: Pool, piiKey: Buffer): Promise<void> {
     console.log('[seed] documentos: demo-fornecedor já possui documentos, pulando.');
     return;
   }
-  const docs = new GerirDocumentos(repo, new ObjectStoragePg(pool), new PiiCipherAesGcm(piiKey));
+  const docs = new GerirDocumentos(repo, new ObjectStoragePg(pool), new PiiCipherAesGcm(piiKey), new CatalogoTiposDocumentoRepo(new TipoDocumentoRepositoryPg(pool)));
   const agora = Date.now();
   let criados = 0;
   for (const d of DOCUMENTOS_SEED) {
@@ -147,27 +150,13 @@ async function seedFilaAnalise(pool: Pool, piiKey: Buffer): Promise<void> {
 /**
  * Catálogo de Tipos de Documento (RF022 / UC020) — os "documentos exigidos" do Passo 2 do
  * credenciamento e do dropdown de upload da tela de Documentos. Sem este seed o catálogo nasce vazio
- * e ambas as telas ficam sem tipos. Nomes alinhados aos documentos demo (`DOCUMENTOS_SEED`) para o
- * fornecedor demo exibir o reaproveitamento (A1). Idempotente via índice único `lower(nome)`.
+ * e ambas as telas ficam sem tipos. A lista canônica vive em `TIPOS_DOCUMENTO_BASELINE` (fonte única,
+ * compartilhada com o bootstrap em memória de `buildServer`). Idempotente via índice único `lower(nome)`.
  */
-const TIPOS_DOCUMENTO_SEED: Array<{ nome: string; categoria: 'cadastral' | 'fiscal' | 'contratual'; exigeValidade: boolean; exigeExercicio: boolean; validadeDias: number | null; obrigatorio: boolean }> = [
-  // `obrigatorio` é parametrizável (RF022 / §02) — o Administrador ajusta na tela "Tipos de Arquivos".
-  // Defaults abaixo espelham os documentos do protótipo (portal-fornecedor.html) marcados como exigidos;
-  // Atestado de Capacidade Técnica fica opcional (só consta do rascunho v1.0 descartado, não canônico).
-  { nome: 'Cartão CNPJ', categoria: 'cadastral', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: true },
-  { nome: 'Contrato Social', categoria: 'contratual', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: true },
-  { nome: 'Certidão Negativa de Débitos Federais', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 180, obrigatorio: true },
-  { nome: 'Certidão Negativa de Débitos Estaduais', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 90, obrigatorio: true },
-  { nome: 'Certidão Negativa de Débitos Trabalhistas (CNDT)', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 180, obrigatorio: true },
-  { nome: 'Certidão de Regularidade do FGTS', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 90, obrigatorio: true },
-  { nome: 'Balanço Patrimonial', categoria: 'contratual', exigeValidade: false, exigeExercicio: true, validadeDias: null, obrigatorio: true },
-  { nome: 'Atestado de Capacidade Técnica', categoria: 'contratual', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: false },
-];
-
 /** Semeia o catálogo de tipos de documento (idempotente: `ON CONFLICT (lower(nome)) DO NOTHING`). */
 async function seedTiposDocumento(pool: Pool): Promise<void> {
   let criados = 0;
-  for (const td of TIPOS_DOCUMENTO_SEED) {
+  for (const td of TIPOS_DOCUMENTO_BASELINE) {
     const r = await pool.query(
       `INSERT INTO tipos_documento (id, nome, formato, categoria, exige_validade, exige_exercicio, validade_dias, obrigatorio, situacao, last_user_update)
        VALUES ($1,$2,'pdf',$3,$4,$5,$6,$7,'ativo','seed')
@@ -176,7 +165,7 @@ async function seedTiposDocumento(pool: Pool): Promise<void> {
     );
     if (r.rowCount) { criados++; console.log(`[seed] tipo-documento: ${td.nome}${td.obrigatorio ? ' (obrigatório)' : ''}`); }
   }
-  console.log(`[seed] tipos-documento: ${criados} criado(s) de ${TIPOS_DOCUMENTO_SEED.length}.`);
+  console.log(`[seed] tipos-documento: ${criados} criado(s) de ${TIPOS_DOCUMENTO_BASELINE.length}.`);
 }
 
 async function seed(): Promise<void> {

@@ -1,6 +1,17 @@
 import { randomUUID } from 'node:crypto';
-import { Documento, FormatoInvalido, type FormatoDoc, type StatusDoc } from '../domain/documento.js';
+import { Documento, FormatoInvalido, TipoDocumentoDesconhecido, type FormatoDoc, type StatusDoc } from '../domain/documento.js';
 import type { PiiCipher } from '../../shared/crypto/pii-cipher.js';
+
+/**
+ * Porta de leitura do catálogo de Tipos de Documento (RF022) usada para validar o `tipo` do upload.
+ * Mantém o boundary do módulo: o adaptador (composition root) resolve contra o catálogo real. O upload
+ * de documentos exigidos só aceita tipos DEFINIDOS no catálogo (UC004/casos-de-uso §147), impedindo que
+ * a tela do fornecedor exiba tipos que não existem em "Tipos de Arquivos".
+ */
+export interface CatalogoTiposDocumento {
+  /** true se existe um tipo ATIVO com este nome (chave natural, case-insensitive; inativos → false por RN015). */
+  existeAtivo(nome: string): Promise<boolean>;
+}
 
 /** Probe QBE (FR-015) — instância parcial de Documento usada como critério de busca (campos AND; ausentes ignorados). */
 export interface DocumentoProbe {
@@ -39,11 +50,16 @@ export class GerirDocumentos {
     private readonly repo: DocumentoRepository,
     private readonly storage: ObjectStorage,
     private readonly cipher: PiiCipher,
+    private readonly catalogo: CatalogoTiposDocumento,
     private readonly hoje: () => string = () => new Date().toISOString(),
   ) {}
 
   async enviar(input: { fornecedorId: string; tipo: string; formato: string; conteudo: string; dataValidade?: string | null }): Promise<{ documentoId: string }> {
     if (!FORMATOS.includes(input.formato as FormatoDoc)) throw new FormatoInvalido(input.formato);
+    // Catálogo é a fonte de verdade dos tipos (RF022): rejeita `tipo` fora do catálogo ativo. O dropdown
+    // do front já restringe a escolha, mas a borda não pode confiar no cliente — sem esta guarda, um POST
+    // direto (ou seed) persistiria um tipo que a tela "Tipos de Arquivos" não conhece.
+    if (!(await this.catalogo.existeAtivo(input.tipo))) throw new TipoDocumentoDesconhecido(input.tipo);
     const id = randomUUID();
     const ref = await this.storage.put(`${input.fornecedorId}/${id}`, this.cipher.encrypt(input.conteudo));
     await this.repo.salvar(Documento.enviar({ id, fornecedorId: input.fornecedorId, tipo: input.tipo, arquivoRef: ref, formato: input.formato as FormatoDoc, dataValidade: input.dataValidade ?? null }));

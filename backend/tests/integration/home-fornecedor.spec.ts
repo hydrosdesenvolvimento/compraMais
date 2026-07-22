@@ -67,14 +67,14 @@ describe('Home do fornecedor — projeções de leitura (HTTP)', () => {
   it('GET /fornecedores/:id/documentos expõe status e dataValidade', async () => {
     const env = await app.inject({
       method: 'POST', url: `/fornecedores/${empresaId}/documentos`,
-      payload: { tipo: 'cnpj', formato: 'pdf', conteudo: 'ZG9j', dataValidade: '2099-01-31' },
+      payload: { tipo: 'Cartão CNPJ', formato: 'pdf', conteudo: 'ZG9j', dataValidade: '2099-01-31' },
     });
     expect(env.statusCode).toBe(201);
     const r = await app.inject({ method: 'GET', url: `/fornecedores/${empresaId}/documentos` });
     expect(r.statusCode).toBe(200);
     const docs = r.json() as Array<Record<string, unknown>>;
     expect(docs).toHaveLength(1);
-    expect(docs[0]).toMatchObject({ tipo: 'cnpj', situacao: 'vigente', status: 'pendente', dataValidade: '2099-01-31' });
+    expect(docs[0]).toMatchObject({ tipo: 'Cartão CNPJ', situacao: 'vigente', status: 'pendente', dataValidade: '2099-01-31' });
   });
 
   it('GET /fornecedores/:id/credenciamentos lista os em andamento com objeto/secretaria do edital', async () => {

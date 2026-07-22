@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { registrarSegurancaHttp } from './shared/http/security.js';
 import { registrarAutenticacao } from './shared/http/autenticacao.js';
@@ -62,6 +63,7 @@ import { PiiCipherAesGcm } from './shared/crypto/pii-cipher-aes.js';
 import { ConsentimentoRepositoryMemory } from './credenciamento/adapters/consentimento-repository-memory.js';
 import { ConsentimentoRepositoryPg } from './credenciamento/adapters/consentimento-repository-pg.js';
 import { registrarRotasDocumentos } from './credenciamento/adapters/documentos-controller.js';
+import { CatalogoTiposDocumentoRepo } from './credenciamento/adapters/catalogo-tipos-documento.js';
 import { Covalidar } from './credenciamento/application/covalidar.js';
 import { AnaliseRepositoryMemory } from './credenciamento/adapters/analise-repository-memory.js';
 import { registrarRotasCovalidacao } from './credenciamento/adapters/covalidacao-controller.js';
@@ -100,7 +102,8 @@ import { CatalogoRepositoryMemory } from './catalogos/adapters/catalogo-reposito
 import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg } from './catalogos/adapters/catalogo-repository-pg.js';
 import type { Secretaria } from './catalogos/domain/secretaria.js';
 import type { SetorCnae } from './catalogos/domain/setor-cnae.js';
-import type { TipoDocumento } from './catalogos/domain/tipo-documento.js';
+import { TipoDocumento } from './catalogos/domain/tipo-documento.js';
+import { TIPOS_DOCUMENTO_BASELINE } from './catalogos/domain/tipos-documento-baseline.js';
 import type { CatalogoRepository } from './catalogos/application/catalogo-repository.js';
 import { registrarRotasCatalogos } from './catalogos/adapters/catalogos-controller.js';
 import { GerirVisibilidadeTelas } from './permissoes/application/gerir-visibilidade.js';
@@ -258,6 +261,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   const secretariasRepo: CatalogoRepository<Secretaria> = pool ? new SecretariaRepositoryPg(pool) : new CatalogoRepositoryMemory<Secretaria>();
   const setoresRepo: CatalogoRepository<SetorCnae> = pool ? new SetorCnaeRepositoryPg(pool) : new CatalogoRepositoryMemory<SetorCnae>();
   const tiposDocRepo: CatalogoRepository<TipoDocumento> = pool ? new TipoDocumentoRepositoryPg(pool) : new CatalogoRepositoryMemory<TipoDocumento>();
+  // Modo memória (sem Postgres — dev rápido e testes): semeia o catálogo baseline para que o dropdown de
+  // upload não nasça vazio e a guarda de `GerirDocumentos.enviar` (tipo ∈ catálogo, RF022) tenha o mesmo
+  // conjunto de tipos do modo durável. No modo pg o `seed` cuida disso.
+  if (!pool) {
+    for (const td of TIPOS_DOCUMENTO_BASELINE) {
+      await tiposDocRepo.salvar(TipoDocumento.criar({ id: randomUUID(), formato: 'pdf', userName: 'bootstrap', ...td, validadeDias: td.validadeDias ?? undefined }));
+    }
+  }
   const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);
   registrarRotasCatalogos(app, { manter: manterCatalogos });
 
@@ -292,7 +303,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   // legado indecifrável assim que o conteúdo virasse durável.
   const docRepo = pool ? new DocumentoRepositoryPg(pool) : new DocumentoRepositoryMemory();
   const storage = pool ? new ObjectStoragePg(pool) : new ObjectStorageMemory();
-  const docs = new GerirDocumentos(docRepo, storage, new PiiCipherAesGcm(config.crypto.piiKey));
+  const docs = new GerirDocumentos(docRepo, storage, new PiiCipherAesGcm(config.crypto.piiKey), new CatalogoTiposDocumentoRepo(tiposDocRepo));
   registrarRotasDocumentos(app, { docs });
   const covalidar = new Covalidar(docRepo, new AnaliseRepositoryMemory(), bus, fornecedores);
   registrarRotasCovalidacao(app, { covalidar });

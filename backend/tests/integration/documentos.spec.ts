@@ -2,11 +2,12 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { GerirDocumentos } from '../../src/credenciamento/application/gerir-documentos.js';
 import { DocumentoRepositoryMemory, ObjectStorageMemory, PiiCipherDev } from '../../src/credenciamento/adapters/documentos-memory.js';
 import { FormatoInvalido } from '../../src/credenciamento/domain/documento.js';
+import { catalogoAceitaTudo } from '../helpers/catalogo.js';
 
 describe('Repositório documental (US3 / FR-007-008)', () => {
   let g: GerirDocumentos;
   let repo: DocumentoRepositoryMemory;
-  beforeEach(() => { repo = new DocumentoRepositoryMemory(); g = new GerirDocumentos(repo, new ObjectStorageMemory(), new PiiCipherDev(), () => '2026-06-29T00:00:00Z'); });
+  beforeEach(() => { repo = new DocumentoRepositoryMemory(); g = new GerirDocumentos(repo, new ObjectStorageMemory(), new PiiCipherDev(), catalogoAceitaTudo, () => '2026-06-29T00:00:00Z'); });
 
   it('faz upload (cifrado) e lista como vigente', async () => {
     const { documentoId } = await g.enviar({ fornecedorId: 'f1', tipo: 'contratoSocial', formato: 'pdf', conteudo: 'X' });

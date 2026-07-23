@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api, type FiltroFornecedoresView } from '../../lib/api';
 import { celula, cabecalho, setaOrdem, Paginacao, type Direcao } from '../../design-system/tabela';
 import { exportarCsv } from '../../lib/exportar';
-import { Botao } from '../../design-system/components';
+import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeBusca, IconeFiltro, IconeOrdenar, IconeDownload, IconeOlho, IconeLapis, IconeBloquear, IconeSeta } from '../../design-system/icons';
 import { ModalFornecedor, type ModoModal } from './ModalFornecedor';
 
@@ -38,7 +38,6 @@ function tomStatus(status: string): { bg: string; fg: string } {
 }
 
 const pill: CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '5px 12px', borderRadius: 999, font: '600 12.5px var(--font-body)', whiteSpace: 'nowrap' };
-const iconeAcao: CSSProperties = { width: 40, height: 40, border: '1px solid var(--border)', borderRadius: 9, background: '#fff', color: 'var(--cinza-600, #556)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 
 export function Fornecedores() {
   const { t } = useTranslation();
@@ -235,15 +234,9 @@ export function Fornecedores() {
                           </td>
                           <td style={{ ...celula, textAlign: 'right' }}>
                             <div style={{ display: 'inline-flex', gap: 8, justifyContent: 'flex-end' }}>
-                              <button type="button" data-cy="ver-detalhes" title={t('admin.fornecedores.acao.ver')} aria-label={t('admin.fornecedores.acao.ver')} onClick={() => setModal({ modo: 'ver', id: f.id })} style={iconeAcao}>
-                                <IconeOlho width={21} height={21} />
-                              </button>
-                              <button type="button" data-cy="editar" title={t('admin.fornecedores.acao.editar')} aria-label={t('admin.fornecedores.acao.editar')} onClick={() => setModal({ modo: 'editar', id: f.id })} style={iconeAcao}>
-                                <IconeLapis width={20} height={20} />
-                              </button>
-                              <button type="button" data-cy="bloquear" disabled title={t('admin.fornecedores.acao.bloquearIndisponivel')} aria-label={t('admin.fornecedores.acao.bloquearIndisponivel')} style={{ ...iconeAcao, cursor: 'not-allowed', opacity: 0.5 }}>
-                                <IconeBloquear width={20} height={20} />
-                              </button>
+                              <BotaoIcone icone={IconeOlho} data-cy="ver-detalhes" title={t('admin.fornecedores.acao.ver')} aria-label={t('admin.fornecedores.acao.ver')} onClick={() => setModal({ modo: 'ver', id: f.id })} />
+                              <BotaoIcone icone={IconeLapis} data-cy="editar" title={t('admin.fornecedores.acao.editar')} aria-label={t('admin.fornecedores.acao.editar')} onClick={() => setModal({ modo: 'editar', id: f.id })} />
+                              <BotaoIcone icone={IconeBloquear} data-cy="bloquear" disabled title={t('admin.fornecedores.acao.bloquearIndisponivel')} aria-label={t('admin.fornecedores.acao.bloquearIndisponivel')} />
                             </div>
                           </td>
                         </tr>

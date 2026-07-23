@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation, Trans } from 'react-i18next';
 import { api, type DocItem, type CatalogoItemView } from '../../lib/api';
 import { MIME, TAMANHO_MAX_MB, formatoDe, lerBase64 } from '../../lib/upload';
-import { Pill, Botao } from '../../design-system/components';
+import { Pill, Botao, BotaoIcone } from '../../design-system/components';
 import { toastBus } from '../../design-system/components/toast-bus';
 import { IconeDocumentos, IconeUpload, IconeDownload, IconeOlho, IconeAlerta, IconeSync, IconeFechar } from '../../design-system/icons';
 import { obterUsuario } from '../../lib/auth';
@@ -198,25 +198,19 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
                 </div>
 
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                  <button
-                    type="button"
+                  <BotaoIcone
+                    icone={IconeOlho}
                     data-cy="visualizar"
                     aria-label={t('documentos.visualizarDocumento', { tipo: d.tipo })}
                     onClick={() => setPreview(d)}
-                    style={acaoIconeStyle}
-                  >
-                    <IconeOlho width={17} height={17} />
-                  </button>
-                  <button
-                    type="button"
+                  />
+                  <BotaoIcone
+                    icone={IconeDownload}
                     data-cy="baixar"
                     aria-label={t('documentos.baixarDocumento', { tipo: d.tipo })}
                     disabled={baixar.isPending}
                     onClick={() => baixar.mutate(d)}
-                    style={acaoIconeStyle}
-                  >
-                    <IconeDownload width={17} height={17} />
-                  </button>
+                  />
                 </div>
               </div>
 
@@ -324,7 +318,7 @@ function ModalUpload({ fornecedorId, onFechar, onEnviado }: { fornecedorId: stri
             <h2 style={{ margin: 0, fontSize: 20, color: 'var(--azul-900)' }}>{titulo}</h2>
             <p style={{ margin: '4px 0 0', fontSize: 13.5, color: 'var(--cinza-500)' }}>{t('documentos.modalUpload.subtitulo')}</p>
           </div>
-          <button type="button" onClick={onFechar} style={botaoX} data-cy="fechar-modal" aria-label={t('documentos.modalUpload.cancelar')}><IconeFechar width={20} height={20} /></button>
+          <BotaoIcone icone={IconeFechar} variante="fechar" onClick={onFechar} data-cy="fechar-modal" aria-label={t('documentos.modalUpload.cancelar')} />
         </header>
 
         <form data-cy="form-upload" onSubmit={(ev) => { ev.preventDefault(); enviar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -401,7 +395,7 @@ function ModalPreview({ doc, onFechar }: { doc: DocItem; onFechar: () => void })
             <h2 style={{ margin: 0, fontSize: 20, color: 'var(--azul-900)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{doc.tipo}</h2>
             <p style={{ margin: '4px 0 0', fontSize: 13.5, color: 'var(--cinza-500)' }}>{t('documentos.preview.subtitulo')}</p>
           </div>
-          <button type="button" onClick={onFechar} style={botaoX} data-cy="fechar-modal" aria-label={t('documentos.preview.fechar')}><IconeFechar width={20} height={20} /></button>
+          <BotaoIcone icone={IconeFechar} variante="fechar" onClick={onFechar} data-cy="fechar-modal" aria-label={t('documentos.preview.fechar')} />
         </header>
 
         <div style={{ padding: 24, overflow: 'auto', flex: 1, minHeight: 320, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--cinza-50, #f8fafc)' }}>
@@ -433,11 +427,6 @@ function ModalPreview({ doc, onFechar }: { doc: DocItem; onFechar: () => void })
   );
 }
 
-const acaoIconeStyle: CSSProperties = {
-  width: 36, height: 36, border: '1px solid var(--border)', borderRadius: 8, background: '#fff',
-  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cinza-700)',
-};
-
 /** Container: resolve a empresa da sessão (mesmo padrão de MeusCredenciamentosConectada). */
 export function DocumentosConectada() {
   const { t } = useTranslation();
@@ -449,5 +438,4 @@ const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(
 const card: CSSProperties = { background: '#fff', borderRadius: 16, width: 'min(600px, 100%)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,.25)' };
 const cabecalho: CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, padding: '20px 24px', borderBottom: '1px solid var(--divider)' };
 const rodape: CSSProperties = { display: 'flex', justifyContent: 'flex-end', gap: 10, padding: '16px 24px', borderTop: '1px solid var(--divider)', background: 'var(--cinza-50, #f8fafc)', borderRadius: '0 0 16px 16px' };
-const botaoX: CSSProperties = { width: 40, height: 40, borderRadius: 10, border: 'none', background: 'var(--cinza-100, #eef1f5)', color: 'var(--cinza-500)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 const rotulo: CSSProperties = { font: '600 13px var(--font-body)', color: 'var(--azul-900)', marginBottom: 6, display: 'block' };

@@ -3,6 +3,7 @@
  * Barrel: preserva o import `from '.../design-system/components'` usado pelas telas.
  */
 export { Botao } from './Botao';
+export { BotaoIcone } from './BotaoIcone';
 export { Tag } from './Tag';
 export { Pill } from './Pill';
 export { Etiqueta } from './Etiqueta';

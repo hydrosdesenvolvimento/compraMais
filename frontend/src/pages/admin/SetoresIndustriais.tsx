@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type CatalogoItemView } from '../../lib/api';
 import { celula, cabecalho } from '../../design-system/tabela';
-import { Botao } from '../../design-system/components';
+import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeLapis, IconePower, IconeFechar, IconeInfo } from '../../design-system/icons';
 
 /**
@@ -17,7 +17,6 @@ import { IconeLapis, IconePower, IconeFechar, IconeInfo } from '../../design-sys
 const SLUG = 'setores-cnae' as const;
 
 const pill: CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '5px 12px', borderRadius: 999, font: '600 12.5px var(--font-body)', whiteSpace: 'nowrap' };
-const iconeAcao: CSSProperties = { width: 40, height: 40, border: '1px solid var(--border)', borderRadius: 9, background: '#fff', color: 'var(--cinza-600, #556)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 
 /** Só os dígitos, no máximo 7 (subclasse CNAE). */
 export function soDigitosCnae(v: string): string { return v.replace(/\D/g, '').slice(0, 7); }
@@ -107,12 +106,8 @@ export function SetoresIndustriais() {
                       </td>
                       <td style={{ ...celula, textAlign: 'right' }}>
                         <div style={{ display: 'inline-flex', gap: 8, justifyContent: 'flex-end' }}>
-                          <button type="button" data-cy="editar" title={t('admin.setoresIndustriais.acao.editar')} aria-label={t('admin.setoresIndustriais.acao.editar')} onClick={() => setModal({ modo: 'editar', item: s })} style={iconeAcao}>
-                            <IconeLapis width={20} height={20} />
-                          </button>
-                          <button type="button" data-cy="alternar-situacao" title={t(`admin.setoresIndustriais.acao.${s.ativo ? 'inativar' : 'reativar'}`)} aria-label={t(`admin.setoresIndustriais.acao.${s.ativo ? 'inativar' : 'reativar'}`)} disabled={inativar.isPending || reativar.isPending} onClick={() => alternar(s)} style={{ ...iconeAcao, color: s.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }}>
-                            <IconePower width={20} height={20} />
-                          </button>
+                          <BotaoIcone icone={IconeLapis} data-cy="editar" title={t('admin.setoresIndustriais.acao.editar')} aria-label={t('admin.setoresIndustriais.acao.editar')} onClick={() => setModal({ modo: 'editar', item: s })} />
+                          <BotaoIcone icone={IconePower} data-cy="alternar-situacao" title={t(`admin.setoresIndustriais.acao.${s.ativo ? 'inativar' : 'reativar'}`)} aria-label={t(`admin.setoresIndustriais.acao.${s.ativo ? 'inativar' : 'reativar'}`)} disabled={inativar.isPending || reativar.isPending} onClick={() => alternar(s)} style={{ color: s.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }} />
                         </div>
                       </td>
                     </tr>
@@ -137,7 +132,6 @@ export function SetoresIndustriais() {
 
 const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 };
 const card: CSSProperties = { background: '#fff', borderRadius: 16, width: 'min(680px, 100%)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,.25)' };
-const botaoX: CSSProperties = { width: 40, height: 40, borderRadius: 10, border: 'none', background: 'var(--cinza-100, #eef1f5)', color: 'var(--cinza-500)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 const rotulo: CSSProperties = { font: '600 13px var(--font-body)', color: 'var(--azul-900)', marginBottom: 6, display: 'block' };
 
 /** Modal único de setor — CRIAR (sem `item`) ou EDITAR (com `item`). Fiel ao protótipo (Código CNAE,
@@ -176,7 +170,7 @@ function ModalSetor({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFe
             <h2 style={{ margin: 0, fontSize: 20, color: 'var(--azul-900)' }}>{titulo}</h2>
             <p style={{ margin: '4px 0 0', fontSize: 13.5, color: 'var(--cinza-500)' }}>{t('admin.setoresIndustriais.modal.subtitulo')}</p>
           </div>
-          <button type="button" onClick={onFechar} style={botaoX} data-cy="fechar-modal" aria-label={t('admin.setoresIndustriais.fechar')}><IconeFechar width={20} height={20} /></button>
+          <BotaoIcone icone={IconeFechar} variante="fechar" onClick={onFechar} data-cy="fechar-modal" aria-label={t('admin.setoresIndustriais.fechar')} />
         </header>
 
         <form data-cy="form-setor" onSubmit={(e) => { e.preventDefault(); salvar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>

@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { useTranslation } from 'react-i18next';
 import { api, type EditalGestao, type CatalogoItemView, type FiltroEditais } from '../../lib/api';
 import { celula, cabecalho, Paginacao } from '../../design-system/tabela';
-import { Botao, Campo } from '../../design-system/components';
+import { Botao, BotaoIcone, Campo } from '../../design-system/components';
 import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro } from '../../design-system/icons';
 
 const POR_PAGINA = 10;
@@ -35,7 +35,6 @@ function tomSituacao(situacao: string): { bg: string; fg: string } {
 }
 
 const pill: CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '5px 12px', borderRadius: 999, font: '600 12.5px var(--font-body)', whiteSpace: 'nowrap' };
-const iconeAcao: CSSProperties = { width: 40, height: 40, border: '1px solid var(--border)', borderRadius: 9, background: '#fff', color: 'var(--cinza-600, #556)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 
 export function GerirEditais() {
   const { t, i18n } = useTranslation();
@@ -220,9 +219,7 @@ export function GerirEditais() {
                             {e.situacao === 'publicado' && (
                               <Botao data-cy="encerrar" variante="secundario" onClick={() => encerrar.mutate(e.id)} disabled={encerrar.isPending}>{t('admin.gerirEditais.encerrar')}</Botao>
                             )}
-                            <button type="button" data-cy="ver-detalhes" title={t('admin.gerirEditais.acaoVer')} aria-label={t('admin.gerirEditais.acaoVer')} onClick={() => setVerId(e.id)} style={iconeAcao}>
-                              <IconeOlho width={21} height={21} />
-                            </button>
+                            <BotaoIcone icone={IconeOlho} data-cy="ver-detalhes" title={t('admin.gerirEditais.acaoVer')} aria-label={t('admin.gerirEditais.acaoVer')} onClick={() => setVerId(e.id)} />
                           </div>
                         </td>
                       </tr>
@@ -276,9 +273,7 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
       <div onClick={(ev) => ev.stopPropagation()} className="card" style={{ width: 'min(520px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <h2 style={{ margin: 0, fontSize: 17, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.modalTitulo')}</h2>
-          <button type="button" data-cy="fechar-modal" title={t('admin.gerirEditais.fechar')} aria-label={t('admin.gerirEditais.fechar')} onClick={onFechar} style={iconeAcao}>
-            <IconeFechar width={18} height={18} />
-          </button>
+          <BotaoIcone icone={IconeFechar} variante="fechar" data-cy="fechar-modal" title={t('admin.gerirEditais.fechar')} aria-label={t('admin.gerirEditais.fechar')} onClick={onFechar} />
         </div>
         <dl style={{ margin: 0, display: 'grid', gridTemplateColumns: 'max-content 1fr', gap: '10px 16px' }}>
           {linhas.map(([rotulo, valor]) => (
@@ -324,9 +319,7 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
             <h2 style={{ margin: 0, fontSize: 18, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.novoTitulo')}</h2>
             <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.novoSub')}</p>
           </div>
-          <button type="button" data-cy="fechar-modal" title={t('admin.gerirEditais.fechar')} aria-label={t('admin.gerirEditais.fechar')} onClick={onFechar} style={iconeAcao}>
-            <IconeFechar width={18} height={18} />
-          </button>
+          <BotaoIcone icone={IconeFechar} variante="fechar" data-cy="fechar-modal" title={t('admin.gerirEditais.fechar')} aria-label={t('admin.gerirEditais.fechar')} onClick={onFechar} />
         </div>
 
         <form data-cy="form-edital" onSubmit={(e) => { e.preventDefault(); void form.handleSubmit(); }}>

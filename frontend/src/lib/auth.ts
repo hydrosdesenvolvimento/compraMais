@@ -32,6 +32,16 @@ export function obterUsuario(): Usuario | null {
   } catch { return null; }
 }
 
+/**
+ * Atualiza campos da identidade em sessão (ex.: `nome` após o usuário se renomear na "Minha conta"),
+ * preservando token e demais claims. Mantém o chip do topo (AppShell) coerente sem reautenticar.
+ */
+export function atualizarUsuarioSessao(patch: Partial<Usuario>): void {
+  const atual = obterUsuario();
+  if (!atual) return;
+  try { localStorage.setItem(CHAVE_USUARIO, JSON.stringify({ ...atual, ...patch })); } catch { /* noop */ }
+}
+
 export function limparSessao(): void {
   try {
     localStorage.removeItem(CHAVE_TOKEN);

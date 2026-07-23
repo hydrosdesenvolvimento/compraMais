@@ -14,6 +14,8 @@ const PERFIL = {
 
 function entrar(): void {
   cy.intercept('GET', `/fornecedores/${FID}`, { statusCode: 200, body: PERFIL }).as('perfil');
+  // RF018 — cartão "Responsável" busca o próprio perfil (nome + foto) em GET /auth/perfil.
+  cy.intercept('GET', '/auth/perfil', { statusCode: 200, body: { userId: 'u1', email: 'ana@acre.com', nome: 'Ana Maria Souza', avatar: null } }).as('perfilProprio');
   cy.visit('/#/minha-conta', {
     onBeforeLoad(win) {
       win.localStorage.setItem('compramais.token', 'jwt.mock');
@@ -72,5 +74,32 @@ describe('Minha conta — re-sincronizar CNPJ (UC018)', () => {
   it('sem sessão → redireciona para /cadastro (rota protegida)', () => {
     cy.visit('/#/minha-conta');
     cy.get('[data-cy=aba-entrar]').should('be.visible'); // AuthPanel
+  });
+});
+
+describe('Minha conta — Dados do responsável (RF018)', () => {
+  it('divide o nome e salva rejuntando nome + sobrenome via PATCH /auth/perfil', () => {
+    entrar();
+    cy.get('[data-cy=responsavel-nome]').should('have.value', 'Ana');
+    cy.get('[data-cy=responsavel-sobrenome]').should('have.value', 'Maria Souza');
+    cy.intercept('PATCH', '/auth/perfil', { statusCode: 200, body: { userId: 'u1', email: 'ana@acre.com', nome: 'Ana Paula Maria Souza', avatar: null } }).as('salvarNome');
+    cy.get('[data-cy=responsavel-nome]').clear().type('Ana Paula');
+    cy.get('[data-cy=salvar-nome]').click();
+    cy.wait('@salvarNome').its('request.body').should('deep.equal', { nome: 'Ana Paula Maria Souza' });
+    cy.get('[data-cy=nome-salvo]').should('be.visible');
+  });
+
+  it('altera a foto: seleciona uma imagem → PATCH com data URL e exibe a foto', () => {
+    entrar();
+    cy.get('[data-cy=avatar-iniciais]').should('be.visible');
+    cy.intercept('PATCH', '/auth/perfil', { statusCode: 200, body: { userId: 'u1', email: 'ana@acre.com', nome: 'Ana Maria Souza', avatar: 'data:image/png;base64,iVBORw0KGgo=' } }).as('salvarFoto');
+    cy.get('[data-cy=avatar-input]').selectFile({
+      contents: Cypress.Buffer.from('imagem-fake'),
+      fileName: 'foto.png',
+      mimeType: 'image/png',
+    }, { force: true });
+    cy.wait('@salvarFoto').its('request.body.avatar').should('match', /^data:image\/png;base64,/);
+    cy.get('[data-cy=avatar-foto]').should('be.visible');
+    cy.get('[data-cy=remover-foto]').should('be.visible');
   });
 });

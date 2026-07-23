@@ -243,6 +243,9 @@ export interface SolicitacaoTitularView {
   id: string; titularId: string; tipo: TipoDireito; detalhe: string | null;
   categoria: CategoriaDado | null; status: 'pendente' | 'atendida' | 'recusada'; resultado: string | null;
 }
+/** RF018 — perfil do PRÓPRIO usuário autenticado (cartão "Responsável" da "Minha conta"). O `nome` é o
+ *  nome de exibição completo (a UI o divide em nome + sobrenome); `avatar` é o data URL da foto ou null. */
+export interface PerfilProprioView { userId: string; email: string; nome: string; avatar: string | null }
 /** UC018 passo 1: perfil do fornecedor exibido na "Minha conta" (dados oficiais read-only + contato). */
 export interface FornecedorPerfil {
   id: string; cnpj: string; razaoSocial: string; porte: string;
@@ -304,6 +307,10 @@ export const api = {
   minhasSolicitacoes: (titularId: string) => get<SolicitacaoTitularView[]>(`/titular/solicitacoes?titularId=${encodeURIComponent(titularId)}`),
   // UC015 · A2 — troca da própria senha (autenticada via Bearer). 400 = senha atual incorreta; 422 = senha fraca.
   trocarSenha: (senhaAtual: string, novaSenha: string) => send<void>('/auth/senha', 'POST', { senhaAtual, novaSenha }),
+  // RF018 — perfil do próprio usuário (cartão "Responsável"). Leitura/edição de nome e foto (Bearer).
+  perfilProprio: () => get<PerfilProprioView>('/auth/perfil'),
+  // `avatar`: data URL para definir, `null` para remover, omitido para manter. 400 = imagem inválida; 413 = grande.
+  atualizarPerfilProprio: (patch: { nome?: string; avatar?: string | null }) => send<PerfilProprioView>('/auth/perfil', 'PATCH', patch),
   // UC019 — Gerir procuradores (só o titular; 403 quando o ator não é o titular).
   procuradores: (fid: string) => get<ProcuradorView[]>(`/fornecedores/${fid}/procuradores`),
   convidarProcurador: (fid: string, identificador: string) => send<{ procuradorContaId: string }>(`/fornecedores/${fid}/procuradores`, 'POST', { identificador }),

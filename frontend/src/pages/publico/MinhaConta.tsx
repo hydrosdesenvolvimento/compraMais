@@ -5,7 +5,7 @@ import { useForm } from '@tanstack/react-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, Pill, Botao, Campo } from '../../design-system/components';
 import { IconeSync, IconeCadeado, IconeCamera, IconeCheck } from '../../design-system/icons';
-import { mascaraCpf, mascaraCep, validarCpf, consultarCep } from '../../lib/br';
+import { mascaraCep, consultarCep } from '../../lib/br';
 import { api, type EnderecoView } from '../../lib/api';
 import { atualizarUsuarioSessao } from '../../lib/auth';
 
@@ -37,7 +37,8 @@ function iniciaisDe(nome: string): string {
 /**
  * "Minha conta" (UX-DR4 / RN009 / RF018) — dashboard do fornecedor (design de referência).
  * Sincronização e autofill de CEP via TanStack Query; formulário editável via TanStack Form
- * (autofill de endereço por CEP + CPF do responsável com validação de dígitos).
+ * (autofill de endereço por CEP). RN009 restringe os campos editáveis a Nome Fantasia, Endereço e
+ * Telefone — não há CPF do responsável aqui (o backend rejeita qualquer outro campo com 422).
  */
 export type SituacaoCadastral = 'ativa' | 'baixada' | 'inapta' | 'suspensa';
 
@@ -410,7 +411,7 @@ function TrocaSenhaForm({ onFechar }: { onFechar: () => void }) {
 
 interface HttpErrorLike { status?: number }
 
-/** Formulário editável (TanStack Form): autofill de CEP (Query) e CPF do responsável (validação). */
+/** Formulário editável (TanStack Form): Nome Fantasia, Telefone e Endereço com autofill de CEP (RN009). */
 function DadosEditaveis({ fornecedorId, inicial, onSalvo }: {
   fornecedorId: string;
   inicial?: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView };
@@ -430,7 +431,7 @@ function DadosEditaveis({ fornecedorId, inicial, onSalvo }: {
     defaultValues: {
       nomeFantasia: inicial?.nomeFantasia ?? '', telefone: inicial?.telefone ?? '',
       cep: end?.cep ? mascaraCep(end.cep) : '', rua: end?.logradouro ?? '', numero: end?.numero ?? '',
-      complemento: end?.complemento ?? '', bairro: end?.bairro ?? '', cidade: end?.cidade ?? '', uf: end?.uf ?? '', cpf: '',
+      complemento: end?.complemento ?? '', bairro: end?.bairro ?? '', cidade: end?.cidade ?? '', uf: end?.uf ?? '',
     },
     onSubmit: async ({ value }) => {
       const cep = value.cep.replace(/\D/g, '');
@@ -495,19 +496,6 @@ function DadosEditaveis({ fornecedorId, inicial, onSalvo }: {
               {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>{t('minhaConta.editaveis.cepBuscando')}</small>}
               {cepMut.isSuccess && cepMut.data && <small style={{ color: 'var(--sucesso)' }}>{t('minhaConta.editaveis.cepPreenchido')}</small>}
               {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>{t('minhaConta.editaveis.cepNaoEncontrado')}</small>}
-            </Campo>
-          )}
-        </form.Field>
-
-        <form.Field name="cpf" validators={{ onChange: ({ value }: { value: string }) => (value.replace(/\D/g, '').length === 11 && !validarCpf(value) ? t('minhaConta.editaveis.cpfInvalido') : undefined) }}>
-          {(f) => (
-            <Campo label={t('minhaConta.editaveis.cpfResponsavel')}>
-              <input data-cy="cpf" className="input" inputMode="numeric" placeholder="000.000.000-00" value={f.state.value}
-                onChange={(e) => f.handleChange(mascaraCpf(e.target.value))}
-                aria-invalid={f.state.meta.errors.length > 0}
-                style={f.state.meta.errors.length > 0 ? { borderColor: 'var(--erro)' } : f.state.value.replace(/\D/g, '').length === 11 ? { borderColor: 'var(--sucesso)' } : undefined} />
-              {f.state.meta.errors[0] ? <small data-cy="cpf-erro" style={{ color: 'var(--erro)' }}>{String(f.state.meta.errors[0])}</small>
-                : f.state.value.replace(/\D/g, '').length === 11 && <small data-cy="cpf-ok" style={{ color: 'var(--sucesso)' }}>{t('minhaConta.editaveis.cpfValido')}</small>}
             </Campo>
           )}
         </form.Field>

@@ -40,6 +40,7 @@ import { ResetTokenRepositoryMemory, type ResetTokenRepository } from './shared/
 import { ResetTokenRepositoryPg } from './shared/identity/reset-token-repository-pg.js';
 import { NotificadorResetLog } from './shared/identity/notificador-reset.js';
 import { registrarRotasAuth } from './shared/identity/auth-controller.js';
+import { GerirPerfilProprio } from './shared/identity/gerir-perfil.js';
 import { registrarGoogleOAuth } from './shared/http/google-oauth.js';
 import { EditalRepositoryMemory } from './editais/adapters/edital-repository-memory.js';
 import { EditalRepositoryPg } from './editais/adapters/edital-repository-pg.js';
@@ -220,6 +221,8 @@ export async function buildServer(): Promise<FastifyInstance> {
     trocarSenha: new TrocarSenha(usuarioRepo, bus),
     solicitarReset: new SolicitarResetSenha(usuarioRepo, resetTokens, notificadorReset, bus, config.auth.jwtExpiraEmSeg),
     redefinirSenha: new RedefinirSenha(usuarioRepo, resetTokens, bus),
+    // RF018 — perfil próprio (nome + foto). A foto é PII cifrada em repouso (AD-19), como os documentos.
+    perfil: new GerirPerfilProprio(usuarioRepo, new PiiCipherAesGcm(config.crypto.piiKey)),
     tokens,
   });
   if (config.auth.google) {

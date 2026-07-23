@@ -1,6 +1,8 @@
 import type { FastifyInstance } from 'fastify';
 import type { RegistrarUsuario, AutenticarLocal, VincularGoogle } from './autenticacao.js';
 import type { TrocarSenha, SolicitarResetSenha, RedefinirSenha } from './gerir-senha.js';
+import type { GerirPerfilProprio } from './gerir-perfil.js';
+import { AVATAR_MAX_BYTES } from './gerir-perfil.js';
 import type { TokenService } from './token-service.js';
 import type { Identidade } from './identity-provider.js';
 import { identidadeDoBearer } from '../http/autenticacao.js';
@@ -22,6 +24,7 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
   trocarSenha: TrocarSenha;
   solicitarReset: SolicitarResetSenha;
   redefinirSenha: RedefinirSenha;
+  perfil: GerirPerfilProprio;
   tokens: TokenService;
 }): void {
   app.post('/auth/registro', {
@@ -90,6 +93,52 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
     const id = identidadeDoBearer(req, deps.tokens);
     if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
     return reply.send(id);
+  });
+
+  // RF018 — perfil do PRÓPRIO usuário (tela "Minha conta"). Diferente de /auth/me (que só decodifica o
+  // token), estas rotas tocam o repositório: leem/gravam nome e foto que mudam sem reemitir o JWT.
+  const PERFIL = { type: 'object', properties: { userId: { type: 'string' }, email: { type: 'string' }, nome: { type: 'string' }, avatar: { type: ['string', 'null'] } } } as const;
+
+  app.get('/auth/perfil', {
+    schema: {
+      tags: ['autenticacao'],
+      summary: 'Perfil do próprio usuário (nome + e-mail + foto)',
+      security: [{ bearerAuth: [] }],
+      response: { 200: PERFIL, 401: ERRO, 404: ERRO },
+    },
+  }, async (req, reply) => {
+    const id = identidadeDoBearer(req, deps.tokens);
+    if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
+    try {
+      return reply.send(await deps.perfil.obter(id.userId));
+    } catch (e) {
+      return reply.code(status(e) as 404).send(erro(e));
+    }
+  });
+
+  // A foto trafega como data URL base64 no corpo → `bodyLimit` ampliado nesta rota (o restante da API
+  // mantém o default). O caso de uso ainda limita o tamanho DECODIFICADO (AVATAR_MAX_BYTES).
+  app.patch('/auth/perfil', {
+    bodyLimit: AVATAR_MAX_BYTES * 3,
+    schema: {
+      tags: ['autenticacao'],
+      summary: 'Edita o próprio nome e/ou foto de perfil',
+      security: [{ bearerAuth: [] }],
+      body: {
+        type: 'object',
+        properties: { nome: { type: 'string' }, avatar: { type: ['string', 'null'] } },
+      },
+      response: { 200: PERFIL, 400: ERRO, 401: ERRO, 404: ERRO, 413: ERRO },
+    },
+  }, async (req, reply) => {
+    const id = identidadeDoBearer(req, deps.tokens);
+    if (!id) return reply.code(401).send({ codigo: 'NAO_AUTENTICADO', mensagem: 'Missing or invalid token.' });
+    const { nome, avatar } = req.body as { nome?: string; avatar?: string | null };
+    try {
+      return reply.send(await deps.perfil.atualizar(id.userId, { nome, avatar }));
+    } catch (e) {
+      return reply.code(statusPerfil(e) as 400 | 404 | 413).send(erro(e));
+    }
   });
 
   app.post('/auth/google/vincular', {
@@ -181,6 +230,12 @@ function status(e: unknown): number {
   if (n === 'EmailInvalido' || n === 'SenhaFraca') return 422;
   if (n === 'UsuarioNaoEncontrado') return 404;
   return 400;
+}
+function statusPerfil(e: unknown): number {
+  const n = (e as Error)?.name;
+  if (n === 'UsuarioNaoEncontrado') return 404;
+  if (n === 'AvatarMuitoGrande') return 413;
+  return 400; // AvatarInvalido e afins
 }
 function erro(e: unknown): { codigo: string; mensagem: string } {
   return { codigo: (e as Error)?.name ?? 'Erro', mensagem: (e as Error)?.message ?? 'Erro' };

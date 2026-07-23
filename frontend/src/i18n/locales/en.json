@@ -861,6 +861,7 @@
     "TransicaoInvalida": "This operation isn't allowed in the current state."
   },
   "contestacao": {
+    "semEmpresa": "No company linked to your account.",
     "titulo": "Disputes and Regularizations",
     "subtitulo": "Resolve the issues blocking your accreditation and follow the reviews in progress.",
     "carregando": "Loading…",
@@ -971,6 +972,7 @@
     }
   },
   "documentos": {
+    "semEmpresa": "No company linked to your account. Complete your registration to submit documents.",
     "tituloPagina": "Document Management",
     "subtituloPagina": "Your company's central repository. Automatically reused in new tenders.",
     "enviarNovo": "Upload new document",
@@ -1245,6 +1247,7 @@
     }
   },
   "painelTitular": {
+    "semEmpresa": "No company linked to your account.",
     "titulo": "My panel",
     "subtitulo": "Consolidated pending items and your data subject rights (LGPD).",
     "pendencias": {

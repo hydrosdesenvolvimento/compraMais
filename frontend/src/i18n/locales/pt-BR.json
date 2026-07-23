@@ -861,6 +861,7 @@
     "TransicaoInvalida": "Operação não permitida no estado atual."
   },
   "contestacao": {
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
     "titulo": "Contestações e Regularizações",
     "subtitulo": "Resolva as pendências que impedem seu credenciamento e acompanhe as análises em curso.",
     "carregando": "Carregando…",
@@ -971,6 +972,7 @@
     }
   },
   "documentos": {
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta. Conclua seu cadastro para enviar documentos.",
     "tituloPagina": "Gestão de Documentos",
     "subtituloPagina": "Repositório central da sua empresa. Reaproveitado automaticamente em novos editais.",
     "enviarNovo": "Enviar novo documento",
@@ -1245,6 +1247,7 @@
     }
   },
   "painelTitular": {
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
     "titulo": "Meu painel",
     "subtitulo": "Pendências consolidadas e seus direitos de titular (LGPD).",
     "pendencias": {

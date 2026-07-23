@@ -861,6 +861,7 @@
     "TransicaoInvalida": "Operación no permitida en el estado actual."
   },
   "contestacao": {
+    "semEmpresa": "Ninguna empresa vinculada a su cuenta.",
     "titulo": "Impugnaciones y Regularizaciones",
     "subtitulo": "Resuelva las pendencias que impiden su acreditación y siga los análisis en curso.",
     "carregando": "Cargando…",
@@ -971,6 +972,7 @@
     }
   },
   "documentos": {
+    "semEmpresa": "Ninguna empresa vinculada a su cuenta. Complete su registro para enviar documentos.",
     "tituloPagina": "Gestión de Documentos",
     "subtituloPagina": "Repositorio central de su empresa. Reutilizado automáticamente en nuevas licitaciones.",
     "enviarNovo": "Enviar nuevo documento",
@@ -1245,6 +1247,7 @@
     }
   },
   "painelTitular": {
+    "semEmpresa": "Ninguna empresa vinculada a su cuenta.",
     "titulo": "Mi panel",
     "subtitulo": "Pendientes consolidados y sus derechos de titular (LGPD).",
     "pendencias": {

@@ -6,6 +6,7 @@ import { MIME, TAMANHO_MAX_MB, formatoDe, lerBase64 } from '../../lib/upload';
 import { Pill, Botao } from '../../design-system/components';
 import { toastBus } from '../../design-system/components/toast-bus';
 import { IconeDocumentos, IconeUpload, IconeDownload, IconeOlho, IconeAlerta, IconeSync, IconeFechar } from '../../design-system/icons';
+import { obterUsuario } from '../../lib/auth';
 
 /** Janela (em dias) para sinalizar "Vence em N dias" antes do vencimento — alinhada ao aviso da topbar. */
 const JANELA_A_VENCER = 30;
@@ -436,6 +437,14 @@ const acaoIconeStyle: CSSProperties = {
   width: 36, height: 36, border: '1px solid var(--border)', borderRadius: 8, background: '#fff',
   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cinza-700)',
 };
+
+/** Container: resolve a empresa da sessão (mesmo padrão de MeusCredenciamentosConectada). */
+export function DocumentosConectada() {
+  const { t } = useTranslation();
+  const fornecedorId = obterUsuario()?.empresaId;
+  if (!fornecedorId) return <p data-cy="sem-empresa" style={{ color: 'var(--cinza-500)' }}>{t('documentos.semEmpresa')}</p>;
+  return <Documentos fornecedorId={fornecedorId} />;
+}
 const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 };
 const card: CSSProperties = { background: '#fff', borderRadius: 16, width: 'min(600px, 100%)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,.25)' };
 const cabecalho: CSSProperties = { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, padding: '20px 24px', borderBottom: '1px solid var(--divider)' };

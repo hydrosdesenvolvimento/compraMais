@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type Pendencia } from '../../lib/api';
 import { IconeBusca, IconeFiltro, IconeSeta } from '../../design-system/icons';
+import { obterUsuario } from '../../lib/auth';
 
 /**
  * Tela Única de Contestação / Regularização (UC016 / Épico 7-1). Consolida, como projeção somente-leitura,
@@ -240,4 +241,12 @@ function rotuloTipo(tipo: string, t: (k: string) => string): string {
   const chave = `contestacao.tipos.${tipo}`;
   const traduzido = t(chave);
   return traduzido === chave ? tipo : traduzido;
+}
+
+/** Container: resolve a empresa da sessão (mesmo padrão de MeusCredenciamentosConectada). */
+export function ContestacaoConectada() {
+  const { t } = useTranslation();
+  const fornecedorId = obterUsuario()?.empresaId;
+  if (!fornecedorId) return <p data-cy="sem-empresa" style={{ color: 'var(--cinza-500)' }}>{t('contestacao.semEmpresa')}</p>;
+  return <Contestacao fornecedorId={fornecedorId} />;
 }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { api } from '../../lib/api';
 import { Card, Botao } from '../../design-system/components';
+import { obterUsuario } from '../../lib/auth';
 
 /**
  * Painel do titular (Épico 7): pendências consolidadas (Query) + solicitação de direitos LGPD (Mutation).
@@ -44,4 +45,12 @@ export function PainelTitular({ fornecedorId }: { fornecedorId: string }) {
       </Card>
     </div>
   );
+}
+
+/** Container: resolve a empresa da sessão (mesmo padrão de MeusCredenciamentosConectada). */
+export function PainelTitularConectada() {
+  const { t } = useTranslation();
+  const fornecedorId = obterUsuario()?.empresaId;
+  if (!fornecedorId) return <p data-cy="sem-empresa" style={{ color: 'var(--cinza-500)' }}>{t('painelTitular.semEmpresa')}</p>;
+  return <PainelTitular fornecedorId={fornecedorId} />;
 }

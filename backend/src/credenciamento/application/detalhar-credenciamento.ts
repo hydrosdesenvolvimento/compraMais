@@ -1,6 +1,6 @@
 import type { CredenciamentoRepository } from './solicitar-credenciamento.js';
 import type { EditalLookup, SecretariaLookup } from './listar-credenciamentos.js';
-import { TOTAL_PASSOS_CREDENCIAMENTO, type Credenciamento, type EstadoCredenciamento, type TermoAceite } from '../domain/credenciamento.js';
+import { TOTAL_PASSOS_CREDENCIAMENTO, type Credenciamento, type EstadoCredenciamento, type StatusProvaVida, type TermoAceite } from '../domain/credenciamento.js';
 
 /**
  * Detalhe de leitura de um credenciamento para a tela "Visualizar" do portal (UC004). Reúne o que o
@@ -19,6 +19,7 @@ export interface CredenciamentoDetalhe {
   capacidadeTeto: number; // teto declarado (RN005)
   passoAtual: number;
   totalPassos: number;
+  provaVidaStatus: StatusProvaVida | null; // veredito da prova de vida facial (UC007); null enquanto não verificada
   termo: TermoAceite | null; // versão + finalidade + timestamp do aceite (RN016); null se ainda não aceito
   criadoEm: string; // ISO-8601
   atualizadoEm: string; // ISO-8601
@@ -66,6 +67,7 @@ export class DetalharCredenciamento {
       capacidadeTeto: c.capacidadeTeto,
       passoAtual: c.passoAtual,
       totalPassos: TOTAL_PASSOS_CREDENCIAMENTO,
+      provaVidaStatus: c.provaVida?.status ?? null,
       termo: c.termo ? { ...c.termo } : null,
       criadoEm: c.registerDate,
       atualizadoEm: c.updateDate,

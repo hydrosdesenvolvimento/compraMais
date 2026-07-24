@@ -81,6 +81,17 @@ import { GerarComprovanteCredenciamento } from './credenciamento/application/ger
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
+import { RegistrarProvaDeVidaNoCredenciamento } from './credenciamento/application/registrar-prova-de-vida.js';
+// Biometria facial / prova de vida (UC007)
+import type { ReconhecimentoFacialGateway } from './shared/acl/facial/reconhecimento-facial-gateway.js';
+import { ReconhecimentoFacialMockGateway } from './shared/acl/facial/reconhecimento-facial-mock.js';
+import { ReconhecimentoFacialHttpGateway } from './shared/acl/facial/reconhecimento-facial-http.js';
+import type { BiometriaRepository } from './biometria/application/biometria-repository.js';
+import { BiometriaRepositoryMemory } from './biometria/adapters/biometria-repository-memory.js';
+import { BiometriaRepositoryPg } from './biometria/adapters/biometria-repository-pg.js';
+import { RegistrarBiometriaReferencia } from './biometria/application/registrar-referencia.js';
+import { VerificarProvaDeVida } from './biometria/application/verificar-prova-de-vida.js';
+import { registrarRotasBiometria } from './biometria/adapters/biometria-controller.js';
 import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
 import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
@@ -337,7 +348,24 @@ export async function buildServer(): Promise<FastifyInstance> {
     },
   };
   const gerarComprovanteCredenciamento = new GerarComprovanteCredenciamento(credRepo, editaisRepo, fornecedorIdentidade, secretariaLookup);
-  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento, comprovante: gerarComprovanteCredenciamento });
+
+  // Biometria facial / prova de vida (UC007). Motor via serviço Python (InsightFace) quando
+  // FACE_PROVIDER=insightface; senão o mock determinístico (dev/test offline, DEC-STR-34). A
+  // comparação em si é do módulo `biometria`; aqui só compomos a fronteira e as portas. A referência
+  // vai CIFRADA no Postgres (AD-19) quando há banco; senão memória (testes). O passo do wizard
+  // (prova-de-vida) e o gate do Termo leem/gravam o veredito no agregado credenciamento.
+  const facial: ReconhecimentoFacialGateway = config.face.provider === 'insightface'
+    ? new ReconhecimentoFacialHttpGateway({ baseUrl: config.face.serviceUrl, timeoutMs: config.face.timeoutMs })
+    : new ReconhecimentoFacialMockGateway();
+  const biometriaRepo: BiometriaRepository = pool
+    ? new BiometriaRepositoryPg(pool, new PiiCipherAesGcm(config.crypto.piiKey))
+    : new BiometriaRepositoryMemory();
+  const registrarBiometria = new RegistrarBiometriaReferencia(biometriaRepo, facial);
+  const verificarProvaDeVida = new VerificarProvaDeVida(biometriaRepo, facial, config.face.limiar);
+  const provaDeVidaNoCredenciamento = new RegistrarProvaDeVidaNoCredenciamento(credRepo, verificarProvaDeVida);
+  registrarRotasBiometria(app, { registrar: registrarBiometria });
+
+  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento, comprovante: gerarComprovanteCredenciamento, provaVida: provaDeVidaNoCredenciamento });
 
   // Motor de Distribuição (Épico 5 / UC008 / RF005). A gestão dispara o rateio de um edital
   // distribuível (publicado); a matriz canônica append-only é durável em Postgres quando disponível

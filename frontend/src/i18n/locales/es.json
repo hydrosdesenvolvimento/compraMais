@@ -86,6 +86,24 @@
       "editalNovo": {
         "titulo": "Nuevo edicto compatible:",
         "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+      },
+      "tipo": {
+        "credenciado": {
+          "titulo": "Acreditación concluida",
+          "texto": "Ha sido acreditado. Sígalo en Mis Acreditaciones."
+        },
+        "em_correcao": {
+          "titulo": "Documento rechazado — corríjalo",
+          "texto": "{{motivo}}"
+        },
+        "distribuicao": {
+          "titulo": "Recibió una cuota en la distribución",
+          "texto": "{{numero}}: cuota de {{cota}}."
+        },
+        "edital_compativel": {
+          "titulo": "Nuevo edicto compatible:",
+          "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+        }
       }
     }
   },
@@ -1499,5 +1517,13 @@
     "criadoEm": "Creado el",
     "atualizadoEm": "Última actualización",
     "capacidadeItens": "{{n}} en total, en {{itens}} ítem(s)"
+  },
+  "notificacoes": {
+    "titulo": "Notificaciones",
+    "subtitulo": "Historial de sus notificaciones",
+    "vazio": "No tiene notificaciones.",
+    "marcarTodas": "Marcar todas como leídas",
+    "carregando": "Cargando…",
+    "naoLida": "No leída"
   }
 }

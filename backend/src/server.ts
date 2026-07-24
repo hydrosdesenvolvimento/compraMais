@@ -146,6 +146,12 @@ import { ListarDesistencias } from './distribuicao/application/listar-desistenci
 import { DistribuicaoRepositoryMemory } from './distribuicao/adapters/distribuicao-repository-memory.js';
 import { DistribuicaoRepositoryPg } from './distribuicao/adapters/distribuicao-repository-pg.js';
 import { registrarRotasDistribuicao } from './distribuicao/adapters/distribuicao-controller.js';
+import { NotificacaoConsumer } from './notificacoes/application/notificacao-consumer.js';
+import { GerirNotificacoes } from './notificacoes/application/listar-notificacoes.js';
+import type { NotificacaoRepository } from './notificacoes/application/notificacao-repository.js';
+import { NotificacaoRepositoryMemory } from './notificacoes/adapters/notificacao-repository-memory.js';
+import { NotificacaoRepositoryPg } from './notificacoes/adapters/notificacao-repository-pg.js';
+import { registrarRotasNotificacoes } from './notificacoes/adapters/notificacoes-controller.js';
 
 /**
  * Bootstrap (camada de INFRA) + composition root. O Fastify é detalhe plugável: o domínio e os
@@ -463,6 +469,19 @@ export async function buildServer(): Promise<FastifyInstance> {
   // do Cadastro de Reserva — reusa o mesmo lookup de editais candidatos). Somente leitura (UC009/RN004).
   const listarDesistencias = new ListarDesistencias(editaisComReserva, credRepo, distribuicaoRepo, fornecedores, secretariaLookup);
   registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas, resumo: resumoDistribuicao, reserva: listarCadastroReserva, desistencias: listarDesistencias });
+
+  // Notificações do fornecedor (projeção event-sourced): um consumer projeta eventos de domínio
+  // (credenciamento concluído, correção, distribuição, edital compatível) em `notificacoes`. Wire aqui,
+  // após editais/fornecedores/distribuição existirem. Durável em Postgres; memória nos testes.
+  const notificacaoRepo: NotificacaoRepository = pool ? new NotificacaoRepositoryPg(pool) : new NotificacaoRepositoryMemory();
+  const editalParaNotificacao = {
+    porId: async (id: string) => {
+      const e = await editaisRepo.porId(id);
+      return e ? { numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, cnaesAlvo: e.cnaesAlvo } : null;
+    },
+  };
+  new NotificacaoConsumer(bus, notificacaoRepo, editalParaNotificacao, fornecedores, distribuicaoRepo).register();
+  registrarRotasNotificacoes(app, { gerir: new GerirNotificacoes(notificacaoRepo) });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();

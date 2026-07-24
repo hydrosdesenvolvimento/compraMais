@@ -1,14 +1,15 @@
 import { Outlet } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { AppShell, type ItemMenu } from './AppShell';
+import { AppShell, type ItemMenu, type Notificacao } from './AppShell';
 import { api, type CatalogoItemView } from '../lib/api';
 import { obterUsuario, obterTelasAdmin, salvarTelasAdmin, estaAutenticado } from '../lib/auth';
 import { montarChip } from '../lib/usuario-chip';
 import { menuAdminVisivel, telasPadraoDoPapel } from '../lib/telas-admin';
 import { construirNotificacoesFornecedor } from '../lib/notificacoes-fornecedor';
+import { renderNotificacao } from '../lib/notificacoes-render';
 
 /** Rótulo localizado do papel RBAC (fallback: o próprio código, ou "visitante" quando sem sessão). */
 function rotuloPapel(t: TFunction, papel: string | undefined): string {
@@ -52,17 +53,41 @@ export function ShellFornecedor({ menu }: { menu: ItemMenu[] }) {
   // Restringe apenas o Procurador; anônimo/demo e Titular mantêm o menu completo.
   const menuVisivel = u?.papel === 'procurador' ? menu.filter((m) => !TELAS_SO_TITULAR.has(m.href as string)) : menu;
 
-  // Notificações REAIS do fornecedor (reusa o cache da Home): documentos a vencer/vencidos (certidões)
-  // e editais compatíveis (oportunidades). Nada de mock — reflete os dados reais da empresa.
+  // Notificações do fornecedor: (a) PERSISTIDAS (event-sourced: credenciamento, distribuição, edital
+  // compatível…) com lidas/não-lidas; (b) ALERTA ao vivo de documentos a vencer (temporal, sem evento).
+  const qc = useQueryClient();
   const documentos = useQuery({ queryKey: ['documentos', empresaId], queryFn: () => api.documentos(empresaId as string), ...on });
-  const editais = useQuery({ queryKey: ['editais'], queryFn: api.editaisCompativeis, ...on });
   const secretarias = useQuery({ queryKey: ['catalogo', 'secretarias'], queryFn: () => api.catalogoListar('secretarias') });
-  const notificacoes = useMemo(
-    () => construirNotificacoesFornecedor(documentos.data ?? [], editais.data ?? [], (secretarias.data as CatalogoItemView[] | undefined) ?? [], t, i18n.language),
-    [documentos.data, editais.data, secretarias.data, t, i18n.language],
-  );
+  const notif = useQuery({ queryKey: ['notificacoes'], queryFn: () => api.notificacoes(1, 8), ...on });
+  const marcarLida = useMutation({
+    mutationFn: (id: string) => api.marcarNotificacaoLida(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['notificacoes'] }),
+  });
 
-  return <AppShell menu={menuVisivel} usuario={chip} notificacoes={notificacoes}><Outlet /></AppShell>;
+  const secretariasLista = (secretarias.data as CatalogoItemView[] | undefined) ?? [];
+  const siglaDe = (id: string): string => { const s = secretariasLista.find((x) => x.id === id); return s?.sigla ?? s?.nome ?? id; };
+  const naoLidas = notif.data?.naoLidas ?? 0;
+  const notificacoes = useMemo<Notificacao[]>(() => {
+    // Alertas ao vivo (só documentos — o "edital compatível" agora é notificação persistida).
+    const alertas = construirNotificacoesFornecedor(documentos.data ?? [], [], secretariasLista, t, i18n.language);
+    // Persistidas → itens clicáveis (id/href/lida) via render localizado.
+    const persistidas: Notificacao[] = (notif.data?.itens ?? []).map((n) => {
+      const r = renderNotificacao(n, t, siglaDe);
+      return { id: n.id, tom: r.tom, titulo: r.titulo, texto: r.texto, href: r.href ?? undefined, lida: n.lida };
+    });
+    return [...alertas, ...persistidas];
+  }, [documentos.data, notif.data, secretarias.data, t, i18n.language]);
+
+  return (
+    <AppShell
+      menu={menuVisivel} usuario={chip} notificacoes={notificacoes}
+      alerta={naoLidas > 0 || notificacoes.some((n) => n.lida === undefined)}
+      verTodasHref="/notificacoes"
+      onNotificacao={(n) => { if (n.id && n.lida === false) marcarLida.mutate(n.id); }}
+    >
+      <Outlet />
+    </AppShell>
+  );
 }
 
 /**

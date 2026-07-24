@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { api, type EditalGestao, type CatalogoItemView, type FiltroEditais, type ItemEditalView } from '../../lib/api';
 import { celula, cabecalho, Paginacao } from '../../design-system/tabela';
 import { Botao, BotaoIcone, Campo, useToast } from '../../design-system/components';
-import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro, IconeDemandas, IconeLapis } from '../../design-system/icons';
+import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro, IconeDemandas, IconeLapis, IconeUpload, IconeVoltar, IconeCadeado, IconeMais } from '../../design-system/icons';
 import { textoDoErro } from '../../lib/erros';
 
 const POR_PAGINA = 10;
@@ -234,14 +234,14 @@ export function GerirEditais() {
                               <BotaoIcone icone={IconeLapis} data-cy="editar-edital" title={t('admin.gerirEditais.editar')} aria-label={t('admin.gerirEditais.editar')} onClick={() => setEditandoId(e.id)} />
                             )}
                             {e.situacao === 'rascunho' && (
-                              <Botao data-cy="publicar" onClick={() => publicar.mutate(e.id)} disabled={publicar.isPending}>{t('admin.gerirEditais.publicar')}</Botao>
+                              <BotaoIcone icone={IconeUpload} data-cy="publicar" title={t('admin.gerirEditais.publicar')} aria-label={t('admin.gerirEditais.publicar')} onClick={() => publicar.mutate(e.id)} disabled={publicar.isPending} style={{ color: 'var(--azul-700)' }} />
                             )}
                             {/* Despublicar: só publicado; o backend bloqueia se houver credenciamentos. */}
                             {e.situacao === 'publicado' && (
-                              <Botao data-cy="despublicar" variante="secundario" onClick={() => despublicar.mutate(e.id)} disabled={despublicar.isPending}>{t('admin.gerirEditais.despublicar')}</Botao>
+                              <BotaoIcone icone={IconeVoltar} data-cy="despublicar" title={t('admin.gerirEditais.despublicar')} aria-label={t('admin.gerirEditais.despublicar')} onClick={() => despublicar.mutate(e.id)} disabled={despublicar.isPending} />
                             )}
                             {e.situacao === 'publicado' && (
-                              <Botao data-cy="encerrar" variante="secundario" onClick={() => encerrar.mutate(e.id)} disabled={encerrar.isPending}>{t('admin.gerirEditais.encerrar')}</Botao>
+                              <BotaoIcone icone={IconeCadeado} data-cy="encerrar" title={t('admin.gerirEditais.encerrar')} aria-label={t('admin.gerirEditais.encerrar')} onClick={() => encerrar.mutate(e.id)} disabled={encerrar.isPending} />
                             )}
                             <BotaoIcone icone={IconeOlho} data-cy="ver-detalhes" title={t('admin.gerirEditais.acaoVer')} aria-label={t('admin.gerirEditais.acaoVer')} onClick={() => setVerId(e.id)} />
                           </div>
@@ -583,7 +583,7 @@ function ModalItensEdital({ editalId, numero, onFechar }: { editalId: string; nu
             <input id="item-preco" data-cy="item-preco" className="input" type="number" min={0} step="0.01" inputMode="decimal" placeholder="0,00" value={precoTeto} onChange={(ev) => setPrecoTeto(ev.target.value)} />
           </Campo>
           <div className="cm-campo-total" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <Botao type="submit" data-cy="adicionar-item" disabled={!podeAdicionar}>{t('admin.gerirEditais.itens.adicionar')}</Botao>
+            <Botao type="submit" data-cy="adicionar-item" title={t('admin.gerirEditais.itens.adicionar')} aria-label={t('admin.gerirEditais.itens.adicionar')} disabled={!podeAdicionar} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><IconeMais width={18} height={18} /></Botao>
             {adicionar.isError && <span data-cy="erro-item" role="alert" style={{ fontSize: 13, color: 'var(--erro, #c0392b)' }}>{t('admin.gerirEditais.itens.erroAdicionar')}</span>}
           </div>
         </form>

@@ -112,7 +112,6 @@ export function GerirEditais() {
         <div>
           <div style={{ fontSize: 12, color: 'var(--cinza-400)' }}>{t('admin.gerirEditais.eyebrow')}</div>
           <h1 className="page-title" style={{ margin: '4px 0 3px' }}>{t('admin.gerirEditais.titulo')}</h1>
-          <p className="page-sub" style={{ margin: 0 }}>{t('admin.gerirEditais.subtitulo')}</p>
         </div>
         <Botao data-cy="novo-edital" onClick={() => setCriando(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span aria-hidden style={{ fontSize: 16, lineHeight: 1 }}>+</span>{t('admin.gerirEditais.novoEdital')}

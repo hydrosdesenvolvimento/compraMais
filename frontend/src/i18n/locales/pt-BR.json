@@ -169,7 +169,6 @@
   "admin": {
     "credenciamentoEdital": {
       "titulo": "Credenciamento em Edital",
-      "subtitulo": "Adesão filtrada por CNAE (RN001) e checagem de inadimplência (RN002)",
       "seletorLabel": "Edital",
       "cnaeExigido": "CNAE exigido: {{cnae}}",
       "elegiveisTitulo": "Fornecedores elegíveis",
@@ -204,7 +203,6 @@
     "distribuicao": {
       "eyebrow": "Operação · Distribuição",
       "titulo": "Distribuição Inteligente",
-      "subtitulo": "Rateio equitativo respeitando a capacidade declarada (RN005)",
       "seletorLabel": "Edital",
       "carregando": "Carregando distribuição…",
       "erroCarregar": "Não foi possível carregar a distribuição.",
@@ -237,7 +235,6 @@
     "reserva": {
       "eyebrow": "Operação · Cadastro de Reserva",
       "titulo": "Cadastro de Reserva",
-      "subtitulo": "Gestão de retardatários sem alterar contratos vigentes (RN004)",
       "avisoTitulo": "Fila de reserva.",
       "avisoTexto": "Fornecedores aprovados após a distribuição inicial são alocados aqui sem alterar as cotas já distribuídas. Serão acionados em ordem cronológica caso algum titular descumpra a entrega.",
       "carregando": "Carregando fila de reserva…",
@@ -540,7 +537,6 @@
     "gerirEditais": {
       "eyebrow": "Operação · Editais",
       "titulo": "Editais de Credenciamento",
-      "subtitulo": "1 edital = 1 demanda de secretaria (RN007)",
       "novoEdital": "Novo edital",
       "colEdital": "Edital",
       "colObjeto": "Objeto",
@@ -845,7 +841,6 @@
       "migalha": "Operação · Análise Documental",
       "titulo": "Análise Documental",
       "tituloComplemento": "(covalidação)",
-      "subtitulo": "Aprovação ou reprovação com justificativa obrigatória (RN003)",
       "carregando": "Carregando fila…",
       "erroCarregar": "Não foi possível carregar a fila de análise.",
       "vazioTitulo": "Nenhum documento na fila",
@@ -1356,7 +1351,6 @@
   },
   "adminLgpd": {
     "titulo": "Atendimento LGPD",
-    "subtitulo": "Fila de direitos do titular pendentes (Encarregado/DPO). A CPL não atende (RNF007).",
     "carregando": "Carregando…",
     "vazio": "Nenhuma solicitação pendente.",
     "titular": "Titular",

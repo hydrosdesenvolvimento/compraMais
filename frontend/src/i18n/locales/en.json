@@ -169,7 +169,6 @@
   "admin": {
     "credenciamentoEdital": {
       "titulo": "Accreditation in Notice",
-      "subtitulo": "Membership filtered by CNAE (RN001) and default check (RN002)",
       "seletorLabel": "Notice",
       "cnaeExigido": "Required CNAE: {{cnae}}",
       "elegiveisTitulo": "Eligible suppliers",
@@ -204,7 +203,6 @@
     "distribuicao": {
       "eyebrow": "Operations · Distribution",
       "titulo": "Smart Distribution",
-      "subtitulo": "Equitable allocation respecting the declared capacity (RN005)",
       "seletorLabel": "Notice",
       "carregando": "Loading distribution…",
       "erroCarregar": "Could not load the distribution.",
@@ -237,7 +235,6 @@
     "reserva": {
       "eyebrow": "Operations · Reserve List",
       "titulo": "Reserve List",
-      "subtitulo": "Managing latecomers without changing active contracts (RN004)",
       "avisoTitulo": "Reserve queue.",
       "avisoTexto": "Suppliers approved after the initial distribution are placed here without changing the quotas already distributed. They will be called in chronological order if a holder fails to deliver.",
       "carregando": "Loading reserve queue…",
@@ -540,7 +537,6 @@
     "gerirEditais": {
       "eyebrow": "Operations · Notices",
       "titulo": "Accreditation Notices",
-      "subtitulo": "1 notice = 1 department demand (RN007)",
       "novoEdital": "New notice",
       "colEdital": "Notice",
       "colObjeto": "Object",
@@ -845,7 +841,6 @@
       "migalha": "Operations · Document Review",
       "titulo": "Document Review",
       "tituloComplemento": "(co-validation)",
-      "subtitulo": "Approval or rejection with mandatory justification (RN003)",
       "carregando": "Loading queue…",
       "erroCarregar": "Could not load the review queue.",
       "vazioTitulo": "No documents in the queue",
@@ -1356,7 +1351,6 @@
   },
   "adminLgpd": {
     "titulo": "LGPD Requests",
-    "subtitulo": "Queue of pending data subject rights (DPO). The procurement team does not handle these (RNF007).",
     "carregando": "Loading…",
     "vazio": "No pending requests.",
     "titular": "Data subject",

@@ -15,6 +15,10 @@ export class EditalEncerrado extends DomainEvent<{ editalId: string }> {
   readonly eventName = 'EditalEncerrado'; readonly eventVersion = 1;
   constructor(aggregateId: string, payload: { editalId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
 }
+export class EditalDespublicado extends DomainEvent<{ editalId: string }> {
+  readonly eventName = 'EditalDespublicado'; readonly eventVersion = 1; // publicado → rascunho (sem credenciamentos)
+  constructor(aggregateId: string, payload: { editalId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}
 export class EditalEditado extends DomainEvent<{ editalId: string; diff: CampoDiff[] }> {
   readonly eventName = 'EditalEditado'; readonly eventVersion = 1; // antes/depois — FR-013/auditoria
   constructor(aggregateId: string, payload: { editalId: string; diff: CampoDiff[] }, actor?: Actor) { super(aggregateId, payload, actor); }

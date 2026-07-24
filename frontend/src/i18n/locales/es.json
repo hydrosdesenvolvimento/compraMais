@@ -617,7 +617,13 @@
           "acoes": "Acciones"
         },
         "listaTitulo": "Materiales del edicto"
-      }
+      },
+      "despublicar": "Despublicar",
+      "despublicadoOk": "Edicto despublicado.",
+      "editar": "Editar",
+      "editadoOk": "Edicto actualizado.",
+      "editarTitulo": "Editar edicto",
+      "editarSub": "Ajuste el edicto {{numero}} (disponible mientras es un borrador)."
     },
     "contestacoes": {
       "titulo": "Impugnaciones de CNAE",
@@ -917,7 +923,9 @@
     "CampoNaoEditavel": "Este campo no se puede editar.",
     "TransicaoInvalida": "Operación no permitida en el estado actual.",
     "MaterialVinculadoAEdital": "El ítem está vinculado a un edicto y no puede eliminarse.",
-    "MaterialAtivoNaoExcluivel": "Solo se pueden eliminar ítems inactivos. Inactívelo primero."
+    "MaterialAtivoNaoExcluivel": "Solo se pueden eliminar ítems inactivos. Inactívelo primero.",
+    "EditalComCredenciamentos": "Este edicto tiene credenciamientos asociados y no puede despublicarse.",
+    "EditalNaoEditavel": "El edicto solo puede editarse mientras es un borrador."
   },
   "contestacao": {
     "semEmpresa": "Ninguna empresa vinculada a su cuenta.",

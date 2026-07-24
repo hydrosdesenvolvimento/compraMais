@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { EditalRepositoryMemory } from '../../src/editais/adapters/edital-repository-memory.js';
-import { GerirEditais } from '../../src/editais/application/gerir-editais.js';
+import { GerirEditais, EditalComCredenciamentos } from '../../src/editais/application/gerir-editais.js';
+import { EditalNaoEditavel, TransicaoInvalida } from '../../src/editais/domain/edital.js';
 import { InMemoryEventBus } from '../../src/shared/events/event-bus.js';
 
 describe('Gestão de editais (US1)', () => {
@@ -42,5 +43,32 @@ describe('Gestão de editais (US1)', () => {
     await uc.publicar(editalId, actor);
     await uc.encerrar(editalId, actor);
     expect((await repo.abertos()).map((e) => e.id)).not.toContain(editalId);
+  });
+
+  it('editarComoRascunho só em rascunho: publicado → EditalNaoEditavel', async () => {
+    const { editalId } = await uc.criar(base, actor);
+    await uc.editarComoRascunho(editalId, { objeto: 'merenda revisada' }, actor); // rascunho: ok
+    expect((await repo.porId(editalId))?.objeto).toBe('merenda revisada');
+    await uc.publicar(editalId, actor);
+    await expect(uc.editarComoRascunho(editalId, { objeto: 'x' }, actor)).rejects.toThrow(EditalNaoEditavel);
+  });
+
+  it('despublicar sem credenciamentos: publicado → rascunho + evento; rascunho → TransicaoInvalida', async () => {
+    const eventos: string[] = [];
+    bus.subscribe('EditalDespublicado', async () => { eventos.push('EditalDespublicado'); });
+    const { editalId } = await uc.criar(base, actor);
+    await uc.publicar(editalId, actor);
+    await uc.despublicar(editalId, actor);
+    expect((await repo.porId(editalId))?.situacao).toBe('rascunho');
+    expect(eventos).toContain('EditalDespublicado');
+    await expect(uc.despublicar(editalId, actor)).rejects.toThrow(TransicaoInvalida); // já é rascunho
+  });
+
+  it('despublicar bloqueada quando há credenciamentos associados → EditalComCredenciamentos', async () => {
+    const comCreds = new GerirEditais(repo, bus, undefined, undefined, undefined, undefined, { contarDoEdital: async () => 2 });
+    const { editalId } = await comCreds.criar(base, actor);
+    await comCreds.publicar(editalId, actor);
+    await expect(comCreds.despublicar(editalId, actor)).rejects.toThrow(EditalComCredenciamentos);
+    expect((await repo.porId(editalId))?.situacao).toBe('publicado'); // permanece publicado
   });
 });

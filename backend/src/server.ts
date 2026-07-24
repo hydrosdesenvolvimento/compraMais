@@ -55,6 +55,10 @@ import { ContestarCnae, ResolverContestacao, type ContestacaoRepository } from '
 import { ContestacaoRepositoryMemory } from './editais/adapters/contestacao-repository-memory.js';
 import { ContestacaoRepositoryPg } from './editais/adapters/contestacao-repository-pg.js';
 import { registrarRotasGestaoEditais, registrarRotaElegiveisEdital } from './editais/adapters/editais-gestao-controller.js';
+import { GerirItensEdital } from './editais/application/gerir-itens-edital.js';
+import { ItemEditalRepositoryMemory } from './editais/adapters/item-edital-repository-memory.js';
+import { ItemEditalRepositoryPg } from './editais/adapters/item-edital-repository-pg.js';
+import { registrarRotasItensEdital } from './editais/adapters/itens-edital-controller.js';
 import { ListarElegiveisEdital } from './editais/application/listar-elegiveis-edital.js';
 import { registrarRotasContestacao } from './editais/adapters/contestacao-controller.js';
 import { GerirDocumentos } from './credenciamento/application/gerir-documentos.js';
@@ -177,6 +181,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'InadimplenciaVerificada', 'BloqueioAplicado', 'BloqueioLiberado',
     'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalEditado',
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
+    'ItemEditalAdicionado', 'ItemEditalRemovido',
     'MaloteGerado', 'MaloteExportado',
     'DireitoTitularSolicitado', 'DireitoTitularAtendido',
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
@@ -312,6 +317,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo, undefined, numeradorEditais);
   const buscarEditais = new BuscarEditais(editaisRepo);
   registrarRotasGestaoEditais(app, { gerir: gerirEditais, buscar: buscarEditais });
+
+  // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). O lookup do catálogo é o
+  // próprio `materiaisRepo` (definido acima) — `MaterialServico` satisfaz o contrato estruturalmente
+  // (nome/unidades/especificacoes/ativo). Persistência durável em Postgres; memória nos testes.
+  const itensEditalRepo = pool ? new ItemEditalRepositoryPg(pool) : new ItemEditalRepositoryMemory();
+  const gerirItensEdital = new GerirItensEdital(editaisRepo, materiaisRepo, itensEditalRepo, bus);
+  registrarRotasItensEdital(app, { gerir: gerirItensEdital });
+
   const fornecedorAtivo = { estaAtivo: async (id: string) => { const f = await fornecedores.porId(id); return !!f && f.situacao === 'ativa'; } };
   const contestar = new ContestarCnae(editaisRepo, contestacaoRepo, fornecedorAtivo, bus);
   const resolver = new ResolverContestacao(contestacaoRepo, gerirEditais, bus);

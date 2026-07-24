@@ -84,6 +84,8 @@ export interface EditalGestao { id: string; numero: string; objeto: string; secr
 export interface PaginaEditais { items: EditalGestao[]; total: number; page: number; size: number }
 /** Filtros da tela de gestão de editais; todos opcionais (QBE). `texto` casa parcial em número/objeto. */
 export interface FiltroEditais { secretariaId?: string; situacao?: string; cnae?: string; texto?: string; page?: number; size?: number }
+/** Item do edital (do catálogo de materiais e serviços, sem lotes). `precoTeto` é montante — não vai à transparência pública (RN013). */
+export interface ItemEditalView { id: string; editalId: string; numero: number; itemCatalogoId: string; nome: string; descricao: string | null; unidade: string; quantidade: number; precoTeto: number }
 /** Tela "Credenciamento em Edital" (Painel Admin · Operação) — situação do fornecedor perante o edital. */
 export type StatusElegivel = 'credenciado' | 'requerente' | 'elegivel';
 export interface FornecedorElegivelView {
@@ -388,9 +390,14 @@ export const api = {
   // Tela "Cadastro de Reserva": fila cronológica global dos retardatários fora da matriz vigente (UC009/RN004).
   cadastroReserva: () => get<CadastroReservaView[]>('/gestao/cadastro-reserva'),
   desistencias: () => get<DesistenciaView[]>('/gestao/desistencias'),
-  criarEdital: (body: unknown) => send('/editais', 'POST', body),
+  criarEdital: (body: unknown) => send<{ editalId: string; numero: string; situacao: string }>('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),
+  // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). Só editáveis em rascunho.
+  editalItens: (id: string) => get<ItemEditalView[]>(`/editais/${id}/itens`),
+  adicionarItemEdital: (id: string, body: { itemCatalogoId: string; unidade: string; quantidade: number; precoTeto: number }) =>
+    send<{ id: string; numero: number }>(`/editais/${id}/itens`, 'POST', body),
+  removerItemEdital: (id: string, itemId: string) => send<{ ok: boolean }>(`/editais/${id}/itens/${itemId}`, 'DELETE'),
   docsPendentes: (fid: string, params: URLSearchParams) => get<DocPendente[]>(`/fornecedores/${fid}/documentos/pendentes?${params.toString()}`),
   // Tela "Análise Documental" (covalidação): fila global de pendentes de todos os fornecedores (RBAC CPL/SMGA).
   filaAnalise: () => get<AnaliseDocItem[]>('/documentos/analise'),

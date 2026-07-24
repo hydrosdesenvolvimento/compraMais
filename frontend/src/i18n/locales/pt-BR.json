@@ -599,7 +599,31 @@
       "prazoLabel": "Prazo de vigência",
       "softDeleteNota": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
       "salvar": "Salvar",
-      "cancelar": "Cancelar"
+      "cancelar": "Cancelar",
+      "itens": {
+        "acao": "Itens do edital",
+        "titulo": "Itens do edital",
+        "subtitulo": "Cadastre os itens do edital {{numero}} a partir do catálogo de materiais e serviços. Disponível enquanto o edital está em rascunho.",
+        "itemLabel": "Item do catálogo",
+        "itemPlaceholder": "Selecione um material ou serviço…",
+        "unidadeLabel": "Unidade",
+        "quantidadeLabel": "Quantidade",
+        "precoLabel": "Preço-teto (R$)",
+        "adicionar": "Adicionar item",
+        "erroAdicionar": "Não foi possível adicionar. Verifique os campos (item já incluído, unidade ou preço inválidos).",
+        "carregando": "Carregando itens…",
+        "vazio": "Nenhum item cadastrado neste edital ainda.",
+        "remover": "Remover item",
+        "notaPreco": "O preço-teto é uso interno da administração e não é exibido no portal público de transparência.",
+        "col": {
+          "num": "Nº",
+          "item": "Item",
+          "unidade": "Unid.",
+          "quantidade": "Qtd.",
+          "preco": "Preço-teto",
+          "acoes": "Ações"
+        }
+      }
     },
     "contestacoes": {
       "titulo": "Contestações de CNAE",

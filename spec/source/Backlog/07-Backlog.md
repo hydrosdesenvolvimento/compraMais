@@ -3,7 +3,7 @@
 
 Resumo
 ------
-Backlog gerado a partir dos Requisitos e Artefatos em [03-HDR.md](03-HDR.md), [04-Arquitetura.md](04-Arquitetura.md), [05-HistoriasUsuario.md](05-HistoriasUsuario.md) e [06-CasosUso.md](06-CasosUso.md). Itens organizados por Release sugerida (MVP / Release 2 / Infra & Não-Funcionais).
+Backlog gerado a partir dos Requisitos e Artefatos em [../Requisitos/03-HDR.md](../Requisitos/03-HDR.md), [../Arquitetura/04-Arquitetura.md](../Arquitetura/04-Arquitetura.md), [../HistoriasUsuario/05-HistoriasUsuario.md](../HistoriasUsuario/05-HistoriasUsuario.md) e [../06-CasosUso.md](../06-CasosUso.md). Itens organizados por Release sugerida (MVP / Release 2 / Infra & Não-Funcionais).
 
 MVP (Release 1) — mínimo viável para operação de credenciamento
 - BI-001: Cadastro via CNPJ e integração Receita Federal

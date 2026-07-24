@@ -653,7 +653,8 @@
       "tabs": {
         "setores": "Sectors (CNAE)",
         "tiposDoc": "Document types",
-        "materiais": "Goods and services"
+        "materiais": "Goods and services",
+        "unidadesMedida": "Units of measure"
       },
       "campos": {
         "codigo": "CNAE code (7 digits)",
@@ -670,7 +671,10 @@
         "unidadesDica": "Separate with commas. E.g.: ea, m, box",
         "especificacoes": "Technical specifications",
         "situacao": "Status",
-        "acoes": "Actions"
+        "acoes": "Actions",
+        "simbolo": "Symbol",
+        "simboloDica": "E.g.: un, kg, m², L, h, cx",
+        "descricaoUnidade": "Description"
       },
       "categorias": {
         "cadastral": "Registration",

@@ -122,8 +122,9 @@ import { DashboardAdmin, Transparencia } from './paineis/application/paineis.js'
 import { registrarRotasPaineis } from './paineis/adapters/paineis-controller.js';
 import { ManterCatalogos } from './catalogos/application/manter-catalogos.js';
 import { CatalogoRepositoryMemory } from './catalogos/adapters/catalogo-repository-memory.js';
-import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg, MaterialServicoRepositoryPg, NumeradorItensPg } from './catalogos/adapters/catalogo-repository-pg.js';
+import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg, MaterialServicoRepositoryPg, UnidadeMedidaRepositoryPg, NumeradorItensPg } from './catalogos/adapters/catalogo-repository-pg.js';
 import type { MaterialServico } from './catalogos/domain/material-servico.js';
+import type { UnidadeMedida } from './catalogos/domain/unidade-medida.js';
 import { NumeradorItensMemory, type NumeradorItens } from './catalogos/application/numerador-itens.js';
 import type { Secretaria } from './catalogos/domain/secretaria.js';
 import type { SetorCnae } from './catalogos/domain/setor-cnae.js';
@@ -302,8 +303,11 @@ export async function buildServer(): Promise<FastifyInstance> {
   // (`item_catalogo_numeros`, migração 0027); em memória nos testes/sem banco.
   const materiaisRepo: CatalogoRepository<MaterialServico> = pool ? new MaterialServicoRepositoryPg(pool) : new CatalogoRepositoryMemory<MaterialServico>();
   const numeradorItens: NumeradorItens = pool ? new NumeradorItensPg(pool) : new NumeradorItensMemory();
+  // Unidades de medida (símbolo + descrição): catálogo que alimenta o campo `unidades` dos itens de
+  // materiais/serviços e a quantificação dos itens de edital. Mantido pela Secretaria (smga) além do Admin.
+  const unidadesRepo: CatalogoRepository<UnidadeMedida> = pool ? new UnidadeMedidaRepositoryPg(pool) : new CatalogoRepositoryMemory<UnidadeMedida>();
   const manterCatalogos = new ManterCatalogos(
-    { secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo, materiaisServicos: materiaisRepo },
+    { secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo, materiaisServicos: materiaisRepo, unidadesMedida: unidadesRepo },
     bus, undefined, numeradorItens,
   );
   registrarRotasCatalogos(app, { manter: manterCatalogos });

@@ -6,6 +6,7 @@ import { Secretaria } from '../domain/secretaria.js';
 import { SetorCnae } from '../domain/setor-cnae.js';
 import { TipoDocumento, type CategoriaDocumento } from '../domain/tipo-documento.js';
 import { MaterialServico, type TipoItem } from '../domain/material-servico.js';
+import { UnidadeMedida } from '../domain/unidade-medida.js';
 import type { NumeradorItens } from '../application/numerador-itens.js';
 
 /** Erro de unicidade do Postgres (índice único violado). */
@@ -148,6 +149,29 @@ export class MaterialServicoRepositoryPg extends CatalogoPgBase<MaterialServico>
       meta: meta(row), numero: String(row.numero), nome: String(row.nome), tipo: row.tipo as TipoItem,
       especificacoes: row.especificacoes == null ? undefined : String(row.especificacoes),
       unidades: Array.isArray(row.unidades) ? (row.unidades as string[]) : [],
+      situacao: row.situacao as SituacaoCatalogo,
+    });
+  }
+}
+
+/**
+ * Catálogo de Unidades de Medida. Ordena e checa unicidade por `simbolo` (chave natural,
+ * case-insensitive). Snapshot plano (AD-33); salvar é upsert por id.
+ */
+export class UnidadeMedidaRepositoryPg extends CatalogoPgBase<UnidadeMedida> {
+  constructor(pool: Pool) { super(pool, 'unidades_medida', 'simbolo'); }
+  protected async upsert(u: UnidadeMedida): Promise<void> {
+    const e = u.estado();
+    await this.pool.query(
+      `INSERT INTO unidades_medida (id, simbolo, descricao, situacao, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
+       ON CONFLICT (id) DO UPDATE SET simbolo=$2, descricao=$3, situacao=$4, update_date=$6, last_user_update=$7`,
+      [e.meta.id, e.simbolo, e.descricao, e.situacao, e.meta.registerDate, e.meta.updateDate, e.meta.lastUserUpdate],
+    );
+  }
+  protected mapear(row: Record<string, unknown>): UnidadeMedida {
+    return UnidadeMedida.deEstado({
+      meta: meta(row), simbolo: String(row.simbolo), descricao: String(row.descricao),
       situacao: row.situacao as SituacaoCatalogo,
     });
   }

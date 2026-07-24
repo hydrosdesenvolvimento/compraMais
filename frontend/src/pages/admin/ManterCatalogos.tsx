@@ -94,6 +94,17 @@ const CATALOGOS: CatalogoDef[] = [
     ],
   },
   {
+    slug: 'unidades-medida', tabKey: 'admin.catalogos.tabs.unidadesMedida',
+    campos: [
+      { nome: 'simbolo', labelKey: 'admin.catalogos.campos.simbolo', tipo: 'text', dicaKey: 'admin.catalogos.campos.simboloDica' },
+      { nome: 'descricao', labelKey: 'admin.catalogos.campos.descricaoUnidade', tipo: 'text', largura: 'total' },
+    ],
+    colunas: [
+      { rotuloKey: 'admin.catalogos.campos.simbolo', estilo: celulaChave, render: (i) => i.simbolo },
+      { rotuloKey: 'admin.catalogos.campos.descricaoUnidade', render: (i) => i.descricao },
+    ],
+  },
+  {
     slug: 'materiais-servicos', tabKey: 'admin.catalogos.tabs.materiais',
     busca: (i) => `${i.numero ?? ''} ${i.nome ?? ''} ${i.especificacoes ?? ''}`,
     campos: [

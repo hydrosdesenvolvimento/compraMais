@@ -31,6 +31,8 @@ interface CrudLike {
 const PERFIS_ESCRITA_PADRAO: readonly Papel[] = ['administrador'];
 const PERFIS_ESCRITA: Record<string, readonly Papel[]> = {
   'materiais-servicos': ['administrador', 'smga'],
+  // Unidade de medida alimenta os itens de materiais/serviços — mesma dona da tela (smga).
+  'unidades-medida': ['administrador', 'smga'],
 };
 
 /**
@@ -44,6 +46,7 @@ export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: Ma
     'setores-cnae': deps.manter.setores,
     'tipos-documento': deps.manter.tiposDocumento,
     'materiais-servicos': deps.manter.materiaisServicos,
+    'unidades-medida': deps.manter.unidadesMedida,
   };
 
   /** Perfis autorizados a escrever no catálogo desta requisição. */

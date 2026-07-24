@@ -7,7 +7,7 @@ import { TAMANHO_CHAVE_PII } from '../crypto/pii-cipher-aes.js';
  * PRJ-DEC-07): se `<VAR>_FILE` existir, lê o valor do arquivo (ex.: /run/secrets/jwt_secret) em vez
  * de `<VAR>` em texto. Nenhum segredo é versionado ou hardcoded.
  */
-function readSecret(name: string): string | undefined {
+export function readSecret(name: string): string | undefined {
   const filePath = process.env[`${name}_FILE`];
   if (filePath) return readFileSync(filePath, 'utf8').trim();
   return process.env[name];

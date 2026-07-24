@@ -103,7 +103,11 @@ export function CredenciamentoDetalhe() {
           <Linha rotulo={t('credenciamentoDetalhe.edital')}>{data.numeroEdital ?? '—'}</Linha>
           <Linha rotulo={t('credenciamentoDetalhe.objeto')}>{data.objeto ?? '—'}</Linha>
           <Linha rotulo={t('credenciamentoDetalhe.secretaria')}>{data.secretariaSigla ?? '—'}</Linha>
-          <Linha rotulo={t('credenciamentoDetalhe.capacidade')}>{t('credenciamentoDetalhe.capacidadeUnidades', { n: data.capacidadeTeto })}</Linha>
+          <Linha rotulo={t('credenciamentoDetalhe.capacidade')}>
+            {data.itens.length > 0
+              ? t('credenciamentoDetalhe.capacidadeItens', { itens: data.itens.length, n: data.capacidadeTeto })
+              : t('credenciamentoDetalhe.capacidadeUnidades', { n: data.capacidadeTeto })}
+          </Linha>
           <Linha rotulo={t('credenciamentoDetalhe.etapa')}>{t('meusCredenciamentos.etapa', { atual: data.passoAtual, total: data.totalPassos })}</Linha>
           <Linha rotulo={t('credenciamentoDetalhe.criadoEm')}>{formatarData(data.criadoEm)}</Linha>
           <Linha rotulo={t('credenciamentoDetalhe.atualizadoEm')}>{formatarData(data.atualizadoEm)}</Linha>

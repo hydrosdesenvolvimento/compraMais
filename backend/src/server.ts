@@ -431,7 +431,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   const editalResumoDemanda = {
     porId: async (id: string) => {
       const e = await editaisRepo.porId(id);
-      return e ? { numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao } : null;
+      if (!e) return null;
+      // Fase 3: detalhamento por item — expõe os itens do edital (id + metadados + quantidade).
+      const itens = (await itensEditalRepo.listarDoEdital(id)).map((it) => ({ itemId: it.id, numero: it.numero, nome: it.nomeSnapshot, unidade: it.unidade, quantidade: it.quantidade }));
+      return { numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, itens };
     },
   };
   const listarDemandas = new ListarDemandasFornecedor(credRepo, distribuicaoRepo, editalResumoDemanda, secretariaLookup);

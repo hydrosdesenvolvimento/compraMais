@@ -186,6 +186,8 @@ export interface Transparencia { editaisVigentes: number; secretarias: string[];
  * presentes); `reserva` é apto mas ficou fora da matriz vigente (Cadastro de Reserva / 2ª demanda) e
  * traz apenas o teto declarado. `total`/`aptos`/`cota` são `null` no caso de reserva.
  */
+/** Cota/teto do fornecedor em UM item do edital (Fase 3). */
+export interface DemandaItemView { itemId: string; numero: number; nome: string; unidade: string; demanda: number; cota: number; teto: number }
 export interface DemandaDistribuidaView {
   editalId: string;
   numero: string;
@@ -196,6 +198,7 @@ export interface DemandaDistribuidaView {
   aptos: number | null;
   cota: number | null;
   teto: number;
+  itens: DemandaItemView[]; // detalhamento por item (Fase 3)
   geradoEm: string;
   hash: string;
 }

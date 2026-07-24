@@ -90,6 +90,8 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
       objeto: 'merenda',
       classificacao: 'titular',
       total: 10, aptos: 1, cota: 10, teto: 10,
+      // Detalhamento por item (Fase 3): a cota/teto do fornecedor no item.
+      itens: [expect.objectContaining({ itemId: itemDistribuido, demanda: 10, cota: 10, teto: 10, unidade: 'un' })],
       geradoEm: expect.any(String), hash: expect.stringMatching(/^[0-9a-f]{64}$/),
     }]);
   });

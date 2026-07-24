@@ -24,11 +24,15 @@ function renderTela() {
 const titular: DemandaDistribuidaView = {
   editalId: 'e1', numero: 'ED-2026/003', secretariaSigla: 'SEME', objeto: 'Uniformes de educação infantil',
   classificacao: 'titular', total: 12000, aptos: 4, cota: 3000, teto: 4000,
+  itens: [
+    { itemId: 'i1', numero: 1, nome: 'Camiseta', unidade: 'un', demanda: 8000, cota: 2000, teto: 3000 },
+    { itemId: 'i2', numero: 2, nome: 'Short', unidade: 'un', demanda: 4000, cota: 1000, teto: 1000 },
+  ],
   geradoEm: '2026-07-10T12:00:00Z', hash: 'a'.repeat(64),
 };
 const reserva: DemandaDistribuidaView = {
   editalId: 'e2', numero: 'ED-2026/021', secretariaSigla: 'SEMSA', objeto: 'Jalecos e uniformes hospitalares',
-  classificacao: 'reserva', total: null, aptos: null, cota: null, teto: 4000,
+  classificacao: 'reserva', total: null, aptos: null, cota: null, teto: 4000, itens: [],
   geradoEm: '2026-07-11T12:00:00Z', hash: 'b'.repeat(64),
 };
 
@@ -52,6 +56,12 @@ describe('Demandas distribuídas (UC008)', () => {
     expect(screen.getByText('3.000 / 4.000')).toBeInTheDocument(); // cota × teto
     expect(screen.getByText('Dentro do teto declarado')).toBeInTheDocument();
     expect(screen.queryByTestId('reserva-aviso')).not.toBeInTheDocument();
+    // Detalhamento por item (Fase 3).
+    expect(screen.getByTestId('demanda-itens')).toBeInTheDocument();
+    const linhas = screen.getAllByTestId('demanda-item-linha');
+    expect(linhas).toHaveLength(2);
+    expect(linhas[0]).toHaveTextContent('Camiseta');
+    expect(screen.getAllByTestId('item-cota')[0]).toHaveTextContent('2.000 de 8.000 un');
   });
 
   it('RESERVA: mostra o selo de Cadastro de Reserva e o aviso da 2ª demanda, sem rateio', async () => {

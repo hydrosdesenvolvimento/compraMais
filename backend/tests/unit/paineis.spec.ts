@@ -9,6 +9,11 @@ const fonte: PaineisFonte = {
     { secretariaId: 's1', cnaesAlvo: ['1091101'] },
     { secretariaId: 's1', cnaesAlvo: ['1091101', '3101200'] },
   ],
+  contarFornecedores: async () => ({ ativos: 5, mei: 2 }),
+  editaisEmAndamento: async () => [
+    { id: 'e1', numero: 'ED-2026/001', objeto: 'Fardamento', secretariaId: 's1', prazoVigencia: '2026-12-31', credenciados: 4, valorEstimado: 1500 },
+    { id: 'e2', numero: 'ED-2026/002', objeto: 'Mobiliário', secretariaId: 's1', prazoVigencia: null, credenciados: 3, valorEstimado: 3200 },
+  ],
 };
 
 describe('Painéis (Épico 9)', () => {
@@ -17,6 +22,15 @@ describe('Painéis (Épico 9)', () => {
     expect(f.documentosPendentes).toBe(3);
     expect(f.editaisPorSituacao.publicado).toBe(2);
     expect(f.bloqueiosAtivos).toBe(1);
+  });
+
+  it('dashboard agrega a visão geral: fornecedores, valor estimado e editais em andamento', async () => {
+    const f = await new DashboardAdmin(fonte).funil();
+    expect(f.fornecedoresAtivos).toBe(5);
+    expect(f.fornecedoresMei).toBe(2);
+    expect(f.valorEstimado).toBe(4700); // soma dos valores estimados dos editais em andamento
+    expect(f.editaisEmAndamento).toHaveLength(2);
+    expect(f.editaisEmAndamento[0]).toMatchObject({ numero: 'ED-2026/001', credenciados: 4 });
   });
 
   it('transparência dedupe secretarias e segmentos (FR-003)', async () => {

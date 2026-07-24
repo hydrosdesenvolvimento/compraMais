@@ -564,6 +564,25 @@ export async function buildServer(): Promise<FastifyInstance> {
     }),
     contarBloqueiosAtivos: async () => bloqueios.contarAtivos(),
     editaisPublicados: async () => (await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })).map((e) => ({ secretariaId: e.secretariaId, cnaesAlvo: e.cnaesAlvo })),
+    // Fornecedores ativos (situação cadastral 'ativa') e, entre eles, o subconjunto MEI (para o % MEI).
+    contarFornecedores: async () => {
+      const ativos = (await fornecedores.listar()).filter((f) => f.situacao === 'ativa');
+      const mei = ativos.filter((f) => f.porte.trim().toUpperCase() === 'MEI').length;
+      return { ativos: ativos.length, mei };
+    },
+    // Demandas em andamento (editais publicados) enriquecidas: credenciados (UC004) e valor estimado
+    // Σ(precoTeto×quantidade) dos itens do edital — dado real (não há valor "distribuído" monetário).
+    editaisEmAndamento: async () => {
+      const publicados = await editaisRepo.buscarPorExemplo({ situacao: 'publicado' });
+      return Promise.all(publicados.map(async (e) => {
+        const [itens, creds] = await Promise.all([itensEditalRepo.listarDoEdital(e.id), credRepo.listarPorEdital(e.id)]);
+        return {
+          id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, prazoVigencia: e.prazoVigencia,
+          credenciados: creds.length,
+          valorEstimado: itens.reduce((s, it) => s + it.precoTeto * it.quantidade, 0),
+        };
+      }));
+    },
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
 

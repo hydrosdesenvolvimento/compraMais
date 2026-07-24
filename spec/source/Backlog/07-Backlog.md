@@ -3,7 +3,8 @@
 
 Resumo
 ------
-Backlog gerado a partir dos Requisitos e Artefatos em [../Requisitos/03-HDR.md](../Requisitos/03-HDR.md), [../Arquitetura/04-Arquitetura.md](../Arquitetura/04-Arquitetura.md), [../HistoriasUsuario/05-HistoriasUsuario.md](../HistoriasUsuario/05-HistoriasUsuario.md) e [../06-CasosUso.md](../06-CasosUso.md). Itens organizados por Release sugerida (MVP / Release 2 / Infra & Não-Funcionais).
+Backlog gerado a partir dos Requisitos e Artefatos em [../Requisitos/03-HDR.md](../Requisitos/03-HDR.md), [../Arquitetura/04-Arquitetura.md](../Arquitetura/04-Arquitetura.md), [../HistoriasUsuario/05-HistoriasUsuario.md](../HistoriasUsuario/05-HistoriasUsuario.md) e [../06-CasosUso.md](../06-CasosUso.md). Itens organizados por Release sugerida (MVP / Release 2 / Infra & Não-Funcionais).
+
 
 MVP (Release 1) — mínimo viável para operação de credenciamento
 - BI-001: Cadastro via CNPJ e integração Receita Federal
@@ -31,7 +32,7 @@ MVP (Release 1) — mínimo viável para operação de credenciamento
 
 - BI-004: Motor de Distribuição Inteligente (rateio)
   - Requisitos: RF005, RN005
-  - Histórias: HU009
+  - Casos de Uso: UC008
   - Casos de Uso: UC009
   - Módulo: Distribuição Inteligente
   - Prioridade: Must Have

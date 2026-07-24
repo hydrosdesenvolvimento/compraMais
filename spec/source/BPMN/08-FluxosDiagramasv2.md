@@ -1,13 +1,13 @@
 # Modelagem de Processos (BPMN) - Compra Mais v2
 
+> ⚠️ **INSUMO (baseline v2 local) — NÃO CANÔNICO.** IDs (RF/RN/UC/FEATURE) são locais e podem colidir com os IDs globais canônicos. Use `spec/docs/` como fonte de verdade (ex.: `spec/docs/prd.md`, `spec/docs/casos-de-uso.md`).
+
 **Projeto:** Compra Mais  
 **Cliente:** Prefeitura Municipal de Rio Branco  
 **Versão:** 2.0  
 **Data:** 2026-07-03
 
 ---
-
-## Visão Geral
 
 Este documento apresenta a modelagem dos principais processos de negócio do sistema Compra Mais, utilizando a notação BPMN (Business Process Model and Notation) representada através de diagramas Mermaid. A versão 2.0 foi gerada a partir dos artefatos consolidados após a **Validação 01** (visitas 5 e 6), incorporando todas as novas regras, requisitos e fluxos aprovados pelo cliente.
 

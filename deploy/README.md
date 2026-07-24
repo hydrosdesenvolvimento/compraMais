@@ -92,6 +92,74 @@ set -a && . ./stack.env && set +a
 docker stack deploy -c compramais-stack.yml --with-registry-auth compramais
 ```
 
+## Seed inicial (bootstrap) — uma vez, após o 1º deploy
+
+O **schema é criado sozinho** (as migrations rodam no boot do backend) — não é
+preciso seed para isso. O seed de produção (`seed:prod`) é **prod-safe**: semeia
+apenas o **catálogo de tipos de documento** (RF022) e cria **um administrador
+inicial** a partir do ambiente/secret. Ele **não** cria usuários/dados demo.
+
+> ⚠️ **Não rode `npm run seed` / `seed.js` em produção** — esse é o seed DEV/DEMO
+> (usuários com senha fraca, fornecedores e documentos fictícios).
+
+Credenciais do admin (idempotente — se o e-mail já existir, a senha é preservada):
+
+| Var | Obrigatório | Descrição |
+|---|---|---|
+| `ADMIN_EMAIL` | sim | E-mail de login do administrador. |
+| `ADMIN_PASSWORD` / `ADMIN_PASSWORD_FILE` | sim | Senha inicial, **≥ 12 caracteres**. Prefira o secret (`_FILE`). |
+| `ADMIN_NOME` | não | Nome exibido (default `Administrador`). |
+| `ADMIN_LOGIN` | não | Login (default = parte local do e-mail). |
+
+### Opção A — `docker exec` no container do backend (mais simples)
+
+O container do backend já roda com `NODE_ENV=production` e todos os secrets
+montados; só faltam as credenciais do admin. **Rode num nó que hospede uma
+réplica do backend** (`docker service ps compramais_backend` mostra onde):
+
+```bash
+ADMIN_PW="$(openssl rand -base64 18)"      # ou uma senha forte sua (≥ 12 chars)
+CID=$(docker ps --filter name=compramais_backend -q | head -n1)
+
+docker exec -e ADMIN_EMAIL="admin@orgao.gov.br" -e ADMIN_PASSWORD="$ADMIN_PW" \
+  "$CID" node dist/shared/db/seed-prod.js
+
+echo "Senha inicial do admin: $ADMIN_PW  — troque no primeiro acesso."
+```
+
+### Opção B — Swarm job (mais limpo; secret em vez de senha inline)
+
+Roda como tarefa efêmera (`replicated-job`), com a senha vinda de um secret e sem
+depender de onde as réplicas estão. Monta os mesmos secrets que o backend exige
+no boot (`loadConfig` valida JWT/PII) mais o `admin_password`:
+
+```bash
+printf '%s' "$(openssl rand -base64 18)" | docker secret create admin_password -
+
+docker service create --name compramais-seed --mode replicated-job \
+  --network compramais_compramais \
+  --secret db_password --secret jwt_secret --secret pii_encryption_key --secret admin_password \
+  --env NODE_ENV=production --env POSTGRES_HOST=db --env POSTGRES_PORT=5432 \
+  --env POSTGRES_DB=compramais --env POSTGRES_USER=compramais \
+  --env POSTGRES_PASSWORD_FILE=/run/secrets/db_password \
+  --env JWT_SECRET_FILE=/run/secrets/jwt_secret \
+  --env PII_ENCRYPTION_KEY_FILE=/run/secrets/pii_encryption_key \
+  --env ADMIN_EMAIL=admin@orgao.gov.br \
+  --env ADMIN_PASSWORD_FILE=/run/secrets/admin_password \
+  ghcr.io/hydrosdesenvolvimento/compramais/backend:${IMAGE_TAG:-latest} \
+  node dist/shared/db/seed-prod.js
+
+docker service logs compramais-seed        # confira "[seed:prod] concluído."
+docker service rm compramais-seed          # remova o job (e o secret admin_password, se quiser)
+```
+
+Via **Portainer**: *Services → Add service*, imagem do backend, **Job** (não
+replicated), rede `compramais_compramais`, os secrets acima e o comando
+`node dist/shared/db/seed-prod.js`.
+
+Rerodar o seed é seguro (idempotente): tipos de documento usam `ON CONFLICT` e o
+admin não é recriado se já existir.
+
 ## Atualizar (nova release)
 
 O rolling update (`order: start-first`, `failure_action: rollback`) troca as

@@ -9,7 +9,7 @@ import { GerirDocumentos } from '../../credenciamento/application/gerir-document
 import { DocumentoRepositoryPg, ObjectStoragePg } from '../../credenciamento/adapters/documentos-pg.js';
 import { CatalogoTiposDocumentoRepo } from '../../credenciamento/adapters/catalogo-tipos-documento.js';
 import { TipoDocumentoRepositoryPg } from '../../catalogos/adapters/catalogo-repository-pg.js';
-import { TIPOS_DOCUMENTO_BASELINE } from '../../catalogos/domain/tipos-documento-baseline.js';
+import { seedTiposDocumento } from './seed-tipos-documento.js';
 import { PiiCipherAesGcm } from '../crypto/pii-cipher-aes.js';
 import { Documento, type FormatoDoc } from '../../credenciamento/domain/documento.js';
 import { Fornecedor } from '../../catalogo/domain/fornecedor.js';
@@ -145,27 +145,6 @@ async function seedFilaAnalise(pool: Pool, piiKey: Buffer): Promise<void> {
     console.log(`[seed] análise: ${s.razaoSocial} + Balanço Patrimonial (pendente).`);
   }
   console.log(`[seed] análise documental: ${criados} fornecedor(es) semeado(s).`);
-}
-
-/**
- * Catálogo de Tipos de Documento (RF022 / UC020) — os "documentos exigidos" do Passo 2 do
- * credenciamento e do dropdown de upload da tela de Documentos. Sem este seed o catálogo nasce vazio
- * e ambas as telas ficam sem tipos. A lista canônica vive em `TIPOS_DOCUMENTO_BASELINE` (fonte única,
- * compartilhada com o bootstrap em memória de `buildServer`). Idempotente via índice único `lower(nome)`.
- */
-/** Semeia o catálogo de tipos de documento (idempotente: `ON CONFLICT (lower(nome)) DO NOTHING`). */
-async function seedTiposDocumento(pool: Pool): Promise<void> {
-  let criados = 0;
-  for (const td of TIPOS_DOCUMENTO_BASELINE) {
-    const r = await pool.query(
-      `INSERT INTO tipos_documento (id, nome, formato, categoria, exige_validade, exige_exercicio, validade_dias, obrigatorio, situacao, last_user_update)
-       VALUES ($1,$2,'pdf',$3,$4,$5,$6,$7,'ativo','seed')
-       ON CONFLICT (lower(nome)) DO NOTHING`,
-      [randomUUID(), td.nome, td.categoria, td.exigeValidade, td.exigeExercicio, td.validadeDias, td.obrigatorio],
-    );
-    if (r.rowCount) { criados++; console.log(`[seed] tipo-documento: ${td.nome}${td.obrigatorio ? ' (obrigatório)' : ''}`); }
-  }
-  console.log(`[seed] tipos-documento: ${criados} criado(s) de ${TIPOS_DOCUMENTO_BASELINE.length}.`);
 }
 
 async function seed(): Promise<void> {

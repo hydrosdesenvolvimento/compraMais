@@ -15,7 +15,7 @@
     "migrate": "tsx src/shared/db/migrate.ts",
     "migrate:prod": "node dist/shared/db/migrate.js",
     "seed": "tsx src/shared/db/seed.ts",
-    "seed:prod": "node dist/shared/db/seed.js",
+    "seed:prod": "node dist/shared/db/seed-prod.js",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -24,7 +24,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "seed:prod:dev": "tsx src/shared/db/seed-prod.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

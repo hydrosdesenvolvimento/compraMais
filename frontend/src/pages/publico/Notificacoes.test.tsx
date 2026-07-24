@@ -11,12 +11,14 @@ vi.mock('../../lib/auth', () => ({ obterUsuario: () => ({ empresaId: 'demo' }) }
 
 const notificacoes = vi.fn<() => Promise<PaginaNotificacoesView>>();
 const catalogoListar = vi.fn();
+const documentos = vi.fn();
 const marcarNotificacaoLida = vi.fn();
 const marcarNotificacoesLidas = vi.fn();
 vi.mock('../../lib/api', () => ({
   api: {
     notificacoes: () => notificacoes(),
     catalogoListar: () => catalogoListar(),
+    documentos: () => documentos(),
     marcarNotificacaoLida: (id: string) => marcarNotificacaoLida(id),
     marcarNotificacoesLidas: () => marcarNotificacoesLidas(),
   },
@@ -39,6 +41,7 @@ describe('Notificacoes — página do fornecedor (histórico + lidas/não-lidas)
   beforeEach(() => {
     notificacoes.mockReset().mockResolvedValue(PAGINA);
     catalogoListar.mockReset().mockResolvedValue([{ id: 's1', sigla: 'SEME', ativo: true, situacao: 'ativo' }]);
+    documentos.mockReset().mockResolvedValue([]);
     marcarNotificacaoLida.mockReset().mockResolvedValue(undefined);
     marcarNotificacoesLidas.mockReset().mockResolvedValue({ atualizadas: 1 });
   });
@@ -65,10 +68,19 @@ describe('Notificacoes — página do fornecedor (histórico + lidas/não-lidas)
     await waitFor(() => expect(marcarNotificacoesLidas).toHaveBeenCalled());
   });
 
-  it('estado vazio quando não há notificações', async () => {
+  it('estado vazio quando não há notificações nem alertas', async () => {
     notificacoes.mockResolvedValue({ total: 0, naoLidas: 0, itens: [] });
     renderTela();
     expect(await screen.findByTestId('vazio')).toBeInTheDocument();
     expect(screen.queryByTestId('marcar-todas')).not.toBeInTheDocument();
+  });
+
+  it('mostra alertas ao vivo (documento a vencer) acima do histórico e sem estado vazio', async () => {
+    notificacoes.mockResolvedValue({ total: 0, naoLidas: 0, itens: [] });
+    documentos.mockResolvedValue([{ tipo: 'Certidão Federal', situacao: 'expirado' }]);
+    renderTela();
+    expect(await screen.findByTestId('alertas')).toBeInTheDocument();
+    expect(screen.getAllByTestId('alerta')).toHaveLength(1);
+    expect(screen.queryByTestId('vazio')).not.toBeInTheDocument();
   });
 });

@@ -1521,6 +1521,7 @@
   "notificacoes": {
     "titulo": "Notifications",
     "subtitulo": "History of your notifications",
+    "alertas": "Alerts",
     "vazio": "You have no notifications.",
     "marcarTodas": "Mark all as read",
     "carregando": "Loading…",

@@ -25,9 +25,10 @@ version: "3.8"
 # --------------------------------------------------------------------------- #
 # Âncoras reutilizáveis                                                        #
 # --------------------------------------------------------------------------- #
-x-deploy-stateless: &deploy-stateless
+x-deploy-stateless:
   # Serviços stateless: réplicas + rolling update com rollback automático.
-  replicas: 2
+  &deploy-stateless
+  replicas: 1
   update_config:
     parallelism: 1
     order: start-first
@@ -54,22 +55,22 @@ services:
       # Senha via Docker secret (nunca em texto). O entrypoint do postgis lê *_FILE.
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
     volumes:
-      - db_data:/var/lib/postgresql/data
+    - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-compramais} -d ${POSTGRES_DB:-compramais}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-compramais} -d ${POSTGRES_DB:-compramais}" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     secrets:
-      - db_password
+    - db_password
     networks:
-      - compramais
+    - compramais
     deploy:
       replicas: 1
       placement:
         constraints:
-          - node.role == manager
+        - node.role == manager
       restart_policy:
         condition: on-failure
         delay: 10s
@@ -115,18 +116,18 @@ services:
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://compramais.example/auth/google/callback}
       AUTH_FRONTEND_REDIRECT: ${AUTH_FRONTEND_REDIRECT:-https://compramais.example/#/cadastro}
     secrets:
-      - db_password
-      - jwt_secret
-      - pii_encryption_key
-      # - sei_senha   # descomentar ao habilitar SEI_PROVIDER=web
+    - db_password
+    - jwt_secret
+    - pii_encryption_key
+    # - sei_senha   # descomentar ao habilitar SEI_PROVIDER=web
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test: [ "CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))" ]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 20s
     networks:
-      - compramais
+    - compramais
     deploy:
       <<: *deploy-stateless
 
@@ -138,12 +139,12 @@ services:
   frontend:
     image: ghcr.io/${GHCR_REPOSITORY:-hydrosdesenvolvimento/compramais}/frontend:${IMAGE_TAG:-latest}
     ports:
-      - target: 8080
-        published: ${FRONTEND_PUBLIC_PORT:-80}
-        protocol: tcp
-        mode: ingress
+    - target: 8080
+      published: ${FRONTEND_PUBLIC_PORT:-80}
+      protocol: tcp
+      mode: ingress
     networks:
-      - compramais
+    - compramais
     deploy:
       <<: *deploy-stateless
 
@@ -157,7 +158,7 @@ services:
     environment:
       FACE_MIN_QUALITY: ${FACE_MIN_QUALITY:-0.5}
     networks:
-      - compramais
+    - compramais
     deploy:
       replicas: ${FACE_REPLICAS:-1}
       update_config:
@@ -171,6 +172,7 @@ services:
 
 volumes:
   db_data:
+
 
 networks:
   compramais:

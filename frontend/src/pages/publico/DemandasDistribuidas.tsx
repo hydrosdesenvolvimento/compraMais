@@ -93,6 +93,21 @@ export function DemandasDistribuidas() {
                         {t('demandasDistribuidas.dentroDoTeto')}
                       </span>
                     </div>
+
+                    {/* Detalhamento por item (Fase 3): a cota do fornecedor em cada item que ele declarou. */}
+                    {d.itens.length > 0 && (
+                      <div data-cy="demanda-itens" style={{ marginTop: 18, borderTop: '1px solid var(--divider)', paddingTop: 14 }}>
+                        <div style={{ font: '600 10.5px var(--font-body)', letterSpacing: '.12em', color: 'var(--cinza-400)', marginBottom: 10 }}>{t('demandasDistribuidas.porItemLabel')}</div>
+                        <div style={{ display: 'grid', gap: 8 }}>
+                          {d.itens.map((it) => (
+                            <div key={it.itemId} data-cy="demanda-item-linha" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, fontSize: 13, padding: '8px 12px', borderRadius: 8, background: 'var(--cinza-100, #f0f3f8)' }}>
+                              <span style={{ flex: 1, minWidth: 0 }}><strong style={{ color: 'var(--azul-900)' }}>{String(it.numero).padStart(2, '0')} · {it.nome}</strong></span>
+                              <span data-cy="item-cota" style={{ color: 'var(--cinza-600, #52607a)', whiteSpace: 'nowrap' }}>{t('demandasDistribuidas.itemCota', { cota: fmt(it.cota), demanda: fmt(it.demanda), unidade: it.unidade })}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div data-cy="reserva-aviso" style={{ padding: '18px 22px', display: 'flex', gap: 13, alignItems: 'flex-start', background: 'var(--atencao-bg)' }}>

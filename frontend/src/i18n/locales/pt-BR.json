@@ -1418,7 +1418,9 @@
     "cotaFinal": "Sua cota final",
     "capacidadeLabel": "Cota alocada vs. sua capacidade (teto)",
     "dentroDoTeto": "Dentro do teto declarado",
-    "reservaAviso": "<b>Você concluiu o credenciamento após a distribuição inicial.</b> Foi classificado no <b>Cadastro de Reserva (2ª Demanda)</b>. Os contratos vigentes não são alterados — você será acionado automaticamente, por ordem de fila, caso um fornecedor titular não cumpra a entrega."
+    "reservaAviso": "<b>Você concluiu o credenciamento após a distribuição inicial.</b> Foi classificado no <b>Cadastro de Reserva (2ª Demanda)</b>. Os contratos vigentes não são alterados — você será acionado automaticamente, por ordem de fila, caso um fornecedor titular não cumpra a entrega.",
+    "porItemLabel": "DISTRIBUIÇÃO POR ITEM",
+    "itemCota": "{{cota}} de {{demanda}} {{unidade}}"
   },
   "meusCredenciamentos": {
     "titulo": "Meus Credenciamentos",
@@ -1480,6 +1482,7 @@
     "termoAceitoEm": "Aceito em",
     "semTermo": "Termo de Aceite ainda não assinado.",
     "criadoEm": "Criado em",
-    "atualizadoEm": "Última atualização"
+    "atualizadoEm": "Última atualização",
+    "capacidadeItens": "{{n}} no total, em {{itens}} item(ns)"
   }
 }

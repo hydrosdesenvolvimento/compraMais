@@ -30,7 +30,8 @@
   - [Escopo Incluído](#escopo-incluído)
   - [Escopo Não Incluído](#escopo-não-incluído)
   - [MVP – Produto Mínimo Viável](#mvp--produto-mínimo-viável)
-  - [Entregáveis do Projeto](#entregáveis-do-projeto)
+  - [Entregáveis do Projeto](#entregáveis-do-projeto)
+
   - [Integrações](#integrações)
   - [Documentos Relacionados](#documentos-relacionados)
 
@@ -125,7 +126,7 @@ Won't Have (Não Terá na V1)
 Sistema de biometria facial para identificação na entrada do portal
 .
 Aplicativo mobile nativo para iOS/Android (a plataforma será Web Responsiva, permitindo acesso via navegador no celular)
-.
+## Entregáveis do Projeto
 ## Entegáveis do Projeto
 Plataforma Web B2G: O "Portal do Fornecedor" (para autoatendimento e upload)
 .

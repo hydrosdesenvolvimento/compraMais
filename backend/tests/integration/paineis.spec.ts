@@ -33,6 +33,10 @@ describe('Painéis (Épico 9) — rotas', () => {
     expect(f).toHaveProperty('documentosPendentes');
     expect(f).toHaveProperty('editaisPorSituacao');
     expect(f).toHaveProperty('bloqueiosAtivos');
+    expect(f).toHaveProperty('fornecedoresAtivos');
+    expect(f).toHaveProperty('fornecedoresMei');
+    expect(f).toHaveProperty('valorEstimado');
+    expect(Array.isArray(f.editaisEmAndamento)).toBe(true);
     await app.close();
   });
 

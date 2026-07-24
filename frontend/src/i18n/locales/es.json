@@ -615,7 +615,8 @@
           "quantidade": "Cant.",
           "preco": "Precio tope",
           "acoes": "Acciones"
-        }
+        },
+        "listaTitulo": "Materiales del edicto"
       }
     },
     "contestacoes": {

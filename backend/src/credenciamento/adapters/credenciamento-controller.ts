@@ -3,6 +3,9 @@ import type { SolicitarCredenciamento, Actor } from '../application/solicitar-cr
 import type { ListarCredenciamentos } from '../application/listar-credenciamentos.js';
 import type { DetalharCredenciamento } from '../application/detalhar-credenciamento.js';
 import type { GerarComprovanteCredenciamento } from '../application/gerar-comprovante-credenciamento.js';
+import type { RegistrarProvaDeVidaNoCredenciamento } from '../application/registrar-prova-de-vida.js';
+import { FalhaCapturaFacial } from '../../biometria/domain/biometria.js';
+import { decodificarImagem } from '../../biometria/adapters/biometria-controller.js';
 import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
 import { exigirPapel } from '../../shared/http/autenticacao.js';
 import { renderComprovantePdf } from './comprovante-pdf.js';
@@ -16,7 +19,7 @@ const PERFIS_FORNECEDOR: readonly Papel[] = ['titular', 'procurador'];
  * um titular podia credenciar em nome de qualquer empresa só trocando o header.
  * Conclusão por Termo de Aceite (RN016) e cancelamento antes da distribuição (A2).
  */
-export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento; listar: ListarCredenciamentos; detalhar: DetalharCredenciamento; comprovante: GerarComprovanteCredenciamento }): void {
+export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solicitar: SolicitarCredenciamento; listar: ListarCredenciamentos; detalhar: DetalharCredenciamento; comprovante: GerarComprovanteCredenciamento; provaVida: RegistrarProvaDeVidaNoCredenciamento }): void {
   // Leitura: credenciamentos do fornecedor para o portal. Somente "em andamento" por padrão (não
   // cancelados) — recorte da home; resolvido por `:id` como as demais rotas de leitura do fornecedor
   // (documentos). `?incluirCancelados=true` devolve o histórico completo, que a tela "Meus
@@ -83,6 +86,24 @@ export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solic
     }
   });
 
+  // Passo 3 do wizard (UC007 · prova de vida): a captura ao vivo da webcam é comparada 1:1 com a
+  // referência do cadastro. Aprova/reprova (não conclui nada) — o gate está no Termo. Falha de captura
+  // vira `codigo` = motivo (sem rosto/múltiplos/qualidade) para o front orientar nova tentativa.
+  app.post('/credenciamentos/:id/prova-de-vida', async (req, reply) => {
+    const identidade = exigirPapel(req, reply, PERFIS_FORNECEDOR);
+    if (!identidade) return reply;
+    const { id } = req.params as { id: string };
+    const { imagem } = req.body as { imagem?: string };
+    if (!imagem) return reply.code(422).send({ codigo: 'ImagemObrigatoria', mensagem: 'imagem (base64) is required.' });
+    try {
+      const out = await deps.provaVida.executar(id, decodificarImagem(imagem), ator(identidade));
+      return reply.send(out);
+    } catch (e) {
+      if (e instanceof FalhaCapturaFacial) return reply.code(422).send({ codigo: e.motivo, mensagem: e.message });
+      return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message });
+    }
+  });
+
   app.post('/credenciamentos/:id/termo', async (req, reply) => {
     const identidade = exigirPapel(req, reply, PERFIS_FORNECEDOR);
     if (!identidade) return reply;
@@ -135,6 +156,7 @@ function erro(e: unknown): number {
   const n = (e as Error).name;
   if (n === 'EditalIncompativel' || n === 'EditalNaoAberto') return 403;
   if (n === 'CredenciamentoNaoEncontrado' || n === 'FornecedorNaoEncontrado') return 404;
-  if (n === 'TransicaoCredenciamentoInvalida' || n === 'TransicaoStatusInvalida' || n === 'CredenciamentoJaDistribuido' || n === 'CredenciamentoDuplicado') return 409;
-  return 422; // CapacidadeInvalida, TermoIncompleto, etc.
+  if (n === 'ReconhecimentoFacialIndisponivel') return 503; // serviço facial fora do ar → "tente novamente"
+  if (n === 'TransicaoCredenciamentoInvalida' || n === 'TransicaoStatusInvalida' || n === 'CredenciamentoJaDistribuido' || n === 'CredenciamentoDuplicado' || n === 'ProvaDeVidaPendente' || n === 'SemReferenciaBiometrica') return 409;
+  return 422; // CapacidadeInvalida, TermoIncompleto, ModeloBiometricoIncompativel, etc.
 }

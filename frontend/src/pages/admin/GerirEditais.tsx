@@ -2,22 +2,19 @@ import { useMemo, useState, type CSSProperties } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { api, type EditalGestao, type CatalogoItemView, type FiltroEditais } from '../../lib/api';
+import { api, type EditalGestao, type CatalogoItemView, type FiltroEditais, type ItemEditalView } from '../../lib/api';
 import { celula, cabecalho, Paginacao } from '../../design-system/tabela';
 import { Botao, BotaoIcone, Campo } from '../../design-system/components';
-import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro } from '../../design-system/icons';
+import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro, IconeDemandas } from '../../design-system/icons';
 
 const POR_PAGINA = 10;
 
 /**
  * Gestão de Editais (SGMA) — tela única de editais do Painel Admin em `/admin/editais` (FR-001/003/004).
  * Lista todos os editais (todas as secretarias/situações) via QBE sem probe; cria em rascunho (modal
- * "Novo edital"), publica e encerra. Layout fiel a `spec/Prototipo/painel-administrativo.html`: colunas
- * Edital (nº + CNAE), Objeto (+ quantitativo), Secretaria, Prazo, Status e Ações.
- *
- * Onde o mockup pede dado sem lastro no domínio ("placeholder honesto"): o protótipo exibia "Valor
- * estimado" — omitido, pois não existe no domínio e RN013 veda montantes. O `numero` oficial (ED-AAAA/NNN)
- * é gerado no backend ao criar (identificador humano, não montante); por isso o modal de criação não o
+ * "Novo edital"), publica e encerra. Colunas: Edital (nº + CNAE), Objeto, Secretaria, Prazo, Status e
+ * Ações. A quantidade não é mais campo do edital — vive nos itens (gerenciados pela ação "Itens" no
+ * rascunho). O `numero` oficial (ED-AAAA/NNN) é gerado no backend ao criar; o modal de criação não o
  * coleta. "Ver" abre um modal read-only com os dados da própria listagem (sem nova chamada).
  */
 
@@ -40,6 +37,7 @@ export function GerirEditais() {
   const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [verId, setVerId] = useState<string | null>(null);
+  const [itensId, setItensId] = useState<string | null>(null); // edital cujo modal de itens está aberto
   const [criando, setCriando] = useState(false);
   const [busca, setBusca] = useState('');
   const [situacao, setSituacao] = useState('');
@@ -82,9 +80,10 @@ export function GerirEditais() {
   }, [secretariasLista]);
 
   const criar = useMutation({
-    mutationFn: (v: { objeto: string; secretariaId: string; cnae: string; quantitativos: number; prazo: string }) =>
-      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), quantitativos: v.quantitativos, prazoVigencia: v.prazo }),
-    onSuccess: () => { setCriando(false); void invalidar(); },
+    mutationFn: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string }) =>
+      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo }),
+    // Recém-criado nasce em rascunho: abre direto o gerenciador de itens para o gestor cadastrá-los.
+    onSuccess: (res) => { setCriando(false); void invalidar(); setItensId(res.editalId); },
   });
   const publicar = useMutation({ mutationFn: (id: string) => api.publicarEdital(id), onSuccess: () => void invalidar() });
   const encerrar = useMutation({ mutationFn: (id: string) => api.encerrarEdital(id), onSuccess: () => void invalidar() });
@@ -110,7 +109,6 @@ export function GerirEditais() {
         <div>
           <div style={{ fontSize: 12, color: 'var(--cinza-400)' }}>{t('admin.gerirEditais.eyebrow')}</div>
           <h1 className="page-title" style={{ margin: '4px 0 3px' }}>{t('admin.gerirEditais.titulo')}</h1>
-          <p className="page-sub" style={{ margin: 0 }}>{t('admin.gerirEditais.subtitulo')}</p>
         </div>
         <Botao data-cy="novo-edital" onClick={() => setCriando(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
           <span aria-hidden style={{ fontSize: 16, lineHeight: 1 }}>+</span>{t('admin.gerirEditais.novoEdital')}
@@ -204,7 +202,6 @@ export function GerirEditais() {
                         </td>
                         <td style={{ ...celula, minWidth: 240 }}>
                           <div style={{ font: '500 14px var(--font-body)', color: 'var(--azul-900)', maxWidth: 320 }}>{e.objeto}</div>
-                          <div style={{ fontSize: 12, color: 'var(--cinza-400)' }}>{t('admin.gerirEditais.unidades', { n: e.quantitativos })}</div>
                         </td>
                         <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-500)', whiteSpace: 'nowrap' }}>{siglaDe(e.secretariaId)}</td>
                         <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-500)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{formatarPrazo(e.prazoVigencia)}</td>
@@ -213,6 +210,9 @@ export function GerirEditais() {
                         </td>
                         <td style={{ ...celula, textAlign: 'right' }}>
                           <div style={{ display: 'inline-flex', gap: 8, justifyContent: 'flex-end', alignItems: 'center' }}>
+                            {e.situacao === 'rascunho' && (
+                              <BotaoIcone icone={IconeDemandas} data-cy="gerir-itens" title={t('admin.gerirEditais.itens.acao')} aria-label={t('admin.gerirEditais.itens.acao')} onClick={() => setItensId(e.id)} />
+                            )}
                             {e.situacao === 'rascunho' && (
                               <Botao data-cy="publicar" onClick={() => publicar.mutate(e.id)} disabled={publicar.isPending}>{t('admin.gerirEditais.publicar')}</Botao>
                             )}
@@ -243,6 +243,7 @@ export function GerirEditais() {
 
       {edital && <ModalDetalhe edital={edital} sigla={siglaDe(edital.secretariaId)} prazo={formatarPrazo(edital.prazoVigencia)} rotuloSituacao={rotuloSituacao} onFechar={() => setVerId(null)} />}
       {criando && <ModalNovoEdital secretarias={secretariasLista} salvando={criar.isPending} onSalvar={(v) => criar.mutate(v)} onFechar={() => setCriando(false)} />}
+      {itensId && <ModalItensEdital editalId={itensId} numero={editais.find((e) => e.id === itensId)?.numero} onFechar={() => setItensId(null)} />}
     </div>
   );
 }
@@ -257,7 +258,6 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
     [t('admin.gerirEditais.campoObjeto'), edital.objeto],
     [t('admin.gerirEditais.campoSecretaria'), sigla],
     [t('admin.gerirEditais.campoCnaes'), edital.cnaesAlvo.map(formatarCnae).join(', ') || '—'],
-    [t('admin.gerirEditais.campoQuantitativos'), t('admin.gerirEditais.unidades', { n: edital.quantitativos })],
     [t('admin.gerirEditais.campoPrazo'), prazo],
     [t('admin.gerirEditais.campoStatus'), rotuloSituacao(edital.situacao)],
   ];
@@ -296,12 +296,12 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
 function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
   secretarias: CatalogoItemView[];
   salvando: boolean;
-  onSalvar: (v: { objeto: string; secretariaId: string; cnae: string; quantitativos: number; prazo: string }) => void;
+  onSalvar: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string }) => void;
   onFechar: () => void;
 }) {
   const { t } = useTranslation();
   const form = useForm({
-    defaultValues: { objeto: '', secretariaId: '', cnae: '', quantitativos: 1, prazo: '' },
+    defaultValues: { objeto: '', secretariaId: '', cnae: '', prazo: '' },
     onSubmit: ({ value }) => onSalvar(value),
   });
   return (
@@ -333,7 +333,7 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
             </Campo>
           )}</form.Field>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="cm-form-grid">
             <form.Field name="secretariaId">{(f) => (
               <Campo label={t('admin.gerirEditais.secretariaLabel')} htmlFor="edital-secretaria">
                 <select id="edital-secretaria" data-cy="secretaria" className="input" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)}>
@@ -352,18 +352,12 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
           </div>
           <span style={{ display: 'block', margin: '-6px 0 12px', fontSize: 12, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.cnaeAjuda')}</span>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-            <form.Field name="quantitativos">{(f) => (
-              <Campo label={t('admin.gerirEditais.quantitativosLabel')} htmlFor="edital-quantitativos">
-                <input id="edital-quantitativos" data-cy="quantitativos" className="input" type="number" min={1} value={f.state.value} onChange={(ev) => f.handleChange(Number(ev.target.value))} />
-              </Campo>
-            )}</form.Field>
-            <form.Field name="prazo">{(f) => (
-              <Campo label={t('admin.gerirEditais.prazoLabel')} htmlFor="edital-prazo">
-                <input id="edital-prazo" data-cy="prazo" className="input" type="date" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
-              </Campo>
-            )}</form.Field>
-          </div>
+          {/* A quantidade deixou de ser campo do edital: passou a viver nos itens (gerenciados após criar). */}
+          <form.Field name="prazo">{(f) => (
+            <Campo label={t('admin.gerirEditais.prazoLabel')} htmlFor="edital-prazo">
+              <input id="edital-prazo" data-cy="prazo" className="input" type="date" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
+            </Campo>
+          )}</form.Field>
 
           <div data-cy="nota-soft-delete" style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '4px 0 18px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-700)', fontSize: 13, lineHeight: 1.5 }}>
             <span aria-hidden>ℹ</span>
@@ -375,6 +369,128 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
             <Botao type="submit" data-cy="criar" disabled={salvando}>{t('admin.gerirEditais.salvar')}</Botao>
           </div>
         </form>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Gestão dos itens do edital (a partir do catálogo de materiais e serviços, SEM lotes). Só para editais
+ * em rascunho (o backend recusa itens após publicar). Lista os itens já cadastrados e um formulário para
+ * adicionar: item do catálogo → unidade (restrita às unidades daquele item) → quantidade → preço-teto.
+ *
+ * O preço-teto é montante monetário e vive só no Painel Admin — não é exposto no portal público (RN013).
+ */
+function ModalItensEdital({ editalId, numero, onFechar }: { editalId: string; numero?: string; onFechar: () => void }) {
+  const { t, i18n } = useTranslation();
+  const qc = useQueryClient();
+  const moeda = useMemo(() => new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'BRL' }), [i18n.language]);
+
+  const { data: itens = [], isLoading } = useQuery({ queryKey: ['edital-itens', editalId], queryFn: () => api.editalItens(editalId) });
+  const { data: catalogo = [] } = useQuery({ queryKey: ['catalogo', 'materiais-servicos'], queryFn: () => api.catalogoListar('materiais-servicos') });
+
+  const [itemCatalogoId, setItemCatalogoId] = useState('');
+  const [unidade, setUnidade] = useState('');
+  const [quantidade, setQuantidade] = useState(1);
+  const [precoTeto, setPrecoTeto] = useState('');
+
+  const selecionado = catalogo.find((c) => c.id === itemCatalogoId);
+  const unidadesDisponiveis = selecionado?.unidades ?? [];
+
+  const invalidar = () => qc.invalidateQueries({ queryKey: ['edital-itens', editalId] });
+  const limpar = () => { setItemCatalogoId(''); setUnidade(''); setQuantidade(1); setPrecoTeto(''); };
+
+  const adicionar = useMutation({
+    mutationFn: () => api.adicionarItemEdital(editalId, { itemCatalogoId, unidade, quantidade, precoTeto: Number(precoTeto) }),
+    onSuccess: () => { limpar(); void invalidar(); },
+  });
+  const remover = useMutation({ mutationFn: (itemId: string) => api.removerItemEdital(editalId, itemId), onSuccess: () => void invalidar() });
+
+  // Ao trocar o item do catálogo, escolhe a 1ª unidade dele (o backend valida unidade ∈ unidades do item).
+  const trocarItem = (id: string) => {
+    setItemCatalogoId(id);
+    const c = catalogo.find((x) => x.id === id);
+    setUnidade(c?.unidades?.[0] ?? '');
+  };
+
+  const podeAdicionar = Boolean(itemCatalogoId && unidade && quantidade > 0 && Number(precoTeto) > 0) && !adicionar.isPending;
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label={t('admin.gerirEditais.itens.titulo')} data-cy="modal-itens-edital"
+      onClick={onFechar} style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 50 }}>
+      <div onClick={(ev) => ev.stopPropagation()} className="card" style={{ width: 'min(760px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 4 }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 18, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.itens.titulo')}</h2>
+            <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.itens.subtitulo', { numero: numero ?? '' })}</p>
+          </div>
+          <BotaoIcone icone={IconeFechar} variante="fechar" data-cy="fechar-modal" title={t('admin.gerirEditais.fechar')} aria-label={t('admin.gerirEditais.fechar')} onClick={onFechar} />
+        </div>
+
+        {/* Formulário de adição */}
+        <form data-cy="form-item-edital" onSubmit={(e) => { e.preventDefault(); if (podeAdicionar) adicionar.mutate(); }} className="cm-form-grid" style={{ margin: '14px 0 8px' }}>
+          <Campo label={t('admin.gerirEditais.itens.itemLabel')} htmlFor="item-catalogo" className="cm-campo-total">
+            <select id="item-catalogo" data-cy="item-catalogo" className="input" value={itemCatalogoId} onChange={(ev) => trocarItem(ev.target.value)}>
+              <option value="">{t('admin.gerirEditais.itens.itemPlaceholder')}</option>
+              {catalogo.map((c) => <option key={c.id} value={c.id}>{c.numero ? `${c.numero} · ${c.nome}` : c.nome}</option>)}
+            </select>
+          </Campo>
+          <Campo label={t('admin.gerirEditais.itens.unidadeLabel')} htmlFor="item-unidade">
+            <select id="item-unidade" data-cy="item-unidade" className="input" value={unidade} disabled={!itemCatalogoId} onChange={(ev) => setUnidade(ev.target.value)}>
+              {unidadesDisponiveis.length === 0 && <option value="">—</option>}
+              {unidadesDisponiveis.map((u) => <option key={u} value={u}>{u}</option>)}
+            </select>
+          </Campo>
+          <Campo label={t('admin.gerirEditais.itens.quantidadeLabel')} htmlFor="item-quantidade">
+            <input id="item-quantidade" data-cy="item-quantidade" className="input" type="number" min={1} value={quantidade} onChange={(ev) => setQuantidade(Number(ev.target.value))} />
+          </Campo>
+          <Campo label={t('admin.gerirEditais.itens.precoLabel')} htmlFor="item-preco">
+            <input id="item-preco" data-cy="item-preco" className="input" type="number" min={0} step="0.01" inputMode="decimal" placeholder="0,00" value={precoTeto} onChange={(ev) => setPrecoTeto(ev.target.value)} />
+          </Campo>
+          <div className="cm-campo-total" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <Botao type="submit" data-cy="adicionar-item" disabled={!podeAdicionar}>{t('admin.gerirEditais.itens.adicionar')}</Botao>
+            {adicionar.isError && <span data-cy="erro-item" role="alert" style={{ fontSize: 13, color: 'var(--erro, #c0392b)' }}>{t('admin.gerirEditais.itens.erroAdicionar')}</span>}
+          </div>
+        </form>
+
+        {/* Lista dos itens já cadastrados */}
+        <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 8 }}>
+          {isLoading ? (
+            <div data-cy="itens-carregando" style={{ padding: 20, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.itens.carregando')}</div>
+          ) : itens.length === 0 ? (
+            <div data-cy="itens-vazio" style={{ padding: '32px 20px', textAlign: 'center', color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.itens.vazio')}</div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table data-cy="tabela-itens-edital" style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
+                <thead>
+                  <tr>
+                    {['num', 'item', 'unidade', 'quantidade', 'preco', 'acoes'].map((c, idx, arr) => (
+                      <th key={c} scope="col" style={cabecalho(false, idx === arr.length - 1 ? 'right' : 'left')}>{t(`admin.gerirEditais.itens.col.${c}`)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {itens.map((it: ItemEditalView) => (
+                    <tr key={it.id} data-cy="item-edital-linha" data-id={it.id}>
+                      <td style={{ ...celula, font: '700 13.5px var(--font-body)', color: 'var(--azul-900)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{String(it.numero).padStart(2, '0')}</td>
+                      <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-800)', minWidth: 200 }}>{it.nome}</td>
+                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap' }}>{it.unidade}</td>
+                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{new Intl.NumberFormat(i18n.language).format(it.quantidade)}</td>
+                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{moeda.format(it.precoTeto)}</td>
+                      <td style={{ ...celula, textAlign: 'right' }}>
+                        <BotaoIcone icone={IconeFechar} data-cy="remover-item" title={t('admin.gerirEditais.itens.remover')} aria-label={t('admin.gerirEditais.itens.remover')} disabled={remover.isPending} onClick={() => remover.mutate(it.id)} style={{ color: 'var(--erro, #c0392b)' }} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        <div data-cy="nota-preco-transparencia" style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '14px 0 2px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-700)', fontSize: 12.5, lineHeight: 1.5 }}>
+          <span aria-hidden>ℹ</span><span>{t('admin.gerirEditais.itens.notaPreco')}</span>
+        </div>
       </div>
     </div>
   );

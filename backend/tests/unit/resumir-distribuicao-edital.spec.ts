@@ -34,7 +34,8 @@ function credenciamento(fornecedorId: string, estado: EstadoCredenciamento, capa
   });
 }
 
-const EDITAL = { id: 'edital-1', numero: 'ED-2026/001', objeto: 'Mobiliário escolar', secretariaId: 'sec-educacao', situacao: 'publicado', quantitativos: 100 };
+// A demanda vem da soma das quantidades dos itens (o edital não tem mais quantitativo agregado).
+const EDITAL = { id: 'edital-1', numero: 'ED-2026/001', objeto: 'Mobiliário escolar', secretariaId: 'sec-educacao', situacao: 'publicado', demanda: 100 };
 const editaisFake: EditalResumoDistribuicaoLookup = { porId: async (id) => (id === EDITAL.id ? EDITAL : null) };
 const secretariasFake: SecretariaLookup = { siglaPorId: async (id) => (id === 'sec-educacao' ? 'SEME' : null) };
 

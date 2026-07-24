@@ -41,7 +41,7 @@ export class GerirEditais {
    * Cria o edital em rascunho já com a numeração oficial do ano corrente (ED-AAAA/NNN). O número é
    * reservado pelo `NumeradorEditais` (atômico) e é imutável: `editar` não o alcança.
    */
-  async criar(input: { secretariaId: string; objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string }, actor: Actor): Promise<{ editalId: string; numero: string }> {
+  async criar(input: { secretariaId: string; objeto: string; cnaesAlvo: string[]; prazoVigencia: string }, actor: Actor): Promise<{ editalId: string; numero: string }> {
     await this.cnaes.validar(input.cnaesAlvo);
     const id = randomUUID();
     const ano = new Date(this.now()).getUTCFullYear();
@@ -59,7 +59,7 @@ export class GerirEditais {
     await this.bus.publish(new EditalPublicado(editalId, { editalId }, actor).toEnvelope(randomUUID(), this.now()));
   }
 
-  async editar(editalId: string, campos: Partial<{ objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }>, actor: Actor): Promise<void> {
+  async editar(editalId: string, campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null }>, actor: Actor): Promise<void> {
     const e = await this.exigir(editalId);
     if (campos.cnaesAlvo) await this.cnaes.validar(campos.cnaesAlvo);
     const { diff, ampliouPublico } = e.editar(campos, actor.userId);

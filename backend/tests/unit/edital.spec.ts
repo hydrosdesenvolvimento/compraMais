@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { Edital, EditalSemSecretaria, EditalIncompleto, TransicaoInvalida } from '../../src/editais/domain/edital.js';
 import { NumeroEditalInvalido } from '../../src/editais/domain/numero-edital.js';
 
-function rascunho(over: Partial<{ cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }> = {}) {
-  return Edital.criar({ id: 'e1', numero: 'ED-2026/001', secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2099-12-31', ...over });
+function rascunho(over: Partial<{ cnaesAlvo: string[]; prazoVigencia: string | null }> = {}) {
+  return Edital.criar({ id: 'e1', numero: 'ED-2026/001', secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], prazoVigencia: '2099-12-31', ...over });
 }
 
 describe('Edital (US1)', () => {
@@ -24,10 +24,11 @@ describe('Edital (US1)', () => {
     expect(rascunho().situacao).toBe('rascunho');
   });
 
-  it('publicar exige completude (FR-004)', () => {
-    expect(() => rascunho({ quantitativos: 0 }).publicar()).toThrow(EditalIncompleto);
+  it('publicar exige completude (FR-004) — objeto, CNAE alvo e prazo (a demanda vive nos itens)', () => {
     expect(() => rascunho({ prazoVigencia: null }).publicar()).toThrow(EditalIncompleto);
     expect(() => rascunho({ cnaesAlvo: [] }).publicar()).toThrow(EditalIncompleto);
+    // Sem quantitativo agregado: um edital com objeto+CNAE+prazo publica (a quantidade é dos itens).
+    expect(() => rascunho().publicar()).not.toThrow();
   });
 
   it('ciclo rascunho→publicado→encerrado; transições inválidas barradas', () => {

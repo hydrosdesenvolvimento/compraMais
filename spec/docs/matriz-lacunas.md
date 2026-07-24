@@ -19,6 +19,7 @@
 |---|---|---|---|
 | 1.0 | 2026-06-29 | Mary / Paige (Party Mode) | Versão inicial — catalogação de 21 lacunas a partir do `source/` |
 | 2.0 | 2026-06-29 | Mary / Paige (Party Mode) | Mergulhos em LAC-04, LAC-08, LAC-09; LAC-10 fechada; correção da contagem (a própria LAC-01); pontos de convergência LAC-11 e LAC-17 |
+| 2.1 | 2026-07-05 | Paige (Technical Writer) | Atualizado 2026-07-05 (Validação 01): +LAC-22/23/24 (lacunas herdadas do feedback do cliente); reforço de LAC-05 e LAC-08/LAC-17 |
 
 ---
 
@@ -84,6 +85,7 @@ Dois itens reaparecem como dependência de várias lacunas — devem ser tratado
 | **LAC-07** | RF009 exige SMS/e-mail, mas **nenhum gateway** consta nas integrações (RNF001) | `03-HDR.md` RF009 vs RNF001 | 🟠 | Qual provedor de SMS/e-mail? Custo? Opt-in? |
 | **LAC-17** | Premissa "Prefeitura proverá acessos" + Pendência "chaves/APIs definitivas" — dependência **não confirmada** | `03-HDR.md` Premissas + Resumo Executivo | 🔴 | Status real dos contratos de interoperabilidade (PGM/SICAF/Receita)? |
 | **LAC-18** | Carga inicial (histórico de preços/itens) dependente e sem detalhamento | `03-HDR.md` Dependências Externas | 🟡 | Fonte, formato e prazo da carga inicial? |
+| **LAC-24** | PDF do SEI (RF025/AD-39): indefinido se o sistema apenas **armazena** o PDF ou **extrai** dados (OCR/parse) — risco de *scope creep* se for extração *(origem: Validação 01)* | Validação 01 (visitas 5/6); RF025; AD-39 | 🟠 | **Aberta** — Dono: TI/SMGA. Definir armazenar × extrair antes de dimensionar a Story do SEI |
 
 ---
 
@@ -96,6 +98,7 @@ Dois itens reaparecem como dependência de várias lacunas — devem ser tratado
 | **LAC-10** | RF012 (biometria) com status contraditório | `03-HDR.md` RF012 vs Lacunas | ✅ | **Fechada** se acatada a remoção da biometria do MVP (LAC-09) |
 | **LAC-16** | RNF004 exige "por item e não por lote" (TCE), mas escopo/BPMN falam em "Lotes e itens" | `03-HDR.md` RNF004 vs `02-Escopo` + `08-BPMN` | 🟠 | O MVP é por item, por lote ou ambos? |
 | **LAC-21** | Restrição de cronograma (30/06/2026) pede "protótipos funcionais auditáveis **e testados**" | `03-HDR.md` Restrições | 🟠 | O que sobe na FIEAC é protótipo de demo ou produção? |
+| **LAC-22** | Texto jurídico do **Termo de Responsabilidade** (RF024) precisa de validação do jurídico da Prefeitura — **bloqueia a Story 2.4 no desenvolvimento** (não bloqueia o canônico) *(origem: Validação 01)* | Validação 01 (visitas 5/6); RF024 | 🟠 | **Aberta** — Dono: SMGA/Jurídico. Ratificar a redação do Termo antes de codar a Story 2.4 |
 
 ---
 
@@ -109,6 +112,7 @@ Dois itens reaparecem como dependência de várias lacunas — devem ser tratado
 | **LAC-13** | RN006 manda o **sistema** "comprovar idoneidade" do balanço, mas é covalidação **humana** (RN003) | `03-HDR.md` RN006 vs RN003 | 🟡 | O que é automático × análise humana? |
 | **LAC-14** | RF006/RN004 "Cadastro de Reserva" sem **ciclo de vida** claro (parcialmente esclarecido por UC009) | `03-HDR.md` RF006/RN004; `06-CasosUso` UC009 | 🟡 | Gatilho e regra de promoção da reserva? (substituição via UC009 alt.) |
 | **LAC-19** | GPI/Leilão/desfazimento — dúvida aberta sobre qual sistema cuida | `03-HDR.md` Lacunas | ⚪ | Confirmar fora do escopo do MVP |
+| **LAC-23** | Critérios exatos de **convocação do Cadastro de Reserva** ("apenas em caso de falha do titular?") — refina RN004/UC009 *(origem: Validação 01)* | Validação 01 (visitas 5/6); RN004; UC009 | 🟡 | **Aberta** — Dono: SMGA/CPL. Definir gatilho exato de convocação da reserva |
 
 ---
 

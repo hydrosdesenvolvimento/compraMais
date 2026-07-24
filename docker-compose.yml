@@ -80,6 +80,11 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
       # CNPJ/CEP via BrasilAPI (sem chave); 'mock' para dev offline.
       RECEITA_PROVIDER: ${RECEITA_PROVIDER:-brasilapi}
+      # Reconhecimento facial (UC007). 'mock' em dev (não exige o container pesado); 'insightface'
+      # aponta para o serviço `face`. Limiar de cosseno sobreponível (calibração).
+      FACE_PROVIDER: ${FACE_PROVIDER:-mock}
+      FACE_SERVICE_URL: ${FACE_SERVICE_URL:-http://face:8000}
+      FACE_MATCH_THRESHOLD: ${FACE_MATCH_THRESHOLD:-0.35}
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
@@ -124,6 +129,21 @@ services:
       - "${FRONTEND_PORT:-5173}:5173"
     depends_on:
       - backend
+    networks:
+      - compramais
+
+  # ----------------------------------------------------------------------- #
+  # Reconhecimento facial (DEV): serviço Python isolado (UC007 — prova de   #
+  # vida). Fronteira de ML fora do backend TS (Ports & Adapters). Modelos    #
+  # SCRFD+ArcFace embutidos na build → runtime offline. Só usado quando      #
+  # FACE_PROVIDER=insightface no backend; senão o backend usa o mock.        #
+  # ----------------------------------------------------------------------- #
+  face:
+    profiles: ["dev"]
+    build:
+      context: ./face-service
+    environment:
+      FACE_MIN_QUALITY: ${FACE_MIN_QUALITY:-0.5}
     networks:
       - compramais
 
@@ -186,6 +206,10 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
       CORS_ORIGIN: ${CORS_ORIGIN:-https://compramais.example}
       RECEITA_PROVIDER: ${RECEITA_PROVIDER:-brasilapi}
+      # Reconhecimento facial (UC007): em prod usa o serviço Python real por padrão.
+      FACE_PROVIDER: ${FACE_PROVIDER:-insightface}
+      FACE_SERVICE_URL: ${FACE_SERVICE_URL:-http://face-prod:8000}
+      FACE_MATCH_THRESHOLD: ${FACE_MATCH_THRESHOLD:-0.35}
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
@@ -233,6 +257,27 @@ services:
     networks:
       - compramais
     deploy:
+      replicas: 2
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+
+  # ----------------------------------------------------------------------- #
+  # Reconhecimento facial (PROD): imagem do GHCR + deploy Swarm             #
+  # ----------------------------------------------------------------------- #
+  face-prod:
+    profiles: ["prod"]
+    image: ghcr.io/${GHCR_REPOSITORY:-OWNER/REPO}/face-service:${IMAGE_TAG:-latest}
+    environment:
+      FACE_MIN_QUALITY: ${FACE_MIN_QUALITY:-0.5}
+    networks:
+      - compramais
+    deploy:
+      # Stateless (só inferência): replicas + rolling update, como o backend.
       replicas: 2
       update_config:
         parallelism: 1

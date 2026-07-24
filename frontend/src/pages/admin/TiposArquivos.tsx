@@ -228,7 +228,7 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
               <span style={rotulo}>{t('admin.tiposArquivos.campos.documento')}</span>
               <input className="input" data-cy="campo-nome" required placeholder={t('admin.tiposArquivos.modal.nomePlaceholder')} value={form.nome} onChange={setTexto('nome')} style={{ width: '100%' }} />
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="cm-form-grid">
               <label>
                 <span style={rotulo}>{t('admin.tiposArquivos.modal.formatoLabel')}</span>
                 <input className="input" data-cy="campo-formato" required placeholder={t('admin.tiposArquivos.modal.formatoPlaceholder')} value={form.formato} onChange={setTexto('formato')} style={{ width: '100%' }} />
@@ -243,7 +243,7 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
                 </select>
               </label>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: form.modo === 'dias' ? '1fr 1fr' : '1fr', gap: 16 }}>
+            <div className={form.modo === 'dias' ? 'cm-form-grid' : undefined} style={form.modo === 'dias' ? undefined : { display: 'grid', gap: 16 }}>
               <label>
                 <span style={rotulo}>{t('admin.tiposArquivos.modal.validadeLabel')}</span>
                 <select className="input" data-cy="campo-validade-modo" value={form.modo} onChange={(e) => setForm({ ...form, modo: e.target.value as ModoValidade })} style={{ width: '100%' }}>

@@ -78,12 +78,14 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 }
 
 // --- Tipos de leitura ---
-export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null; quantitativos: number }
-export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }
+export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null }
+export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null }
 /** Página da busca de gestão de editais (`GET /gestao/editais`): itens + total do filtro para o pager. */
 export interface PaginaEditais { items: EditalGestao[]; total: number; page: number; size: number }
 /** Filtros da tela de gestão de editais; todos opcionais (QBE). `texto` casa parcial em número/objeto. */
 export interface FiltroEditais { secretariaId?: string; situacao?: string; cnae?: string; texto?: string; page?: number; size?: number }
+/** Item do edital (do catálogo de materiais e serviços, sem lotes). `precoTeto` é montante — não vai à transparência pública (RN013). */
+export interface ItemEditalView { id: string; editalId: string; numero: number; itemCatalogoId: string; nome: string; descricao: string | null; unidade: string; quantidade: number; precoTeto: number }
 /** Tela "Credenciamento em Edital" (Painel Admin · Operação) — situação do fornecedor perante o edital. */
 export type StatusElegivel = 'credenciado' | 'requerente' | 'elegivel';
 export interface FornecedorElegivelView {
@@ -190,7 +192,9 @@ export interface Funil { documentosPendentes: number; editaisPorSituacao: { rasc
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; usuarioNome: string | null; papel: string | null; evento: string; timestamp: string; ip: string | null }
 /** UC020 — item de catálogo base (superset: cada catálogo acrescenta seus campos). */
-export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento';
+export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento' | 'materiais-servicos';
+/** Natureza do item do catálogo de materiais e serviços. */
+export type TipoItemCatalogo = 'material' | 'servico';
 export interface CatalogoItemView {
   id: string; ativo: boolean; situacao: 'ativo' | 'inativo';
   // Secretaria
@@ -199,6 +203,8 @@ export interface CatalogoItemView {
   codigo?: string; descricao?: string;
   // Tipo de documento
   formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number; obrigatorio?: boolean;
+  // Material/Serviço — `numero` (ITM-AAAA/NNN) é gerado pelo backend e read-only na tela
+  numero?: string; tipo?: TipoItemCatalogo; especificacoes?: string; unidades?: string[];
 }
 /** UC021 — servidor interno exibido no Painel Admin de usuários (sem segredos). */
 export interface UsuarioInternoView {
@@ -384,9 +390,14 @@ export const api = {
   // Tela "Cadastro de Reserva": fila cronológica global dos retardatários fora da matriz vigente (UC009/RN004).
   cadastroReserva: () => get<CadastroReservaView[]>('/gestao/cadastro-reserva'),
   desistencias: () => get<DesistenciaView[]>('/gestao/desistencias'),
-  criarEdital: (body: unknown) => send('/editais', 'POST', body),
+  criarEdital: (body: unknown) => send<{ editalId: string; numero: string; situacao: string }>('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),
+  // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). Só editáveis em rascunho.
+  editalItens: (id: string) => get<ItemEditalView[]>(`/editais/${id}/itens`),
+  adicionarItemEdital: (id: string, body: { itemCatalogoId: string; unidade: string; quantidade: number; precoTeto: number }) =>
+    send<{ id: string; numero: number }>(`/editais/${id}/itens`, 'POST', body),
+  removerItemEdital: (id: string, itemId: string) => send<{ ok: boolean }>(`/editais/${id}/itens/${itemId}`, 'DELETE'),
   docsPendentes: (fid: string, params: URLSearchParams) => get<DocPendente[]>(`/fornecedores/${fid}/documentos/pendentes?${params.toString()}`),
   // Tela "Análise Documental" (covalidação): fila global de pendentes de todos os fornecedores (RBAC CPL/SMGA).
   filaAnalise: () => get<AnaliseDocItem[]>('/documentos/analise'),
@@ -415,7 +426,7 @@ export const api = {
   // UC020 — Catálogos base. Leitura aberta (dado de referência); escritas exigem papel administrador no token.
   catalogoListar: (slug: CatalogoSlug, incluirInativos = false) =>
     get<CatalogoItemView[]>(`/catalogos/${slug}${incluirInativos ? '?incluirInativos=true' : ''}`),
-  catalogoCriar: (slug: CatalogoSlug, body: Record<string, unknown>) => send<{ id: string }>(`/catalogos/${slug}`, 'POST', body),
+  catalogoCriar: (slug: CatalogoSlug, body: Record<string, unknown>) => send<CatalogoItemView>(`/catalogos/${slug}`, 'POST', body),
   catalogoEditar: (slug: CatalogoSlug, id: string, body: Record<string, unknown>) => send<{ ok: boolean }>(`/catalogos/${slug}/${id}`, 'PATCH', body),
   catalogoInativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/inativar`, 'POST'),
   catalogoReativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/reativar`, 'POST'),

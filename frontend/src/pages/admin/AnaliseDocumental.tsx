@@ -43,7 +43,6 @@ export function AnaliseDocumental() {
         <h1 className="page-title" style={{ margin: '4px 0 3px' }}>
           {t('admin.analiseDocumental.titulo')} <span style={{ color: 'var(--cinza-400)', fontWeight: 500 }}>{t('admin.analiseDocumental.tituloComplemento')}</span>
         </h1>
-        <div className="page-sub">{t('admin.analiseDocumental.subtitulo')}</div>
       </div>
 
       {isLoading ? (

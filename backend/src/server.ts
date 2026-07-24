@@ -55,6 +55,10 @@ import { ContestarCnae, ResolverContestacao, type ContestacaoRepository } from '
 import { ContestacaoRepositoryMemory } from './editais/adapters/contestacao-repository-memory.js';
 import { ContestacaoRepositoryPg } from './editais/adapters/contestacao-repository-pg.js';
 import { registrarRotasGestaoEditais, registrarRotaElegiveisEdital } from './editais/adapters/editais-gestao-controller.js';
+import { GerirItensEdital } from './editais/application/gerir-itens-edital.js';
+import { ItemEditalRepositoryMemory } from './editais/adapters/item-edital-repository-memory.js';
+import { ItemEditalRepositoryPg } from './editais/adapters/item-edital-repository-pg.js';
+import { registrarRotasItensEdital } from './editais/adapters/itens-edital-controller.js';
 import { ListarElegiveisEdital } from './editais/application/listar-elegiveis-edital.js';
 import { registrarRotasContestacao } from './editais/adapters/contestacao-controller.js';
 import { GerirDocumentos } from './credenciamento/application/gerir-documentos.js';
@@ -81,6 +85,17 @@ import { GerarComprovanteCredenciamento } from './credenciamento/application/ger
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
+import { RegistrarProvaDeVidaNoCredenciamento } from './credenciamento/application/registrar-prova-de-vida.js';
+// Biometria facial / prova de vida (UC007)
+import type { ReconhecimentoFacialGateway } from './shared/acl/facial/reconhecimento-facial-gateway.js';
+import { ReconhecimentoFacialMockGateway } from './shared/acl/facial/reconhecimento-facial-mock.js';
+import { ReconhecimentoFacialHttpGateway } from './shared/acl/facial/reconhecimento-facial-http.js';
+import type { BiometriaRepository } from './biometria/application/biometria-repository.js';
+import { BiometriaRepositoryMemory } from './biometria/adapters/biometria-repository-memory.js';
+import { BiometriaRepositoryPg } from './biometria/adapters/biometria-repository-pg.js';
+import { RegistrarBiometriaReferencia } from './biometria/application/registrar-referencia.js';
+import { VerificarProvaDeVida } from './biometria/application/verificar-prova-de-vida.js';
+import { registrarRotasBiometria } from './biometria/adapters/biometria-controller.js';
 import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
 import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
@@ -101,7 +116,9 @@ import { DashboardAdmin, Transparencia } from './paineis/application/paineis.js'
 import { registrarRotasPaineis } from './paineis/adapters/paineis-controller.js';
 import { ManterCatalogos } from './catalogos/application/manter-catalogos.js';
 import { CatalogoRepositoryMemory } from './catalogos/adapters/catalogo-repository-memory.js';
-import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg } from './catalogos/adapters/catalogo-repository-pg.js';
+import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg, MaterialServicoRepositoryPg, NumeradorItensPg } from './catalogos/adapters/catalogo-repository-pg.js';
+import type { MaterialServico } from './catalogos/domain/material-servico.js';
+import { NumeradorItensMemory, type NumeradorItens } from './catalogos/application/numerador-itens.js';
 import type { Secretaria } from './catalogos/domain/secretaria.js';
 import type { SetorCnae } from './catalogos/domain/setor-cnae.js';
 import { TipoDocumento } from './catalogos/domain/tipo-documento.js';
@@ -164,6 +181,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'InadimplenciaVerificada', 'BloqueioAplicado', 'BloqueioLiberado',
     'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalEditado',
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
+    'ItemEditalAdicionado', 'ItemEditalRemovido',
     'MaloteGerado', 'MaloteExportado',
     'DireitoTitularSolicitado', 'DireitoTitularAtendido',
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
@@ -273,7 +291,15 @@ export async function buildServer(): Promise<FastifyInstance> {
       await tiposDocRepo.salvar(TipoDocumento.criar({ id: randomUUID(), formato: 'pdf', userName: 'bootstrap', ...td, validadeDias: td.validadeDias ?? undefined }));
     }
   }
-  const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);
+  // 4º catálogo (materiais e serviços): itens que a Administração compra/contrata, mantidos pela
+  // Secretaria (smga) além do Administrador. A numeração ITM-AAAA/NNN é durável e atômica em Postgres
+  // (`item_catalogo_numeros`, migração 0027); em memória nos testes/sem banco.
+  const materiaisRepo: CatalogoRepository<MaterialServico> = pool ? new MaterialServicoRepositoryPg(pool) : new CatalogoRepositoryMemory<MaterialServico>();
+  const numeradorItens: NumeradorItens = pool ? new NumeradorItensPg(pool) : new NumeradorItensMemory();
+  const manterCatalogos = new ManterCatalogos(
+    { secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo, materiaisServicos: materiaisRepo },
+    bus, undefined, numeradorItens,
+  );
   registrarRotasCatalogos(app, { manter: manterCatalogos });
 
   // Módulo editais — vitrine filtrada por CNAE (002) + gestão/contestação de editais (003)
@@ -291,6 +317,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo, undefined, numeradorEditais);
   const buscarEditais = new BuscarEditais(editaisRepo);
   registrarRotasGestaoEditais(app, { gerir: gerirEditais, buscar: buscarEditais });
+
+  // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). O lookup do catálogo é o
+  // próprio `materiaisRepo` (definido acima) — `MaterialServico` satisfaz o contrato estruturalmente
+  // (nome/unidades/especificacoes/ativo). Persistência durável em Postgres; memória nos testes.
+  const itensEditalRepo = pool ? new ItemEditalRepositoryPg(pool) : new ItemEditalRepositoryMemory();
+  const gerirItensEdital = new GerirItensEdital(editaisRepo, materiaisRepo, itensEditalRepo, bus);
+  registrarRotasItensEdital(app, { gerir: gerirItensEdital });
+
   const fornecedorAtivo = { estaAtivo: async (id: string) => { const f = await fornecedores.porId(id); return !!f && f.situacao === 'ativa'; } };
   const contestar = new ContestarCnae(editaisRepo, contestacaoRepo, fornecedorAtivo, bus);
   const resolver = new ResolverContestacao(contestacaoRepo, gerirEditais, bus);
@@ -337,18 +371,39 @@ export async function buildServer(): Promise<FastifyInstance> {
     },
   };
   const gerarComprovanteCredenciamento = new GerarComprovanteCredenciamento(credRepo, editaisRepo, fornecedorIdentidade, secretariaLookup);
-  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento, comprovante: gerarComprovanteCredenciamento });
+
+  // Biometria facial / prova de vida (UC007). Motor via serviço Python (InsightFace) quando
+  // FACE_PROVIDER=insightface; senão o mock determinístico (dev/test offline, DEC-STR-34). A
+  // comparação em si é do módulo `biometria`; aqui só compomos a fronteira e as portas. A referência
+  // vai CIFRADA no Postgres (AD-19) quando há banco; senão memória (testes). O passo do wizard
+  // (prova-de-vida) e o gate do Termo leem/gravam o veredito no agregado credenciamento.
+  const facial: ReconhecimentoFacialGateway = config.face.provider === 'insightface'
+    ? new ReconhecimentoFacialHttpGateway({ baseUrl: config.face.serviceUrl, timeoutMs: config.face.timeoutMs })
+    : new ReconhecimentoFacialMockGateway();
+  const biometriaRepo: BiometriaRepository = pool
+    ? new BiometriaRepositoryPg(pool, new PiiCipherAesGcm(config.crypto.piiKey))
+    : new BiometriaRepositoryMemory();
+  const registrarBiometria = new RegistrarBiometriaReferencia(biometriaRepo, facial);
+  const verificarProvaDeVida = new VerificarProvaDeVida(biometriaRepo, facial, config.face.limiar);
+  const provaDeVidaNoCredenciamento = new RegistrarProvaDeVidaNoCredenciamento(credRepo, verificarProvaDeVida);
+  registrarRotasBiometria(app, { registrar: registrarBiometria });
+
+  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento, comprovante: gerarComprovanteCredenciamento, provaVida: provaDeVidaNoCredenciamento });
 
   // Motor de Distribuição (Épico 5 / UC008 / RF005). A gestão dispara o rateio de um edital
   // distribuível (publicado); a matriz canônica append-only é durável em Postgres quando disponível
   // (como `editais`/`credenciamentos`), senão memória (testes sem banco). O fornecedor lê suas
   // "Demandas distribuídas" (rateio + Cadastro de Reserva) derivadas da matriz vigente + credenciamento.
   const distribuicaoRepo: DistribuicaoRepository = pool ? new DistribuicaoRepositoryPg(pool) : new DistribuicaoRepositoryMemory();
+  // Demanda total do edital = soma das quantidades dos itens (o edital não tem mais quantitativo
+  // agregado). Fonte única consumida pelo Motor e pelo resumo da distribuição.
+  const demandaDoEdital = async (id: string): Promise<number> =>
+    (await itensEditalRepo.listarDoEdital(id)).reduce((soma, it) => soma + it.quantidade, 0);
   const editalParaDistribuir = {
     porId: async (id: string) => {
       const e = await editaisRepo.porId(id);
       // Guarda de estado: só distribui edital publicado (develop não tem a máquina AD-37/em_distribuicao).
-      return e ? { podeDistribuir: e.situacao === 'publicado', quantitativos: e.quantitativos } : null;
+      return e ? { podeDistribuir: e.situacao === 'publicado', demanda: await demandaDoEdital(id) } : null;
     },
   };
   const executarDistribuicao = new ExecutarDistribuicao(editalParaDistribuir, credRepo, fornecedores, distribuicaoRepo, bus);
@@ -359,9 +414,15 @@ export async function buildServer(): Promise<FastifyInstance> {
     },
   };
   const listarDemandas = new ListarDemandasFornecedor(credRepo, distribuicaoRepo, editalResumoDemanda, secretariaLookup);
-  // Painel Admin · "Distribuição Inteligente": resumo por edital (cabeçalho + totais + rateio). Reusa o
-  // `editaisRepo` como leitura (a instância `Edital` satisfaz o lookup mínimo, inclui `quantitativos`).
-  const resumoDistribuicao = new ResumoDistribuicaoEdital(editaisRepo, credRepo, fornecedores, distribuicaoRepo, secretariaLookup);
+  // Painel Admin · "Distribuição Inteligente": resumo por edital (cabeçalho + totais + rateio). A demanda
+  // do cabeçalho/preview vem da soma dos itens (não mais de um campo do edital).
+  const editalResumoDistribuicao = {
+    porId: async (id: string) => {
+      const e = await editaisRepo.porId(id);
+      return e ? { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, demanda: await demandaDoEdital(id) } : null;
+    },
+  };
+  const resumoDistribuicao = new ResumoDistribuicaoEdital(editalResumoDistribuicao, credRepo, fornecedores, distribuicaoRepo, secretariaLookup);
   // Painel Admin · "Cadastro de Reserva": fila cronológica global dos retardatários (UC009/RN004).
   // Candidatos = editais publicados (no develop a distribuição roda em publicado e o edital ali permanece).
   const editaisComReserva = {

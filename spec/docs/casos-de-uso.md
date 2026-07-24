@@ -2,7 +2,7 @@
 
 **Projeto:** Compra Mais (Programa de Compras Municipalizadas — Prefeitura de Rio Branco)
 **Fonte de verdade:** este diretório (`spec/docs/`), versionado no git — ver [index.md](index.md).
-**Rastreável a:** [prd.md](prd.md) (RF/RN/RNF/RBAC) · [architecture/ARCHITECTURE-SPINE.md](architecture/ARCHITECTURE-SPINE.md) (ADs) · [epics.md](epics.md) (histórias e critérios de aceite).
+**Rastreável a:** [prd.md](prd.md) (RF/RN/RNF/RBAC, **PRD v2.5**) · [architecture/ARCHITECTURE-SPINE.md](architecture/ARCHITECTURE-SPINE.md) (ADs) · [epics.md](epics.md) (histórias e critérios de aceite) · [VALIDACAO-CLIENTE-01.md](VALIDACAO-CLIENTE-01.md) (feedback do cliente — Validação 01).
 
 > **Papel deste documento.** Os casos de uso descrevem **ator → objetivo → fluxo** (principal, alternativos,
 > exceções). Eles **não** são critérios de aceite: o comportamento testável (Given/When/Then) vive em
@@ -24,6 +24,7 @@
 |---|---|---|---|
 | 1.0 | 2026-06-22 | Equipe de Análise | Rascunho inicial (14 UCs) — em `source/06-CasosUso.md` |
 | 2.0 | 2026-07-02 | Party Mode | Versão canônica alinhada ao **PRD v2.4**: atores por papel (RBAC §15); ciclo de vida do Edital (RN014); Termo de Aceite conclui o credenciamento no MVP e **UC007 (liveness) marcado R2 condicional a RIPD** (RN016, RF012); inativação lógica (RN015); **novos UC015–UC021** para RF015–RF023 e Procurador (RN010) |
+| 2.1 | 2026-07-05 | Party Mode (Validação 01) | Incorporação do feedback do cliente (ver VALIDACAO-CLIENTE-01.md): novos UC022 (baixar PDF do edital) e UC023 (desistência covalidada); extensões em UC004 (Termo de Responsabilidade RF024/RN019), UC005 (PDF obrigatório RF025/AD-39), UC008 (imutabilidade RN017 + visão individual RN020), UC002/UC006 (RN021), UC014 (Desistências Pendentes); status "Requerente"→"Cadastrado" (AD-41). Alinhado ao PRD v2.5. |
 
 ---
 
@@ -32,15 +33,15 @@
 | Bloco | Casos de Uso |
 |---|---|
 | **A. Cadastro & Identidade do Fornecedor** | UC001, UC018, UC019, UC015 |
-| **B. Editais** | UC005 |
-| **C. Credenciamento & Covalidação** | UC003, UC004, UC002, UC006, UC007 *(R2)*, UC016 |
+| **B. Editais** | UC005, UC022 |
+| **C. Credenciamento & Covalidação** | UC003, UC004, UC002, UC006, UC007 *(R2)*, UC016, UC023 |
 | **D. Distribuição & Malote** | UC008, UC009, UC010 |
 | **E. Transparência, Auditoria & Notificações** | UC011, UC012, UC013, UC014 |
 | **F. LGPD** | UC017 |
 | **G. Administração (catálogos & usuários)** | UC020, UC021 |
 
-**Convenção de status do Fornecedor:** `Requerente → Pendente de Análise → Credenciado → Apto` (por edital), com
-`Em Correção` no laço de covalidação. **Ciclo do Edital (RN014):** `Rascunho → Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`.
+**Convenção de status do Fornecedor:** `Cadastrado → Pendente de Análise → Credenciado → Apto` (por edital), com
+`Em Correção` no laço de covalidação. *(D4: o rótulo antes chamado "Requerente" passa a "Cadastrado"; a migração de schema/enum e de `data-cy` é história dedicada — AD-41.)* **Ciclo do Edital (RN014):** `Rascunho → Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`.
 
 ---
 
@@ -55,7 +56,7 @@
 2. Informa o número do CNPJ.
 3. O Sistema consulta a API da Receita e autopreenche **Razão Social, Nome Fantasia, Porte e CNAEs** (principal e secundários) — dados **somente leitura** (RN009).
 4. O Titular informa contato (e-mail/senha) e o **endereço estruturado geolocalizável** para análise territorial (RF019).
-5. O Sistema salva o registro com status inicial **Requerente** e registra o `timestamp` da sincronização (RF018).
+5. O Sistema salva o registro com status inicial **Cadastrado** *(rótulo antes "Requerente"; migração de schema/enum/`data-cy` é história dedicada — AD-41)* e registra o `timestamp` da sincronização (RF018).
 **Fluxos alternativos:**
 - **A1 — API indisponível:** o Sistema permite preenchimento manual, marcando o cadastro para **covalidação rigorosa posterior** (política `fail-open + flag`, RN002/AD-12).
 **Exceções:** CNPJ inválido matematicamente → cadastro bloqueado.
@@ -114,12 +115,26 @@
 1. Em "Editais", clica em "Novo Edital".
 2. Preenche objeto, valor unitário e vigência; **vincula obrigatoriamente 1 Secretaria demandante** (selecionada do catálogo — RF020/AD-16).
 3. Adiciona lotes/itens com quantidades e **CNAEs exigidos** (subclasse 7 dígitos, do catálogo — RF021/RF003).
-4. Salva como **Rascunho**; ao publicar, o edital passa a **Aberto** e aparece na vitrine do fornecedor (RN014).
+4. **Anexa o PDF oficial do edital** (documento gerado no SEI) — upload **obrigatório** para publicar; ele **complementa** (não substitui) o preenchimento estruturado dos passos 2–3 (D2, RF025/AD-39).
+5. Salva como **Rascunho**; ao publicar, o edital passa a **Aberto** e aparece na vitrine do fornecedor (RN014).
 **Fluxos alternativos:**
 - **A1 — Edição pós-publicação:** a Secretaria altera qualquer campo (inclusive CNAE/quantitativos) **com auditoria antes/depois** (RN012); mudança de CNAE **reavalia a vitrine imediatamente**, mantendo o prazo; reabertura/extensão é **manual e auditada**.
-**Exceções:** tentativa de associar **duas** secretarias → bloqueado (RN007, individualização orçamentária).
+**Exceções:** tentativa de associar **duas** secretarias → bloqueado (RN007, individualização orçamentária); tentativa de publicar **sem o PDF oficial anexado** → transição `Rascunho → Aberto` bloqueada (RF025/AD-39).
 **Pós-condições:** edital progride no ciclo `Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`, com cada transição auditada (AD-37).
-**Rastreabilidade:** RF008 · RN007, RN012, RN014 · AD-16, AD-37 · Prioridade **Must** · Complexidade Média.
+**Rastreabilidade:** RF008, RF025 · RN007, RN012, RN014 · AD-16, AD-37, AD-39 · Prioridade **Must** · Complexidade Média.
+
+### UC022 — Baixar Edital Oficial em PDF
+**Objetivo:** permitir que o fornecedor obtenha o **PDF oficial** do edital (anexado pela Secretaria no SEI) para leitura, arquivo e conferência das regras do chamamento.
+**Ator principal:** Fornecedor.
+**Pré-condições:** edital **Aberto** e compatível com o fornecedor (UC003); PDF oficial anexado na criação/edição do edital (UC005, RF025/AD-39).
+**Fluxo principal:**
+1. O fornecedor abre a tela de **detalhes do edital**.
+2. Aciona **"Baixar Edital em PDF"**.
+3. O Sistema entrega o **PDF oficial** anexado pela Secretaria, servido a partir do armazenamento seguro do documento (AD-39).
+**Fluxos alternativos:** **A1 —** PDF ainda não disponível (edital sem anexo, caso de dado legado): o Sistema informa que o documento oficial não está disponível e orienta a consultar o edital estruturado na tela.
+**Exceções:** edital não compatível/oculto ao fornecedor → download **bloqueado inclusive por link direto** (coerente com RN001/UC003).
+**Pós-condições:** fornecedor de posse do edital oficial, sem alterar o estado do edital.
+**Rastreabilidade:** RF025 · AD-39 · Prioridade **Must** · Complexidade Baixa.
 
 ---
 
@@ -143,15 +158,15 @@
 **Pré-condições:** edital **Aberto**; fornecedor aprovado no filtro CNAE (UC003).
 **Fluxo principal:**
 1. Seleciona o edital e clica em "Iniciar Credenciamento".
-2. O Sistema exibe itens/lotes; o fornecedor informa sua **capacidade produtiva** (teto declarado — base do water-filling, RN005).
+2. O Sistema exibe itens/lotes; o fornecedor informa sua **capacidade produtiva** (teto declarado — base do water-filling, RN005) e, neste passo, deve **aceitar o Termo de Responsabilidade** sobre a capacidade declarada; o botão **"Prosseguir" fica bloqueado sem o aceite** e o aceite (**versão + timestamp**) é gravado na trilha (RF024/RN019).
 3. O fornecedor faz **upload dos documentos exigidos** (tipos definidos no catálogo RF022) — cifrados em repouso (RF002/RNF).
 4. O fornecedor **assina o Termo de Aceite**; o Sistema registra o aceite na trilha e muda o status para **Pendente de Análise** (RN016).
 **Fluxos alternativos:**
 - **A1 — Documento reutilizável válido:** o Sistema importa do repositório sem exigir reenvio (RF002).
 - **A2 — Cancelamento pelo fornecedor:** **antes da distribuição**, o fornecedor pode cancelar o credenciamento (RN016). Após homologação, saída só por substituição de desistente (RN004).
-**Exceções:** arquivo acima do tamanho/format inválido → rejeitado.
-**Pós-condições:** documentos na fila de covalidação da CPL.
-**Rastreabilidade:** RF002 · RN016, RN005, RN004 · Prioridade **Must** · Complexidade Média. *(Etapa "Prova de vida"/liveness = UC007, R2.)*
+**Exceções:** arquivo acima do tamanho/format inválido → rejeitado; tentativa de prosseguir **sem aceitar o Termo de Responsabilidade** → bloqueada (RF024/RN019).
+**Pós-condições:** documentos na fila de covalidação da CPL; aceite do Termo de Responsabilidade registrado na trilha.
+**Rastreabilidade:** RF002, RF024 · RN016, RN019, RN005, RN004 · Prioridade **Must** · Complexidade Média. *(Etapa "Prova de vida"/liveness = UC007, R2.)*
 
 ### UC002 — Validar Situação de Inadimplência
 **Objetivo:** checar débitos/sanções em bases oficiais e aplicar **bloqueio transitório** nas portas do processo.
@@ -164,7 +179,8 @@
 - **A1 — Débito/penalidade/inidoneidade:** aplica bloqueio **transitório** conforme o estado (débito regularizável enquanto ativo; penalidade até a data; inidoneidade pelo termo) — **nunca permanente** (preserva o direito de regularização LC 123, RN002). Data de fim: usa a base oficial quando disponível; **CPL registra manualmente** como fallback.
 - **A2 — API indisponível:** `fail-open` **com flag obrigatória para a CPL** (RN002/AD-12).
 **Pós-condições:** fornecedor liberado ou bloqueado transitoriamente com motivo auditável.
-**Rastreabilidade:** RF011 · RN002 · AD-12 · Prioridade **Must** · Complexidade Alta.
+**Comunicação de status (RN021):** o bloqueio por inadimplência/dívida é comunicado como **"Bloqueado"**, distinto de **"Em Análise"** (pendência documental do UC006) — os dois estados não se confundem na visão do fornecedor.
+**Rastreabilidade:** RF011 · RN002, RN021 · AD-12 · Prioridade **Must** · Complexidade Alta.
 
 ### UC006 — Analisar e Covalidar Documentação (Antifraude)
 **Objetivo:** verificação humana de documentos declaratórios, com parecer de habilitação/inabilitação.
@@ -178,7 +194,8 @@
 - **A1 — Reprovar:** o Sistema **exige justificativa** (RN003); o fornecedor entra em **Em Correção** e é notificado (laço com UC016).
 **Exceções:** reprovar sem justificativa → bloqueado.
 **Pós-condições:** fornecedor apto ao cálculo de distribuição ou em fila de correção.
-**Rastreabilidade:** RF004 · RN003, RN006, RN011 · RNF003 · Prioridade **Must** · Complexidade Média.
+**Comunicação de status (RN021):** a pendência documental é comunicada como **"Em Análise"**, distinta de **"Bloqueado"** (inadimplência/dívida do UC002) — o fornecedor vê estados separados para pendência de análise e bloqueio por débito.
+**Rastreabilidade:** RF004 · RN003, RN006, RN011, RN021 · RNF003 · Prioridade **Must** · Complexidade Média.
 
 ### UC007 — Validar Identidade por Prova de Vida (Liveness) · **Release 2 — condicional a RIPD**
 **Objetivo:** prova de vida no ato do envio para mitigar fraude por terceiros.
@@ -198,6 +215,23 @@
 **Pós-condições:** pendência encaminhada com decisão auditável.
 **Rastreabilidade:** RF016 · RN012, RN002, RN003 · Prioridade **Must** · Complexidade Média.
 
+### UC023 — Formalizar Desistência de Credenciamento
+**Objetivo:** permitir que o fornecedor formalize a **saída de um edital após a distribuição** por um fluxo covalidado, acionando a substituição pelo Cadastro de Reserva quando havia cota homologada.
+**Ator principal:** Fornecedor. **Apoio:** Analista CPL/SMGA.
+**Pré-condições:** fornecedor credenciado/homologado em um edital; a **distribuição já ocorreu** (após UC008/homologação). *(Antes da distribuição, a saída é self-service via UC004/A2 — ver Regra abaixo.)*
+**Fluxo principal:**
+1. O fornecedor abre o edital e aciona **"Desistir do Edital"**.
+2. O Sistema exibe **confirmação** (o fornecedor confirma a intenção).
+3. O status do vínculo passa a **"Pendente de Desistência"** e o Sistema **notifica o admin** (Analista CPL/SMGA).
+4. O admin aciona **"Confirmar Desistência"**; o status passa a **"Desistente"** e o evento é registrado na **trilha de auditoria**.
+5. Se havia **cota homologada** para o fornecedor, o Sistema aciona a **substituição pelo Cadastro de Reserva** (UC009/AD-25).
+**Fluxos alternativos:**
+- **A1 — Admin rejeita a desistência:** o admin recusa o pedido e o vínculo **reverte ao status anterior** (sem baixa da cota), com registro auditável.
+**Exceções:** —
+**Pós-condições:** vínculo encerrado como **Desistente** com substituição encaminhada, **ou** pedido revertido ao status anterior; evento auditado em qualquer caso.
+**Regra (RN018/RN016):** **cancelamento ANTES da distribuição** continua **self-service** (RN016, UC004/A2); **desistência APÓS a distribuição** exige **esta covalidação** (fornecedor solicita, admin confirma).
+**Rastreabilidade:** RF026 · RN018, RN004 · AD-40 · Prioridade **Must** · Complexidade Média.
+
 ---
 
 ## D. Distribuição & Malote
@@ -209,11 +243,12 @@
 **Fluxo principal:**
 1. A CPL aciona "Calcular Distribuição".
 2. O Sistema aplica o **Motor (§8 do PRD): water-filling iterativo + maiores restos (Hamilton) + desempate determinístico**, respeitando o **teto declarado** de cada fornecedor (RN005) e redistribuindo o excedente.
-3. Gera a **matriz de alocação** (itens por CNPJ).
+3. Gera a **matriz de alocação** (itens por CNPJ), **imutável a edição manual de cotas** — as cotas resultam apenas do Motor, sem override manual (RN017).
+**Visão do fornecedor (RN020):** ao consultar sua distribuição, o fornecedor vê **apenas a demanda total do item + a sua própria cota**; o **rateio dos concorrentes fica oculto** (não expõe quem mais foi alocado nem quanto).
 **Fluxos alternativos:** **A1 —** oferta combinada < demanda → alerta de **déficit de abastecimento**.
-**Exceções:** parâmetro de desempate não ratificado → usa o default de config (§16), sinalizando.
+**Exceções:** parâmetro de desempate não ratificado → usa o default de config (§16), sinalizando; tentativa de **editar manualmente uma cota da matriz** → bloqueada (RN017).
 **Pós-condições:** alocação calculada; ao **Homologar**, a alocação **congela** (AD-10, RN014).
-**Rastreabilidade:** RF005 · RN005 · §8, AD-10 · Prioridade **Must** · Complexidade Alta. *(Bloqueado até ratificação Item×Lote — ver [index.md](index.md).)*
+**Rastreabilidade:** RF005 · RN005, RN017, RN020 · §8, AD-10 · Prioridade **Must** · Complexidade Alta. *(Bloqueado até ratificação Item×Lote — ver [index.md](index.md).)*
 
 ### UC009 — Gerir Cadastro de Reserva (Segunda Demanda)
 **Objetivo:** acomodar fornecedores retardatários em fila de espera sem refração retroativa na distribuição já feita.
@@ -283,10 +318,10 @@
 **Pré-condições:** ator autenticado com papel interno.
 **Fluxo principal:**
 1. Acessa "Painel Administrativo".
-2. O Sistema exibe métricas: cadastros pendentes, documentos em análise, editais por estado do ciclo (RN014), vencimentos próximos.
+2. O Sistema exibe métricas: cadastros pendentes, documentos em análise, editais por estado do ciclo (RN014), vencimentos próximos e o card **"Desistências Pendentes"** (vínculos em **"Pendente de Desistência"** aguardando confirmação da CPL/SMGA — RN018/UC023).
 3. Filtra por secretaria, status documental e prazo.
 **Pós-condições:** visibilidade operacional imediata.
-**Rastreabilidade:** RF013 · RN014 · Prioridade **Should** · Complexidade Média.
+**Rastreabilidade:** RF013 · RN014, RN018 · Prioridade **Should** · Complexidade Média.
 
 ---
 
@@ -346,13 +381,15 @@
 | UC018 | Re-sincronizar Dados do CNPJ | A | Fornecedor | RF018 | Must | Baixa |
 | UC019 | Gerir Procuradores da Empresa | A | Titular | RN010 | Must | Média |
 | UC015 | Autenticar e Gerir a Própria Senha | A | Usuário | RF015 | Must | Média |
-| UC005 | Criar Edital Individualizado | B | Secretaria/Gestor | RF008 | Must | Média |
+| UC005 | Criar Edital Individualizado | B | Secretaria/Gestor | RF008, RF025 | Must | Média |
+| UC022 | Baixar Edital Oficial em PDF | B | Fornecedor | RF025 | Must | Baixa |
 | UC003 | Visualizar Editais Compatíveis (CNAE) | C | Fornecedor | RF003 | Must | Baixa |
-| UC004 | Solicitar Credenciamento + Termo de Aceite | C | Fornecedor | RF002 | Must | Média |
+| UC004 | Solicitar Credenciamento + Termo de Aceite | C | Fornecedor | RF002, RF024 | Must | Média |
 | UC002 | Validar Situação de Inadimplência | C | Sistema | RF011 | Must | Alta |
 | UC006 | Analisar e Covalidar Documentação | C | Analista CPL | RF004 | Must | Média |
 | UC007 | Prova de Vida (Liveness) | C | Fornecedor | RF012 | **R2** | Alta |
 | UC016 | Contestar / Regularizar | C | Fornecedor | RF016 | Must | Média |
+| UC023 | Formalizar Desistência de Credenciamento | C | Fornecedor | RF026 | Must | Média |
 | UC008 | Distribuir Demanda (Motor) | D | Sistema | RF005 | Must | Alta |
 | UC009 | Gerir Cadastro de Reserva | D | Sistema | RF006 | Must | Alta |
 | UC010 | Gerar Malote SEI | D | Analista CPL | RF007 | Must | Alta |
@@ -364,7 +401,7 @@
 | UC020 | Manter Catálogos Base (CRUD) | G | Administrador | RF020, RF021, RF022 | Must | Média |
 | UC021 | Gerir Usuários Internos | G | Administrador | RF023 | Must | Média |
 
-**Cobertura de RF:** RF001–RF011, RF013–RF023 mapeados; **RF012** presente apenas como **UC007 (R2)**. Os critérios de aceite testáveis de cada UC vivem em [epics.md](epics.md).
+**Cobertura de RF:** RF001–RF011, RF013–RF026 mapeados (inclui **RF024** em UC004, **RF025** em UC005/UC022 e **RF026** em UC023); **RF012** presente apenas como **UC007 (R2)**. Os critérios de aceite testáveis de cada UC vivem em [epics.md](epics.md).
 
 ---
 
@@ -375,14 +412,15 @@ graph LR
   Titular((Titular)) --- UC001 & UC019 & UC017 & UC004 & UC016
   Procurador((Procurador)) --- UC018 & UC004
   Usuario((Usuário)) --- UC015
-  CPL((Analista CPL)) --- UC006 & UC010 & UC008
+  Fornecedor((Fornecedor)) --- UC022 & UC023
+  CPL((Analista CPL)) --- UC006 & UC010 & UC008 & UC023
   Gestor((Secretaria/Gestor)) --- UC005 & UC014
   Admin((Administrador)) --- UC020 & UC021
   Auditor((auditor)) --- UC012
   DPO((dpo)) --- UC017
   Cidadao((Cidadão/Gestor)) --- UC011
-  Sistema((Sistema)) --- UC002 & UC008 & UC009 & UC013
+  Sistema((Sistema)) --- UC002 & UC008 & UC009 & UC013 & UC023
 ```
 
 ---
-*Documento canônico — `spec/docs/casos-de-uso.md`. Alinhado ao PRD v2.4. Supersede `source/06-CasosUso.md` v1.0 (insumo histórico).*
+*Documento canônico — `spec/docs/casos-de-uso.md`. Alinhado ao PRD v2.5. Supersede `source/06-CasosUso.md` v1.0 (insumo histórico).*

@@ -209,7 +209,7 @@ function ModalGerarMalote({ onFechar, onGerado }: { onFechar: () => void; onGera
 
         <form data-cy="form-malote" onSubmit={(e) => { e.preventDefault(); if (podeGerar) gerar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           <div style={{ padding: 24, overflowY: 'auto', display: 'grid', gap: 18 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="cm-form-grid">
               <label>
                 <span style={rotulo}>{t('admin.malote.gerar.fornecedorId')}</span>
                 <input className="input" data-cy="campo-fornecedor" required value={form.fornecedorId} onChange={(e) => setForm({ ...form, fornecedorId: e.target.value })} style={{ width: '100%' }} />

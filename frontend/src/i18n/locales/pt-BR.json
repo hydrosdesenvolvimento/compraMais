@@ -169,7 +169,6 @@
   "admin": {
     "credenciamentoEdital": {
       "titulo": "Credenciamento em Edital",
-      "subtitulo": "Adesão filtrada por CNAE (RN001) e checagem de inadimplência (RN002)",
       "seletorLabel": "Edital",
       "cnaeExigido": "CNAE exigido: {{cnae}}",
       "elegiveisTitulo": "Fornecedores elegíveis",
@@ -204,7 +203,6 @@
     "distribuicao": {
       "eyebrow": "Operação · Distribuição",
       "titulo": "Distribuição Inteligente",
-      "subtitulo": "Rateio equitativo respeitando a capacidade declarada (RN005)",
       "seletorLabel": "Edital",
       "carregando": "Carregando distribuição…",
       "erroCarregar": "Não foi possível carregar a distribuição.",
@@ -237,7 +235,6 @@
     "reserva": {
       "eyebrow": "Operação · Cadastro de Reserva",
       "titulo": "Cadastro de Reserva",
-      "subtitulo": "Gestão de retardatários sem alterar contratos vigentes (RN004)",
       "avisoTitulo": "Fila de reserva.",
       "avisoTexto": "Fornecedores aprovados após a distribuição inicial são alocados aqui sem alterar as cotas já distribuídas. Serão acionados em ordem cronológica caso algum titular descumpra a entrega.",
       "carregando": "Carregando fila de reserva…",
@@ -540,7 +537,6 @@
     "gerirEditais": {
       "eyebrow": "Operação · Editais",
       "titulo": "Editais de Credenciamento",
-      "subtitulo": "1 edital = 1 demanda de secretaria (RN007)",
       "novoEdital": "Novo edital",
       "colEdital": "Edital",
       "colObjeto": "Objeto",
@@ -549,7 +545,6 @@
       "colStatus": "Status",
       "colAcoes": "Ações",
       "cnaePrefixo": "CNAE {{cnae}}",
-      "unidades": "{{n}} un.",
       "semPrazo": "—",
       "status": {
         "rascunho": "Rascunho",
@@ -580,7 +575,6 @@
       "campoObjeto": "Objeto",
       "campoSecretaria": "Secretaria",
       "campoCnaes": "CNAE(s) alvo",
-      "campoQuantitativos": "Quantitativo",
       "campoPrazo": "Prazo de vigência",
       "campoStatus": "Status",
       "fechar": "Fechar",
@@ -595,11 +589,34 @@
       "cnaeLabel": "CNAE exigido",
       "cnaePlaceholder": "Ex.: 1091101, 4721102",
       "cnaeAjuda": "Separe múltiplos CNAEs por vírgula.",
-      "quantitativosLabel": "Quantitativo",
       "prazoLabel": "Prazo de vigência",
       "softDeleteNota": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
       "salvar": "Salvar",
-      "cancelar": "Cancelar"
+      "cancelar": "Cancelar",
+      "itens": {
+        "acao": "Itens do edital",
+        "titulo": "Itens do edital",
+        "subtitulo": "Cadastre os itens do edital {{numero}} a partir do catálogo de materiais e serviços. Disponível enquanto o edital está em rascunho.",
+        "itemLabel": "Item do catálogo",
+        "itemPlaceholder": "Selecione um material ou serviço…",
+        "unidadeLabel": "Unidade",
+        "quantidadeLabel": "Quantidade",
+        "precoLabel": "Preço-teto (R$)",
+        "adicionar": "Adicionar item",
+        "erroAdicionar": "Não foi possível adicionar. Verifique os campos (item já incluído, unidade ou preço inválidos).",
+        "carregando": "Carregando itens…",
+        "vazio": "Nenhum item cadastrado neste edital ainda.",
+        "remover": "Remover item",
+        "notaPreco": "O preço-teto é uso interno da administração e não é exibido no portal público de transparência.",
+        "col": {
+          "num": "Nº",
+          "item": "Item",
+          "unidade": "Unid.",
+          "quantidade": "Qtd.",
+          "preco": "Preço-teto",
+          "acoes": "Ações"
+        }
+      }
     },
     "contestacoes": {
       "titulo": "Contestações de CNAE",
@@ -632,23 +649,28 @@
     },
     "catalogos": {
       "titulo": "Catálogos base",
-      "subtitulo": "Mantenha secretarias, setores (CNAE) e tipos de documento. A exclusão é lógica: o item inativado sai das listas mas preserva os vínculos.",
+      "subtitulo": "Mantenha setores (CNAE), tipos de documento e o catálogo de materiais e serviços. A exclusão é lógica: o item inativado sai das listas mas preserva os vínculos.",
       "tabs": {
-        "secretarias": "Secretarias",
         "setores": "Setores (CNAE)",
-        "tiposDoc": "Tipos de documento"
+        "tiposDoc": "Tipos de documento",
+        "materiais": "Materiais e serviços"
       },
       "campos": {
-        "nome": "Nome",
-        "sigla": "Sigla",
-        "responsavel": "Responsável",
         "codigo": "Código CNAE (7 dígitos)",
         "descricao": "Descrição",
         "nomeTipo": "Nome do tipo",
         "formato": "Formato aceito (ex.: pdf)",
         "categoria": "Categoria",
         "exigeValidade": "Exige data de validade",
-        "exigeExercicio": "Exige exercício (ex.: Balanço)"
+        "exigeExercicio": "Exige exercício (ex.: Balanço)",
+        "numero": "Número",
+        "nomeItem": "Nome do item",
+        "tipoItem": "Natureza",
+        "unidades": "Unidades de medida",
+        "unidadesDica": "Separe por vírgula. Ex.: un, m, cx",
+        "especificacoes": "Especificações técnicas",
+        "situacao": "Situação",
+        "acoes": "Ações"
       },
       "categorias": {
         "cadastral": "Cadastral",
@@ -661,7 +683,20 @@
       "situacaoInativo": "inativo",
       "inativar": "Inativar",
       "reativar": "Reativar",
-      "vazio": "Nenhum item cadastrado ainda."
+      "vazio": "Nenhum item cadastrado ainda.",
+      "tiposItem": {
+        "material": "Material",
+        "servico": "Serviço"
+      },
+      "filtros": {
+        "tipo": "Natureza",
+        "tipoTodos": "Todas as naturezas"
+      },
+      "buscaPlaceholder": "Buscar por número, nome ou especificação…",
+      "buscaAriaLabel": "Buscar no catálogo",
+      "exportarCsv": "Exportar Excel",
+      "exportarPdf": "Exportar PDF",
+      "situacaoAtivo": "ativo"
     },
     "usuarios": {
       "breadcrumb": "Administração · Usuários",
@@ -799,7 +834,6 @@
       "migalha": "Operação · Análise Documental",
       "titulo": "Análise Documental",
       "tituloComplemento": "(covalidação)",
-      "subtitulo": "Aprovação ou reprovação com justificativa obrigatória (RN003)",
       "carregando": "Carregando fila…",
       "erroCarregar": "Não foi possível carregar a fila de análise.",
       "vazioTitulo": "Nenhum documento na fila",
@@ -1048,7 +1082,6 @@
       "colObjeto": "Edital",
       "colSecretaria": "Secretaria",
       "colPrazo": "Prazo",
-      "colQuantitativos": "Quantitativos",
       "filtroSecretariaAriaLabel": "Filtrar por secretaria",
       "todasSecretarias": "Todas as secretarias",
       "exportarCsv": "CSV",
@@ -1310,7 +1343,6 @@
   },
   "adminLgpd": {
     "titulo": "Atendimento LGPD",
-    "subtitulo": "Fila de direitos do titular pendentes (Encarregado/DPO). A CPL não atende (RNF007).",
     "carregando": "Carregando…",
     "vazio": "Nenhuma solicitação pendente.",
     "titular": "Titular",

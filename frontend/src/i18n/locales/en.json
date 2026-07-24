@@ -169,7 +169,6 @@
   "admin": {
     "credenciamentoEdital": {
       "titulo": "Accreditation in Notice",
-      "subtitulo": "Membership filtered by CNAE (RN001) and default check (RN002)",
       "seletorLabel": "Notice",
       "cnaeExigido": "Required CNAE: {{cnae}}",
       "elegiveisTitulo": "Eligible suppliers",
@@ -204,7 +203,6 @@
     "distribuicao": {
       "eyebrow": "Operations · Distribution",
       "titulo": "Smart Distribution",
-      "subtitulo": "Equitable allocation respecting the declared capacity (RN005)",
       "seletorLabel": "Notice",
       "carregando": "Loading distribution…",
       "erroCarregar": "Could not load the distribution.",
@@ -237,7 +235,6 @@
     "reserva": {
       "eyebrow": "Operations · Reserve List",
       "titulo": "Reserve List",
-      "subtitulo": "Managing latecomers without changing active contracts (RN004)",
       "avisoTitulo": "Reserve queue.",
       "avisoTexto": "Suppliers approved after the initial distribution are placed here without changing the quotas already distributed. They will be called in chronological order if a holder fails to deliver.",
       "carregando": "Loading reserve queue…",
@@ -540,7 +537,6 @@
     "gerirEditais": {
       "eyebrow": "Operations · Notices",
       "titulo": "Accreditation Notices",
-      "subtitulo": "1 notice = 1 department demand (RN007)",
       "novoEdital": "New notice",
       "colEdital": "Notice",
       "colObjeto": "Object",
@@ -549,7 +545,6 @@
       "colStatus": "Status",
       "colAcoes": "Actions",
       "cnaePrefixo": "CNAE {{cnae}}",
-      "unidades": "{{n}} units",
       "semPrazo": "—",
       "status": {
         "rascunho": "Draft",
@@ -580,7 +575,6 @@
       "campoObjeto": "Object",
       "campoSecretaria": "Department",
       "campoCnaes": "Target CNAE(s)",
-      "campoQuantitativos": "Quantity",
       "campoPrazo": "Validity deadline",
       "campoStatus": "Status",
       "fechar": "Close",
@@ -595,11 +589,34 @@
       "cnaeLabel": "Required CNAE",
       "cnaePlaceholder": "e.g. 1091101, 4721102",
       "cnaeAjuda": "Separate multiple CNAEs with commas.",
-      "quantitativosLabel": "Quantity",
       "prazoLabel": "Validity deadline",
       "softDeleteNota": "Records are never permanently deleted — deletion converts them to Inactive or Blocked, preserving history.",
       "salvar": "Save",
-      "cancelar": "Cancel"
+      "cancelar": "Cancel",
+      "itens": {
+        "acao": "Edital items",
+        "titulo": "Edital items",
+        "subtitulo": "Register the items of edital {{numero}} from the goods and services catalog. Available while the edital is a draft.",
+        "itemLabel": "Catalog item",
+        "itemPlaceholder": "Select a good or service…",
+        "unidadeLabel": "Unit",
+        "quantidadeLabel": "Quantity",
+        "precoLabel": "Ceiling price (R$)",
+        "adicionar": "Add item",
+        "erroAdicionar": "Could not add. Check the fields (item already included, invalid unit or price).",
+        "carregando": "Loading items…",
+        "vazio": "No items registered for this edital yet.",
+        "remover": "Remove item",
+        "notaPreco": "The ceiling price is for internal administration use and is not shown on the public transparency portal.",
+        "col": {
+          "num": "No.",
+          "item": "Item",
+          "unidade": "Unit",
+          "quantidade": "Qty",
+          "preco": "Ceiling price",
+          "acoes": "Actions"
+        }
+      }
     },
     "contestacoes": {
       "titulo": "CNAE challenges",
@@ -632,23 +649,28 @@
     },
     "catalogos": {
       "titulo": "Base catalogs",
-      "subtitulo": "Maintain departments, sectors (CNAE) and document types. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
+      "subtitulo": "Maintain CNAE sectors, document types and the goods and services catalog. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
       "tabs": {
-        "secretarias": "Departments",
         "setores": "Sectors (CNAE)",
-        "tiposDoc": "Document types"
+        "tiposDoc": "Document types",
+        "materiais": "Goods and services"
       },
       "campos": {
-        "nome": "Name",
-        "sigla": "Acronym",
-        "responsavel": "Responsible",
         "codigo": "CNAE code (7 digits)",
         "descricao": "Description",
         "nomeTipo": "Type name",
         "formato": "Accepted format (e.g. pdf)",
         "categoria": "Category",
         "exigeValidade": "Requires expiry date",
-        "exigeExercicio": "Requires fiscal year (e.g. Balance sheet)"
+        "exigeExercicio": "Requires fiscal year (e.g. Balance sheet)",
+        "numero": "Number",
+        "nomeItem": "Item name",
+        "tipoItem": "Nature",
+        "unidades": "Units of measure",
+        "unidadesDica": "Separate with commas. E.g.: ea, m, box",
+        "especificacoes": "Technical specifications",
+        "situacao": "Status",
+        "acoes": "Actions"
       },
       "categorias": {
         "cadastral": "Registration",
@@ -661,7 +683,20 @@
       "situacaoInativo": "inactive",
       "inativar": "Deactivate",
       "reativar": "Reactivate",
-      "vazio": "No items registered yet."
+      "vazio": "No items registered yet.",
+      "tiposItem": {
+        "material": "Goods",
+        "servico": "Service"
+      },
+      "filtros": {
+        "tipo": "Nature",
+        "tipoTodos": "All natures"
+      },
+      "buscaPlaceholder": "Search by number, name or specification…",
+      "buscaAriaLabel": "Search the catalog",
+      "exportarCsv": "Export Excel",
+      "exportarPdf": "Export PDF",
+      "situacaoAtivo": "active"
     },
     "usuarios": {
       "breadcrumb": "Administration · Users",
@@ -799,7 +834,6 @@
       "migalha": "Operations · Document Review",
       "titulo": "Document Review",
       "tituloComplemento": "(co-validation)",
-      "subtitulo": "Approval or rejection with mandatory justification (RN003)",
       "carregando": "Loading queue…",
       "erroCarregar": "Could not load the review queue.",
       "vazioTitulo": "No documents in the queue",
@@ -1048,7 +1082,6 @@
       "colObjeto": "Notice",
       "colSecretaria": "Department",
       "colPrazo": "Deadline",
-      "colQuantitativos": "Quantities",
       "filtroSecretariaAriaLabel": "Filter by department",
       "todasSecretarias": "All departments",
       "exportarCsv": "CSV",
@@ -1310,7 +1343,6 @@
   },
   "adminLgpd": {
     "titulo": "LGPD Requests",
-    "subtitulo": "Queue of pending data subject rights (DPO). The procurement team does not handle these (RNF007).",
     "carregando": "Loading…",
     "vazio": "No pending requests.",
     "titular": "Data subject",

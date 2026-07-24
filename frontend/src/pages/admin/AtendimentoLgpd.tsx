@@ -45,7 +45,7 @@ export function AtendimentoLgpd() {
 
   return (
     <div className="stack">
-      <div><h1 className="page-title">{t('adminLgpd.titulo')}</h1><p className="page-sub">{t('adminLgpd.subtitulo')}</p></div>
+      <div><h1 className="page-title">{t('adminLgpd.titulo')}</h1></div>
 
       {feedback && (
         <div data-cy="lgpd-feedback" role="status" className={`pill ${feedback.tom === 'ok' ? 'pill-success' : 'pill-error'}`} style={{ display: 'inline-flex' }}>

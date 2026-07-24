@@ -82,7 +82,7 @@ function CorpoCriar({ onFechar, onMudou }: { onFechar: () => void; onMudou: () =
           <span style={rotulo}>{t('admin.fornecedores.campos.razaoSocial')}</span>
           <input className="input" data-cy="campo-razao-social" required placeholder={t('admin.fornecedores.modal.razaoPlaceholder')} value={form.razaoSocial} onChange={set('razaoSocial')} style={{ width: '100%' }} />
         </label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        <div className="cm-form-grid">
           <label>
             <span style={rotulo}>{t('admin.fornecedores.campos.porte')}</span>
             <input className="input" data-cy="campo-porte" required placeholder="MEI / ME / EPP" value={form.porte} onChange={set('porte')} style={{ width: '100%' }} />

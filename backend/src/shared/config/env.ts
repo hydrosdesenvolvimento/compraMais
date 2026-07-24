@@ -29,6 +29,8 @@ export interface AppConfig {
     frontendRedirect: string;
   };
   crypto: { piiKey: Buffer };
+  /** Reconhecimento facial (UC007 — prova de vida). Motor via serviço Python; mock em teste/dev. */
+  face: { provider: 'insightface' | 'mock'; serviceUrl: string; timeoutMs: number; limiar: number };
 }
 
 /** Segredo de assinatura usado fora de produção, quando `JWT_SECRET` não foi informado. */
@@ -131,5 +133,24 @@ export function loadConfig(): AppConfig {
       frontendRedirect: process.env.AUTH_FRONTEND_REDIRECT ?? 'http://localhost:5173/#/cadastro',
     },
     crypto: { piiKey: exigirChavePii(process.env.NODE_ENV ?? 'development') },
+    face: resolverFace(process.env.NODE_ENV ?? 'development'),
+  };
+}
+
+/**
+ * Motor facial: 'mock' em teste (offline, DEC-STR-34); em runtime segue `FACE_PROVIDER`, com default
+ * seguro por ambiente (produção usa o serviço Python real; dev cai no mock para não exigir o container
+ * pesado). O limiar de cosseno é sobreponível por env (calibração falso-aceite × falso-rejeite).
+ */
+function resolverFace(nodeEnv: string): AppConfig['face'] {
+  const explicito = process.env.FACE_PROVIDER;
+  const provider: 'insightface' | 'mock' =
+    nodeEnv === 'test' ? 'mock' : explicito === 'insightface' ? 'insightface' : explicito === 'mock' ? 'mock' : nodeEnv === 'production' ? 'insightface' : 'mock';
+  const limiar = Number.parseFloat(process.env.FACE_MATCH_THRESHOLD ?? '');
+  return {
+    provider,
+    serviceUrl: process.env.FACE_SERVICE_URL ?? 'http://face:8000',
+    timeoutMs: toInt(process.env.FACE_TIMEOUT_MS, 5000),
+    limiar: Number.isFinite(limiar) ? limiar : 0.35,
   };
 }

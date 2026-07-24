@@ -30,21 +30,37 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
     expect(cad.statusCode).toBe(201);
     empresaId = cad.json().fornecedorId as string;
 
+    // Prova de vida (UC007): referência do responsável no cadastro; a MESMA foto aprova na verificação.
+    const foto = Buffer.from('rosto-do-titular-1').toString('base64');
+    const bio = await app.inject({ method: 'POST', url: `/fornecedores/${empresaId}/biometria`, headers: fornecedor(), payload: { imagem: foto } });
+    expect(bio.statusCode).toBe(201);
+
     editalDistribuido = await criarPublicar(['1412601'], 10);
-    // Fornecedor credencia (teto 10) e assina o termo → vira apto (`aceito`).
+    // Fornecedor credencia (teto 10), prova vida e assina o termo → vira apto (`aceito`).
     const cred = await app.inject({ method: 'POST', url: `/editais/${editalDistribuido}/credenciamentos`, headers: fornecedor(), payload: { capacidade: 10 } });
     expect(cred.statusCode).toBe(201);
     const credId = cred.json().credenciamentoId as string;
+    const prova = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/prova-de-vida`, headers: fornecedor(), payload: { imagem: foto } });
+    expect(prova.statusCode).toBe(200);
     const termo = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: fornecedor(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
     expect(termo.statusCode).toBe(200);
   });
 
   afterAll(async () => { await app.close(); });
 
-  async function criarPublicar(cnaesAlvo: string[], quantitativos: number): Promise<string> {
-    const r = await app.inject({ method: 'POST', url: '/editais', headers: gestor, payload: { secretariaId: 's1', objeto: 'merenda', cnaesAlvo, quantitativos, prazoVigencia: '2099-12-31' } });
+  // A demanda do edital deixou de ser um campo próprio: vem da soma das quantidades dos ITENS. O helper
+  // cria o edital, um item de catálogo, adiciona um item com `quantidade = demanda` e então publica.
+  let seqItem = 0;
+  async function criarPublicar(cnaesAlvo: string[], demanda: number): Promise<string> {
+    const r = await app.inject({ method: 'POST', url: '/editais', headers: gestor, payload: { secretariaId: 's1', objeto: 'merenda', cnaesAlvo, prazoVigencia: '2099-12-31' } });
     expect(r.statusCode).toBe(201);
     const id = r.json().editalId as string;
+
+    const cat = await app.inject({ method: 'POST', url: '/catalogos/materiais-servicos', headers: gestor, payload: { nome: `Item demanda ${seqItem++}`, tipo: 'material', unidades: ['un'] } });
+    expect(cat.statusCode).toBe(201);
+    const item = await app.inject({ method: 'POST', url: `/editais/${id}/itens`, headers: gestor, payload: { itemCatalogoId: cat.json().id, unidade: 'un', quantidade: demanda, precoTeto: 10 } });
+    expect(item.statusCode).toBe(201);
+
     const pub = await app.inject({ method: 'POST', url: `/editais/${id}/publicar`, headers: gestor });
     expect(pub.statusCode).toBe(200);
     return id;
@@ -84,7 +100,7 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
   });
 
   it('guarda de estado: distribuir edital não publicado (rascunho) → 409', async () => {
-    const rascunho = await app.inject({ method: 'POST', url: '/editais', headers: gestor, payload: { secretariaId: 's1', objeto: 'outro', cnaesAlvo: ['1412601'], quantitativos: 5, prazoVigencia: '2099-12-31' } });
+    const rascunho = await app.inject({ method: 'POST', url: '/editais', headers: gestor, payload: { secretariaId: 's1', objeto: 'outro', cnaesAlvo: ['1412601'], prazoVigencia: '2099-12-31' } });
     const id = rascunho.json().editalId as string;
     const r = await app.inject({ method: 'POST', url: `/editais/${id}/distribuir`, headers: gestor });
     expect(r.statusCode).toBe(409);

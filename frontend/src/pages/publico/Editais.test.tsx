@@ -28,7 +28,7 @@ vi.mock('../../lib/auth', () => ({ obterUsuario: () => obterUsuario() }));
 
 /** Edital com os campos reais de `GET /editais`; `prazoVigencia` distante evita prazo "encerrado". */
 function edital(over: Partial<EditalItem> & Pick<EditalItem, 'id'>): EditalItem {
-  return { objeto: 'Objeto', secretariaId: 's1', prazoVigencia: '2099-12-31', quantitativos: 10, ...over };
+  return { objeto: 'Objeto', secretariaId: 's1', prazoVigencia: '2099-12-31', ...over };
 }
 
 function renderVitrine() {
@@ -51,7 +51,7 @@ describe('Editais — Vitrine filtrada por CNAE (UC003)', () => {
   it('lista os editais compatíveis recebidos, marcados como compatíveis', async () => {
     editaisCompativeis.mockResolvedValue([
       edital({ id: 'e1', objeto: 'Merenda escolar', secretariaId: 's1' }),
-      edital({ id: 'e2', objeto: 'Uniformes', secretariaId: 's2', prazoVigencia: null, quantitativos: 50 }),
+      edital({ id: 'e2', objeto: 'Uniformes', secretariaId: 's2', prazoVigencia: null }),
     ]);
     renderVitrine();
 

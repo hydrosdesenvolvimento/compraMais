@@ -12,7 +12,7 @@ type Actor = { userId: string; empresaId?: string };
  * forma bivariante em TS, então cada `CrudCatalogo<T, TCriar, TEditar>` concreto satisfaz esta interface.
  */
 interface CrudLike {
-  criar(input: unknown, actor: Actor): Promise<{ id: string }>;
+  criar(input: unknown, actor: Actor): Promise<ItemCatalogo>;
   editar(id: string, campos: unknown, actor: Actor): Promise<void>;
   inativar(id: string, actor: Actor): Promise<void>;
   reativar(id: string, actor: Actor): Promise<void>;
@@ -20,22 +20,37 @@ interface CrudLike {
 }
 
 /**
- * Apenas o Administrador mantém catálogos (UC020). A leitura é aberta (dado de referência):
- * anônimo → 401 nas escritas, papel errado → 403; o GET não passa por guard algum, de propósito.
+ * Política de escrita **por catálogo**. A leitura é aberta em todos (dado de referência): anônimo → 401
+ * nas escritas, papel errado → 403; o GET não passa por guard algum, de propósito.
+ *
+ * Os três catálogos base seguem exclusivos do Administrador (UC020). O de **materiais e serviços** é
+ * mantido também pela Secretaria (`smga`): a tela "Catálogos" já é dela por padrão
+ * (`VISIBILIDADE_PADRAO.smga` em `permissoes/domain/tela-admin.ts`), então um único perfil de escrita
+ * global deixaria o público default da tela sem poder escrever nada.
  */
-const PERFIS_ESCRITA: readonly Papel[] = ['administrador'];
+const PERFIS_ESCRITA_PADRAO: readonly Papel[] = ['administrador'];
+const PERFIS_ESCRITA: Record<string, readonly Papel[]> = {
+  'materiais-servicos': ['administrador', 'smga'],
+};
 
 /**
- * Controller dos catálogos base (UC020 / RF020-RF022). Um único conjunto de rotas parametrizado por
- * `:catalogo` (`secretarias` | `setores-cnae` | `tipos-documento`) despacha para o CrudCatalogo dono.
- * Escritas exigem RBAC Administrador; a listagem é leitura de referência (consumida por editais/upload).
+ * Controller dos catálogos (UC020 / RF020-RF022). Um único conjunto de rotas parametrizado por
+ * `:catalogo` (`secretarias` | `setores-cnae` | `tipos-documento` | `materiais-servicos`) despacha para o
+ * CrudCatalogo dono. A listagem é leitura de referência (consumida por editais/upload/lotes).
  */
 export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: ManterCatalogos }): void {
   const catalogos: Record<string, CrudLike> = {
     secretarias: deps.manter.secretarias,
     'setores-cnae': deps.manter.setores,
     'tipos-documento': deps.manter.tiposDocumento,
+    'materiais-servicos': deps.manter.materiaisServicos,
   };
+
+  /** Perfis autorizados a escrever no catálogo desta requisição. */
+  function perfisEscrita(req: FastifyRequest): readonly Papel[] {
+    const { catalogo } = req.params as { catalogo: string };
+    return PERFIS_ESCRITA[catalogo] ?? PERFIS_ESCRITA_PADRAO;
+  }
 
   function resolver(req: FastifyRequest, reply: FastifyReply): CrudLike | null {
     const { catalogo } = req.params as { catalogo: string };
@@ -52,14 +67,14 @@ export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: Ma
   });
 
   app.post('/catalogos/:catalogo', async (req, reply) => {
-    const quem = exigirPapel(req, reply, PERFIS_ESCRITA); if (!quem) return reply;
+    const quem = exigirPapel(req, reply, perfisEscrita(req)); if (!quem) return reply;
     const crud = resolver(req, reply); if (!crud) return;
-    try { return reply.code(201).send(await crud.criar(req.body, actor(quem))); }
+    try { return reply.code(201).send(serializar(await crud.criar(req.body, actor(quem)))); }
     catch (e) { return falha(reply, e); }
   });
 
   app.patch('/catalogos/:catalogo/:id', async (req, reply) => {
-    const quem = exigirPapel(req, reply, PERFIS_ESCRITA); if (!quem) return reply;
+    const quem = exigirPapel(req, reply, perfisEscrita(req)); if (!quem) return reply;
     const crud = resolver(req, reply); if (!crud) return;
     const { id } = req.params as { id: string };
     try { await crud.editar(id, req.body, actor(quem)); return reply.send({ ok: true }); }
@@ -67,7 +82,7 @@ export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: Ma
   });
 
   app.post('/catalogos/:catalogo/:id/inativar', async (req, reply) => {
-    const quem = exigirPapel(req, reply, PERFIS_ESCRITA); if (!quem) return reply;
+    const quem = exigirPapel(req, reply, perfisEscrita(req)); if (!quem) return reply;
     const crud = resolver(req, reply); if (!crud) return;
     const { id } = req.params as { id: string };
     try { await crud.inativar(id, actor(quem)); return reply.send({ situacao: 'inativo' }); }
@@ -75,7 +90,7 @@ export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: Ma
   });
 
   app.post('/catalogos/:catalogo/:id/reativar', async (req, reply) => {
-    const quem = exigirPapel(req, reply, PERFIS_ESCRITA); if (!quem) return reply;
+    const quem = exigirPapel(req, reply, perfisEscrita(req)); if (!quem) return reply;
     const crud = resolver(req, reply); if (!crud) return;
     const { id } = req.params as { id: string };
     try { await crud.reativar(id, actor(quem)); return reply.send({ situacao: 'ativo' }); }

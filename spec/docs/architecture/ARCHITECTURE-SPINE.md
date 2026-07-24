@@ -121,6 +121,7 @@ graph TD
 - **Binds:** Credenciamento; RN004
 - **Prevents:** caminhos de mutação concorrentes da fase
 - **Rule:** `Requerente → Credenciado → Fornecedor`, transições só pelo dono, com guarda (inadimplência é a guarda de `Requerente→Credenciado`). Flag Reserva/Segunda Demanda é estado interno. Outros módulos pedem avanço via evento (ex.: Distribuição→Fornecedor), nunca escrita direta.
+- **Nota:** o rótulo da fase inicial `Requerente` passa a `Cadastrado` (AD-41), sem alterar a estrutura da máquina de estado.
 
 ### AD-15 — Status de `Documento` só pela Covalidação
 - **Binds:** Credenciamento/Covalidacao; RN003
@@ -268,6 +269,20 @@ graph TD
 - **Prevents:** perda de histórico/integridade referencial por DELETE físico; órfãos em processos vinculados
 - **Rule:** entidades de cadastro **não são apagadas fisicamente** — recebem estado `Inativo` (flag/soft-delete), somem das seleções ativas mas preservam histórico e referências. DELETE físico é proibido para entidades referenciadas por processos. Complementa a trilha append-only (AD-18) e a `EntidadeBase` (AD-33). Identificado na validação de mockups (2026-07-02).
 
+### AD-39 — PDF oficial do Edital como artefato anexado
+- **Binds:** Editais; RF025, RF008, RN014 (reforça AD-16, AD-37)
+- **Prevents:** edital publicado sem o artefato oficial do SEI; PDF que se torna fonte estruturada em vez de complemento
+- **Rule:** o admin/Secretaria anexa o PDF do edital (gerado no SEI) na criação; o upload é **obrigatório** para a transição de estado Rascunho→Aberto (RN014/AD-37); o arquivo é persistido no object storage (S3-compatível, mesma infra dos documentos, AD-19 quando houver PII); é disponibilizado para download ao fornecedor na tela do edital. Complementa RF008 — **não** substitui o preenchimento estruturado (metadados/itens/CNAE), que segue sendo a fonte do filtro (RF003), da distribuição (RF005) e da transparência.
+
+### AD-40 — Desistência como transição covalidada e append-only
+- **Binds:** Credenciamento, Distribuicao; RF026, RN018, RN016, RN004 (reforça AD-14, AD-10, AD-25, AD-18)
+- **Prevents:** saída de credenciamento sem covalidação humana; cota homologada órfã; mutação da trilha
+- **Rule:** a desistência de um credenciamento não é ação automática; é uma transição na máquina de estado do Credenciamento (AD-14) com estados `Pendente de Desistência → Desistente`; a solicitação do fornecedor emite evento e a **confirmação** da CPL/SMGA (covalidação humana) efetiva a saída; a rejeição reverte ao estado anterior; quando havia cota homologada, a confirmação aciona `SubstituicaoCota` (AD-10) promovendo o Cadastro de Reserva (AD-25). Tudo append-only na trilha (AD-18). O cancelamento **antes** da distribuição permanece self-service (RN016), sem covalidação.
+
+### AD-41 — Nomenclatura canônica da fase inicial do fornecedor = "Cadastrado"
+- **Binds:** Credenciamento; AD-14, AD-28
+- **Prevents:** divergência de rótulo da fase inicial em relação à semântica oficial do cliente; migração destrutiva da trilha
+- **Rule:** o rótulo da fase inicial na máquina de estado do fornecedor (AD-14) passa a ser `Cadastrado` (substitui `Requerente`), alinhando à semântica oficial do cliente: `Cadastrado → Credenciado → Fornecedor`. A adoção é documental; a migração de schema/enum, seletores `data-cy` e UI é tratada como **história dedicada** (Story 1.8), forward-only (AD-28), sem mutar a trilha existente.
 ### AD-39 — Um contrato, um lugar
 - **Binds:** toda a documentação normativa (`spec/docs/`, `spec/Prototipo/`)
 - **Prevents:** canônico fantasma — documento normativo não-versionado, referência a arquivo inexistente, cópia divergente sem dono
@@ -341,11 +356,11 @@ erDiagram
 | Cadastro CNPJ / CNAE (RF001/003) | `catalogo/` | AD-4, AD-5, AD-20 |
 | Covalidação documental (RF002/004) | `credenciamento/` | AD-15, AD-19 |
 | Inadimplência (RF011, RN002) | `credenciamento/` + `acl/` | AD-11, AD-12 |
-| Editais individualizados (RF008, RN007) | `editais/` | AD-16, AD-37 |
+| Editais individualizados (RF008, RN007) | `editais/` | AD-16, AD-37, AD-39 |
 | Cadastros administrativos — Secretarias/CNAE/Tipos-doc (RF020/021/022) | `editais/` + `catalogo/` | AD-16, AD-38 |
 | Gestão de usuários internos + RBAC (RF023, §15) | `shared/identity/` | AD-20, AD-35, AD-38 |
 | Motor de distribuição (RF005, RN005) | `distribuicao/` | AD-7, AD-8, AD-9, AD-10 |
-| Cadastro de Reserva (RF006, RN004) | `credenciamento/` | AD-10, AD-14 |
+| Cadastro de Reserva (RF006, RN004) | `credenciamento/` | AD-10, AD-14, AD-40, AD-41 |
 | Malote SEI (RF007, RNF002) | `malote/` | AD-6, AD-21 |
 | Auditoria/exportação (RF014, RNF003) | `auditoria/` | AD-18 |
 | Contestação/direitos do titular (RF016/RF017) | `credenciamento/` + `shared/identity/` | AD-19 |

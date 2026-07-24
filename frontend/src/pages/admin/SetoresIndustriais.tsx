@@ -175,7 +175,7 @@ function ModalSetor({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFe
 
         <form data-cy="form-setor" onSubmit={(e) => { e.preventDefault(); salvar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           <div style={{ padding: 24, overflowY: 'auto', display: 'grid', gap: 18 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="cm-form-grid">
               <label>
                 <span style={rotulo}>{t('admin.setoresIndustriais.campos.codigo')}</span>
                 <input className="input" data-cy="campo-codigo" required inputMode="numeric" placeholder={t('admin.setoresIndustriais.modal.codigoPlaceholder')} value={formatarCnae(form.codigo)} onChange={setCodigo} style={{ width: '100%', fontVariantNumeric: 'tabular-nums' }} />

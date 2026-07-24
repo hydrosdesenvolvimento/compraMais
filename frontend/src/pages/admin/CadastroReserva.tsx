@@ -36,7 +36,6 @@ export function CadastroReserva() {
       <div>
         <div style={{ fontSize: 12, color: 'var(--cinza-400)' }}>{t('admin.reserva.eyebrow')}</div>
         <h1 className="page-title">{t('admin.reserva.titulo')}</h1>
-        <p className="page-sub">{t('admin.reserva.subtitulo')}</p>
       </div>
 
       {/* Aviso "Fila de reserva" — explica a regra RN004 (não altera cotas já distribuídas). */}

@@ -10,7 +10,7 @@ import { celula, siglaTag, botaoExportar, cabecalho, setaOrdem, Paginacao, type 
 import { IconeBusca, IconeDownload, IconeInfo, IconeSeta } from '../../design-system/icons';
 
 /** Colunas ordenáveis da vitrine. `prazo` ordena pelo nº de dias, não pelo texto. */
-type Coluna = 'objeto' | 'secretaria' | 'prazo' | 'quantitativos';
+type Coluna = 'objeto' | 'secretaria' | 'prazo';
 
 const POR_PAGINA = 5;
 
@@ -74,7 +74,6 @@ export function Editais() {
         if (a.dias === null || b.dias === null) return a.dias === b.dias ? 0 : a.dias === null ? 1 : -1;
         return (a.dias - b.dias) * sentido;
       }
-      if (ordem === 'quantitativos') return (a.quantitativos - b.quantitativos) * sentido;
       const campo = ordem === 'objeto' ? 'objeto' : 'sigla';
       return a[campo].localeCompare(b[campo]) * sentido;
     };
@@ -106,14 +105,13 @@ export function Editais() {
     { chave: 'objeto', rotulo: t('editais.vitrine.colObjeto') },
     { chave: 'secretaria', rotulo: t('editais.vitrine.colSecretaria') },
     { chave: 'prazo', rotulo: t('editais.vitrine.colPrazo') },
-    { chave: 'quantitativos', rotulo: t('editais.vitrine.colQuantitativos'), alinhamento: 'right' },
     { chave: null, rotulo: '', alinhamento: 'right' },
   ];
 
   // Exporta o que está filtrado/ordenado (não só a página), espelhando o que o usuário vê.
   const exportar = () => exportarCsv(
     colunas.filter((c) => c.chave).map((c) => c.rotulo),
-    filtrados.map((e) => [e.objeto, e.sigla, textoPrazo(e.dias), e.quantitativos]),
+    filtrados.map((e) => [e.objeto, e.sigla, textoPrazo(e.dias)]),
     'editais.csv',
   );
 
@@ -243,9 +241,6 @@ export function Editais() {
                           >
                             {textoPrazo(e.dias)}
                           </span>
-                        </td>
-                        <td style={{ ...celula, textAlign: 'right', font: '600 14px var(--font-body)', color: 'var(--cinza-900)', whiteSpace: 'nowrap' }}>
-                          {e.quantitativos}
                         </td>
                         <td style={{ ...celula, textAlign: 'right' }}>
                           <button

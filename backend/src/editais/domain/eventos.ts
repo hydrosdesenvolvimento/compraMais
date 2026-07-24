@@ -23,6 +23,14 @@ export class PublicoAlvoAmpliado extends DomainEvent<{ editalId: string; cnaesAl
   readonly eventName = 'PublicoAlvoAmpliado'; readonly eventVersion = 1; // FR-014 — sinalização; prazo mantido
   constructor(aggregateId: string, payload: { editalId: string; cnaesAlvo: string[] }, actor?: Actor) { super(aggregateId, payload, actor); }
 }
+export class ItemEditalAdicionado extends DomainEvent<{ editalId: string; itemId: string; itemCatalogoId: string; numero: number }> {
+  readonly eventName = 'ItemEditalAdicionado'; readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { editalId: string; itemId: string; itemCatalogoId: string; numero: number }, actor?: Actor) { super(aggregateId, payload, actor); }
+}
+export class ItemEditalRemovido extends DomainEvent<{ editalId: string; itemId: string }> {
+  readonly eventName = 'ItemEditalRemovido'; readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { editalId: string; itemId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}
 export class ContestacaoCnaeAberta extends DomainEvent<{ contestacaoId: string; editalId: string; cnae: string }> {
   readonly eventName = 'ContestacaoCnaeAberta'; readonly eventVersion = 1;
   constructor(aggregateId: string, payload: { contestacaoId: string; editalId: string; cnae: string }, actor?: Actor) { super(aggregateId, payload, actor); }

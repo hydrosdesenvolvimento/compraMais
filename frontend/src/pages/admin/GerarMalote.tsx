@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api, type MaloteListaView, type PecaMalote, type ProcessoSeiView, type TipoPecaMalote } from '../../lib/api';
 import { Botao, BotaoIcone, Campo } from '../../design-system/components';
 import { celula, cabecalho } from '../../design-system/tabela';
-import { IconeDownload, IconeFiltro, IconeSync, IconeFechar, IconeAlerta } from '../../design-system/icons';
+import { IconeDownload, IconeFiltro, IconeSync, IconeFechar, IconeAlerta, IconeUpload, IconeMais } from '../../design-system/icons';
 
 /**
  * Painel Admin · "Malote SEI" (UC010 / RF007, ator CPL). A CPL consolida a documentação aprovada de um
@@ -177,13 +177,13 @@ export function GerarMalote() {
                           )}
                           {/* Enviar ao SEI: só para malote gerado ainda não protocolado. */}
                           {m.status === 'gerado' && !m.protocoloSei && !seiInfo[m.id] && (
-                            <button type="button" data-cy="enviar-sei" title={t('admin.malote.sei.enviar')} aria-label={t('admin.malote.sei.enviar')} disabled={enviarSei.isPending} onClick={() => enviarSei.mutate(m.id)} style={iconeAcao}>
-                              <span style={{ font: '600 13px var(--font-body)' }}>{t('admin.malote.sei.enviar')}</span>
+                            <button type="button" data-cy="enviar-sei" title={t('admin.malote.sei.enviar')} aria-label={t('admin.malote.sei.enviar')} disabled={enviarSei.isPending} onClick={() => enviarSei.mutate(m.id)} style={{ ...iconeAcao, padding: 0 }}>
+                              <IconeUpload width={18} height={18} />
                             </button>
                           )}
                           {m.status !== 'pendente' && (
-                            <button type="button" data-cy="exportar" title={t('admin.malote.lista.exportar')} aria-label={t('admin.malote.lista.exportar')} disabled={exportar.isPending} onClick={() => exportar.mutate(m.id)} style={iconeAcao}>
-                              <IconeDownload width={18} height={18} /><span style={{ font: '600 13px var(--font-body)' }}>{t('admin.malote.lista.exportar')}</span>
+                            <button type="button" data-cy="exportar" title={t('admin.malote.lista.exportar')} aria-label={t('admin.malote.lista.exportar')} disabled={exportar.isPending} onClick={() => exportar.mutate(m.id)} style={{ ...iconeAcao, padding: 0 }}>
+                              <IconeDownload width={18} height={18} />
                             </button>
                           )}
                         </div>
@@ -315,7 +315,7 @@ function ModalGerarMalote({ onFechar, onGerado }: { onFechar: () => void; onGera
                 </select>
                 <input data-cy="peca-ref" className="input" style={{ maxWidth: 170 }} placeholder={t('admin.malote.gerar.ref')} value={peca.ref} onChange={(e) => setPeca({ ...peca, ref: e.target.value })} />
                 <input data-cy="peca-tamanho" className="input" style={{ maxWidth: 150 }} type="number" min={1} placeholder={t('admin.malote.gerar.tamanho')} value={peca.tamanho} onChange={(e) => setPeca({ ...peca, tamanho: e.target.value })} />
-                <Botao data-cy="add-peca" type="button" variante="secundario" onClick={adicionarPeca}>{t('admin.malote.gerar.adicionarPeca')}</Botao>
+                <Botao data-cy="add-peca" type="button" variante="secundario" title={t('admin.malote.gerar.adicionarPeca')} aria-label={t('admin.malote.gerar.adicionarPeca')} onClick={adicionarPeca} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}><IconeMais width={18} height={18} /></Botao>
               </div>
               {pecas.length === 0 ? (
                 <p data-cy="sem-pecas" style={{ margin: '10px 0 0', fontSize: 13, color: 'var(--cinza-500)' }}>{t('admin.malote.gerar.semPecas')}</p>

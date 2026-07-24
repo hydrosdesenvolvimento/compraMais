@@ -43,11 +43,21 @@ export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir:
     catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
   });
 
+  // Edição pela gestão (FR-013): só em rascunho (edital não publicado). O caso de uso aplica a guarda.
   app.patch('/editais/:id', async (req, reply) => {
     const ator = exigirPapel(req, reply, PERFIS_GESTAO);
     if (!ator) return reply;
     const { id } = req.params as { id: string };
-    try { await deps.gerir.editar(id, req.body as Record<string, unknown>, { userId: ator.userId }); return reply.send({ ok: true }); }
+    try { await deps.gerir.editarComoRascunho(id, req.body as Record<string, unknown>, { userId: ator.userId }); return reply.send({ ok: true }); }
+    catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
+  });
+
+  // Despublicação (publicado → rascunho): só se não houver credenciamentos associados.
+  app.post('/editais/:id/despublicar', async (req, reply) => {
+    const ator = exigirPapel(req, reply, PERFIS_GESTAO);
+    if (!ator) return reply;
+    const { id } = req.params as { id: string };
+    try { await deps.gerir.despublicar(id, { userId: ator.userId }); return reply.send({ situacao: 'rascunho' }); }
     catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
   });
 
@@ -56,10 +66,7 @@ export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir:
     if (!ator) return reply;
     const { id } = req.params as { id: string };
     try { await deps.gerir.encerrar(id, { userId: ator.userId }); return reply.send({ situacao: 'encerrado' }); }
-    catch (e) {
-      const code = (e as Error).name === 'ContestacoesPendentes' ? 409 : erro(e);
-      return reply.code(code).send({ codigo: (e as Error).name, mensagem: (e as Error).message });
-    }
+    catch (e) { return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message }); }
   });
 
   // Busca por instância parcial (QBE — FR-011): probe `secretariaId`/`situacao`/`cnae`/`texto`; page/size fora do
@@ -93,6 +100,7 @@ export function registrarRotaElegiveisEdital(app: FastifyInstance, deps: { elegi
 function erro(e: unknown): number {
   const n = (e as Error).name;
   if (n === 'EditalNaoEncontrado') return 404;
-  if (n === 'TransicaoInvalida') return 409;
+  // Conflitos de estado/regra: transição inválida, edital não editável, com credenciamentos, ou contestações pendentes.
+  if (n === 'TransicaoInvalida' || n === 'EditalNaoEditavel' || n === 'EditalComCredenciamentos' || n === 'ContestacoesPendentes') return 409;
   return 422; // EditalIncompleto, CnaeInvalido, etc.
 }

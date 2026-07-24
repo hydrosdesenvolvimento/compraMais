@@ -370,8 +370,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Postgres quando disponível (como `editais`/`fornecedores`); senão memória (testes sem banco).
   // Precondição de edital Aberto + compatível reusa a vitrine (UC003); o aceite move o fornecedor a
   // `pendente_analise`; o cancelamento (A2) é permitido antes da distribuição.
-  // `credRepo` já foi declarado acima (usado pela despublicação de edital).
-  const solicitarCredenciamento = new SolicitarCredenciamento(credRepo, vitrine, fornecedores, bus);
+  // `credRepo` já foi declarado acima (usado pela despublicação de edital). A porta de itens do edital
+  // (reusa `itensEditalRepo`) valida que a capacidade declarada por item aponta itens reais do edital.
+  const itensDoEdital = { idsDoEdital: async (editalId: string) => (await itensEditalRepo.listarDoEdital(editalId)).map((i) => i.id) };
+  const solicitarCredenciamento = new SolicitarCredenciamento(credRepo, vitrine, fornecedores, bus, undefined, itensDoEdital);
   // Leitura da home do fornecedor: lista seus credenciamentos enriquecidos com objeto/secretaria do
   // edital (reusa o `editaisRepo` já definido acima). Somente leitura — não altera o domínio.
   // Sigla da secretaria (ex.: SEME) para a tela "Meus Credenciamentos". Editais guardam `secretariaId`

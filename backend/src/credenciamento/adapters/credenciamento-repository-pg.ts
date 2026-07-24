@@ -1,5 +1,5 @@
 import type { Pool } from 'pg';
-import { Credenciamento, type EstadoCredenciamento, type ProvaVida, type TermoAceite } from '../domain/credenciamento.js';
+import { Credenciamento, type CapacidadeItem, type EstadoCredenciamento, type ProvaVida, type TermoAceite } from '../domain/credenciamento.js';
 import type { CredenciamentoRepository } from '../application/solicitar-credenciamento.js';
 
 /**
@@ -14,13 +14,13 @@ export class CredenciamentoRepositoryPg implements CredenciamentoRepository {
     const s = c.estado();
     await this.pool.query(
       `INSERT INTO credenciamentos
-         (id, fornecedor_id, edital_id, capacidade_teto, estado, passo_atual, termo, prova_vida, distribuido_em, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+         (id, fornecedor_id, edital_id, capacidade_teto, capacidades_itens, estado, passo_atual, termo, prova_vida, distribuido_em, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5::jsonb,$6,$7,$8,$9,$10,$11,$12,$13)
        ON CONFLICT (id) DO UPDATE SET
-         capacidade_teto = $4, estado = $5, passo_atual = $6, termo = $7, prova_vida = $8, distribuido_em = $9,
-         update_date = $11, last_user_update = $12`,
+         capacidade_teto = $4, capacidades_itens = $5::jsonb, estado = $6, passo_atual = $7, termo = $8, prova_vida = $9, distribuido_em = $10,
+         update_date = $12, last_user_update = $13`,
       [
-        s.meta.id, s.fornecedorId, s.editalId, s.capacidadeTeto, s.estado, s.passoAtual,
+        s.meta.id, s.fornecedorId, s.editalId, s.capacidadeTeto, JSON.stringify(s.itens), s.estado, s.passoAtual,
         s.termo ? JSON.stringify(s.termo) : null, s.provaVida ? JSON.stringify(s.provaVida) : null, s.distribuidoEm,
         s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate,
       ],
@@ -70,6 +70,7 @@ function mapear(row: Record<string, unknown>): Credenciamento {
     fornecedorId: String(row.fornecedor_id),
     editalId: String(row.edital_id),
     capacidadeTeto: Number(row.capacidade_teto),
+    itens: Array.isArray(row.capacidades_itens) ? (row.capacidades_itens as CapacidadeItem[]) : [], // jsonb parseado pelo driver
     estado: row.estado as EstadoCredenciamento,
     passoAtual: row.passo_atual == null ? 1 : Number(row.passo_atual),
     termo: (row.termo as TermoAceite | null) ?? null, // jsonb já vem parseado pelo driver pg

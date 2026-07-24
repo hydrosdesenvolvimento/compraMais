@@ -19,7 +19,7 @@ vi.mock('@tanstack/react-router', () => ({
 const DET = (over: Partial<CredenciamentoDetalheView> = {}): CredenciamentoDetalheView => ({
   id: 'c1', editalId: 'e1', estado: 'aceito',
   numeroEdital: 'ED-2026/003', objeto: 'Uniformes de educação infantil', secretariaSigla: 'SEME',
-  capacidadeTeto: 500, passoAtual: 4, totalPassos: 4,
+  capacidadeTeto: 500, itens: [], passoAtual: 4, totalPassos: 4,
   termo: { versao: 'v1', finalidade: 'credenciamento', aceitoEm: '2026-06-14T16:40:00.000Z' },
   criadoEm: '2026-06-10T09:12:00.000Z', atualizadoEm: '2026-06-14T16:40:00.000Z',
   ...over,

@@ -105,6 +105,12 @@ import { GerarMalote, type MaloteRepository } from './malote/application/gerar-m
 import { MaloteRepositoryMemory } from './malote/adapters/malote-repository-memory.js';
 import { MaloteRepositoryPg } from './malote/adapters/malote-repository-pg.js';
 import { registrarRotasMalote } from './malote/adapters/malote-controller.js';
+import { EnviarMaloteSei } from './malote/application/enviar-malote-sei.js';
+import type { SeiGateway } from './shared/acl/sei/sei-gateway.js';
+import { SeiWebGateway } from './shared/acl/sei/sei-web-gateway.js';
+import { SeiMockGateway } from './shared/acl/sei/sei-mock-gateway.js';
+import { ConsultarProcessoSei } from './sei/application/consultar-processo-sei.js';
+import { registrarRotasSei } from './sei/adapters/sei-controller.js';
 import { FilaMaloteMemory } from './malote/application/fila-malote.js';
 import { FilaMalotePg } from './malote/adapters/fila-malote-pg.js';
 import { GerirDireitosTitular, type SolicitacaoRepository } from './titular/application/gerir-direitos.js';
@@ -182,7 +188,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalEditado',
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
     'ItemEditalAdicionado', 'ItemEditalRemovido',
-    'MaloteGerado', 'MaloteExportado',
+    'MaloteGerado', 'MaloteExportado', 'MaloteProtocoladoSei',
     'DireitoTitularSolicitado', 'DireitoTitularAtendido',
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
     'SenhaAlterada', 'ResetSenhaSolicitado', 'SenhaRedefinida',
@@ -474,7 +480,24 @@ export async function buildServer(): Promise<FastifyInstance> {
     ? new FilaMalotePg(pool, (job) => gerarMalote.processarJob(job))
     : new FilaMaloteMemory((job) => gerarMalote.processarJob(job));
   gerarMalote = new GerarMalote(maloteRepo, bus, filaMalote); // limite global SEI_MALOTE_LIMITE_MB
-  registrarRotasMalote(app, { gerar: gerarMalote });
+
+  // Integração SEI (Épico 6): 'web' fala o SEI real (login SSO + camada web — modelo ../api_sei), com
+  // circuit breaker + fail-open; 'mock' é determinístico (teste/CI e dev sem SEI). A seleção vem da
+  // config (credenciais/órgão/tipo por env/secret; ausentes → mock). Push (malote→SEI) e pull (consulta).
+  const seiGateway: SeiGateway = config.sei.provider === 'web'
+    ? new SeiWebGateway({
+        baseUrl: config.sei.baseUrl, usuario: config.sei.usuario, senha: config.sei.senha ?? '',
+        selOrgao: config.sei.selOrgao, idTipoProcedimento: config.sei.idTipoProcedimento,
+      }, metrics)
+    : new SeiMockGateway();
+  const enviarMaloteSei = new EnviarMaloteSei(maloteRepo, seiGateway, bus);
+  registrarRotasMalote(app, { gerar: gerarMalote, enviarSei: enviarMaloteSei });
+  // `configurado` = integração pronta para o SEI real (provider 'web', que exige SEI_BASE_URL +
+  // credenciais/órgão/tipo). Sem isso, a UI de malote avisa que falta configuração.
+  registrarRotasSei(app, {
+    consultar: new ConsultarProcessoSei(seiGateway),
+    status: { configurado: config.sei.provider === 'web', provider: config.sei.provider },
+  });
   // Recuperação no boot: reprocessa jobs pendentes/órfãos que sobreviveram a um restart (durabilidade FR-002).
   if (filaMalote instanceof FilaMalotePg) await filaMalote.recuperar();
 

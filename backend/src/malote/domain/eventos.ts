@@ -10,3 +10,7 @@ export class MaloteExportado extends DomainEvent<{ maloteId: string }> {
   readonly eventName = 'MaloteExportado'; readonly eventVersion = 1;
   constructor(aggregateId: string, payload: { maloteId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
 }
+export class MaloteProtocoladoSei extends DomainEvent<{ maloteId: string; numeroProcesso: string; idProtocolo: string }> {
+  readonly eventName = 'MaloteProtocoladoSei'; readonly eventVersion = 1; // push ao SEI (Épico 6)
+  constructor(aggregateId: string, payload: { maloteId: string; numeroProcesso: string; idProtocolo: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}

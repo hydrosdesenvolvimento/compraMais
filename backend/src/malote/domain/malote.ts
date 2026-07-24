@@ -10,6 +10,9 @@ export interface Peca { tipo: TipoPeca; ref: string; tamanhoBytes: number }
 /** `acimaLimite` (FR-009): fragmento com peça única indivisível maior que o limite — sinalizado p/ a CPL. */
 export interface Fragmento { indice: number; pecasRefs: string[]; tamanhoBytes: number; acimaLimite: boolean }
 
+/** Referência ao processo do SEI onde o malote foi protocolado (Épico 6, integração SEI). */
+export interface ProtocoloSei { numeroProcesso: string; idProtocolo: string; url?: string }
+
 /** Snapshot do agregado para persistência (AD-33) — reconstruído por `Malote.deEstado`. */
 export interface MaloteState {
   meta: MetadadosBase;
@@ -19,6 +22,8 @@ export interface MaloteState {
   fragmentos: Fragmento[];
   status: StatusMalote;
   limiteBytes: number;
+  /** Processo do SEI onde o malote foi protocolado; null enquanto não enviado. */
+  protocoloSei: ProtocoloSei | null;
 }
 
 /**
@@ -34,12 +39,13 @@ export class Malote extends EntidadeBase {
     private _fragmentos: Fragmento[],
     private _status: StatusMalote,
     readonly limiteBytes: number,
+    private _protocoloSei: ProtocoloSei | null,
   ) {
     super(meta);
   }
 
   static criar(input: { id: string; fornecedorId: string; editalId: string; limiteBytes: number; userName?: string }): Malote {
-    return new Malote(EntidadeBase.metaNova(input.id, input.userName), input.fornecedorId, input.editalId, [], [], 'pendente', input.limiteBytes);
+    return new Malote(EntidadeBase.metaNova(input.id, input.userName), input.fornecedorId, input.editalId, [], [], 'pendente', input.limiteBytes, null);
   }
 
   /** Reconstrução a partir da persistência (sem regra de criação — aceita qualquer status do ciclo). */
@@ -47,7 +53,7 @@ export class Malote extends EntidadeBase {
     return new Malote(
       s.meta, s.fornecedorId, s.editalId,
       s.pecas.map((p) => ({ ...p })), s.fragmentos.map((f) => ({ ...f, pecasRefs: [...f.pecasRefs] })),
-      s.status, s.limiteBytes,
+      s.status, s.limiteBytes, s.protocoloSei ? { ...s.protocoloSei } : null,
     );
   }
 
@@ -59,12 +65,15 @@ export class Malote extends EntidadeBase {
       pecas: this._pecas.map((p) => ({ ...p })),
       fragmentos: this._fragmentos.map((f) => ({ ...f, pecasRefs: [...f.pecasRefs] })),
       status: this._status, limiteBytes: this.limiteBytes,
+      protocoloSei: this._protocoloSei ? { ...this._protocoloSei } : null,
     };
   }
 
   get pecas(): readonly Peca[] { return this._pecas; }
   get fragmentos(): readonly Fragmento[] { return this._fragmentos; }
   get status(): StatusMalote { return this._status; }
+  /** Processo do SEI onde o malote foi protocolado (null enquanto não enviado). */
+  get protocoloSei(): ProtocoloSei | null { return this._protocoloSei ? { ...this._protocoloSei } : null; }
   /** FR-009: há fragmento com peça indivisível acima do limite (requer tratamento manual da CPL). */
   get temPecaAcimaLimite(): boolean { return this._fragmentos.some((f) => f.acimaLimite); }
 
@@ -108,6 +117,20 @@ export class Malote extends EntidadeBase {
     this._status = 'exportado';
     this.marcarAtualizacao(userName);
     return { jaExportado: false };
+  }
+
+  /**
+   * Registra o protocolo no SEI (integração — Épico 6): grava o processo e marca o malote como
+   * `exportado`. Idempotente: se já protocolado, devolve o processo existente sem reprotocolar (evita
+   * duplicar processo no SEI numa reexecução). Exige o malote `gerado` (as peças precisam existir).
+   */
+  registrarEnvioSei(protocolo: ProtocoloSei, userName = 'sistema'): { jaProtocolado: boolean; protocolo: ProtocoloSei } {
+    if (this._protocoloSei) return { jaProtocolado: true, protocolo: { ...this._protocoloSei } };
+    if (this._status !== 'gerado') throw new MaloteNaoGerado();
+    this._protocoloSei = { ...protocolo };
+    this._status = 'exportado';
+    this.marcarAtualizacao(userName);
+    return { jaProtocolado: false, protocolo: { ...this._protocoloSei } };
   }
 }
 

@@ -15,14 +15,15 @@ export class MaloteRepositoryPg implements MaloteRepository {
     const s = m.estado();
     await this.pool.query(
       `INSERT INTO malotes
-         (id, fornecedor_id, edital_id, status, limite_bytes, pecas, fragmentos, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,$9,$10)
+         (id, fornecedor_id, edital_id, status, limite_bytes, pecas, fragmentos, protocolo_sei, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8::jsonb,$9,$10,$11)
        ON CONFLICT (id) DO UPDATE SET
-         status = $4, pecas = $6::jsonb, fragmentos = $7::jsonb,
-         update_date = $9, last_user_update = $10`,
+         status = $4, pecas = $6::jsonb, fragmentos = $7::jsonb, protocolo_sei = $8::jsonb,
+         update_date = $10, last_user_update = $11`,
       [
         s.meta.id, s.fornecedorId, s.editalId, s.status, s.limiteBytes,
         JSON.stringify(s.pecas), JSON.stringify(s.fragmentos),
+        s.protocoloSei ? JSON.stringify(s.protocoloSei) : null,
         s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate,
       ],
     );
@@ -66,6 +67,7 @@ function mapear(row: Record<string, unknown>): Malote {
     limiteBytes: Number(row.limite_bytes),
     pecas: (row.pecas as Peca[] | null) ?? [],
     fragmentos: (row.fragmentos as Fragmento[] | null) ?? [],
+    protocoloSei: (row.protocolo_sei as MaloteState['protocoloSei']) ?? null,
   };
   return Malote.deEstado(state);
 }

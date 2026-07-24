@@ -48,7 +48,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        service: [backend, frontend]
+        # face-service e referenciado pelo stack de prod (deploy/compramais-stack.yml);
+        # publicar aqui garante que a imagem exista no GHCR. E build pesado (modelos de
+        # ML na build), mas o cache gha (mode=max) reaproveita as camadas entre execucoes.
+        service: [backend, frontend, face-service]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,5 +85,31 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Cache por serviço (scope) para o build pesado do face-service nao
+          # invalidar o cache do backend/frontend e vice-versa.
+          cache-from: type=gha,scope=${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service }}
+
+  # ----------------------------------------------------------------------- #
+  # Deploy (opcional): dispara o redeploy do stack no Portainer via webhook. #
+  # Só roda em push no branch default (main) e apenas se o secret existir —  #
+  # sem PORTAINER_WEBHOOK_URL configurado, faz no-op (não falha o CI).       #
+  # O Portainer re-puxa as imagens do GHCR e aplica o rolling update.        #
+  # ----------------------------------------------------------------------- #
+  deploy:
+    name: Deploy (Portainer webhook)
+    needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispara redeploy do stack no Portainer
+        env:
+          HOOK: ${{ secrets.PORTAINER_WEBHOOK_URL }}
+        run: |
+          if [ -z "$HOOK" ]; then
+            echo "PORTAINER_WEBHOOK_URL não configurado — pulando o redeploy automático."
+            exit 0
+          fi
+          echo "Disparando webhook de redeploy do Portainer…"
+          curl -fsSL -X POST "$HOOK"
+          echo "Webhook disparado."

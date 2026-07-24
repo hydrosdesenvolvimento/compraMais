@@ -1,8 +1,8 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { api, type MaloteListaView, type PecaMalote, type TipoPecaMalote } from '../../lib/api';
-import { Botao, BotaoIcone } from '../../design-system/components';
+import { api, type MaloteListaView, type PecaMalote, type ProcessoSeiView, type TipoPecaMalote } from '../../lib/api';
+import { Botao, BotaoIcone, Campo } from '../../design-system/components';
 import { celula, cabecalho } from '../../design-system/tabela';
 import { IconeDownload, IconeFiltro, IconeSync, IconeFechar, IconeAlerta } from '../../design-system/icons';
 
@@ -44,9 +44,11 @@ export function GerarMalote() {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [modalAberto, setModalAberto] = useState(false);
+  const [consultaAberta, setConsultaAberta] = useState(false); // modal de consulta ao SEI (pull)
   const [filtros, setFiltros] = useState(FILTRO_VAZIO);
   const [aplicado, setAplicado] = useState(FILTRO_VAZIO);
   const [exportInfo, setExportInfo] = useState<Record<string, 'exportado' | 'jaExportado'>>({});
+  const [seiInfo, setSeiInfo] = useState<Record<string, string>>({}); // maloteId → nº do processo protocolado
 
   const { data: malotes = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['malotes', aplicado],
@@ -56,9 +58,18 @@ export function GerarMalote() {
   });
   const invalidar = () => qc.invalidateQueries({ queryKey: ['malotes'] });
 
+  // Status da integração SEI: se SEI_BASE_URL/credenciais não estão setados, a tela avisa e desabilita
+  // as ações de SEI. Default `true` enquanto carrega, para não piscar o aviso nem esconder as ações.
+  const { data: seiStatus } = useQuery({ queryKey: ['sei-status'], queryFn: () => api.seiStatus(), retry: false, staleTime: 60000 });
+
   const exportar = useMutation({
     mutationFn: (id: string) => api.maloteExportar(id),
     onSuccess: (r, id) => { setExportInfo((m) => ({ ...m, [id]: r.jaExportado ? 'jaExportado' : 'exportado' })); void invalidar(); },
+  });
+  // Push ao SEI (Épico 6): cria o processo e protocola o malote (idempotente). Guarda o nº do processo.
+  const enviarSei = useMutation({
+    mutationFn: (id: string) => api.maloteEnviarSei(id),
+    onSuccess: (r, id) => { setSeiInfo((m) => ({ ...m, [id]: r.numeroProcesso })); void invalidar(); },
   });
 
   const colunas = [
@@ -69,6 +80,23 @@ export function GerarMalote() {
     t('admin.malote.campos.acoes'),
   ];
 
+  // SEI não configurado (SEI_BASE_URL/credenciais ausentes): a tela exibe SOMENTE o aviso de configuração,
+  // sem lista, filtros ou ações — o painel do malote depende da integração e não deve operar sem ela.
+  if (seiStatus && !seiStatus.configurado) {
+    return (
+      <div className="stack" data-cy="admin-malote">
+        <h1 className="page-title">{t('admin.malote.titulo')}</h1>
+        <div data-cy="sei-nao-configurado" role="status" className="card" style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '20px 22px', background: 'var(--atencao-bg, #FEF3C7)', border: '1px solid #F1D08A', color: '#8A5410' }}>
+          <span aria-hidden style={{ display: 'inline-flex', flexShrink: 0, marginTop: 1 }}><IconeAlerta width={22} height={22} /></span>
+          <div style={{ display: 'grid', gap: 4 }}>
+            <div style={{ font: '700 15px var(--font-body)' }}>{t('admin.malote.sei.naoConfiguradoTitulo')}</div>
+            <div style={{ fontSize: 13.5, lineHeight: 1.5 }}>{t('admin.malote.sei.naoConfigurado')}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="stack" data-cy="admin-malote">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
@@ -76,9 +104,12 @@ export function GerarMalote() {
           <h1 className="page-title">{t('admin.malote.titulo')}</h1>
           <p className="page-sub">{t('admin.malote.subtitulo')}</p>
         </div>
-        <Botao data-cy="novo-malote" onClick={() => setModalAberto(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <span aria-hidden style={{ fontSize: 16, lineHeight: 1 }}>+</span>{t('admin.malote.novoMalote')}
-        </Botao>
+        <div style={{ display: 'inline-flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Botao data-cy="consultar-sei" variante="secundario" onClick={() => setConsultaAberta(true)}>{t('admin.malote.sei.consultarTitulo')}</Botao>
+          <Botao data-cy="novo-malote" onClick={() => setModalAberto(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span aria-hidden style={{ fontSize: 16, lineHeight: 1 }}>+</span>{t('admin.malote.novoMalote')}
+          </Botao>
+        </div>
       </div>
 
       <div className="card">
@@ -133,10 +164,22 @@ export function GerarMalote() {
                       </td>
                       <td style={{ ...celula, textAlign: 'right' }}>
                         <div style={{ display: 'inline-flex', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}>
+                          {/* Já protocolado (do backend) ou recém-enviado (estado local): mostra o nº do processo. */}
+                          {(m.protocoloSei?.numeroProcesso || seiInfo[m.id]) && (
+                            <span data-cy="sei-processo" style={{ fontSize: 12.5, color: 'var(--azul-700)', fontVariantNumeric: 'tabular-nums' }}>
+                              {t('admin.malote.sei.processo', { numero: m.protocoloSei?.numeroProcesso ?? seiInfo[m.id] })}
+                            </span>
+                          )}
                           {exportInfo[m.id] && (
                             <span data-cy="export-msg" style={{ fontSize: 12.5, color: 'var(--sucesso)' }}>
                               {t(`admin.malote.lista.${exportInfo[m.id]}`)}
                             </span>
+                          )}
+                          {/* Enviar ao SEI: só para malote gerado ainda não protocolado. */}
+                          {m.status === 'gerado' && !m.protocoloSei && !seiInfo[m.id] && (
+                            <button type="button" data-cy="enviar-sei" title={t('admin.malote.sei.enviar')} aria-label={t('admin.malote.sei.enviar')} disabled={enviarSei.isPending} onClick={() => enviarSei.mutate(m.id)} style={iconeAcao}>
+                              <span style={{ font: '600 13px var(--font-body)' }}>{t('admin.malote.sei.enviar')}</span>
+                            </button>
                           )}
                           {m.status !== 'pendente' && (
                             <button type="button" data-cy="exportar" title={t('admin.malote.lista.exportar')} aria-label={t('admin.malote.lista.exportar')} disabled={exportar.isPending} onClick={() => exportar.mutate(m.id)} style={iconeAcao}>
@@ -155,6 +198,50 @@ export function GerarMalote() {
       )}
 
       {modalAberto && <ModalGerarMalote onFechar={() => setModalAberto(false)} onGerado={() => void invalidar()} />}
+      {consultaAberta && <ModalConsultarSei onFechar={() => setConsultaAberta(false)} />}
+    </div>
+  );
+}
+
+/**
+ * Consulta um processo no SEI por número (pull — Épico 6). Read-only: mostra o processo e seus
+ * documentos. Distingue "não encontrado" e "SEI indisponível" (fail-open) das mensagens do backend.
+ */
+function ModalConsultarSei({ onFechar }: { onFechar: () => void }) {
+  const { t } = useTranslation();
+  const [numero, setNumero] = useState('');
+  const consulta = useMutation<ProcessoSeiView, Error, string>({ mutationFn: (n: string) => api.seiConsultarProcesso(n) });
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label={t('admin.malote.sei.consultarTitulo')} data-cy="modal-consultar-sei"
+      onClick={onFechar} style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 50 }}>
+      <div onClick={(ev) => ev.stopPropagation()} className="card" style={{ width: 'min(560px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 6 }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 18, color: 'var(--azul-900)' }}>{t('admin.malote.sei.consultarTitulo')}</h2>
+            <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--cinza-500)' }}>{t('admin.malote.sei.consultarSub')}</p>
+          </div>
+          <BotaoIcone icone={IconeFechar} variante="fechar" data-cy="fechar-consulta" title={t('admin.malote.sei.fechar')} aria-label={t('admin.malote.sei.fechar')} onClick={onFechar} />
+        </div>
+
+        <form data-cy="form-consulta-sei" onSubmit={(e) => { e.preventDefault(); if (numero.trim()) consulta.mutate(numero.trim()); }} style={{ display: 'flex', gap: 10, alignItems: 'flex-end', margin: '12px 0' }}>
+          <Campo label={t('admin.malote.sei.numeroLabel')} htmlFor="sei-numero" className="cm-campo-total">
+            <input id="sei-numero" data-cy="sei-numero" className="input" placeholder="0000.000000.00000/0000-00" value={numero} onChange={(e) => setNumero(e.target.value)} />
+          </Campo>
+          <Botao type="submit" data-cy="consultar" disabled={consulta.isPending || !numero.trim()}>{t('admin.malote.sei.consultar')}</Botao>
+        </form>
+
+        {consulta.isError && <p data-cy="consulta-erro" role="alert" style={{ color: 'var(--erro, #c0392b)', fontSize: 13 }}>{t('admin.malote.sei.erroConsulta')}</p>}
+        {consulta.data && (
+          <div data-cy="consulta-resultado" className="card" style={{ padding: 14 }}>
+            <div style={{ font: '600 14px var(--font-body)', color: 'var(--azul-900)' }}>{t('admin.malote.sei.processoLabel', { numero: consulta.data.numero })}</div>
+            <div style={{ fontSize: 12.5, color: 'var(--cinza-500)', margin: '2px 0 8px' }}>{t('admin.malote.sei.documentos', { n: consulta.data.documentos.length })}</div>
+            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 13, color: 'var(--cinza-800)' }}>
+              {consulta.data.documentos.map((d) => <li key={d.idDocumento} data-cy="documento-sei">{d.titulo ?? d.idDocumento}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

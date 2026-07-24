@@ -828,6 +828,20 @@
         "jaExportado": "Ya exportada (idempotente).",
         "atualizar": "Actualizar",
         "vazio": "No se encontraron valijas."
+      },
+      "sei": {
+        "enviar": "Enviar al SEI",
+        "processo": "Proceso {{numero}}",
+        "consultarTitulo": "Consultar SEI",
+        "consultarSub": "Consulte un proceso del SEI por número y vea sus documentos.",
+        "numeroLabel": "Número del proceso",
+        "consultar": "Consultar",
+        "fechar": "Cerrar",
+        "processoLabel": "Proceso {{numero}}",
+        "documentos": "{{n}} documento(s)",
+        "erroConsulta": "No se pudo consultar. Verifique el número, o el SEI puede estar no disponible.",
+        "naoConfigurado": "Integración con el SEI no configurada. Defina SEI_BASE_URL y las credenciales del SEI (usuario, contraseña, órgano y tipo de proceso) para habilitar el envío y la consulta.",
+        "naoConfiguradoTitulo": "Integración con el SEI no configurada"
       }
     },
     "analiseDocumental": {

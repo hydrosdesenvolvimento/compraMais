@@ -828,6 +828,20 @@
         "jaExportado": "Já exportado (idempotente).",
         "atualizar": "Atualizar",
         "vazio": "Nenhum malote encontrado."
+      },
+      "sei": {
+        "enviar": "Enviar ao SEI",
+        "processo": "Processo {{numero}}",
+        "consultarTitulo": "Consultar SEI",
+        "consultarSub": "Consulte um processo do SEI pelo número e veja seus documentos.",
+        "numeroLabel": "Número do processo",
+        "consultar": "Consultar",
+        "fechar": "Fechar",
+        "processoLabel": "Processo {{numero}}",
+        "documentos": "{{n}} documento(s)",
+        "erroConsulta": "Não foi possível consultar. Verifique o número, ou o SEI pode estar indisponível.",
+        "naoConfigurado": "Integração com o SEI não configurada. Defina SEI_BASE_URL e as credenciais do SEI (usuário, senha, órgão e tipo de processo) para habilitar o envio e a consulta.",
+        "naoConfiguradoTitulo": "Integração com o SEI não configurada"
       }
     },
     "analiseDocumental": {

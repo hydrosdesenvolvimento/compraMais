@@ -31,6 +31,19 @@ export interface AppConfig {
   crypto: { piiKey: Buffer };
   /** Reconhecimento facial (UC007 — prova de vida). Motor via serviço Python; mock em teste/dev. */
   face: { provider: 'insightface' | 'mock'; serviceUrl: string; timeoutMs: number; limiar: number };
+  /**
+   * Integração SEI (Épico 6). `provider` 'web' fala o SEI real (camada web, login SSO — modelo
+   * ../api_sei); 'mock' é determinístico (teste/CI e dev sem SEI). Credenciais/URL/órgão/tipo de
+   * processo vêm de env/secret e NUNCA do repositório (PRJ-DEC-07); ausentes → cai para mock.
+   */
+  sei: {
+    provider: 'web' | 'mock';
+    baseUrl: string;
+    usuario: string;
+    senha: string | undefined;
+    selOrgao: string;
+    idTipoProcedimento: string;
+  };
 }
 
 /** Segredo de assinatura usado fora de produção, quando `JWT_SECRET` não foi informado. */
@@ -134,7 +147,26 @@ export function loadConfig(): AppConfig {
     },
     crypto: { piiKey: exigirChavePii(process.env.NODE_ENV ?? 'development') },
     face: resolverFace(process.env.NODE_ENV ?? 'development'),
+    sei: resolverSei(process.env.NODE_ENV ?? 'development'),
   };
+}
+
+/**
+ * Integração SEI: 'mock' em teste (offline, DEC-STR-34) e quando `SEI_PROVIDER=mock`. 'web' (real) exige
+ * as credenciais/URL/órgão/tipo; se faltarem, cai para 'mock' em vez de derrubar o boot — a integração é
+ * opt-in por operação, não pré-condição do sistema. A senha vem de `SEI_SENHA`/`SEI_SENHA_FILE` (secret).
+ */
+function resolverSei(nodeEnv: string): AppConfig['sei'] {
+  const explicito = process.env.SEI_PROVIDER;
+  const baseUrl = process.env.SEI_BASE_URL ?? '';
+  const usuario = process.env.SEI_USUARIO ?? '';
+  const senha = readSecret('SEI_SENHA');
+  const selOrgao = process.env.SEI_SEL_ORGAO ?? '';
+  const idTipoProcedimento = process.env.SEI_ID_TIPO_PROCEDIMENTO ?? '';
+  const configurado = Boolean(baseUrl && usuario && senha && selOrgao && idTipoProcedimento);
+  const provider: 'web' | 'mock' =
+    nodeEnv === 'test' || explicito === 'mock' ? 'mock' : explicito === 'web' && configurado ? 'web' : configurado && nodeEnv === 'production' ? 'web' : 'mock';
+  return { provider, baseUrl, usuario, senha, selOrgao, idTipoProcedimento };
 }
 
 /**

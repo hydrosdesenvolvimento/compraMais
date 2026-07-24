@@ -828,6 +828,18 @@
         "jaExportado": "Já exportado (idempotente).",
         "atualizar": "Atualizar",
         "vazio": "Nenhum malote encontrado."
+      },
+      "sei": {
+        "enviar": "Enviar ao SEI",
+        "processo": "Processo {{numero}}",
+        "consultarTitulo": "Consultar SEI",
+        "consultarSub": "Consulte um processo do SEI pelo número e veja seus documentos.",
+        "numeroLabel": "Número do processo",
+        "consultar": "Consultar",
+        "fechar": "Fechar",
+        "processoLabel": "Processo {{numero}}",
+        "documentos": "{{n}} documento(s)",
+        "erroConsulta": "Não foi possível consultar. Verifique o número, ou o SEI pode estar indisponível."
       }
     },
     "analiseDocumental": {

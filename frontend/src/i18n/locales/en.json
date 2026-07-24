@@ -828,6 +828,18 @@
         "jaExportado": "Already exported (idempotent).",
         "atualizar": "Refresh",
         "vazio": "No packages found."
+      },
+      "sei": {
+        "enviar": "Send to SEI",
+        "processo": "Process {{numero}}",
+        "consultarTitulo": "Query SEI",
+        "consultarSub": "Query a SEI process by number and see its documents.",
+        "numeroLabel": "Process number",
+        "consultar": "Query",
+        "fechar": "Close",
+        "processoLabel": "Process {{numero}}",
+        "documentos": "{{n}} document(s)",
+        "erroConsulta": "Could not query. Check the number, or SEI may be unavailable."
       }
     },
     "analiseDocumental": {

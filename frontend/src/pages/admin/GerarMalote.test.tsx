@@ -10,11 +10,15 @@ configure({ testIdAttribute: 'data-cy' });
 const malotesListar = vi.fn<() => Promise<MaloteListaView[]>>();
 const maloteGerar = vi.fn<(...a: unknown[]) => Promise<{ maloteId: string; status: string }>>();
 const maloteExportar = vi.fn<(...a: unknown[]) => Promise<{ status: string; jaExportado: boolean }>>();
+const maloteEnviarSei = vi.fn<(id: string) => Promise<unknown>>();
+const seiConsultarProcesso = vi.fn<(numero: string) => Promise<unknown>>();
 vi.mock('../../lib/api', () => ({
   api: {
     malotesListar: () => malotesListar(),
     maloteGerar: (body: unknown) => maloteGerar(body),
     maloteExportar: (id: string) => maloteExportar(id),
+    maloteEnviarSei: (id: string) => maloteEnviarSei(id),
+    seiConsultarProcesso: (numero: string) => seiConsultarProcesso(numero),
   },
 }));
 
@@ -32,6 +36,36 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
     malotesListar.mockReset().mockResolvedValue([]);
     maloteGerar.mockReset().mockResolvedValue({ maloteId: 'm-novo', status: 'pendente' });
     maloteExportar.mockReset().mockResolvedValue({ status: 'exportado', jaExportado: false });
+    maloteEnviarSei.mockReset().mockResolvedValue({ maloteId: 'm1', numeroProcesso: '4004.017444.00012/2026-02', idProtocolo: '23351546', jaProtocolado: false });
+    seiConsultarProcesso.mockReset().mockResolvedValue({ numero: '4004.017444.00012/2026-02', idProtocolo: '23351546', documentos: [{ idDocumento: '999001', titulo: 'Despacho 1' }] });
+  });
+
+  it('envia um malote gerado ao SEI (push) e mostra o número do processo protocolado', async () => {
+    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2 }]);
+    renderTela();
+    await screen.findAllByTestId('item-malote');
+
+    fireEvent.click(screen.getByTestId('enviar-sei'));
+    await waitFor(() => expect(maloteEnviarSei).toHaveBeenCalledWith('m1'));
+    expect(await screen.findByTestId('sei-processo')).toHaveTextContent('4004.017444.00012/2026-02');
+  });
+
+  it('não oferece "Enviar ao SEI" para malote já protocolado (mostra o processo)', async () => {
+    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'exportado', fragmentos: 2, protocoloSei: { numeroProcesso: '4004.017444.00099/2026-11', idProtocolo: 'x' } }]);
+    renderTela();
+    await screen.findAllByTestId('item-malote');
+    expect(screen.queryByTestId('enviar-sei')).not.toBeInTheDocument();
+    expect(screen.getByTestId('sei-processo')).toHaveTextContent('4004.017444.00099/2026-11');
+  });
+
+  it('consulta um processo no SEI (pull) e lista seus documentos', async () => {
+    renderTela();
+    fireEvent.click(await screen.findByTestId('consultar-sei'));
+    await screen.findByTestId('modal-consultar-sei');
+    fireEvent.change(screen.getByTestId('sei-numero'), { target: { value: '4004.017444.00012/2026-02' } });
+    fireEvent.submit(screen.getByTestId('form-consulta-sei'));
+    await waitFor(() => expect(seiConsultarProcesso).toHaveBeenCalledWith('4004.017444.00012/2026-02'));
+    expect(await screen.findByTestId('documento-sei')).toHaveTextContent('Despacho 1');
   });
 
   it('lista malotes numa tabela com status; exporta um gerado delegando ao módulo dono (FR-004)', async () => {

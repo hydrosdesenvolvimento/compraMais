@@ -9,7 +9,7 @@ import react from '@vitejs/plugin-react';
 const API_PREFIXES = [
   '/fornecedores', '/credenciamentos', '/editais', '/documentos', '/contestacoes-cnae', '/auditoria',
   '/admin', '/gestao', '/titular', '/transparencia', '/auth', '/bloqueios',
-  '/malotes', '/metrics', '/health', '/catalogos', '/permissoes', '/distribuicao',
+  '/malotes', '/metrics', '/health', '/catalogos', '/permissoes', '/distribuicao', '/sei',
 ];
 
 const target = process.env.VITE_API_PROXY_TARGET ?? 'http://backend:3000';

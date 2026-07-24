@@ -5,9 +5,7 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default tseslint.config(
   {
-    // `cypress.docker.config.cjs` é CommonJS/Node (atalho de execução dos E2E em container),
-    // não faz parte do bundle da SPA e não deve ser lintado com as regras do browser.
-    ignores: ['dist/**', 'node_modules/**', 'coverage/**', 'cypress.docker.config.cjs'],
+    ignores: ['dist/**', 'node_modules/**', 'coverage/**'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

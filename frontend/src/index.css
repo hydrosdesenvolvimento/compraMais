@@ -267,7 +267,7 @@ input[type="date"], input[type="number"], input[type="tel"], select, textarea {
    de encolher). Campos longos — nome, especificações, blocos de texto — usam `.cm-campo-total` para
    ocupar a linha inteira. Colapsa em coluna única no mesmo breakpoint das demais grades (920px), o que
    as grades `1fr 1fr` inline espalhadas pelas telas admin NÃO fazem. */
-.cm-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; align-items: start; }
+.cm-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
 .cm-campo-total { grid-column: 1 / -1; }
 .cm-form-grid .input, .cm-form-grid textarea.input { width: 100%; }
 

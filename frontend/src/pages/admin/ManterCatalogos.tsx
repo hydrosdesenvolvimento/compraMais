@@ -190,10 +190,12 @@ export function ManterCatalogos() {
         <p className="page-sub">{t('admin.catalogos.subtitulo')}</p>
       </div>
 
+      {/* `role="tablist"` exige filhos `role="tab"`, e `aria-selected` só é permitido nesse papel — sem
+          isso o axe acusa aria-required-children + aria-allowed-attr (WCAG 2.1 AA / e-MAG). */}
       <div role="tablist" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {CATALOGOS.map((c) => (
           <Botao key={c.slug} data-cy={`tab-${c.slug}`} variante={c.slug === slug ? 'primario' : 'secundario'}
-            aria-selected={c.slug === slug} onClick={() => trocarCatalogo(c.slug)}>
+            role="tab" aria-selected={c.slug === slug} onClick={() => trocarCatalogo(c.slug)}>
             {t(c.tabKey)}
           </Botao>
         ))}

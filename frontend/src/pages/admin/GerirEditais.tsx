@@ -333,7 +333,7 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
             </Campo>
           )}</form.Field>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="cm-form-grid">
             <form.Field name="secretariaId">{(f) => (
               <Campo label={t('admin.gerirEditais.secretariaLabel')} htmlFor="edital-secretaria">
                 <select id="edital-secretaria" data-cy="secretaria" className="input" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)}>
@@ -352,7 +352,7 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
           </div>
           <span style={{ display: 'block', margin: '-6px 0 12px', fontSize: 12, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.cnaeAjuda')}</span>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          <div className="cm-form-grid">
             <form.Field name="quantitativos">{(f) => (
               <Campo label={t('admin.gerirEditais.quantitativosLabel')} htmlFor="edital-quantitativos">
                 <input id="edital-quantitativos" data-cy="quantitativos" className="input" type="number" min={1} value={f.state.value} onChange={(ev) => f.handleChange(Number(ev.target.value))} />

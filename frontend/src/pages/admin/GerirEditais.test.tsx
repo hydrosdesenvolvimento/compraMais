@@ -148,6 +148,24 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     await waitFor(() => expect(screen.queryByTestId('modal-edital')).not.toBeInTheDocument());
   });
 
+  it('o modal de detalhes lista os materiais do edital', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/014', objeto: 'Fardamento' })]));
+    editalItens.mockResolvedValue([
+      { id: 'i1', editalId: 'e1', numero: 1, itemCatalogoId: 'm1', nome: 'Cabo de rede CAT6', descricao: null, unidade: 'un', quantidade: 100, precoTeto: 12.5 },
+      { id: 'i2', editalId: 'e1', numero: 2, itemCatalogoId: 'm2', nome: 'Instalação elétrica', descricao: null, unidade: 'h', quantidade: 40, precoTeto: 80 },
+    ]);
+    renderTela();
+    await screen.findAllByTestId('item-edital');
+
+    fireEvent.click(screen.getByTestId('ver-detalhes'));
+    const modal = await screen.findByTestId('modal-edital');
+    await within(modal).findByTestId('detalhe-tabela-itens');
+    const linhas = within(modal).getAllByTestId('detalhe-item-edital');
+    expect(linhas).toHaveLength(2);
+    expect(within(modal).getByText('Cabo de rede CAT6')).toBeInTheDocument();
+    expect(within(modal).getByText('Instalação elétrica')).toBeInTheDocument();
+  });
+
   it('"Novo edital" abre o modal de criação e salva o edital com a secretaria escolhida', async () => {
     buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/014' })]));
     renderTela();

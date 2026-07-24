@@ -252,7 +252,10 @@ export function GerirEditais() {
 function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
   edital: EditalGestao; sigla: string; prazo: string; rotuloSituacao: (s: string) => string; onFechar: () => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const moeda = useMemo(() => new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'BRL' }), [i18n.language]);
+  // Materiais/serviços do edital (leitura). O modal de detalhes é read-only — sem editor.
+  const { data: itens = [], isLoading: itensCarregando } = useQuery({ queryKey: ['edital-itens', edital.id], queryFn: () => api.editalItens(edital.id) });
   const linhas: [string, string][] = [
     [t('admin.gerirEditais.campoNumero'), edital.numero],
     [t('admin.gerirEditais.campoObjeto'), edital.objeto],
@@ -270,7 +273,7 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
       onClick={onFechar}
       style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 50 }}
     >
-      <div onClick={(ev) => ev.stopPropagation()} className="card" style={{ width: 'min(520px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div onClick={(ev) => ev.stopPropagation()} className="card" style={{ width: 'min(620px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 16 }}>
           <h2 style={{ margin: 0, fontSize: 17, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.modalTitulo')}</h2>
           <BotaoIcone icone={IconeFechar} variante="fechar" data-cy="fechar-modal" title={t('admin.gerirEditais.fechar')} aria-label={t('admin.gerirEditais.fechar')} onClick={onFechar} />
@@ -283,6 +286,39 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
             </div>
           ))}
         </dl>
+
+        {/* Materiais/serviços do edital (leitura). Mesma tabela do editor, sem a coluna de ações. */}
+        <h3 style={{ margin: '20px 0 8px', fontSize: 14, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.itens.listaTitulo')}</h3>
+        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+          {itensCarregando ? (
+            <div data-cy="detalhe-itens-carregando" style={{ padding: 16, color: 'var(--cinza-500)', fontSize: 13 }}>{t('admin.gerirEditais.itens.carregando')}</div>
+          ) : itens.length === 0 ? (
+            <div data-cy="detalhe-itens-vazio" style={{ padding: '28px 16px', textAlign: 'center', color: 'var(--cinza-500)', fontSize: 13 }}>{t('admin.gerirEditais.itens.vazio')}</div>
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table data-cy="detalhe-tabela-itens" style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
+                <thead>
+                  <tr>
+                    {['num', 'item', 'unidade', 'quantidade', 'preco'].map((c, idx, arr) => (
+                      <th key={c} scope="col" style={cabecalho(false, idx === arr.length - 1 ? 'right' : 'left')}>{t(`admin.gerirEditais.itens.col.${c}`)}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {itens.map((it: ItemEditalView) => (
+                    <tr key={it.id} data-cy="detalhe-item-edital" data-id={it.id}>
+                      <td style={{ ...celula, font: '700 13.5px var(--font-body)', color: 'var(--azul-900)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{String(it.numero).padStart(2, '0')}</td>
+                      <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-800)', minWidth: 180 }}>{it.nome}</td>
+                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap' }}>{it.unidade}</td>
+                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{new Intl.NumberFormat(i18n.language).format(it.quantidade)}</td>
+                      <td style={{ ...celula, textAlign: 'right', fontSize: 13.5, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{moeda.format(it.precoTeto)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

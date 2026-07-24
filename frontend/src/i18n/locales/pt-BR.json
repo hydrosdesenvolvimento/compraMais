@@ -615,7 +615,8 @@
           "quantidade": "Qtd.",
           "preco": "Preço-teto",
           "acoes": "Ações"
-        }
+        },
+        "listaTitulo": "Materiais do edital"
       }
     },
     "contestacoes": {

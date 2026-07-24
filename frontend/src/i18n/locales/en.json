@@ -615,7 +615,8 @@
           "quantidade": "Qty",
           "preco": "Ceiling price",
           "acoes": "Actions"
-        }
+        },
+        "listaTitulo": "Edital materials"
       }
     },
     "contestacoes": {

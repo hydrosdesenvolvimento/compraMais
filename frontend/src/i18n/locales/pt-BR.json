@@ -615,7 +615,9 @@
           "quantidade": "Qtd.",
           "preco": "Preço-teto",
           "acoes": "Ações"
-        }
+        },
+        "novoEditalDica": "Opcional: adicione agora os itens do edital ou depois, pela ação \"Itens\".",
+        "erroCriarComItens": "Não foi possível concluir. Verifique os campos e tente salvar novamente."
       }
     },
     "contestacoes": {

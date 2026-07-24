@@ -1,4 +1,4 @@
-import { useMemo, useState, type CSSProperties } from 'react';
+import { useMemo, useRef, useState, type CSSProperties } from 'react';
 import { useForm } from '@tanstack/react-form';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -79,11 +79,27 @@ export function GerirEditais() {
     return (id: string) => porId.get(id) ?? id;
   }, [secretariasLista]);
 
+  // Criação do edital COM seus itens no mesmo passo (o modal acumula os itens localmente). Como não há
+  // transação cruzando editais+itens, a orquestração é idempotente por refs: numa reexecução (ex.: falha
+  // de rede no meio dos itens) NÃO recria o edital nem reenvia itens já gravados — o Salvar apenas
+  // retoma os itens pendentes. Os refs zeram no sucesso.
+  const editalCriadoRef = useRef<string | null>(null);
+  const itensGravadosRef = useRef<Set<string>>(new Set());
   const criar = useMutation({
-    mutationFn: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string }) =>
-      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo }),
-    // Recém-criado nasce em rascunho: abre direto o gerenciador de itens para o gestor cadastrá-los.
-    onSuccess: (res) => { setCriando(false); void invalidar(); setItensId(res.editalId); },
+    mutationFn: async (v: { objeto: string; secretariaId: string; cnae: string; prazo: string; itens: ItemPendente[] }) => {
+      if (!editalCriadoRef.current) {
+        const res = await api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo });
+        editalCriadoRef.current = res.editalId;
+      }
+      const editalId = editalCriadoRef.current;
+      for (const it of v.itens) {
+        if (itensGravadosRef.current.has(it.id)) continue;
+        await api.adicionarItemEdital(editalId, { itemCatalogoId: it.itemCatalogoId, unidade: it.unidade, quantidade: it.quantidade, precoTeto: it.precoTeto });
+        itensGravadosRef.current.add(it.id);
+      }
+      return { editalId };
+    },
+    onSuccess: () => { editalCriadoRef.current = null; itensGravadosRef.current = new Set(); setCriando(false); void invalidar(); },
   });
   const publicar = useMutation({ mutationFn: (id: string) => api.publicarEdital(id), onSuccess: () => void invalidar() });
   const encerrar = useMutation({ mutationFn: (id: string) => api.encerrarEdital(id), onSuccess: () => void invalidar() });
@@ -242,7 +258,7 @@ export function GerirEditais() {
       )}
 
       {edital && <ModalDetalhe edital={edital} sigla={siglaDe(edital.secretariaId)} prazo={formatarPrazo(edital.prazoVigencia)} rotuloSituacao={rotuloSituacao} onFechar={() => setVerId(null)} />}
-      {criando && <ModalNovoEdital secretarias={secretariasLista} salvando={criar.isPending} onSalvar={(v) => criar.mutate(v)} onFechar={() => setCriando(false)} />}
+      {criando && <ModalNovoEdital secretarias={secretariasLista} salvando={criar.isPending} erro={criar.isError} onSalvar={(v) => criar.mutate(v)} onFechar={() => { editalCriadoRef.current = null; itensGravadosRef.current = new Set(); setCriando(false); }} />}
       {itensId && <ModalItensEdital editalId={itensId} numero={editais.find((e) => e.id === itensId)?.numero} onFechar={() => setItensId(null)} />}
     </div>
   );
@@ -288,22 +304,157 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
   );
 }
 
+/** Item de edital como linha exibível no editor (serve tanto ao pendente local quanto ao já persistido). */
+interface LinhaItemEditor { id: string; numero: number; nome: string; unidade: string; quantidade: number; precoTeto: number }
+/** Item pendente acumulado no modal de criação (ainda não gravado) — carrega o `itemCatalogoId` para enviar. */
+interface ItemPendente extends LinhaItemEditor { itemCatalogoId: string }
+/** Entrada do formulário de adição de item. */
+interface NovoItemInput { itemCatalogoId: string; unidade: string; quantidade: number; precoTeto: number }
+
 /**
- * Modal "Novo edital" (criação em rascunho). O `numero` é gerado no backend ao salvar (FR-001), por isso
- * aqui só se mostra um aviso — não é campo editável. A secretaria demandante vem do catálogo (1 edital =
- * 1 secretaria, RN007). Objeto/CNAE(s)/quantitativo/prazo alimentam o domínio.
+ * Editor de itens do edital (a partir do catálogo de materiais e serviços, SEM lotes): formulário de
+ * adição (item do catálogo → unidade restrita às unidades daquele item → quantidade → preço-teto) + a
+ * tabela dos itens. Componente controlado, reusado por dois contextos:
+ *  • criação do edital (`ModalNovoEdital`) — os itens são acumulados em estado LOCAL e gravados junto;
+ *  • gestão de um rascunho existente (`ModalItensEdital`) — cada adição/remoção vai à API na hora.
+ * O `catalogo` já chega SEM os itens já usados (o pai filtra), evitando escolher um duplicado.
+ * Preço-teto é montante e vive só no Painel Admin — não é exposto no portal público (RN013).
  */
-function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
+function EditorItensEdital({ catalogo, itens, onAdicionar, onRemover, adicionando, removendo, erro, carregando }: {
+  catalogo: CatalogoItemView[];
+  itens: LinhaItemEditor[];
+  onAdicionar: (v: NovoItemInput) => void;
+  onRemover: (id: string) => void;
+  adicionando?: boolean;
+  removendo?: boolean;
+  erro?: boolean;
+  carregando?: boolean;
+}) {
+  const { t, i18n } = useTranslation();
+  const moeda = useMemo(() => new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'BRL' }), [i18n.language]);
+
+  const [itemCatalogoId, setItemCatalogoId] = useState('');
+  const [unidade, setUnidade] = useState('');
+  const [quantidade, setQuantidade] = useState(1);
+  const [precoTeto, setPrecoTeto] = useState('');
+
+  const unidadesDisponiveis = catalogo.find((c) => c.id === itemCatalogoId)?.unidades ?? [];
+  const limpar = () => { setItemCatalogoId(''); setUnidade(''); setQuantidade(1); setPrecoTeto(''); };
+  // Ao trocar o item do catálogo, escolhe a 1ª unidade dele (o backend valida unidade ∈ unidades do item).
+  const trocarItem = (id: string) => { setItemCatalogoId(id); setUnidade(catalogo.find((x) => x.id === id)?.unidades?.[0] ?? ''); };
+
+  const podeAdicionar = Boolean(itemCatalogoId && unidade && quantidade > 0 && Number(precoTeto) > 0) && !adicionando;
+  // Não é um <form>: o editor é reusado DENTRO do <form> do "Novo edital", e form aninhado é HTML
+  // inválido (o submit do item dispararia a criação do edital). A adição é por clique no botão.
+  const adicionarAgora = () => {
+    if (!podeAdicionar) return;
+    onAdicionar({ itemCatalogoId, unidade, quantidade, precoTeto: Number(precoTeto) });
+    limpar();
+  };
+
+  return (
+    <div>
+      <div data-cy="form-item-edital" className="cm-form-grid" style={{ margin: '4px 0 8px' }}>
+        <Campo label={t('admin.gerirEditais.itens.itemLabel')} htmlFor="item-catalogo" className="cm-campo-total">
+          <select id="item-catalogo" data-cy="item-catalogo" className="input" value={itemCatalogoId} onChange={(ev) => trocarItem(ev.target.value)}>
+            <option value="">{t('admin.gerirEditais.itens.itemPlaceholder')}</option>
+            {catalogo.map((c) => <option key={c.id} value={c.id}>{c.numero ? `${c.numero} · ${c.nome}` : c.nome}</option>)}
+          </select>
+        </Campo>
+        <Campo label={t('admin.gerirEditais.itens.unidadeLabel')} htmlFor="item-unidade">
+          <select id="item-unidade" data-cy="item-unidade" className="input" value={unidade} disabled={!itemCatalogoId} onChange={(ev) => setUnidade(ev.target.value)}>
+            {unidadesDisponiveis.length === 0 && <option value="">—</option>}
+            {unidadesDisponiveis.map((u) => <option key={u} value={u}>{u}</option>)}
+          </select>
+        </Campo>
+        <Campo label={t('admin.gerirEditais.itens.quantidadeLabel')} htmlFor="item-quantidade">
+          <input id="item-quantidade" data-cy="item-quantidade" className="input" type="number" min={1} value={quantidade} onChange={(ev) => setQuantidade(Number(ev.target.value))} />
+        </Campo>
+        <Campo label={t('admin.gerirEditais.itens.precoLabel')} htmlFor="item-preco">
+          <input id="item-preco" data-cy="item-preco" className="input" type="number" min={0} step="0.01" inputMode="decimal" placeholder="0,00" value={precoTeto} onChange={(ev) => setPrecoTeto(ev.target.value)} />
+        </Campo>
+        <div className="cm-campo-total" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          <Botao type="button" data-cy="adicionar-item" disabled={!podeAdicionar} onClick={adicionarAgora}>{t('admin.gerirEditais.itens.adicionar')}</Botao>
+          {erro && <span data-cy="erro-item" role="alert" style={{ fontSize: 13, color: 'var(--erro, #c0392b)' }}>{t('admin.gerirEditais.itens.erroAdicionar')}</span>}
+        </div>
+      </div>
+
+      <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 8 }}>
+        {carregando ? (
+          <div data-cy="itens-carregando" style={{ padding: 20, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.itens.carregando')}</div>
+        ) : itens.length === 0 ? (
+          <div data-cy="itens-vazio" style={{ padding: '32px 20px', textAlign: 'center', color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.itens.vazio')}</div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table data-cy="tabela-itens-edital" style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
+              <thead>
+                <tr>
+                  {['num', 'item', 'unidade', 'quantidade', 'preco', 'acoes'].map((c, idx, arr) => (
+                    <th key={c} scope="col" style={cabecalho(false, idx === arr.length - 1 ? 'right' : 'left')}>{t(`admin.gerirEditais.itens.col.${c}`)}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {itens.map((it) => (
+                  <tr key={it.id} data-cy="item-edital-linha" data-id={it.id}>
+                    <td style={{ ...celula, font: '700 13.5px var(--font-body)', color: 'var(--azul-900)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{String(it.numero).padStart(2, '0')}</td>
+                    <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-800)', minWidth: 200 }}>{it.nome}</td>
+                    <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap' }}>{it.unidade}</td>
+                    <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{new Intl.NumberFormat(i18n.language).format(it.quantidade)}</td>
+                    <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{moeda.format(it.precoTeto)}</td>
+                    <td style={{ ...celula, textAlign: 'right' }}>
+                      <BotaoIcone icone={IconeFechar} data-cy="remover-item" title={t('admin.gerirEditais.itens.remover')} aria-label={t('admin.gerirEditais.itens.remover')} disabled={removendo} onClick={() => onRemover(it.id)} style={{ color: 'var(--erro, #c0392b)' }} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div data-cy="nota-preco-transparencia" style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '14px 0 2px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-700)', fontSize: 12.5, lineHeight: 1.5 }}>
+        <span aria-hidden>ℹ</span><span>{t('admin.gerirEditais.itens.notaPreco')}</span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Modal "Novo edital" (criação em rascunho). O `numero` é gerado no backend ao salvar (FR-001). A
+ * secretaria demandante vem do catálogo (1 edital = 1 secretaria, RN007). Os ITENS do edital são
+ * cadastrados AQUI, junto com o edital: acumulados localmente e gravados no mesmo Salvar (o pai
+ * orquestra criar-edital → gravar-itens). Itens são opcionais na criação (podem ser adicionados depois).
+ */
+function ModalNovoEdital({ secretarias, salvando, erro, onSalvar, onFechar }: {
   secretarias: CatalogoItemView[];
   salvando: boolean;
-  onSalvar: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string }) => void;
+  erro?: boolean;
+  onSalvar: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string; itens: ItemPendente[] }) => void;
   onFechar: () => void;
 }) {
   const { t } = useTranslation();
+  const { data: catalogo = [] } = useQuery({ queryKey: ['catalogo', 'materiais-servicos'], queryFn: () => api.catalogoListar('materiais-servicos') });
+  const [itens, setItens] = useState<ItemPendente[]>([]);
+
+  // Catálogo sem os itens já adicionados (evita duplicar o mesmo item de catálogo — regra do backend).
+  const usados = new Set(itens.map((i) => i.itemCatalogoId));
+  const catalogoDisponivel = catalogo.filter((c) => !usados.has(c.id));
+
+  const adicionarItem = (v: NovoItemInput) => {
+    const cat = catalogo.find((c) => c.id === v.itemCatalogoId);
+    setItens((atual) => [...atual, {
+      id: `pend-${v.itemCatalogoId}`, numero: atual.length + 1, nome: cat?.nome ?? v.itemCatalogoId,
+      unidade: v.unidade, quantidade: v.quantidade, precoTeto: v.precoTeto, itemCatalogoId: v.itemCatalogoId,
+    }]);
+  };
+  const removerItem = (id: string) => setItens((atual) => atual.filter((i) => i.id !== id).map((i, idx) => ({ ...i, numero: idx + 1 })));
+
   const form = useForm({
     defaultValues: { objeto: '', secretariaId: '', cnae: '', prazo: '' },
-    onSubmit: ({ value }) => onSalvar(value),
+    onSubmit: ({ value }) => onSalvar({ ...value, itens }),
   });
+
   return (
     <div
       role="dialog"
@@ -313,7 +464,7 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
       onClick={onFechar}
       style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 50 }}
     >
-      <div onClick={(ev) => ev.stopPropagation()} className="card" style={{ width: 'min(600px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div onClick={(ev) => ev.stopPropagation()} className="card" style={{ width: 'min(760px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 18 }}>
           <div>
             <h2 style={{ margin: 0, fontSize: 18, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.novoTitulo')}</h2>
@@ -352,19 +503,24 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
           </div>
           <span style={{ display: 'block', margin: '-6px 0 12px', fontSize: 12, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.cnaeAjuda')}</span>
 
-          {/* A quantidade deixou de ser campo do edital: passou a viver nos itens (gerenciados após criar). */}
           <form.Field name="prazo">{(f) => (
             <Campo label={t('admin.gerirEditais.prazoLabel')} htmlFor="edital-prazo">
               <input id="edital-prazo" data-cy="prazo" className="input" type="date" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
             </Campo>
           )}</form.Field>
 
-          <div data-cy="nota-soft-delete" style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '4px 0 18px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-700)', fontSize: 13, lineHeight: 1.5 }}>
+          {/* Itens do edital, cadastrados junto com o edital (opcional). */}
+          <h3 style={{ margin: '18px 0 2px', fontSize: 14.5, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.itens.titulo')}</h3>
+          <p style={{ margin: '0 0 6px', fontSize: 12.5, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.itens.novoEditalDica')}</p>
+          <EditorItensEdital catalogo={catalogoDisponivel} itens={itens} onAdicionar={adicionarItem} onRemover={removerItem} />
+
+          <div data-cy="nota-soft-delete" style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '10px 0 18px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-700)', fontSize: 13, lineHeight: 1.5 }}>
             <span aria-hidden>ℹ</span>
             <span>{t('admin.gerirEditais.softDeleteNota')}</span>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
+            {erro && <span data-cy="erro-criar" role="alert" style={{ fontSize: 13, color: 'var(--erro, #c0392b)', marginRight: 'auto' }}>{t('admin.gerirEditais.itens.erroCriarComItens')}</span>}
             <Botao type="button" variante="secundario" data-cy="cancelar" onClick={onFechar}>{t('admin.gerirEditais.cancelar')}</Botao>
             <Botao type="submit" data-cy="criar" disabled={salvando}>{t('admin.gerirEditais.salvar')}</Botao>
           </div>
@@ -375,45 +531,22 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
 }
 
 /**
- * Gestão dos itens do edital (a partir do catálogo de materiais e serviços, SEM lotes). Só para editais
- * em rascunho (o backend recusa itens após publicar). Lista os itens já cadastrados e um formulário para
- * adicionar: item do catálogo → unidade (restrita às unidades daquele item) → quantidade → preço-teto.
- *
- * O preço-teto é montante monetário e vive só no Painel Admin — não é exposto no portal público (RN013).
+ * Gestão dos itens de um edital em rascunho já existente (ação "Itens" na linha). Cada adição/remoção vai
+ * à API na hora. Reusa o `EditorItensEdital`; o catálogo chega sem os itens já cadastrados.
  */
 function ModalItensEdital({ editalId, numero, onFechar }: { editalId: string; numero?: string; onFechar: () => void }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const qc = useQueryClient();
-  const moeda = useMemo(() => new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'BRL' }), [i18n.language]);
 
   const { data: itens = [], isLoading } = useQuery({ queryKey: ['edital-itens', editalId], queryFn: () => api.editalItens(editalId) });
   const { data: catalogo = [] } = useQuery({ queryKey: ['catalogo', 'materiais-servicos'], queryFn: () => api.catalogoListar('materiais-servicos') });
 
-  const [itemCatalogoId, setItemCatalogoId] = useState('');
-  const [unidade, setUnidade] = useState('');
-  const [quantidade, setQuantidade] = useState(1);
-  const [precoTeto, setPrecoTeto] = useState('');
-
-  const selecionado = catalogo.find((c) => c.id === itemCatalogoId);
-  const unidadesDisponiveis = selecionado?.unidades ?? [];
+  const usados = new Set((itens as ItemEditalView[]).map((i) => i.itemCatalogoId));
+  const catalogoDisponivel = catalogo.filter((c) => !usados.has(c.id));
 
   const invalidar = () => qc.invalidateQueries({ queryKey: ['edital-itens', editalId] });
-  const limpar = () => { setItemCatalogoId(''); setUnidade(''); setQuantidade(1); setPrecoTeto(''); };
-
-  const adicionar = useMutation({
-    mutationFn: () => api.adicionarItemEdital(editalId, { itemCatalogoId, unidade, quantidade, precoTeto: Number(precoTeto) }),
-    onSuccess: () => { limpar(); void invalidar(); },
-  });
+  const adicionar = useMutation({ mutationFn: (v: NovoItemInput) => api.adicionarItemEdital(editalId, v), onSuccess: () => void invalidar() });
   const remover = useMutation({ mutationFn: (itemId: string) => api.removerItemEdital(editalId, itemId), onSuccess: () => void invalidar() });
-
-  // Ao trocar o item do catálogo, escolhe a 1ª unidade dele (o backend valida unidade ∈ unidades do item).
-  const trocarItem = (id: string) => {
-    setItemCatalogoId(id);
-    const c = catalogo.find((x) => x.id === id);
-    setUnidade(c?.unidades?.[0] ?? '');
-  };
-
-  const podeAdicionar = Boolean(itemCatalogoId && unidade && quantidade > 0 && Number(precoTeto) > 0) && !adicionar.isPending;
 
   return (
     <div role="dialog" aria-modal="true" aria-label={t('admin.gerirEditais.itens.titulo')} data-cy="modal-itens-edital"
@@ -427,70 +560,16 @@ function ModalItensEdital({ editalId, numero, onFechar }: { editalId: string; nu
           <BotaoIcone icone={IconeFechar} variante="fechar" data-cy="fechar-modal" title={t('admin.gerirEditais.fechar')} aria-label={t('admin.gerirEditais.fechar')} onClick={onFechar} />
         </div>
 
-        {/* Formulário de adição */}
-        <form data-cy="form-item-edital" onSubmit={(e) => { e.preventDefault(); if (podeAdicionar) adicionar.mutate(); }} className="cm-form-grid" style={{ margin: '14px 0 8px' }}>
-          <Campo label={t('admin.gerirEditais.itens.itemLabel')} htmlFor="item-catalogo" className="cm-campo-total">
-            <select id="item-catalogo" data-cy="item-catalogo" className="input" value={itemCatalogoId} onChange={(ev) => trocarItem(ev.target.value)}>
-              <option value="">{t('admin.gerirEditais.itens.itemPlaceholder')}</option>
-              {catalogo.map((c) => <option key={c.id} value={c.id}>{c.numero ? `${c.numero} · ${c.nome}` : c.nome}</option>)}
-            </select>
-          </Campo>
-          <Campo label={t('admin.gerirEditais.itens.unidadeLabel')} htmlFor="item-unidade">
-            <select id="item-unidade" data-cy="item-unidade" className="input" value={unidade} disabled={!itemCatalogoId} onChange={(ev) => setUnidade(ev.target.value)}>
-              {unidadesDisponiveis.length === 0 && <option value="">—</option>}
-              {unidadesDisponiveis.map((u) => <option key={u} value={u}>{u}</option>)}
-            </select>
-          </Campo>
-          <Campo label={t('admin.gerirEditais.itens.quantidadeLabel')} htmlFor="item-quantidade">
-            <input id="item-quantidade" data-cy="item-quantidade" className="input" type="number" min={1} value={quantidade} onChange={(ev) => setQuantidade(Number(ev.target.value))} />
-          </Campo>
-          <Campo label={t('admin.gerirEditais.itens.precoLabel')} htmlFor="item-preco">
-            <input id="item-preco" data-cy="item-preco" className="input" type="number" min={0} step="0.01" inputMode="decimal" placeholder="0,00" value={precoTeto} onChange={(ev) => setPrecoTeto(ev.target.value)} />
-          </Campo>
-          <div className="cm-campo-total" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-            <Botao type="submit" data-cy="adicionar-item" disabled={!podeAdicionar}>{t('admin.gerirEditais.itens.adicionar')}</Botao>
-            {adicionar.isError && <span data-cy="erro-item" role="alert" style={{ fontSize: 13, color: 'var(--erro, #c0392b)' }}>{t('admin.gerirEditais.itens.erroAdicionar')}</span>}
-          </div>
-        </form>
-
-        {/* Lista dos itens já cadastrados */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden', marginTop: 8 }}>
-          {isLoading ? (
-            <div data-cy="itens-carregando" style={{ padding: 20, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.itens.carregando')}</div>
-          ) : itens.length === 0 ? (
-            <div data-cy="itens-vazio" style={{ padding: '32px 20px', textAlign: 'center', color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.itens.vazio')}</div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table data-cy="tabela-itens-edital" style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
-                <thead>
-                  <tr>
-                    {['num', 'item', 'unidade', 'quantidade', 'preco', 'acoes'].map((c, idx, arr) => (
-                      <th key={c} scope="col" style={cabecalho(false, idx === arr.length - 1 ? 'right' : 'left')}>{t(`admin.gerirEditais.itens.col.${c}`)}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {itens.map((it: ItemEditalView) => (
-                    <tr key={it.id} data-cy="item-edital-linha" data-id={it.id}>
-                      <td style={{ ...celula, font: '700 13.5px var(--font-body)', color: 'var(--azul-900)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{String(it.numero).padStart(2, '0')}</td>
-                      <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-800)', minWidth: 200 }}>{it.nome}</td>
-                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap' }}>{it.unidade}</td>
-                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{new Intl.NumberFormat(i18n.language).format(it.quantidade)}</td>
-                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{moeda.format(it.precoTeto)}</td>
-                      <td style={{ ...celula, textAlign: 'right' }}>
-                        <BotaoIcone icone={IconeFechar} data-cy="remover-item" title={t('admin.gerirEditais.itens.remover')} aria-label={t('admin.gerirEditais.itens.remover')} disabled={remover.isPending} onClick={() => remover.mutate(it.id)} style={{ color: 'var(--erro, #c0392b)' }} />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-
-        <div data-cy="nota-preco-transparencia" style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '14px 0 2px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-700)', fontSize: 12.5, lineHeight: 1.5 }}>
-          <span aria-hidden>ℹ</span><span>{t('admin.gerirEditais.itens.notaPreco')}</span>
-        </div>
+        <EditorItensEdital
+          catalogo={catalogoDisponivel}
+          itens={itens as ItemEditalView[]}
+          onAdicionar={(v) => adicionar.mutate(v)}
+          onRemover={(id) => remover.mutate(id)}
+          adicionando={adicionar.isPending}
+          removendo={remover.isPending}
+          erro={adicionar.isError}
+          carregando={isLoading}
+        />
       </div>
     </div>
   );

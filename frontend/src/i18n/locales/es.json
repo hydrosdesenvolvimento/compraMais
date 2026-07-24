@@ -615,7 +615,9 @@
           "quantidade": "Cant.",
           "preco": "Precio tope",
           "acoes": "Acciones"
-        }
+        },
+        "novoEditalDica": "Opcional: agregue los ítems del edicto ahora o después, con la acción \"Ítems\".",
+        "erroCriarComItens": "No se pudo completar. Verifique los campos e intente guardar de nuevo."
       }
     },
     "contestacoes": {

@@ -187,7 +187,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'DocumentoAprovado', 'DocumentoReprovado', 'FornecedorCredenciado', 'FornecedorEmCorrecao',
     'CredenciamentoIniciado', 'TermoAceito', 'CredenciamentoCancelado',
     'InadimplenciaVerificada', 'BloqueioAplicado', 'BloqueioLiberado',
-    'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalEditado',
+    'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalDespublicado', 'EditalEditado',
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
     'ItemEditalAdicionado', 'ItemEditalRemovido',
     'MaloteGerado', 'MaloteExportado', 'MaloteProtocoladoSei',
@@ -330,7 +330,11 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Numeração oficial ED-AAAA/NNN: durável e atômica em Postgres (tabela `edital_numeros`); em memória
   // nos testes/sem banco. Sem ela dois editais do mesmo ano poderiam receber o mesmo número.
   const numeradorEditais: NumeradorEditais = pool ? new NumeradorEditaisPg(pool) : new NumeradorEditaisMemory();
-  const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo, undefined, numeradorEditais);
+  // Repo de credenciamentos declarado aqui (antes de `gerirEditais`) porque a despublicação de edital
+  // exige checar que não há credenciamentos associados. O módulo credenciamento reaproveita a instância.
+  const credRepo: CredenciamentoRepository = pool ? new CredenciamentoRepositoryPg(pool) : new CredenciamentoRepositoryMemory();
+  const credenciamentosDoEdital = { contarDoEdital: async (editalId: string) => (await credRepo.listarPorEdital(editalId)).length };
+  const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo, undefined, numeradorEditais, credenciamentosDoEdital);
   const buscarEditais = new BuscarEditais(editaisRepo);
   registrarRotasGestaoEditais(app, { gerir: gerirEditais, buscar: buscarEditais });
 
@@ -366,7 +370,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Postgres quando disponível (como `editais`/`fornecedores`); senão memória (testes sem banco).
   // Precondição de edital Aberto + compatível reusa a vitrine (UC003); o aceite move o fornecedor a
   // `pendente_analise`; o cancelamento (A2) é permitido antes da distribuição.
-  const credRepo: CredenciamentoRepository = pool ? new CredenciamentoRepositoryPg(pool) : new CredenciamentoRepositoryMemory();
+  // `credRepo` já foi declarado acima (usado pela despublicação de edital).
   const solicitarCredenciamento = new SolicitarCredenciamento(credRepo, vitrine, fornecedores, bus);
   // Leitura da home do fornecedor: lista seus credenciamentos enriquecidos com objeto/secretaria do
   // edital (reusa o `editaisRepo` já definido acima). Somente leitura — não altera o domínio.

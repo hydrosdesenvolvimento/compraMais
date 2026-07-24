@@ -398,6 +398,8 @@ export const api = {
   desistencias: () => get<DesistenciaView[]>('/gestao/desistencias'),
   criarEdital: (body: unknown) => send<{ editalId: string; numero: string; situacao: string }>('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
+  despublicarEdital: (id: string) => send<{ situacao: string }>(`/editais/${id}/despublicar`, 'POST'),
+  editarEdital: (id: string, body: { objeto?: string; cnaesAlvo?: string[]; prazoVigencia?: string | null }) => send<{ ok: boolean }>(`/editais/${id}`, 'PATCH', body),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),
   // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). Só editáveis em rascunho.
   editalItens: (id: string) => get<ItemEditalView[]>(`/editais/${id}/itens`),

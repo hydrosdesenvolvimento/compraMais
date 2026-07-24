@@ -617,7 +617,13 @@
           "acoes": "Ações"
         },
         "listaTitulo": "Materiais do edital"
-      }
+      },
+      "despublicar": "Despublicar",
+      "despublicadoOk": "Edital despublicado.",
+      "editar": "Editar",
+      "editadoOk": "Edital atualizado.",
+      "editarTitulo": "Editar edital",
+      "editarSub": "Ajuste os dados do edital {{numero}} (disponível enquanto está em rascunho)."
     },
     "contestacoes": {
       "titulo": "Contestações de CNAE",
@@ -917,7 +923,9 @@
     "CampoNaoEditavel": "Este campo não pode ser editado.",
     "TransicaoInvalida": "Operação não permitida no estado atual.",
     "MaterialVinculadoAEdital": "Item vinculado a um edital — não pode ser excluído.",
-    "MaterialAtivoNaoExcluivel": "Só itens inativos podem ser excluídos. Inative primeiro."
+    "MaterialAtivoNaoExcluivel": "Só itens inativos podem ser excluídos. Inative primeiro.",
+    "EditalComCredenciamentos": "Há credenciamentos associados a este edital — não é possível despublicá-lo.",
+    "EditalNaoEditavel": "O edital só pode ser editado enquanto estiver como rascunho."
   },
   "contestacao": {
     "semEmpresa": "Nenhuma empresa vinculada à sua conta.",

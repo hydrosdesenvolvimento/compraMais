@@ -617,7 +617,13 @@
           "acoes": "Actions"
         },
         "listaTitulo": "Edital materials"
-      }
+      },
+      "despublicar": "Unpublish",
+      "despublicadoOk": "Edital unpublished.",
+      "editar": "Edit",
+      "editadoOk": "Edital updated.",
+      "editarTitulo": "Edit edital",
+      "editarSub": "Adjust edital {{numero}} (available while it is a draft)."
     },
     "contestacoes": {
       "titulo": "CNAE challenges",
@@ -917,7 +923,9 @@
     "CampoNaoEditavel": "This field can't be edited.",
     "TransicaoInvalida": "This operation isn't allowed in the current state.",
     "MaterialVinculadoAEdital": "Item is linked to an edital and cannot be deleted.",
-    "MaterialAtivoNaoExcluivel": "Only inactive items can be deleted. Inactivate it first."
+    "MaterialAtivoNaoExcluivel": "Only inactive items can be deleted. Inactivate it first.",
+    "EditalComCredenciamentos": "This edital has associated credenciamentos and cannot be unpublished.",
+    "EditalNaoEditavel": "The edital can only be edited while it is a draft."
   },
   "contestacao": {
     "semEmpresa": "No company linked to your account.",

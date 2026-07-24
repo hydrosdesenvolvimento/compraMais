@@ -1,13 +1,15 @@
 import { Outlet } from '@tanstack/react-router';
-import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { AppShell, type ItemMenu } from './AppShell';
-import { api } from '../lib/api';
+import { AppShell, type ItemMenu, type Notificacao } from './AppShell';
+import { api, type CatalogoItemView } from '../lib/api';
 import { obterUsuario, obterTelasAdmin, salvarTelasAdmin, estaAutenticado } from '../lib/auth';
 import { montarChip } from '../lib/usuario-chip';
 import { menuAdminVisivel, telasPadraoDoPapel } from '../lib/telas-admin';
+import { construirNotificacoesFornecedor } from '../lib/notificacoes-fornecedor';
+import { renderNotificacao } from '../lib/notificacoes-render';
 
 /** Rótulo localizado do papel RBAC (fallback: o próprio código, ou "visitante" quando sem sessão). */
 function rotuloPapel(t: TFunction, papel: string | undefined): string {
@@ -40,21 +42,52 @@ const TELAS_SO_TITULAR = new Set(['/procuradores', '/privacidade']);
  * O menu esconde Procuradores e Privacidade para o Procurador — direitos exclusivos do Titular.
  */
 export function ShellFornecedor({ menu }: { menu: ItemMenu[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const u = obterUsuario();
   const empresaId = u?.empresaId;
-  const { data } = useQuery({
-    queryKey: ['fornecedor', empresaId],
-    queryFn: () => api.fornecedor(empresaId as string),
-    enabled: !!empresaId,
-    staleTime: 5 * 60_000,
-  });
+  const on = { enabled: !!empresaId, staleTime: 5 * 60_000 };
+  const { data } = useQuery({ queryKey: ['fornecedor', empresaId], queryFn: () => api.fornecedor(empresaId as string), ...on });
   const perfil = usePerfilProprio();
   const fantasia = data?.nomeFantasia || data?.razaoSocial;
   const chip = montarChip(u, rotuloPapel(t, u?.papel), fantasia, perfil?.avatar);
   // Restringe apenas o Procurador; anônimo/demo e Titular mantêm o menu completo.
   const menuVisivel = u?.papel === 'procurador' ? menu.filter((m) => !TELAS_SO_TITULAR.has(m.href as string)) : menu;
-  return <AppShell menu={menuVisivel} usuario={chip}><Outlet /></AppShell>;
+
+  // Notificações do fornecedor: (a) PERSISTIDAS (event-sourced: credenciamento, distribuição, edital
+  // compatível…) com lidas/não-lidas; (b) ALERTA ao vivo de documentos a vencer (temporal, sem evento).
+  const qc = useQueryClient();
+  const documentos = useQuery({ queryKey: ['documentos', empresaId], queryFn: () => api.documentos(empresaId as string), ...on });
+  const secretarias = useQuery({ queryKey: ['catalogo', 'secretarias'], queryFn: () => api.catalogoListar('secretarias') });
+  const notif = useQuery({ queryKey: ['notificacoes'], queryFn: () => api.notificacoes(1, 8), ...on });
+  const marcarLida = useMutation({
+    mutationFn: (id: string) => api.marcarNotificacaoLida(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['notificacoes'] }),
+  });
+
+  const secretariasLista = (secretarias.data as CatalogoItemView[] | undefined) ?? [];
+  const siglaDe = (id: string): string => { const s = secretariasLista.find((x) => x.id === id); return s?.sigla ?? s?.nome ?? id; };
+  const naoLidas = notif.data?.naoLidas ?? 0;
+  const notificacoes = useMemo<Notificacao[]>(() => {
+    // Alertas ao vivo (só documentos — o "edital compatível" agora é notificação persistida).
+    const alertas = construirNotificacoesFornecedor(documentos.data ?? [], [], secretariasLista, t, i18n.language);
+    // Persistidas → itens clicáveis (id/href/lida) via render localizado.
+    const persistidas: Notificacao[] = (notif.data?.itens ?? []).map((n) => {
+      const r = renderNotificacao(n, t, siglaDe);
+      return { id: n.id, tom: r.tom, titulo: r.titulo, texto: r.texto, href: r.href ?? undefined, lida: n.lida };
+    });
+    return [...alertas, ...persistidas];
+  }, [documentos.data, notif.data, secretarias.data, t, i18n.language]);
+
+  return (
+    <AppShell
+      menu={menuVisivel} usuario={chip} notificacoes={notificacoes}
+      alerta={naoLidas > 0 || notificacoes.some((n) => n.lida === undefined)}
+      verTodasHref="/notificacoes"
+      onNotificacao={(n) => { if (n.id && n.lida === false) marcarLida.mutate(n.id); }}
+    >
+      <Outlet />
+    </AppShell>
+  );
 }
 
 /**

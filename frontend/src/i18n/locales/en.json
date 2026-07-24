@@ -72,6 +72,39 @@
     },
     "toast": {
       "fechar": "Close"
+    },
+    "notif": {
+      "docVence": {
+        "titulo_one": "{{tipo}} expires in {{count}} day.",
+        "titulo_other": "{{tipo}} expires in {{count}} days.",
+        "texto": "Renew it before {{data}}."
+      },
+      "docVencido": {
+        "titulo": "{{tipo}} has expired.",
+        "texto": "Renew the document to keep your accreditation."
+      },
+      "editalNovo": {
+        "titulo": "New compatible edital:",
+        "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+      },
+      "tipo": {
+        "credenciado": {
+          "titulo": "Accreditation completed",
+          "texto": "You have been accredited. Track it in My Accreditations."
+        },
+        "em_correcao": {
+          "titulo": "Document rejected — fix it",
+          "texto": "{{motivo}}"
+        },
+        "distribuicao": {
+          "titulo": "You received a quota in the distribution",
+          "texto": "{{numero}}: quota of {{cota}}."
+        },
+        "edital_compativel": {
+          "titulo": "New compatible edital:",
+          "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+        }
+      }
     }
   },
   "auth": {
@@ -230,7 +263,10 @@
       "homologar": "Approve distribution",
       "homologando": "Approving…",
       "homologadaEm": "Distribution approved · version {{versao}}",
-      "erroHomologar": "Could not approve the distribution."
+      "erroHomologar": "Could not approve the distribution.",
+      "itemResumo": "{{distribuido}} of {{demanda}} {{unidade}} distributed",
+      "itemDeficit": "deficit of {{deficit}}",
+      "itemSemRateio": "No supplier declared capacity for this item."
     },
     "reserva": {
       "eyebrow": "Operations · Reserve List",
@@ -1415,7 +1451,9 @@
     "cotaFinal": "Your final quota",
     "capacidadeLabel": "Allocated quota vs. your capacity (ceiling)",
     "dentroDoTeto": "Within declared ceiling",
-    "reservaAviso": "<b>You completed your accreditation after the initial distribution.</b> You were placed on the <b>Reserve List (2nd Demand)</b>. Active contracts are not changed — you will be called automatically, in queue order, if a primary supplier fails to deliver."
+    "reservaAviso": "<b>You completed your accreditation after the initial distribution.</b> You were placed on the <b>Reserve List (2nd Demand)</b>. Active contracts are not changed — you will be called automatically, in queue order, if a primary supplier fails to deliver.",
+    "porItemLabel": "DISTRIBUTION BY ITEM",
+    "itemCota": "{{cota}} of {{demanda}} {{unidade}}"
   },
   "meusCredenciamentos": {
     "titulo": "My Accreditations",
@@ -1477,6 +1515,15 @@
     "termoAceitoEm": "Accepted on",
     "semTermo": "Acceptance Term not signed yet.",
     "criadoEm": "Created on",
-    "atualizadoEm": "Last update"
+    "atualizadoEm": "Last update",
+    "capacidadeItens": "{{n}} total, across {{itens}} item(s)"
+  },
+  "notificacoes": {
+    "titulo": "Notifications",
+    "subtitulo": "History of your notifications",
+    "vazio": "You have no notifications.",
+    "marcarTodas": "Mark all as read",
+    "carregando": "Loading…",
+    "naoLida": "Unread"
   }
 }

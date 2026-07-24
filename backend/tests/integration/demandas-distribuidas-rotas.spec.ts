@@ -15,6 +15,7 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
   const gestor = comoPapel('smga', { userId: 'gestor1' });
   const fornecedor = (): Record<string, string> => comoPapel('titular', { userId: 'titular1', empresaId });
   let editalDistribuido: string;
+  let itemDistribuido: string;
 
   beforeAll(async () => {
     app = await buildServer();
@@ -35,9 +36,11 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
     const bio = await app.inject({ method: 'POST', url: `/fornecedores/${empresaId}/biometria`, headers: fornecedor(), payload: { imagem: foto } });
     expect(bio.statusCode).toBe(201);
 
-    editalDistribuido = await criarPublicar(['1412601'], 10);
-    // Fornecedor credencia (teto 10), prova vida e assina o termo → vira apto (`aceito`).
-    const cred = await app.inject({ method: 'POST', url: `/editais/${editalDistribuido}/credenciamentos`, headers: fornecedor(), payload: { capacidade: 10 } });
+    const criado = await criarPublicar(['1412601'], 10);
+    editalDistribuido = criado.editalId;
+    itemDistribuido = criado.itemId;
+    // Fornecedor credencia POR ITEM (teto 10 no item), prova vida e assina o termo → vira apto (`aceito`).
+    const cred = await app.inject({ method: 'POST', url: `/editais/${editalDistribuido}/credenciamentos`, headers: fornecedor(), payload: { itens: [{ itemId: criado.itemId, capacidadeTeto: 10 }] } });
     expect(cred.statusCode).toBe(201);
     const credId = cred.json().credenciamentoId as string;
     const prova = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/prova-de-vida`, headers: fornecedor(), payload: { imagem: foto } });
@@ -51,7 +54,7 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
   // A demanda do edital deixou de ser um campo próprio: vem da soma das quantidades dos ITENS. O helper
   // cria o edital, um item de catálogo, adiciona um item com `quantidade = demanda` e então publica.
   let seqItem = 0;
-  async function criarPublicar(cnaesAlvo: string[], demanda: number): Promise<string> {
+  async function criarPublicar(cnaesAlvo: string[], demanda: number): Promise<{ editalId: string; itemId: string }> {
     const r = await app.inject({ method: 'POST', url: '/editais', headers: gestor, payload: { secretariaId: 's1', objeto: 'merenda', cnaesAlvo, prazoVigencia: '2099-12-31' } });
     expect(r.statusCode).toBe(201);
     const id = r.json().editalId as string;
@@ -63,16 +66,18 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
 
     const pub = await app.inject({ method: 'POST', url: `/editais/${id}/publicar`, headers: gestor });
     expect(pub.statusCode).toBe(200);
-    return id;
+    return { editalId: id, itemId: item.json().id as string };
   }
 
   it('POST /editais/:id/distribuir → 201 com a matriz (o único apto leva a demanda)', async () => {
     const r = await app.inject({ method: 'POST', url: `/editais/${editalDistribuido}/distribuir`, headers: gestor });
     expect(r.statusCode).toBe(201);
     const body = r.json();
-    expect(body.alocacoes).toEqual([{ fornecedorId: empresaId, cota: 10 }]);
+    expect(body.alocacoes).toEqual([{ fornecedorId: empresaId, cota: 10 }]); // agregado
     expect(body.deficit).toBe(false);
     expect(body.hash).toMatch(/^[0-9a-f]{64}$/);
+    // Matriz POR ITEM (Fase 2): o item recebe sua própria demanda/rateio.
+    expect(body.itens).toEqual([{ itemId: itemDistribuido, demanda: 10, distribuido: 10, deficit: false, deficitQuantidade: 0, alocacoes: [{ fornecedorId: empresaId, cota: 10 }] }]);
   });
 
   it('GET /distribuicao/minhas → o fornecedor vê a demanda com o rateio (TITULAR)', async () => {
@@ -85,6 +90,8 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
       objeto: 'merenda',
       classificacao: 'titular',
       total: 10, aptos: 1, cota: 10, teto: 10,
+      // Detalhamento por item (Fase 3): a cota/teto do fornecedor no item.
+      itens: [expect.objectContaining({ itemId: itemDistribuido, demanda: 10, cota: 10, teto: 10, unidade: 'un' })],
       geradoEm: expect.any(String), hash: expect.stringMatching(/^[0-9a-f]{64}$/),
     }]);
   });

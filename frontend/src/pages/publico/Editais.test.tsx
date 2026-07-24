@@ -28,7 +28,7 @@ vi.mock('../../lib/auth', () => ({ obterUsuario: () => obterUsuario() }));
 
 /** Edital com os campos reais de `GET /editais`; `prazoVigencia` distante evita prazo "encerrado". */
 function edital(over: Partial<EditalItem> & Pick<EditalItem, 'id'>): EditalItem {
-  return { objeto: 'Objeto', secretariaId: 's1', prazoVigencia: '2099-12-31', ...over };
+  return { numero: 'ED-2026/001', objeto: 'Objeto', secretariaId: 's1', prazoVigencia: '2099-12-31', ...over };
 }
 
 function renderVitrine() {

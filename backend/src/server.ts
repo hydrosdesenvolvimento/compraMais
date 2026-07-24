@@ -146,6 +146,12 @@ import { ListarDesistencias } from './distribuicao/application/listar-desistenci
 import { DistribuicaoRepositoryMemory } from './distribuicao/adapters/distribuicao-repository-memory.js';
 import { DistribuicaoRepositoryPg } from './distribuicao/adapters/distribuicao-repository-pg.js';
 import { registrarRotasDistribuicao } from './distribuicao/adapters/distribuicao-controller.js';
+import { NotificacaoConsumer } from './notificacoes/application/notificacao-consumer.js';
+import { GerirNotificacoes } from './notificacoes/application/listar-notificacoes.js';
+import type { NotificacaoRepository } from './notificacoes/application/notificacao-repository.js';
+import { NotificacaoRepositoryMemory } from './notificacoes/adapters/notificacao-repository-memory.js';
+import { NotificacaoRepositoryPg } from './notificacoes/adapters/notificacao-repository-pg.js';
+import { registrarRotasNotificacoes } from './notificacoes/adapters/notificacoes-controller.js';
 
 /**
  * Bootstrap (camada de INFRA) + composition root. O Fastify é detalhe plugável: o domínio e os
@@ -417,22 +423,24 @@ export async function buildServer(): Promise<FastifyInstance> {
   // (como `editais`/`credenciamentos`), senão memória (testes sem banco). O fornecedor lê suas
   // "Demandas distribuídas" (rateio + Cadastro de Reserva) derivadas da matriz vigente + credenciamento.
   const distribuicaoRepo: DistribuicaoRepository = pool ? new DistribuicaoRepositoryPg(pool) : new DistribuicaoRepositoryMemory();
-  // Demanda total do edital = soma das quantidades dos itens (o edital não tem mais quantitativo
-  // agregado). Fonte única consumida pelo Motor e pelo resumo da distribuição.
-  const demandaDoEdital = async (id: string): Promise<number> =>
-    (await itensEditalRepo.listarDoEdital(id)).reduce((soma, it) => soma + it.quantidade, 0);
   const editalParaDistribuir = {
     porId: async (id: string) => {
       const e = await editaisRepo.porId(id);
+      if (!e) return null;
       // Guarda de estado: só distribui edital publicado (develop não tem a máquina AD-37/em_distribuicao).
-      return e ? { podeDistribuir: e.situacao === 'publicado', demanda: await demandaDoEdital(id) } : null;
+      // Fase 2: o rateio roda por item — expõe os itens do edital (id + quantidade demandada).
+      const itens = (await itensEditalRepo.listarDoEdital(id)).map((it) => ({ itemId: it.id, quantidade: it.quantidade }));
+      return { podeDistribuir: e.situacao === 'publicado', itens };
     },
   };
   const executarDistribuicao = new ExecutarDistribuicao(editalParaDistribuir, credRepo, fornecedores, distribuicaoRepo, bus);
   const editalResumoDemanda = {
     porId: async (id: string) => {
       const e = await editaisRepo.porId(id);
-      return e ? { numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao } : null;
+      if (!e) return null;
+      // Fase 3: detalhamento por item — expõe os itens do edital (id + metadados + quantidade).
+      const itens = (await itensEditalRepo.listarDoEdital(id)).map((it) => ({ itemId: it.id, numero: it.numero, nome: it.nomeSnapshot, unidade: it.unidade, quantidade: it.quantidade }));
+      return { numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, itens };
     },
   };
   const listarDemandas = new ListarDemandasFornecedor(credRepo, distribuicaoRepo, editalResumoDemanda, secretariaLookup);
@@ -441,7 +449,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   const editalResumoDistribuicao = {
     porId: async (id: string) => {
       const e = await editaisRepo.porId(id);
-      return e ? { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, demanda: await demandaDoEdital(id) } : null;
+      if (!e) return null;
+      // Fase 2: o resumo roda por item — expõe os itens do edital (id + metadados + quantidade).
+      const itens = (await itensEditalRepo.listarDoEdital(id)).map((it) => ({ itemId: it.id, numero: it.numero, nome: it.nomeSnapshot, unidade: it.unidade, quantidade: it.quantidade }));
+      return { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, itens };
     },
   };
   const resumoDistribuicao = new ResumoDistribuicaoEdital(editalResumoDistribuicao, credRepo, fornecedores, distribuicaoRepo, secretariaLookup);
@@ -458,6 +469,19 @@ export async function buildServer(): Promise<FastifyInstance> {
   // do Cadastro de Reserva — reusa o mesmo lookup de editais candidatos). Somente leitura (UC009/RN004).
   const listarDesistencias = new ListarDesistencias(editaisComReserva, credRepo, distribuicaoRepo, fornecedores, secretariaLookup);
   registrarRotasDistribuicao(app, { executar: executarDistribuicao, repo: distribuicaoRepo, demandas: listarDemandas, resumo: resumoDistribuicao, reserva: listarCadastroReserva, desistencias: listarDesistencias });
+
+  // Notificações do fornecedor (projeção event-sourced): um consumer projeta eventos de domínio
+  // (credenciamento concluído, correção, distribuição, edital compatível) em `notificacoes`. Wire aqui,
+  // após editais/fornecedores/distribuição existirem. Durável em Postgres; memória nos testes.
+  const notificacaoRepo: NotificacaoRepository = pool ? new NotificacaoRepositoryPg(pool) : new NotificacaoRepositoryMemory();
+  const editalParaNotificacao = {
+    porId: async (id: string) => {
+      const e = await editaisRepo.porId(id);
+      return e ? { numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, cnaesAlvo: e.cnaesAlvo } : null;
+    },
+  };
+  new NotificacaoConsumer(bus, notificacaoRepo, editalParaNotificacao, fornecedores, distribuicaoRepo).register();
+  registrarRotasNotificacoes(app, { gerir: new GerirNotificacoes(notificacaoRepo) });
 
   // Credenciamento — elegibilidade fiscal / bloqueio transitório (002 US2): fail-open+flag (AD-11/12)
   const metrics = new InMemoryAdapterMetrics();

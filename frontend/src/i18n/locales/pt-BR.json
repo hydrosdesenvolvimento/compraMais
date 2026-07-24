@@ -72,6 +72,39 @@
     },
     "toast": {
       "fechar": "Fechar"
+    },
+    "notif": {
+      "docVence": {
+        "titulo_one": "{{tipo}} vence em {{count}} dia.",
+        "titulo_other": "{{tipo}} vence em {{count}} dias.",
+        "texto": "Atualize antes de {{data}}."
+      },
+      "docVencido": {
+        "titulo": "{{tipo}} venceu.",
+        "texto": "Atualize o documento para manter o credenciamento."
+      },
+      "editalNovo": {
+        "titulo": "Novo edital compatível:",
+        "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+      },
+      "tipo": {
+        "credenciado": {
+          "titulo": "Credenciamento concluído",
+          "texto": "Você foi credenciado. Acompanhe em Meus Credenciamentos."
+        },
+        "em_correcao": {
+          "titulo": "Documento reprovado — corrija",
+          "texto": "{{motivo}}"
+        },
+        "distribuicao": {
+          "titulo": "Você recebeu cota na distribuição",
+          "texto": "{{numero}}: cota de {{cota}}."
+        },
+        "edital_compativel": {
+          "titulo": "Novo edital compatível:",
+          "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+        }
+      }
     }
   },
   "auth": {
@@ -230,7 +263,10 @@
       "homologar": "Homologar distribuição",
       "homologando": "Homologando…",
       "homologadaEm": "Distribuição homologada · versão {{versao}}",
-      "erroHomologar": "Não foi possível homologar a distribuição."
+      "erroHomologar": "Não foi possível homologar a distribuição.",
+      "itemResumo": "{{distribuido}} de {{demanda}} {{unidade}} distribuído",
+      "itemDeficit": "déficit de {{deficit}}",
+      "itemSemRateio": "Nenhum credenciado declarou capacidade neste item."
     },
     "reserva": {
       "eyebrow": "Operação · Cadastro de Reserva",
@@ -1415,7 +1451,9 @@
     "cotaFinal": "Sua cota final",
     "capacidadeLabel": "Cota alocada vs. sua capacidade (teto)",
     "dentroDoTeto": "Dentro do teto declarado",
-    "reservaAviso": "<b>Você concluiu o credenciamento após a distribuição inicial.</b> Foi classificado no <b>Cadastro de Reserva (2ª Demanda)</b>. Os contratos vigentes não são alterados — você será acionado automaticamente, por ordem de fila, caso um fornecedor titular não cumpra a entrega."
+    "reservaAviso": "<b>Você concluiu o credenciamento após a distribuição inicial.</b> Foi classificado no <b>Cadastro de Reserva (2ª Demanda)</b>. Os contratos vigentes não são alterados — você será acionado automaticamente, por ordem de fila, caso um fornecedor titular não cumpra a entrega.",
+    "porItemLabel": "DISTRIBUIÇÃO POR ITEM",
+    "itemCota": "{{cota}} de {{demanda}} {{unidade}}"
   },
   "meusCredenciamentos": {
     "titulo": "Meus Credenciamentos",
@@ -1477,6 +1515,15 @@
     "termoAceitoEm": "Aceito em",
     "semTermo": "Termo de Aceite ainda não assinado.",
     "criadoEm": "Criado em",
-    "atualizadoEm": "Última atualização"
+    "atualizadoEm": "Última atualização",
+    "capacidadeItens": "{{n}} no total, em {{itens}} item(ns)"
+  },
+  "notificacoes": {
+    "titulo": "Notificações",
+    "subtitulo": "Histórico das suas notificações",
+    "vazio": "Você não tem notificações.",
+    "marcarTodas": "Marcar todas como lidas",
+    "carregando": "Carregando…",
+    "naoLida": "Não lida"
   }
 }

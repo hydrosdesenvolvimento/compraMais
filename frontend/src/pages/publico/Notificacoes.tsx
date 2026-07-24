@@ -1,0 +1,85 @@
+import { useMemo, type CSSProperties } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from '@tanstack/react-router';
+import { useTranslation } from 'react-i18next';
+import { api, type CatalogoItemView, type NotificacaoView } from '../../lib/api';
+import { obterUsuario } from '../../lib/auth';
+import { renderNotificacao } from '../../lib/notificacoes-render';
+import { IconeRelogio, IconeEditais } from '../../design-system/icons';
+import { Botao } from '../../design-system/components';
+
+const cardBase: CSSProperties = { display: 'flex', gap: 14, alignItems: 'flex-start', padding: '16px 18px', borderRadius: 12, border: '1px solid var(--border)', background: '#fff', textAlign: 'left', width: '100%', cursor: 'pointer' };
+
+/**
+ * Página "Notificações" do fornecedor (histórico persistido + lidas/não-lidas). Lista as notificações
+ * event-sourced (credenciamento, distribuição, edital compatível, correção), destaca as não-lidas,
+ * marca como lida ao abrir e navega para o contexto (edital/documentos). Somente do fornecedor do token.
+ */
+export function Notificacoes() {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const empresaId = obterUsuario()?.empresaId;
+
+  const { data, isLoading } = useQuery({ queryKey: ['notificacoes-pagina'], queryFn: () => api.notificacoes(1, 50), enabled: !!empresaId });
+  const secretarias = useQuery({ queryKey: ['catalogo', 'secretarias'], queryFn: () => api.catalogoListar('secretarias') });
+  const invalidar = () => { void qc.invalidateQueries({ queryKey: ['notificacoes-pagina'] }); void qc.invalidateQueries({ queryKey: ['notificacoes'] }); };
+  const marcarLida = useMutation({ mutationFn: (id: string) => api.marcarNotificacaoLida(id), onSuccess: invalidar });
+  const marcarTodas = useMutation({ mutationFn: () => api.marcarNotificacoesLidas(), onSuccess: invalidar });
+
+  const secretariasLista = (secretarias.data as CatalogoItemView[] | undefined) ?? [];
+  const siglaDe = (id: string): string => { const s = secretariasLista.find((x) => x.id === id); return s?.sigla ?? s?.nome ?? id; };
+  const fmt = (iso: string) => new Date(iso).toLocaleDateString(i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  const itens = useMemo(() => data?.itens ?? [], [data]);
+  const naoLidas = data?.naoLidas ?? 0;
+
+  function abrir(n: NotificacaoView, href: string | null) {
+    if (!n.lida) marcarLida.mutate(n.id);
+    if (href) void navigate({ to: href });
+  }
+
+  if (!empresaId) return <p data-cy="sem-empresa" className="page-sub">{t('demandasDistribuidas.semEmpresa')}</p>;
+
+  return (
+    <div className="stack" data-cy="notificacoes-pagina">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <h1 className="page-title">{t('notificacoes.titulo')}</h1>
+          <p className="page-sub">{t('notificacoes.subtitulo')}</p>
+        </div>
+        {naoLidas > 0 && (
+          <Botao data-cy="marcar-todas" variante="secundario" onClick={() => marcarTodas.mutate()} disabled={marcarTodas.isPending}>
+            {t('notificacoes.marcarTodas')}
+          </Botao>
+        )}
+      </div>
+
+      {isLoading ? (
+        <p data-cy="carregando" className="page-sub">{t('notificacoes.carregando')}</p>
+      ) : itens.length === 0 ? (
+        <div data-cy="vazio" className="card" style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>{t('notificacoes.vazio')}</div>
+      ) : (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {itens.map((n) => {
+            const r = renderNotificacao(n, t, siglaDe);
+            return (
+              <button key={n.id} type="button" data-cy="notificacao" data-tipo={n.tipo} data-lida={n.lida}
+                onClick={() => abrir(n, r.href)}
+                style={{ ...cardBase, borderColor: n.lida ? 'var(--border)' : 'var(--azul-300, #9db8e0)', background: n.lida ? '#fff' : 'var(--azul-50)' }}>
+                <span style={{ flexShrink: 0, marginTop: 1, color: r.tom === 'atencao' ? '#8A5410' : 'var(--azul-600)' }}>
+                  {r.tom === 'atencao' ? <IconeRelogio width={20} height={20} /> : <IconeEditais width={20} height={20} />}
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--azul-900)' }}><strong>{r.titulo}</strong> <span style={{ color: 'var(--cinza-700)' }}>{r.texto}</span></div>
+                  <div style={{ fontSize: 12, color: 'var(--cinza-400)', marginTop: 4 }}>{fmt(n.criadoEm)}</div>
+                </div>
+                {!n.lida && <span data-cy="nao-lida" aria-label={t('notificacoes.naoLida')} style={{ flexShrink: 0, width: 9, height: 9, borderRadius: 999, background: 'var(--azul-700)', marginTop: 6 }} />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

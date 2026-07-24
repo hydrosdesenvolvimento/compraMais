@@ -78,7 +78,7 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 }
 
 // --- Tipos de leitura ---
-export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null }
+export interface EditalItem { id: string; numero: string; objeto: string; secretariaId: string; prazoVigencia: string | null }
 export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null }
 /** Página da busca de gestão de editais (`GET /gestao/editais`): itens + total do filtro para o pager. */
 export interface PaginaEditais { items: EditalGestao[]; total: number; page: number; size: number }
@@ -100,6 +100,12 @@ export interface EditalElegiveisView {
 }
 /** Tela "Distribuição Inteligente" (Painel Admin · Operação) — uma linha do rateio (UC008/RN005). */
 export interface RateioLinhaView { fornecedorId: string; nome: string; capacidade: number; cota: number }
+/** Rateio de UM item do edital (Fase 2 — distribuição por item). */
+export interface ItemDistribuicaoView {
+  itemId: string; numero: number; nome: string; unidade: string;
+  demanda: number; distribuido: number; deficit: boolean; deficitQuantidade: number;
+  rateio: RateioLinhaView[];
+}
 /**
  * Resumo da distribuição de um edital. `homologada=true` = matriz congelada (append-only); `false` =
  * preview determinístico do Motor, ainda por homologar. `total` = demanda; `distribuido` = soma das
@@ -114,7 +120,8 @@ export interface ResumoDistribuicaoView {
   habilitados: number;
   deficit: boolean;
   deficitQuantidade: number;
-  rateio: RateioLinhaView[];
+  itens: ItemDistribuicaoView[]; // rateio POR item (Fase 2)
+  rateio: RateioLinhaView[]; // rateio AGREGADO por fornecedor (resumo)
 }
 /**
  * Uma posição na fila do Cadastro de Reserva (UC009 / RN004). Fornecedor apto (credenciamento aceito)
@@ -179,6 +186,13 @@ export interface Transparencia { editaisVigentes: number; secretarias: string[];
  * presentes); `reserva` é apto mas ficou fora da matriz vigente (Cadastro de Reserva / 2ª demanda) e
  * traz apenas o teto declarado. `total`/`aptos`/`cota` são `null` no caso de reserva.
  */
+/** Notificação persistida do fornecedor (event-sourced). Dado estruturado; o texto é localizado no front. */
+export type TipoNotificacao = 'credenciado' | 'em_correcao' | 'distribuicao' | 'edital_compativel';
+export interface NotificacaoView { id: string; tipo: TipoNotificacao; payload: Record<string, unknown>; referencia: string | null; criadoEm: string; lida: boolean }
+export interface PaginaNotificacoesView { itens: NotificacaoView[]; total: number; naoLidas: number }
+
+/** Cota/teto do fornecedor em UM item do edital (Fase 3). */
+export interface DemandaItemView { itemId: string; numero: number; nome: string; unidade: string; demanda: number; cota: number; teto: number }
 export interface DemandaDistribuidaView {
   editalId: string;
   numero: string;
@@ -189,6 +203,7 @@ export interface DemandaDistribuidaView {
   aptos: number | null;
   cota: number | null;
   teto: number;
+  itens: DemandaItemView[]; // detalhamento por item (Fase 3)
   geradoEm: string;
   hash: string;
 }
@@ -294,6 +309,10 @@ export const api = {
   transparencia: () => get<Transparencia>('/transparencia'),
   // UC008 — Demandas distribuídas: o rateio que o Motor atribuiu ao fornecedor (empresa vem do token).
   demandasDistribuidas: () => get<DemandaDistribuidaView[]>('/distribuicao/minhas'),
+  // Notificações persistidas do fornecedor (histórico + lidas/não-lidas).
+  notificacoes: (page = 1, size = 20) => get<PaginaNotificacoesView>(`/notificacoes?page=${page}&size=${size}`),
+  marcarNotificacaoLida: (id: string) => send<void>(`/notificacoes/${id}/ler`, 'POST'),
+  marcarNotificacoesLidas: () => send<{ atualizadas: number }>('/notificacoes/ler-todas', 'POST'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   // FR-007 — envio de documento comprobatório. `conteudo` são os bytes do arquivo em base64 (o
   // backend cifra em repouso — AD-19). `formato` ∈ pdf|jpg|png; `dataValidade` opcional (ISO).

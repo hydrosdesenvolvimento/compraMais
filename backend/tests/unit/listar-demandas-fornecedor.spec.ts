@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { ListarDemandasFornecedor, type EditalResumoDemanda, type SecretariaSiglaLookup } from '../../src/distribuicao/application/listar-demandas-fornecedor.js';
 import { DistribuicaoRepositoryMemory } from '../../src/distribuicao/adapters/distribuicao-repository-memory.js';
-import { montarRegistro } from '../../src/distribuicao/domain/registro-distribuicao.js';
+import { montarRegistro, montarRegistroPorItem } from '../../src/distribuicao/domain/registro-distribuicao.js';
 import { distribuir } from '../../src/distribuicao/domain/motor.js';
 import type { CredenciamentoRepository } from '../../src/credenciamento/application/solicitar-credenciamento.js';
-import type { Credenciamento } from '../../src/credenciamento/domain/credenciamento.js';
+import type { Credenciamento, CapacidadeItem } from '../../src/credenciamento/domain/credenciamento.js';
 
-/** Fake mínimo de credenciamento: o read-model só lê situacao/editalId/capacidadeTeto. */
-function cred(editalId: string, situacao: string, capacidadeTeto: number): Credenciamento {
-  return { editalId, situacao, capacidadeTeto } as unknown as Credenciamento;
+/** Fake mínimo de credenciamento: o read-model só lê situacao/editalId/capacidadeTeto/itens. */
+function cred(editalId: string, situacao: string, capacidadeTeto: number, itens: CapacidadeItem[] = []): Credenciamento {
+  return { editalId, situacao, capacidadeTeto, itens } as unknown as Credenciamento;
 }
 
 /** Repo de credenciamento fake que só implementa `listarPorFornecedor` (o que o read-model usa). */
@@ -23,7 +23,7 @@ function credsFake(lista: Credenciamento[]): CredenciamentoRepository {
 }
 
 const editaisFake: EditalResumoDemanda = {
-  porId: async (id) => ({ numero: `ED-2026/00${id.slice(-1)}`, objeto: `objeto ${id}`, secretariaId: `sec-${id}`, situacao: 'publicado' }),
+  porId: async (id) => ({ numero: `ED-2026/00${id.slice(-1)}`, objeto: `objeto ${id}`, secretariaId: `sec-${id}`, situacao: 'publicado', itens: [] }),
 };
 const secretariasFake: SecretariaSiglaLookup = { siglaPorId: async (id) => id.toUpperCase() };
 
@@ -95,5 +95,32 @@ describe('ListarDemandasFornecedor (UC008 — projeção da tela)', () => {
     const out = await uc.listar(FORN);
 
     expect(out.map((d) => d.editalId)).toEqual(['e2', 'e1']); // mais recente primeiro
+  });
+
+  it('detalha a cota/teto do fornecedor POR ITEM (Fase 3)', async () => {
+    const repo = new DistribuicaoRepositoryMemory();
+    // Matriz por item: it1 (demanda 100) fornA=60/fB=40; it2 (demanda 50) fornA=50.
+    await repo.append(montarRegistroPorItem({
+      id: 'm1', editalId: 'e1', versao: 1, geradoEm: '2026-07-10T12:00:00Z', regraDesempate: 'ordem_credenciamento_cnpj',
+      itens: [
+        { itemId: 'it1', demanda: 100, distribuido: 100, deficit: false, deficitQuantidade: 0, alocacoes: [{ fornecedorId: FORN, cota: 60 }, { fornecedorId: 'fB', cota: 40 }] },
+        { itemId: 'it2', demanda: 50, distribuido: 50, deficit: false, deficitQuantidade: 0, alocacoes: [{ fornecedorId: FORN, cota: 50 }] },
+      ],
+    }));
+    const editais: EditalResumoDemanda = {
+      porId: async () => ({ numero: 'ED-2026/001', objeto: 'obj', secretariaId: 'sec', situacao: 'publicado', itens: [
+        { itemId: 'it1', numero: 1, nome: 'Cabo', unidade: 'un', quantidade: 100 },
+        { itemId: 'it2', numero: 2, nome: 'Fio', unidade: 'm', quantidade: 50 },
+      ] }),
+    };
+    const uc = new ListarDemandasFornecedor(credsFake([cred('e1', 'aceito', 110, [{ itemId: 'it1', capacidadeTeto: 70 }, { itemId: 'it2', capacidadeTeto: 40 }])]), repo, editais, secretariasFake);
+    const [d] = await uc.listar(FORN);
+
+    expect(d.classificacao).toBe('titular');
+    expect(d.cota).toBe(110); // 60 + 50 (agregado)
+    expect(d.itens).toEqual([
+      { itemId: 'it1', numero: 1, nome: 'Cabo', unidade: 'un', demanda: 100, cota: 60, teto: 70 },
+      { itemId: 'it2', numero: 2, nome: 'Fio', unidade: 'm', demanda: 50, cota: 50, teto: 40 },
+    ]);
   });
 });

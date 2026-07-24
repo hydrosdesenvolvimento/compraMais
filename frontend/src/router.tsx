@@ -15,6 +15,7 @@ import { ContestacaoConectada } from './pages/publico/Contestacao';
 import { MeusCredenciamentosConectada } from './pages/publico/MeusCredenciamentos';
 import { CredenciamentoDetalhe } from './pages/publico/CredenciamentoDetalhe';
 import { DemandasDistribuidasConectada } from './pages/publico/DemandasDistribuidas';
+import { Notificacoes } from './pages/publico/Notificacoes';
 import { MinhaContaConectada } from './pages/publico/MinhaContaConectada';
 import { ProcuradoresConectada } from './pages/publico/ProcuradoresConectada';
 import { PrivacidadeConectada } from './pages/publico/PrivacidadeConectada';
@@ -83,6 +84,7 @@ const rContestacao = createRoute({ getParentRoute: () => fornecedorLayout, path:
 const rDocumentos = createRoute({ getParentRoute: () => fornecedorLayout, path: '/documentos', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: DocumentosConectada });
 const rTransparencia = createRoute({ getParentRoute: () => fornecedorLayout, path: '/transparencia', component: Transparencia });
 const rDemandas = createRoute({ getParentRoute: () => fornecedorLayout, path: '/demandas', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: DemandasDistribuidasConectada });
+const rNotificacoes = createRoute({ getParentRoute: () => fornecedorLayout, path: '/notificacoes', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: Notificacoes });
 const rTitular = createRoute({ getParentRoute: () => fornecedorLayout, path: '/titular', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: PainelTitularConectada });
 
 const adminLayout = createRoute({ getParentRoute: () => rootRoute, id: 'admin', component: () => <ShellAdmin /> });
@@ -115,7 +117,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   cadastroRoute,
   redefinirSenhaRoute,
-  fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rMeusCredenciamentos, rCredenciamentoDetalhe, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rDemandas, rTitular]),
+  fornecedorLayout.addChildren([rInicio, rMinhaConta, rProcuradores, rPrivacidade, rEditais, rCredenciamento, rMeusCredenciamentos, rCredenciamentoDetalhe, rContestarCnae, rContestacao, rDocumentos, rTransparencia, rDemandas, rNotificacoes, rTitular]),
   adminLayout.addChildren([
     rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos,
     rAdminUsuarios, rAdminLgpd, rAdminAudit, rAdminPerfis,

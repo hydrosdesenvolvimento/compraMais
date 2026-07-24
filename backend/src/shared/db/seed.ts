@@ -61,6 +61,27 @@ function pdfDemoBase64(texto: string): string {
   return Buffer.from(pdf, 'latin1').toString('base64');
 }
 
+/**
+ * Fornecedor demo (`demo-fornecedor`) — o agregado que o usuário `fornecedor@demo.local` representa.
+ * Sem isto, o usuário existe mas o Fornecedor não: a Home do fornecedor quebra (perfil 404 + vitrine
+ * 500 "Supplier not found"). CNAE 1412601 casa com os editais demo (fila de análise/publicados).
+ */
+async function seedFornecedorDemo(pool: Pool): Promise<void> {
+  const repo = new FornecedorRepositoryPg(pool);
+  if (await repo.porId(DEMO_FORNECEDOR_ID)) {
+    console.log('[seed] fornecedor demo: já existe, pulando.');
+    return;
+  }
+  const agora = new Date().toISOString();
+  await repo.salvar(Fornecedor.deEstado({
+    meta: { id: DEMO_FORNECEDOR_ID, registerDate: agora, updateDate: agora, lastUserUpdate: 'seed' },
+    cnpj: '11222333000181', razaoSocial: 'Fornecedor Demo Ltda', porte: 'ME',
+    cnaes: [{ codigoSubclasse: '1412601', tipo: 'principal', ativo: true }],
+    situacao: 'ativa', origem: 'manual', contato: {}, status: 'credenciado', sincronizadoEm: null,
+  }));
+  console.log('[seed] fornecedor demo: demo-fornecedor criado (CNAE 1412601).');
+}
+
 /** Situação-alvo de cada documento demo → o seed transiciona o agregado após o upload. */
 type AlvoDoc = 'aprovado' | 'reprovado' | 'pendente';
 
@@ -180,6 +201,7 @@ async function seed(): Promise<void> {
     if (falhas) process.exitCode = 1; // visível em CI sem abortar os demais
 
     await seedTiposDocumento(pool);
+    await seedFornecedorDemo(pool); // antes dos documentos — o Fornecedor demo precisa existir (Home do fornecedor)
     await seedDocumentos(pool, config.crypto.piiKey);
     await seedFilaAnalise(pool, config.crypto.piiKey);
   } finally {

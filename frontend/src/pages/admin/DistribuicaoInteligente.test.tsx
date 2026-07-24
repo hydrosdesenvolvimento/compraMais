@@ -23,14 +23,17 @@ const EDITAIS: EditalGestao[] = [
   { id: 'e2', numero: 'ED-2026/002', objeto: 'Fardamento escolar', secretariaId: 's1', situacao: 'publicado', cnaesAlvo: ['1412601'], prazoVigencia: null },
 ];
 
+const RATEIO = [
+  { fornecedorId: 'a', nome: 'Floresta Uniformes', capacidade: 800, cota: 300 },
+  { fornecedorId: 'b', nome: 'Malharia Maria', capacidade: 300, cota: 150 },
+  { fornecedorId: 'c', nome: 'Têxtil Amazônia', capacidade: 150, cota: 150 },
+];
 const RESUMO_E1: ResumoDistribuicaoView = {
   edital: { id: 'e1', numero: 'ED-2026/001', objeto: 'Mobiliário escolar', secretariaSigla: 'SEME', situacao: 'publicado' },
   homologada: false, versao: null, total: 600, distribuido: 600, habilitados: 3, deficit: false, deficitQuantidade: 0,
-  rateio: [
-    { fornecedorId: 'a', nome: 'Floresta Uniformes', capacidade: 800, cota: 300 },
-    { fornecedorId: 'b', nome: 'Malharia Maria', capacidade: 300, cota: 150 },
-    { fornecedorId: 'c', nome: 'Têxtil Amazônia', capacidade: 150, cota: 150 },
-  ],
+  // Fase 2: rateio POR item — aqui um item (i1) com a demanda 600.
+  itens: [{ itemId: 'i1', numero: 1, nome: 'Cadeira escolar', unidade: 'un/mês', demanda: 600, distribuido: 600, deficit: false, deficitQuantidade: 0, rateio: RATEIO }],
+  rateio: RATEIO,
 };
 
 function renderTela() {
@@ -60,8 +63,9 @@ describe('DistribuicaoInteligente — Painel Admin (UC008/RN005)', () => {
     expect(screen.getByTestId('stat-habilitados')).toHaveTextContent('3');
   });
 
-  it('renderiza o rateio com capacidade, cota e % da demanda', async () => {
+  it('renderiza o rateio por item com capacidade, cota e % da demanda do item', async () => {
     renderTela();
+    expect(await screen.findByTestId('item-distribuicao')).toBeInTheDocument();
     const linhas = await screen.findAllByTestId('linha-rateio');
     expect(linhas).toHaveLength(3);
     expect(linhas[0]).toHaveTextContent('Floresta Uniformes');
@@ -96,7 +100,7 @@ describe('DistribuicaoInteligente — Painel Admin (UC008/RN005)', () => {
   });
 
   it('mostra estado vazio quando não há fornecedores habilitados', async () => {
-    resumoDistribuicao.mockResolvedValue({ ...RESUMO_E1, habilitados: 0, distribuido: 0, deficit: true, deficitQuantidade: 600, rateio: [] });
+    resumoDistribuicao.mockResolvedValue({ ...RESUMO_E1, habilitados: 0, distribuido: 0, deficit: true, deficitQuantidade: 600, itens: [], rateio: [] });
     renderTela();
     await waitFor(() => expect(screen.getByTestId('vazio')).toBeInTheDocument());
     expect(screen.queryByTestId('homologar')).not.toBeInTheDocument();

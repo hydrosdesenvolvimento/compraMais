@@ -72,6 +72,21 @@
     },
     "toast": {
       "fechar": "Cerrar"
+    },
+    "notif": {
+      "docVence": {
+        "titulo_one": "{{tipo}} vence en {{count}} día.",
+        "titulo_other": "{{tipo}} vence en {{count}} días.",
+        "texto": "Actualice antes del {{data}}."
+      },
+      "docVencido": {
+        "titulo": "{{tipo}} venció.",
+        "texto": "Actualice el documento para mantener la acreditación."
+      },
+      "editalNovo": {
+        "titulo": "Nuevo edicto compatible:",
+        "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+      }
     }
   },
   "auth": {

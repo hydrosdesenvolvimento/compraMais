@@ -72,6 +72,21 @@
     },
     "toast": {
       "fechar": "Fechar"
+    },
+    "notif": {
+      "docVence": {
+        "titulo_one": "{{tipo}} vence em {{count}} dia.",
+        "titulo_other": "{{tipo}} vence em {{count}} dias.",
+        "texto": "Atualize antes de {{data}}."
+      },
+      "docVencido": {
+        "titulo": "{{tipo}} venceu.",
+        "texto": "Atualize o documento para manter o credenciamento."
+      },
+      "editalNovo": {
+        "titulo": "Novo edital compatível:",
+        "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+      }
     }
   },
   "auth": {

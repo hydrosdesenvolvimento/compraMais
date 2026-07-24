@@ -1,13 +1,14 @@
 import { Outlet } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { AppShell, type ItemMenu } from './AppShell';
-import { api } from '../lib/api';
+import { api, type CatalogoItemView } from '../lib/api';
 import { obterUsuario, obterTelasAdmin, salvarTelasAdmin, estaAutenticado } from '../lib/auth';
 import { montarChip } from '../lib/usuario-chip';
 import { menuAdminVisivel, telasPadraoDoPapel } from '../lib/telas-admin';
+import { construirNotificacoesFornecedor } from '../lib/notificacoes-fornecedor';
 
 /** Rótulo localizado do papel RBAC (fallback: o próprio código, ou "visitante" quando sem sessão). */
 function rotuloPapel(t: TFunction, papel: string | undefined): string {
@@ -40,21 +41,28 @@ const TELAS_SO_TITULAR = new Set(['/procuradores', '/privacidade']);
  * O menu esconde Procuradores e Privacidade para o Procurador — direitos exclusivos do Titular.
  */
 export function ShellFornecedor({ menu }: { menu: ItemMenu[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const u = obterUsuario();
   const empresaId = u?.empresaId;
-  const { data } = useQuery({
-    queryKey: ['fornecedor', empresaId],
-    queryFn: () => api.fornecedor(empresaId as string),
-    enabled: !!empresaId,
-    staleTime: 5 * 60_000,
-  });
+  const on = { enabled: !!empresaId, staleTime: 5 * 60_000 };
+  const { data } = useQuery({ queryKey: ['fornecedor', empresaId], queryFn: () => api.fornecedor(empresaId as string), ...on });
   const perfil = usePerfilProprio();
   const fantasia = data?.nomeFantasia || data?.razaoSocial;
   const chip = montarChip(u, rotuloPapel(t, u?.papel), fantasia, perfil?.avatar);
   // Restringe apenas o Procurador; anônimo/demo e Titular mantêm o menu completo.
   const menuVisivel = u?.papel === 'procurador' ? menu.filter((m) => !TELAS_SO_TITULAR.has(m.href as string)) : menu;
-  return <AppShell menu={menuVisivel} usuario={chip}><Outlet /></AppShell>;
+
+  // Notificações REAIS do fornecedor (reusa o cache da Home): documentos a vencer/vencidos (certidões)
+  // e editais compatíveis (oportunidades). Nada de mock — reflete os dados reais da empresa.
+  const documentos = useQuery({ queryKey: ['documentos', empresaId], queryFn: () => api.documentos(empresaId as string), ...on });
+  const editais = useQuery({ queryKey: ['editais'], queryFn: api.editaisCompativeis, ...on });
+  const secretarias = useQuery({ queryKey: ['catalogo', 'secretarias'], queryFn: () => api.catalogoListar('secretarias') });
+  const notificacoes = useMemo(
+    () => construirNotificacoesFornecedor(documentos.data ?? [], editais.data ?? [], (secretarias.data as CatalogoItemView[] | undefined) ?? [], t, i18n.language),
+    [documentos.data, editais.data, secretarias.data, t, i18n.language],
+  );
+
+  return <AppShell menu={menuVisivel} usuario={chip} notificacoes={notificacoes}><Outlet /></AppShell>;
 }
 
 /**

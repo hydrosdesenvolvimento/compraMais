@@ -16,11 +16,6 @@ export interface ItemMenu { rotuloKey: string; href: MenuLinkTo; icone: ReactNod
 export interface UsuarioChip { nome: string; papel: string; iniciais: string; fantasia?: string; avatar?: string | null }
 export interface Notificacao { tom: 'atencao' | 'info'; titulo: string; texto: string }
 
-const NOTIF_PADRAO: Notificacao[] = [
-  { tom: 'atencao', titulo: 'Certidão Federal vence em 5 dias.', texto: 'Enviamos aviso por SMS e e-mail. Atualize antes de 30/06/2026.' },
-  { tom: 'info', titulo: 'Novo edital compatível:', texto: 'ED-2026/014 — Fardamento escolar (SEME).' },
-];
-
 function ehMobile() {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 920px)').matches;
 }
@@ -39,7 +34,7 @@ function AvatarChip({ usuario, style }: { usuario: UsuarioChip; style?: CSSPrope
  */
 export function AppShell({
   menu, usuario, children, rodapeKey = 'common.shell.footerFornecedor',
-  notificacoes = NOTIF_PADRAO, contaHref = '/minha-conta' as MenuLinkTo,
+  notificacoes = [], contaHref = '/minha-conta' as MenuLinkTo,
 }: {
   menu: ItemMenu[]; usuario: UsuarioChip; children: ReactNode; rodapeKey?: string;
   notificacoes?: Notificacao[]; contaHref?: MenuLinkTo;

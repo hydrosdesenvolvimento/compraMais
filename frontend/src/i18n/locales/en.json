@@ -72,6 +72,21 @@
     },
     "toast": {
       "fechar": "Close"
+    },
+    "notif": {
+      "docVence": {
+        "titulo_one": "{{tipo}} expires in {{count}} day.",
+        "titulo_other": "{{tipo}} expires in {{count}} days.",
+        "texto": "Renew it before {{data}}."
+      },
+      "docVencido": {
+        "titulo": "{{tipo}} has expired.",
+        "texto": "Renew the document to keep your accreditation."
+      },
+      "editalNovo": {
+        "titulo": "New compatible edital:",
+        "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+      }
     }
   },
   "auth": {

@@ -1,12 +1,39 @@
-import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { api } from '../../lib/api';
+import { api, type Pendencia } from '../../lib/api';
 import { IconeBusca, IconeFiltro, IconeSeta } from '../../design-system/icons';
+import { obterUsuario } from '../../lib/auth';
 
-/** Meus Credenciamentos (US3 / FR-012) — acompanha credenciamentos e próximos passos. Query. */
+/**
+ * Tela Única de Contestação / Regularização (UC016 / Épico 7-1). Consolida, como projeção somente-leitura,
+ * as pendências do fornecedor (documento reprovado, bloqueio fiscal, contestação de CNAE, direito LGPD) e
+ * delega cada ação ao módulo dono: reenviar documento → UC006; regularizar e reconsultar → UC002. As
+ * pendências de análise (contestação de CNAE / LGPD) são informativas (aguardam a Secretaria/CPL ou o DPO).
+ */
 export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
   const { t } = useTranslation();
-  const { data: pendencias = [], isLoading } = useQuery({ queryKey: ['pendencias', fornecedorId], queryFn: () => api.pendencias(fornecedorId) });
+  const qc = useQueryClient();
+  const [feedback, setFeedback] = useState<{ tom: 'ok' | 'erro'; texto: string } | null>(null);
+
+  const { data: pendencias = [], isLoading } = useQuery({ queryKey: ['pendencias-consolidadas', fornecedorId], queryFn: () => api.pendenciasConsolidadas(fornecedorId) });
+  // Necessário para a reconsulta de elegibilidade (UC002 exige o CNPJ na porta).
+  const { data: perfil } = useQuery({ queryKey: ['fornecedor', fornecedorId], queryFn: () => api.fornecedor(fornecedorId) });
+
+  const invalidar = () => { void qc.invalidateQueries({ queryKey: ['pendencias-consolidadas', fornecedorId] }); };
+
+  const reenviar = useMutation({
+    meta: { semToast: true }, // esta tela já exibe feedback inline (pill) — evita toast duplicado
+    mutationFn: (docId: string) => api.reenviarDocumento(docId),
+    onSuccess: () => { setFeedback({ tom: 'ok', texto: t('contestacao.acao.sucesso') }); invalidar(); },
+    onError: () => setFeedback({ tom: 'erro', texto: t('contestacao.acao.erro') }),
+  });
+  const reconsultar = useMutation({
+    meta: { semToast: true }, // idem: feedback inline nesta tela
+    mutationFn: () => api.reconsultarElegibilidade(fornecedorId, perfil?.cnpj ?? ''),
+    onSuccess: () => { setFeedback({ tom: 'ok', texto: t('contestacao.acao.sucesso') }); invalidar(); },
+    onError: () => setFeedback({ tom: 'erro', texto: t('contestacao.acao.erro') }),
+  });
 
   const cabecalho = (
     <div style={{ marginBottom: 18 }}>
@@ -27,6 +54,17 @@ export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
   return (
     <div className="stack">
       {cabecalho}
+
+      {feedback && (
+        <div
+          data-cy="feedback-acao"
+          role="status"
+          className={`pill ${feedback.tom === 'ok' ? 'pill-success' : 'pill-error'}`}
+          style={{ marginBottom: 14, display: 'inline-flex' }}
+        >
+          {feedback.texto}
+        </div>
+      )}
 
       {/* Busca + filtros */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 18, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -88,6 +126,7 @@ export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
               <li
                 key={i}
                 data-cy="pendencia"
+                data-tipo={p.tipo}
                 style={{
                   display: 'flex',
                   gap: 14,
@@ -97,7 +136,7 @@ export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
                 }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ font: '600 15px var(--font-body)', color: 'var(--azul-900)' }}>{p.tipo}</div>
+                  <div style={{ font: '600 15px var(--font-body)', color: 'var(--azul-900)' }}>{rotuloTipo(p.tipo, t)}</div>
                   <div style={{ fontSize: 13.5, color: 'var(--cinza-500)', marginTop: 3 }}>{p.motivo ?? '—'}</div>
                   <div
                     style={{
@@ -114,7 +153,12 @@ export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
                     {p.proximoPasso}
                   </div>
                 </div>
-                <span className="pill pill-warn" style={{ flexShrink: 0 }}>{t('contestacao.status.rascunho')}</span>
+                <AcaoPendencia
+                  pendencia={p}
+                  onReenviar={(docId) => reenviar.mutate(docId)}
+                  onReconsultar={() => reconsultar.mutate()}
+                  ocupado={reenviar.isPending || reconsultar.isPending}
+                />
               </li>
             ))}
           </ul>
@@ -149,4 +193,60 @@ export function Contestacao({ fornecedorId }: { fornecedorId: string }) {
       </div>
     </div>
   );
+}
+
+/** Botão de ação da pendência — só documento (reenviar) e bloqueio (regularizar) são acionáveis daqui. */
+function AcaoPendencia({
+  pendencia, onReenviar, onReconsultar, ocupado,
+}: {
+  pendencia: Pendencia;
+  onReenviar: (docId: string) => void;
+  onReconsultar: () => void;
+  ocupado: boolean;
+}) {
+  const { t } = useTranslation();
+  if (pendencia.tipo === 'documento' && pendencia.referenciaId) {
+    return (
+      <button
+        className="btn btn-primary"
+        type="button"
+        data-cy="acao-reenviar"
+        disabled={ocupado}
+        onClick={() => onReenviar(pendencia.referenciaId as string)}
+        style={{ flexShrink: 0 }}
+      >
+        {ocupado ? t('contestacao.acao.processando') : t('contestacao.acao.reenviar')}
+      </button>
+    );
+  }
+  if (pendencia.tipo === 'bloqueio') {
+    return (
+      <button
+        className="btn btn-primary"
+        type="button"
+        data-cy="acao-regularizar"
+        disabled={ocupado}
+        onClick={() => onReconsultar()}
+        style={{ flexShrink: 0 }}
+      >
+        {ocupado ? t('contestacao.acao.processando') : t('contestacao.acao.regularizar')}
+      </button>
+    );
+  }
+  // contestação de CNAE / LGPD: aguardam análise da Secretaria/CPL ou do DPO — sem ação do fornecedor aqui.
+  return <span className="pill pill-warn" style={{ flexShrink: 0 }} data-cy="acao-aguardando">{t('contestacao.acao.aguardando')}</span>;
+}
+
+function rotuloTipo(tipo: string, t: (k: string) => string): string {
+  const chave = `contestacao.tipos.${tipo}`;
+  const traduzido = t(chave);
+  return traduzido === chave ? tipo : traduzido;
+}
+
+/** Container: resolve a empresa da sessão (mesmo padrão de MeusCredenciamentosConectada). */
+export function ContestacaoConectada() {
+  const { t } = useTranslation();
+  const fornecedorId = obterUsuario()?.empresaId;
+  if (!fornecedorId) return <p data-cy="sem-empresa" style={{ color: 'var(--cinza-500)' }}>{t('contestacao.semEmpresa')}</p>;
+  return <Contestacao fornecedorId={fornecedorId} />;
 }

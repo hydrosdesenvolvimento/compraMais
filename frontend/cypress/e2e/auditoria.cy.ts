@@ -20,4 +20,20 @@ describe('Auditoria — consulta e exportação', () => {
     cy.get('[data-cy=consultar]').click();
     cy.get('[data-cy=erro]').should('be.visible');
   });
+
+  it('exporta CSV via fetch (não navega para fora da SPA)', () => {
+    cy.intercept('GET', '/auditoria?*', { body: [] });
+    // A rota de exportação é protegida por RBAC: o download precisa ser um fetch com cabeçalhos,
+    // não uma navegação de página (que responderia 403). O intercept prova que a requisição ocorre.
+    cy.intercept('GET', '/auditoria/exportar?*', {
+      headers: { 'content-type': 'text/csv', 'content-disposition': 'attachment; filename="auditoria.csv"' },
+      body: 'id,usuario,evento,timestamp,ip,payload',
+    }).as('export');
+    cy.visit('/#/admin/auditoria');
+    cy.get('[data-cy=fornecedor]').type('CNPJ-9');
+    cy.get('[data-cy=consultar]').click();
+    cy.get('[data-cy=exportar-csv]').click();
+    cy.wait('@export').its('request.url').should('include', 'formato=csv').and('include', 'fornecedorId=CNPJ-9');
+    cy.location('hash').should('eq', '#/admin/auditoria'); // permaneceu na SPA
+  });
 });

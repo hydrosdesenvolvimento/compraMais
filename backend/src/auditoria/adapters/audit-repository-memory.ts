@@ -9,14 +9,15 @@ export class AuditRepositoryMemory implements AuditRepository {
     this.registros.push(record); // só inserção — nunca update/delete (AD-18)
   }
 
-  /** Consulta QBE (FR-001): AND, ausentes ignorados; editalId casa contra payload; ordenação determinística. */
+  /** Consulta QBE (FR-001): AND, ausentes ignorados; editalId/fornecedorId casam contra payload; ordenação determinística. */
   async query(f: AuditQuery, page?: AuditPage): Promise<AuditRecord[]> {
     const filtrados = this.registros.filter((r) =>
       (!f.usuario || r.usuario === f.usuario) &&
       (!f.evento || r.evento === f.evento) &&
       (!f.de || r.timestamp >= f.de) &&
       (!f.ate || r.timestamp <= f.ate) &&
-      (!f.editalId || editalDe(r) === f.editalId));
+      (!f.editalId || editalDe(r) === f.editalId) &&
+      (!f.fornecedorId || fornecedorDe(r) === f.fornecedorId));
 
     // Ordenação determinística (FR-004): timestamp, desempate por id.
     const ordem = page?.ordem ?? 'desc';
@@ -36,4 +37,10 @@ export class AuditRepositoryMemory implements AuditRepository {
 function editalDe(r: AuditRecord): string | undefined {
   const p = r.payload as { editalId?: string; aggregateId?: string };
   return p.editalId ?? p.aggregateId;
+}
+
+/** fornecedorId de um registro: campo dedicado no payload ou a empresa representada pelo ator (AD-30). */
+function fornecedorDe(r: AuditRecord): string | undefined {
+  const p = r.payload as { fornecedorId?: string; empresa?: string };
+  return p.fornecedorId ?? p.empresa;
 }

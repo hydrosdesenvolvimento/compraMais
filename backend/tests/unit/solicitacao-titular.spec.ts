@@ -13,6 +13,17 @@ describe('SolicitacaoTitular (Épico 7 / LGPD)', () => {
     const s = SolicitacaoTitular.solicitar({ id: 's2', titularId: 't1', tipo: 'correcao' });
     expect(() => s.recusar('', 'dpo1')).toThrow(MotivoRecusaObrigatorio);
   });
+
+  it('estado()/deEstado() faz round-trip do snapshot (AD-33 — durabilidade)', () => {
+    const s = SolicitacaoTitular.solicitar({ id: 's3', titularId: 't1', tipo: 'exclusao', detalhe: 'apagar cadastro', categoria: 'cadastral' });
+    s.recusar('retenção fiscal em curso', 'dpo1');
+    const rehidratada = SolicitacaoTitular.deEstado(s.estado());
+    expect(rehidratada.estado()).toEqual(s.estado());
+    expect(rehidratada.status).toBe('recusada');
+    expect(rehidratada.detalhe).toBe('apagar cadastro');
+    expect(rehidratada.categoria).toBe('cadastral');
+    expect(rehidratada.resultado).toBe('retenção fiscal em curso');
+  });
 });
 
 describe('PoliticaRetencao por categoria (FR-008)', () => {

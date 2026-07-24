@@ -10,11 +10,28 @@
       "credenciamentos": "My accreditations",
       "documentos": "Documents",
       "demandas": "Assigned demands",
+      "procuradores": "Attorneys",
       "painel": "Dashboard",
       "covalidacao": "Co-validation",
       "gestaoEditais": "Tender management",
       "contestacoes": "Disputes",
-      "auditoria": "Audit"
+      "auditoria": "Audit",
+      "catalogos": "Catalogs",
+      "usuarios": "Users",
+      "malote": "SEI Package",
+      "privacidade": "Privacy",
+      "lgpd": "LGPD Requests",
+      "fornecedores": "Suppliers",
+      "credenciamento": "Accreditation",
+      "analiseDocumental": "Document Review",
+      "distribuicao": "Distribution",
+      "cadastroReserva": "Reserve List",
+      "desistencias": "Withdrawals",
+      "secretarias": "Departments",
+      "setoresIndustriais": "Industrial Sectors",
+      "tiposArquivos": "File Types",
+      "perfis": "Screens by role",
+      "contestacao": "Disputes"
     },
     "shell": {
       "menu": "MENU",
@@ -30,7 +47,8 @@
       "myAccount": "My account",
       "logout": "Sign out",
       "footerFornecedor": "Version 2.0 · MVP FIEAC",
-      "footerAdmin": "Administrative panel · CPL / SMGA"
+      "footerAdmin": "Administrative panel · CPL / SMGA",
+      "userGeneric": "Guest"
     },
     "language": {
       "label": "Language",
@@ -41,6 +59,19 @@
       "highContrast": "High contrast",
       "increaseFont": "Increase font",
       "decreaseFont": "Decrease font"
+    },
+    "papel": {
+      "titular": "Account holder",
+      "procurador": "Attorney",
+      "administrador": "Administrator",
+      "cpl": "CPL Analyst",
+      "smga": "Department / Manager",
+      "auditor": "Auditor",
+      "dpo": "Data Protection Officer",
+      "leitura": "Read-only"
+    },
+    "toast": {
+      "fechar": "Close"
     }
   },
   "auth": {
@@ -70,6 +101,23 @@
       "qsa": "OWNERSHIP STRUCTURE (QSA)",
       "manualLink": "Federal Revenue Service unavailable? Fill in manually",
       "submit": "Create supplier account",
+      "submitting": "Creating account…",
+      "nomeFantasia": "TRADE NAME",
+      "nomeFantasiaPlaceholder": "Trade name (optional)",
+      "telefone": "PHONE",
+      "telefonePlaceholder": "(00) 00000-0000",
+      "email": "LOGIN E-MAIL",
+      "emailPlaceholder": "you@company.com",
+      "senha": "PASSWORD",
+      "senhaPlaceholder": "At least 8 characters",
+      "consent": "I authorize the processing of my data for accreditation purposes, in accordance with the LGPD.",
+      "errors": {
+        "cnpjInvalido": "Invalid CNPJ. Check the numbers you entered.",
+        "situacao": "CNPJ with a non-active registration status — registration not allowed.",
+        "cnpjDuplicado": "This CNPJ is already registered. Use account recovery.",
+        "emailDuplicado": "This e-mail is already in use. Sign in or use another e-mail.",
+        "generico": "Could not complete the registration. Please try again."
+      },
       "statusNote": "Your account will start with the <b>Applicant</b> status."
     },
     "login": {
@@ -88,9 +136,384 @@
       "submit": "Sign in",
       "submitting": "Signing in…",
       "error": "Invalid credentials."
+    },
+    "reset": {
+      "title": "Recover password",
+      "subtitle": "Enter your registered e-mail. If an account exists, we'll send a link to reset your password.",
+      "enviar": "Send recovery link",
+      "enviando": "Sending…",
+      "erro": "Could not send the link. Please try again.",
+      "voltarLogin": "Back to login",
+      "enviadoTitle": "Check your e-mail",
+      "enviadoInfo": "If the e-mail has an account, you'll receive a link to reset your password shortly.",
+      "voltar": "Back to login"
+    },
+    "redefinir": {
+      "title": "Set a new password",
+      "subtitle": "Choose a new password for your account.",
+      "novaSenha": "New password",
+      "novaSenhaPlaceholder": "At least 8 characters",
+      "confirmar": "Confirm new password",
+      "confirmarPlaceholder": "Repeat the new password",
+      "enviar": "Reset password",
+      "enviando": "Resetting…",
+      "erroToken": "Invalid or expired link. Please request a new password recovery.",
+      "erroFraca": "The password must be at least 8 characters long.",
+      "erroConfirma": "The passwords do not match.",
+      "erroGenerico": "Could not reset the password. Please try again.",
+      "irLogin": "Go to login",
+      "sucessoTitle": "Password reset",
+      "sucessoInfo": "Your password has been updated. You can now sign in with the new password."
     }
   },
   "admin": {
+    "credenciamentoEdital": {
+      "titulo": "Accreditation in Notice",
+      "subtitulo": "Membership filtered by CNAE (RN001) and default check (RN002)",
+      "seletorLabel": "Notice",
+      "cnaeExigido": "Required CNAE: {{cnae}}",
+      "elegiveisTitulo": "Eligible suppliers",
+      "elegiveisFiltro": "(CNAE filter applied)",
+      "capacidade": "Cap. {{cap}} units/month",
+      "semCapacidade": "Capacity not declared",
+      "pills": {
+        "pgm": "PGM: {{estado}}",
+        "sicaf": "SICAF: {{estado}}",
+        "cnaeCompativel": "CNAE compatible"
+      },
+      "regularidade": {
+        "regular": "Regular",
+        "irregular": "Irregular"
+      },
+      "status": {
+        "credenciado": "Accredited",
+        "requerente": "Applicant",
+        "elegivel": "Eligible"
+      },
+      "situacaoEdital": {
+        "rascunho": "Draft",
+        "publicado": "Open",
+        "encerrado": "Closed"
+      },
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load eligible suppliers.",
+      "semEditais": "No open notices at the moment.",
+      "vazioTitulo": "No eligible suppliers",
+      "vazioDica": "No company with a compatible CNAE for this notice."
+    },
+    "distribuicao": {
+      "eyebrow": "Operations · Distribution",
+      "titulo": "Smart Distribution",
+      "subtitulo": "Equitable allocation respecting the declared capacity (RN005)",
+      "seletorLabel": "Notice",
+      "carregando": "Loading distribution…",
+      "erroCarregar": "Could not load the distribution.",
+      "semEditais": "No published notice available for distribution.",
+      "chip": {
+        "emDistribuicao": "In Distribution",
+        "homologada": "Approved"
+      },
+      "stats": {
+        "total": "Total demand",
+        "distribuido": "Distributed",
+        "habilitados": "Qualified"
+      },
+      "resultadoTitulo": "Distribution result",
+      "col": {
+        "fornecedor": "Supplier",
+        "capacidade": "Capacity",
+        "cota": "Assigned quota",
+        "percentual": "% of demand"
+      },
+      "capacidade": "{{cap}} units/mo",
+      "vazioTitulo": "No qualified suppliers",
+      "vazioDica": "There are no accepted credentials yet to allocate this notice's demand.",
+      "deficitAviso": "Supply shortfall: the declared capacity ({{distribuido}}) does not cover the demand ({{total}}). Uncovered balance: {{deficit}}.",
+      "homologar": "Approve distribution",
+      "homologando": "Approving…",
+      "homologadaEm": "Distribution approved · version {{versao}}",
+      "erroHomologar": "Could not approve the distribution."
+    },
+    "reserva": {
+      "eyebrow": "Operations · Reserve List",
+      "titulo": "Reserve List",
+      "subtitulo": "Managing latecomers without changing active contracts (RN004)",
+      "avisoTitulo": "Reserve queue.",
+      "avisoTexto": "Suppliers approved after the initial distribution are placed here without changing the quotas already distributed. They will be called in chronological order if a holder fails to deliver.",
+      "carregando": "Loading reserve queue…",
+      "erroCarregar": "Could not load the reserve list.",
+      "vazioTitulo": "No suppliers on reserve",
+      "vazioDica": "Suppliers approved after the initial distribution will appear here, in chronological order.",
+      "capacidade": "Cap. {{cap}} units/mo",
+      "posicaoLabel": "Position {{posicao}} in the reserve queue",
+      "chip": "Reserve"
+    },
+    "desistencias": {
+      "eyebrow": "Operations · Withdrawals",
+      "titulo": "Withdrawals",
+      "subtitulo": "Record of suppliers who declined assigned quotas",
+      "carregando": "Loading withdrawals…",
+      "erroCarregar": "Could not load withdrawals.",
+      "vazioTitulo": "No withdrawals recorded",
+      "vazioDica": "When a holder supplier declines a quota, the record appears here and the next in the reserve queue is triggered automatically.",
+      "cota": "Quota {{cota}} units/mo",
+      "chip": "Withdrawal"
+    },
+    "setoresIndustriais": {
+      "titulo": "Industrial Sectors (CNAE)",
+      "subtitulo": "Accepted economic activity codes",
+      "novoCadastro": "New sector",
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load the sectors. Check your permissions.",
+      "vazioTitulo": "No sectors registered",
+      "vazioDica": "Click \"New sector\" to add the first one.",
+      "semCategoria": "—",
+      "fechar": "Close",
+      "campos": {
+        "codigo": "Code",
+        "descricao": "Description",
+        "categoria": "Category",
+        "status": "Status",
+        "acoes": "Actions"
+      },
+      "status": {
+        "ativo": "Active",
+        "inativo": "Inactive"
+      },
+      "acao": {
+        "editar": "Edit sector",
+        "inativar": "Deactivate sector",
+        "reativar": "Reactivate sector"
+      },
+      "modal": {
+        "tituloCriar": "New industrial sector",
+        "tituloEditar": "Edit industrial sector",
+        "subtitulo": "Fill in the fields and save",
+        "codigoPlaceholder": "0000-0/00",
+        "descricaoPlaceholder": "Activity description",
+        "categoriaLabel": "Category",
+        "categoriaPlaceholder": "Textile industry, Food…",
+        "avisoHistorico": "Records are never permanently deleted — deletion converts to Inactive, preserving the notices that already required the code.",
+        "cancelar": "Cancel",
+        "salvar": "Save",
+        "erroSalvar": "Could not save. Check the CNAE code (7 digits) and the description."
+      }
+    },
+    "tiposArquivos": {
+      "titulo": "File Types",
+      "subtitulo": "Documents required for registration",
+      "novoCadastro": "New type",
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load file types. Check your permissions.",
+      "vazioTitulo": "No type registered",
+      "vazioDica": "Click \"New type\" to add the first one.",
+      "fechar": "Close",
+      "campos": {
+        "documento": "Document",
+        "formato": "Format",
+        "categoria": "Category",
+        "obrigatorio": "Required",
+        "validade": "Validity",
+        "status": "Status",
+        "acoes": "Actions"
+      },
+      "obrigatorioSim": "Required",
+      "obrigatorioNao": "Optional",
+      "status": {
+        "ativo": "Active",
+        "inativo": "Inactive"
+      },
+      "categorias": {
+        "cadastral": "Registration",
+        "fiscal": "Fiscal",
+        "contratual": "Contractual"
+      },
+      "validade": {
+        "sem": "No validity",
+        "exige": "Requires validity",
+        "exercicio": "Fiscal year",
+        "dias": "{{dias}} days"
+      },
+      "acao": {
+        "editar": "Edit type",
+        "inativar": "Deactivate type",
+        "reativar": "Reactivate type"
+      },
+      "modal": {
+        "tituloCriar": "New file type",
+        "tituloEditar": "Edit file type",
+        "subtitulo": "Fill in the fields and save",
+        "nomePlaceholder": "e.g. FGTS Certificate",
+        "formatoLabel": "Accepted format",
+        "formatoPlaceholder": "PDF",
+        "categoriaLabel": "Category",
+        "categoriaPlaceholder": "Select the category",
+        "validadeLabel": "Validity",
+        "validadeModo": {
+          "sem": "No validity",
+          "dias": "Term in days",
+          "exercicio": "Fiscal year (e.g. Balance sheet)"
+        },
+        "diasLabel": "Term (days)",
+        "diasPlaceholder": "90",
+        "obrigatorioLabel": "Required for registration",
+        "obrigatorioAjuda": "Highlights this document as required in Step 2 of registration (does not block submission).",
+        "avisoHistorico": "Records are never permanently deleted — deletion converts to Inactive, preserving historical links (notices and uploads).",
+        "cancelar": "Cancel",
+        "salvar": "Save",
+        "erroSalvar": "Could not save. Check the document, format and category."
+      }
+    },
+    "perfis": {
+      "titulo": "Screen access by role",
+      "subtitulo": "Choose which Admin Panel screens each role can see. The Administrator's own access is editable too, but they never lose this screen.",
+      "colPerfil": "Role",
+      "superusuario": "sees all",
+      "customizado": "customized",
+      "salvar": "Save",
+      "salvo": "Visibility updated.",
+      "erro": "Could not save. Check your permissions."
+    },
+    "emConstrucao": {
+      "subtitulo": "Screen under construction.",
+      "corpo": "This feature is not implemented yet. The item already appears in the menu and in Screen access by role."
+    },
+    "fornecedores": {
+      "titulo": "Supplier Management",
+      "subtitulo": "Local companies registered on the platform.",
+      "buscaPlaceholder": "Search by tax ID or legal name…",
+      "buscaAriaLabel": "Search suppliers",
+      "novoFornecedor": "New supplier",
+      "novoFornecedorIndisponivel": "Registration is done by the supplier itself (self-registration).",
+      "filtros": "Filters",
+      "ordenar": "Sort",
+      "exportar": "Export",
+      "ordenarPor": "Sort by",
+      "ordenacaoPadrao": "Most recent",
+      "direcao": {
+        "asc": "Ascending",
+        "desc": "Descending"
+      },
+      "capProdutivaIndisponivel": "Capacity is declared per notice (not a supplier attribute).",
+      "filtroStatusTodos": "All statuses",
+      "filtroSituacaoTodas": "All registration states",
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load suppliers. Check your permissions.",
+      "vazioTitulo": "No suppliers found",
+      "vazioDica": "Adjust the search or filters to see other results.",
+      "verDetalhes": "View details",
+      "fechar": "Close",
+      "detalheTitulo": "Supplier details",
+      "contatoTitulo": "Contact details (editable)",
+      "salvarContato": "Save contact",
+      "contatoSalvo": "Contact updated.",
+      "erroSalvarContato": "Could not save. Check the fields.",
+      "sincronizar": "Sync with Receita",
+      "sincronizando": "Syncing…",
+      "nuncaSincronizado": "Never synced",
+      "paginacaoInfo": "Showing {{de}}–{{ate}} of {{total}} suppliers",
+      "irParaPagina": "Go to page {{n}}",
+      "campos": {
+        "cnpj": "Tax ID (CNPJ)",
+        "razaoSocial": "Legal name",
+        "nomeFantasia": "Trade name",
+        "porte": "Company size",
+        "cnaePrincipal": "Primary CNAE",
+        "capProdutiva": "Prod. capacity",
+        "cnaes": "CNAEs",
+        "situacao": "Registration status",
+        "status": "Status",
+        "telefone": "Phone",
+        "sincronizadoEm": "Last sync",
+        "acoes": "Actions"
+      },
+      "acao": {
+        "ver": "View details",
+        "editar": "Edit contact",
+        "bloquearIndisponivel": "Debt-based blocking is handled in the accreditation module (RN002)."
+      },
+      "modal": {
+        "tituloCriar": "New supplier",
+        "subtituloCriar": "Fill in the fields and save",
+        "tituloVer": "Supplier details",
+        "tituloEditar": "Edit supplier",
+        "subtituloVerEditar": "Official data is read-only; edit the contact details.",
+        "razaoPlaceholder": "Company legal name",
+        "avisoHistorico": "Records are never permanently deleted — deletion converts to Inactive or Blocked, preserving history.",
+        "cancelar": "Cancel",
+        "salvar": "Save",
+        "editar": "Edit",
+        "erroCriar": "Could not register. Check the tax ID and required fields."
+      },
+      "endereco": {
+        "logradouro": "Street",
+        "numero": "Number",
+        "bairro": "District",
+        "cidade": "City",
+        "uf": "State",
+        "cep": "ZIP code"
+      },
+      "status": {
+        "requerente": "Applicant",
+        "pendente_analise": "Pending review",
+        "credenciado": "Accredited",
+        "apto": "Eligible",
+        "em_correcao": "Under correction"
+      },
+      "situacao": {
+        "ativa": "Active",
+        "baixada": "Closed",
+        "inapta": "Unfit",
+        "suspensa": "Suspended"
+      },
+      "sincResultado": {
+        "sucesso": "Data updated successfully.",
+        "revisao": "Data updated — status requires CPL review.",
+        "erro": "Receita unavailable — current data preserved."
+      }
+    },
+    "secretarias": {
+      "titulo": "Departments",
+      "subtitulo": "Management of requesting units",
+      "novoCadastro": "New record",
+      "carregando": "Loading…",
+      "erroCarregar": "Could not load the departments. Check your permissions.",
+      "vazioTitulo": "No department registered",
+      "vazioDica": "Click \"New record\" to add the first one.",
+      "semContato": "—",
+      "fechar": "Close",
+      "campos": {
+        "sigla": "Acronym",
+        "nome": "Name",
+        "responsavel": "Owner",
+        "contato": "Contact",
+        "status": "Status",
+        "acoes": "Actions"
+      },
+      "status": {
+        "ativa": "Active",
+        "inativa": "Inactive"
+      },
+      "acao": {
+        "editar": "Edit department",
+        "inativar": "Deactivate department",
+        "reativar": "Reactivate department"
+      },
+      "modal": {
+        "tituloCriar": "New department",
+        "tituloEditar": "Edit department",
+        "subtitulo": "Fill in the fields and save",
+        "siglaPlaceholder": "SEME",
+        "nomePlaceholder": "Municipal Department of…",
+        "responsavelPlaceholder": "Owner name",
+        "contatoLabel": "Contact e-mail",
+        "contatoPlaceholder": "sector@riobranco.ac.gov.br",
+        "avisoHistorico": "Records are never permanently deleted — deletion converts them to Inactive or Blocked, preserving history.",
+        "cancelar": "Cancel",
+        "salvar": "Save",
+        "erroSalvar": "Could not save. Check the required fields and the e-mail."
+      }
+    },
     "dashboard": {
       "carregando": "Loading…",
       "titulo": "Administrative panel",
@@ -111,20 +534,72 @@
       "vazio": "No documents for the current filters.",
       "aprovar": "Approve",
       "motivoPlaceholder": "Reason (required to reject)",
-      "reprovar": "Reject"
+      "reprovar": "Reject",
+      "enviadoHa": "Submitted {{tempo}}"
     },
     "gerirEditais": {
-      "titulo": "Tender management",
-      "subtitulo": "Create, publish and close individualized tenders (1 department per tender).",
-      "objetoPlaceholder": "Demand object",
-      "cnaePlaceholder": "Target CNAE(s) (comma-separated)",
-      "criar": "Create tender (draft)",
-      "filtrarSituacao": "Filter by status",
-      "situacaoRascunho": "Draft",
-      "situacaoPublicado": "Published",
-      "situacaoEncerrado": "Closed",
+      "eyebrow": "Operations · Notices",
+      "titulo": "Accreditation Notices",
+      "subtitulo": "1 notice = 1 department demand (RN007)",
+      "novoEdital": "New notice",
+      "colEdital": "Notice",
+      "colObjeto": "Object",
+      "colSecretaria": "Department",
+      "colPrazo": "Deadline",
+      "colStatus": "Status",
+      "colAcoes": "Actions",
+      "cnaePrefixo": "CNAE {{cnae}}",
+      "unidades": "{{n}} units",
+      "semPrazo": "—",
+      "status": {
+        "rascunho": "Draft",
+        "publicado": "Published",
+        "encerrado": "Closed"
+      },
+      "acaoVer": "View",
+      "carregando": "Loading notices…",
+      "erroCarregar": "Could not load notices.",
+      "vazioTitulo": "No notices registered",
+      "vazioDica": "Create the first notice to start operations.",
+      "vazioFiltroTitulo": "No notices found",
+      "vazioFiltroDica": "Adjust the search or filters to see more results.",
+      "buscaPlaceholder": "Search by number or subject…",
+      "buscaAriaLabel": "Search notices by number or subject",
+      "filtros": "Filters",
+      "filtroSituacaoTodas": "All statuses",
+      "filtroSecretariaTodas": "All departments",
+      "filtroCnaeLabel": "CNAE",
+      "filtroCnaePlaceholder": "e.g., 1091101",
+      "limparFiltros": "Clear filters",
+      "paginacaoInfo": "Showing {{de}}–{{ate}} of {{total}}",
+      "irParaPagina": "Go to page {{n}}",
       "publicar": "Publish",
-      "encerrar": "Close"
+      "encerrar": "Close",
+      "modalTitulo": "Notice details",
+      "campoNumero": "Notice",
+      "campoObjeto": "Object",
+      "campoSecretaria": "Department",
+      "campoCnaes": "Target CNAE(s)",
+      "campoQuantitativos": "Quantity",
+      "campoPrazo": "Validity deadline",
+      "campoStatus": "Status",
+      "fechar": "Close",
+      "novoTitulo": "New notice",
+      "novoSub": "Fill in the fields and save",
+      "numeroLabel": "Notice number",
+      "numeroAuto": "Generated automatically on save",
+      "objetoLabel": "Object",
+      "objetoPlaceholder": "Demand description",
+      "secretariaLabel": "Requesting department",
+      "secretariaPlaceholder": "Select the department",
+      "cnaeLabel": "Required CNAE",
+      "cnaePlaceholder": "e.g. 1091101, 4721102",
+      "cnaeAjuda": "Separate multiple CNAEs with commas.",
+      "quantitativosLabel": "Quantity",
+      "prazoLabel": "Validity deadline",
+      "softDeleteNota": "Records are never permanently deleted — deletion converts them to Inactive or Blocked, preserving history.",
+      "salvar": "Save",
+      "cancelar": "Cancel"
     },
     "contestacoes": {
       "titulo": "CNAE challenges",
@@ -141,6 +616,7 @@
       "usuarioPlaceholder": "User/actor",
       "eventoPlaceholder": "Action/event",
       "editalPlaceholder": "Tender",
+      "fornecedorPlaceholder": "Supplier (Tax ID)",
       "consultar": "Search",
       "exportarCsv": "Export CSV",
       "exportarJson": "Export JSON",
@@ -149,14 +625,245 @@
       "erroConsulta": "Query error.",
       "colQuando": "When",
       "colAtor": "Actor",
+      "colPapel": "Role",
       "colAcao": "Action",
       "colIp": "IP",
       "vazio": "No records for the current filters."
+    },
+    "catalogos": {
+      "titulo": "Base catalogs",
+      "subtitulo": "Maintain departments, sectors (CNAE) and document types. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
+      "tabs": {
+        "secretarias": "Departments",
+        "setores": "Sectors (CNAE)",
+        "tiposDoc": "Document types"
+      },
+      "campos": {
+        "nome": "Name",
+        "sigla": "Acronym",
+        "responsavel": "Responsible",
+        "codigo": "CNAE code (7 digits)",
+        "descricao": "Description",
+        "nomeTipo": "Type name",
+        "formato": "Accepted format (e.g. pdf)",
+        "categoria": "Category",
+        "exigeValidade": "Requires expiry date",
+        "exigeExercicio": "Requires fiscal year (e.g. Balance sheet)"
+      },
+      "categorias": {
+        "cadastral": "Registration",
+        "fiscal": "Fiscal",
+        "contratual": "Contractual"
+      },
+      "criar": "Add item",
+      "erroCriar": "Could not save. Check whether the key already exists or the fields are valid.",
+      "mostrarInativos": "Show inactive",
+      "situacaoInativo": "inactive",
+      "inativar": "Deactivate",
+      "reativar": "Reactivate",
+      "vazio": "No items registered yet."
+    },
+    "usuarios": {
+      "breadcrumb": "Administration · Users",
+      "titulo": "Users",
+      "subtitulo": "System access management",
+      "novoCadastro": "New user",
+      "carregando": "Loading users…",
+      "erroCarregar": "Could not load users.",
+      "vazioTitulo": "No users registered yet",
+      "vazioDica": "Use “New user” to register the first staff member.",
+      "semSecretaria": "—",
+      "semLogin": "—",
+      "selecioneCargo": "Select a role",
+      "selecioneSecretaria": "Select a department",
+      "fechar": "Close",
+      "resetarSenha": "Reset password",
+      "novaSenha": "New password (min. 8)",
+      "confirmarReset": "Confirm",
+      "resetOk": "Password reset.",
+      "erroReset": "Could not reset. Check the password (min. 8).",
+      "campos": {
+        "nome": "Name",
+        "email": "E-mail",
+        "cargo": "Position",
+        "secretaria": "Department",
+        "perfil": "Profile",
+        "login": "Login",
+        "status": "Status",
+        "acoes": "Actions",
+        "senha": "Initial password (min. 8 characters)"
+      },
+      "cargos": {
+        "administrador": "Administrator",
+        "analistaCpl": "CPL Analyst",
+        "coordenadorCpl": "CPL Coordinator",
+        "secretario": "Secretary",
+        "gestor": "Manager",
+        "auditor": "Auditor",
+        "dpo": "DPO / Data Officer"
+      },
+      "perfis": {
+        "administrador": "Administrator",
+        "cpl": "Analyst",
+        "smga": "Manager",
+        "auditor": "Auditor",
+        "dpo": "DPO",
+        "leitura": "Read-only"
+      },
+      "status": {
+        "ativo": "Active",
+        "inativo": "Inactive"
+      },
+      "acao": {
+        "editar": "Edit",
+        "inativar": "Deactivate",
+        "reativar": "Reactivate"
+      },
+      "modal": {
+        "tituloCriar": "New user",
+        "tituloEditar": "Edit user",
+        "subtitulo": "The position defines the access profile (RBAC). Deletion is logical: a deactivated user cannot sign in, but their action history is preserved.",
+        "nomePlaceholder": "Staff member full name",
+        "emailPlaceholder": "email@cityhall.gov",
+        "loginPlaceholder": "e.g. silas.cpl",
+        "senhaPlaceholder": "Minimum of 8 characters",
+        "salvar": "Save",
+        "cancelar": "Cancel",
+        "erroSalvar": "Could not save. Check the data (e-mail/login already in use, position and password)."
+      }
+    },
+    "malote": {
+      "titulo": "SEI Package",
+      "subtitulo": "Consolidate a supplier's approved documents into an ordered dossier (Company ID → Personal → Attachments → Certificates) optimized for SEI upload. Generation is asynchronous and durable; an indivisible piece above the limit is flagged for manual handling.",
+      "novoMalote": "Generate package",
+      "carregando": "Loading packages…",
+      "erroCarregar": "Could not load the packages.",
+      "vazioTitulo": "No packages yet",
+      "vazioDica": "Generate a package from a supplier's approved documents.",
+      "campos": {
+        "fornecedor": "Supplier",
+        "edital": "Notice",
+        "status": "Status",
+        "fragmentos": "Fragments",
+        "acoes": "Actions"
+      },
+      "modal": {
+        "subtitulo": "The legal order (Company ID → Personal → Attachments → Certificates) and fragmentation by the SEI limit are applied automatically on generation.",
+        "fechar": "Close",
+        "cancelar": "Cancel",
+        "removerPeca": "Remove piece"
+      },
+      "gerar": {
+        "titulo": "Generate new package",
+        "fornecedorId": "Supplier ID",
+        "editalId": "Notice ID",
+        "pecas": "Pieces (approved documents)",
+        "ref": "Reference",
+        "tamanho": "Size (bytes)",
+        "adicionarPeca": "Add piece",
+        "semPecas": "No pieces added.",
+        "enviar": "Generate package",
+        "enviado": "Generation requested — processing in the background.",
+        "erro": "Could not request generation. Check the fields and your access role."
+      },
+      "tipos": {
+        "cnpj": "Company ID",
+        "pessoal": "Personal document",
+        "anexo": "Notice attachment",
+        "certidao": "Certificate"
+      },
+      "filtros": {
+        "titulo": "Filters",
+        "fornecedorId": "Supplier",
+        "editalId": "Notice",
+        "status": "Status",
+        "todos": "All",
+        "aplicar": "Filter"
+      },
+      "status": {
+        "pendente": "Pending",
+        "gerado": "Generated",
+        "exportado": "Exported"
+      },
+      "lista": {
+        "fragmentos": "{{n}} fragment(s)",
+        "acimaLimite": "Piece above the limit — handle manually",
+        "exportar": "Export",
+        "exportado": "Exported.",
+        "jaExportado": "Already exported (idempotent).",
+        "atualizar": "Refresh",
+        "vazio": "No packages found."
+      }
+    },
+    "analiseDocumental": {
+      "migalha": "Operations · Document Review",
+      "titulo": "Document Review",
+      "tituloComplemento": "(co-validation)",
+      "subtitulo": "Approval or rejection with mandatory justification (RN003)",
+      "carregando": "Loading queue…",
+      "erroCarregar": "Could not load the review queue.",
+      "vazioTitulo": "No documents in the queue",
+      "vazioDica": "All reviews have been completed.",
+      "pendente": "Pending",
+      "enviadoEm": "sent on {{data}}",
+      "visualizar": "View document",
+      "reprovar": "Reject",
+      "aprovar": "Approve",
+      "toastAprovado": "Document from {{empresa}} approved.",
+      "toastReprovado": "Document from {{empresa}} rejected.",
+      "toastErro": "Could not record the decision.",
+      "modal": {
+        "titulo": "Reject document",
+        "label": "Rejection justification",
+        "placeholder": "Describe the reason (e.g., unreadable image, expired document, divergent data…). The supplier will see this justification.",
+        "aviso": "The justification is mandatory and is recorded in the audit trail (RN003).",
+        "cancelar": "Cancel",
+        "confirmar": "Confirm rejection"
+      }
     }
   },
+  "erros": {
+    "status": "Unexpected error (status {{status}}).",
+    "rede": "Connection failed. Check your internet and try again.",
+    "RBAC": "You don't have permission for this action.",
+    "NAO_AUTENTICADO": "Session expired. Please sign in again.",
+    "FornecedorNaoEncontrado": "Supplier not found.",
+    "EditalNaoEncontrado": "Notice not found.",
+    "DocumentoNaoEncontrado": "Document not found.",
+    "CredenciamentoNaoEncontrado": "Accreditation not found.",
+    "CredenciamentoDuplicado": "You already have an active accreditation for this notice.",
+    "EditalNaoAberto": "This notice is not open for accreditation.",
+    "EditalIncompativel": "Your company is not eligible for this notice (incompatible CNAE).",
+    "CapacidadeInvalida": "Enter a valid capacity: a whole number greater than zero.",
+    "TermoIncompleto": "The acceptance term could not be recorded. Please try again.",
+    "TransicaoCredenciamentoInvalida": "This action is not allowed in the accreditation's current state.",
+    "CredenciamentoJaDistribuido": "This accreditation has already been distributed and cannot be canceled.",
+    "ContestacaoNaoEncontrada": "Challenge not found.",
+    "MaloteNaoEncontrado": "Bundle not found.",
+    "SolicitacaoNaoEncontrada": "Request not found.",
+    "UsuarioNaoEncontrado": "User not found.",
+    "ProcuradorNaoEncontrado": "Attorney not found.",
+    "ItemCatalogoNaoEncontrado": "Catalog item not found.",
+    "TitularNaoEncontrado": "Data subject not found.",
+    "SenhaAtualIncorreta": "Current password is incorrect.",
+    "SenhaFraca": "The new password doesn't meet the security requirements.",
+    "CredenciaisInvalidas": "Invalid email or password.",
+    "EmailJaCadastrado": "This email is already registered.",
+    "CnpjJaCadastrado": "This company (CNPJ) is already registered.",
+    "TokenResetInvalido": "Reset link is invalid or expired.",
+    "ApenasTitularConvida": "Only the account holder can invite attorneys.",
+    "ApenasTitularGere": "Only the account holder can manage attorneys.",
+    "LGPDTitular": "Only the data subject can exercise this right.",
+    "DescarteRetido": "Disposal blocked: the data is still under legal retention.",
+    "JustificativaObrigatoria": "Please provide a justification.",
+    "MotivoRecusaObrigatorio": "Please provide a reason for the rejection.",
+    "CampoNaoEditavel": "This field can't be edited.",
+    "TransicaoInvalida": "This operation isn't allowed in the current state."
+  },
   "contestacao": {
-    "titulo": "My Accreditations",
-    "subtitulo": "Track your accreditations across public notices and resume any that are still in draft.",
+    "semEmpresa": "No company linked to your account.",
+    "titulo": "Disputes and Regularizations",
+    "subtitulo": "Resolve the issues blocking your accreditation and follow the reviews in progress.",
     "carregando": "Loading…",
     "filtros": "Filters",
     "busca": {
@@ -172,15 +879,33 @@
     "status": {
       "rascunho": "draft"
     },
+    "tipos": {
+      "documento": "Rejected document",
+      "bloqueio": "Tax pending issue",
+      "contestacao-cnae": "CNAE challenge",
+      "lgpd": "Data request (LGPD)"
+    },
+    "acao": {
+      "reenviar": "Resubmit document",
+      "regularizar": "Settle and re-check",
+      "processando": "Processing…",
+      "aguardando": "Under review",
+      "sucesso": "Request submitted.",
+      "erro": "Could not complete. Please try again."
+    },
     "contagem_one": "{{count}} accreditation",
     "contagem_other": "{{count}} accreditations"
   },
   "credenciamento": {
     "voltarVitrine": "Back to showcase",
+    "noEdital": "Application to notice",
+    "retomado": "We picked your application up where you left off.",
+    "carregando": "Loading…",
+    "erroGenerico": "This step could not be completed. Please try again.",
     "passos": {
       "capacidade": "Capacity",
       "documentos": "Documents",
-      "provaVida": "Liveness check",
+      "termo": "Terms of Acceptance",
       "concluido": "Completed"
     },
     "acoes": {
@@ -188,7 +913,7 @@
       "enviar": "Submit application",
       "voltar": "Back",
       "cancelar": "Cancel",
-      "pular": "Skip this step"
+      "enviando": "Submitting…"
     },
     "capacidade": {
       "passo": "STEP 1",
@@ -207,42 +932,96 @@
       "titulo": "Required documents",
       "descricao": "Valid documents submitted in previous notices are <b>reused automatically</b>. You only need to attach what is missing.",
       "importado": "Imported from previous notice",
+      "emAnalise": "Under review",
       "necessarioEnviar": "Upload required",
+      "obrigatorio": "Required",
+      "reprovadoCurto": "Rejected — resend",
+      "vencidoCurto": "Expired — update",
+      "listaVazia": "No document types configured in the catalog.",
+      "semPendentes": "All required documents are already in your repository and are reused automatically.",
       "enviarPendentes": "Upload pending documents",
-      "arraste": "Drag the PDF here (upload will be integrated later)",
-      "limite": "PDF up to 10 MB · will be compressed for SEI"
+      "arraste": "Select a file (PDF, JPG or PNG)",
+      "limite": "PDF, JPG or PNG · up to 10 MB",
+      "validadeLabel": "Document validity",
+      "validadeObrigatoria": "Please provide this document's validity date.",
+      "erroFormato": "Invalid format. Accepted: PDF, JPG or PNG.",
+      "erroTamanho": "File larger than {{mb}} MB.",
+      "erroEnviar": "The document could not be uploaded. Please try again.",
+      "enviarArquivo": "Upload document",
+      "enviando": "Uploading…",
+      "enviadoSucesso": "{{tipo}} submitted for review."
     },
-    "provaVida": {
-      "passo": "STEP 3 · OPTIONAL",
-      "titulo": "Facial authentication of the representative",
-      "descricao": "Liveness check to validate the signature, matching the face against the identity document. This step is optional.",
-      "verificando": "Verifying…",
-      "validada": "Liveness verified",
-      "realizar": "Run liveness check"
+    "termo": {
+      "passo": "STEP 3",
+      "titulo": "Terms of Acceptance",
+      "descricao": "By finishing, you sign the <b>Terms of Acceptance</b> of the application. The acceptance is recorded in the audit trail with purpose, version and date.",
+      "versaoLabel": "Terms version",
+      "finalidadeLabel": "Purpose",
+      "finalidade": "Application to a notice",
+      "resumo": "I declare that the information and documents submitted are true and I agree to the notice's participation conditions, under Complementary Law 123 and the Compra Mais program rules.",
+      "checkbox": "I have read and accept the Terms of Acceptance of the application."
     },
     "enviado": {
       "titulo": "Application submitted!",
-      "descricao": "Your proposal for <b>{{edital}}</b> has been submitted to the Bidding Committee.",
+      "descricao": "Your application has been submitted to the Bidding Committee.",
       "status": "Status: Pending Review",
       "baixarPdf": "Download PDF",
+      "baixarPdfProcessando": "Generating…",
+      "baixarPdfErro": "Could not generate the receipt. Please try again.",
       "voltarPainel": "Back to dashboard"
     }
   },
   "documentos": {
+    "semEmpresa": "No company linked to your account. Complete your registration to submit documents.",
     "tituloPagina": "Document Management",
     "subtituloPagina": "Your company's central repository. Automatically reused in new tenders.",
     "enviarNovo": "Upload new document",
     "formatosAceitos": "Accepted formats: PDF, JPG or PNG.",
-    "alertaExpirados_one": "<b>{{count}} expired document.</b> Update the documents below to keep participating in tenders.",
-    "alertaExpirados_other": "<b>{{count}} expired documents.</b> Update the documents below to keep participating in tenders.",
+    "alertaPendencias_one": "<b>{{count}} document needs attention.</b> Resolve the documents below to keep participating in tenders.",
+    "alertaPendencias_other": "<b>{{count}} documents need attention.</b> Resolve the documents below to keep participating in tenders.",
     "colunaDocumento": "DOCUMENT",
+    "colunaValidade": "VALIDITY",
     "colunaStatus": "STATUS",
     "colunaAcoes": "ACTIONS",
-    "statusVigente": "Valid",
-    "statusExpirado": "Expired",
+    "statusAprovado": "Approved",
+    "statusVenceEm_one": "Expires in {{count}} day",
+    "statusVenceEm_other": "Expires in {{count}} days",
+    "statusReprovado": "Rejected",
+    "statusVencido": "Expired",
+    "statusEmAnalise": "Under review",
+    "reprovadoPelaCpl": "Rejected by the CPL:",
+    "motivoIndisponivel": "Reason not provided.",
+    "reenviarCorrigido": "Resend Corrected Document",
+    "reenvioSucesso": "Document resent. The CPL will review it again.",
+    "visualizarDocumento": "View {{tipo}}",
     "baixarDocumento": "Download {{tipo}}",
-    "atualizarDocumento": "Update document",
-    "reenviar": "Resend"
+    "listaVazia": "No documents sent yet. Use the button above to send the first one.",
+    "uploadSucesso": "Document sent. The CPL will review it.",
+    "erroBaixar": "Could not download the document. Please try again.",
+    "modalUpload": {
+      "titulo": "Send document",
+      "subtitulo": "Choose the type, the file and the validity (if any).",
+      "campoTipo": "Document type",
+      "selecioneTipo": "Select the type…",
+      "campoArquivo": "File",
+      "arquivoAjuda": "PDF, JPG or PNG — up to {{mb}} MB.",
+      "campoValidade": "Validity (optional)",
+      "validadeAjuda": "Leave blank for documents without an expiry date.",
+      "enviar": "Send",
+      "cancelar": "Cancel",
+      "erroFormato": "Unsupported format. Send PDF, JPG or PNG.",
+      "erroTamanho": "File exceeds the {{mb}} MB limit.",
+      "erroTipoObrigatorio": "Select the document type.",
+      "erroArquivoObrigatorio": "Select a file to send.",
+      "erroEnviar": "Could not send the document. Please try again."
+    },
+    "preview": {
+      "subtitulo": "Preview of the submitted document.",
+      "carregando": "Loading document…",
+      "erro": "Could not load the document.",
+      "fechar": "Close",
+      "baixar": "Download"
+    }
   },
   "transparencia": {
     "carregando": "Loading…",
@@ -259,14 +1038,29 @@
       "titulo": "Bids Showcase",
       "subtitulo": "Only bids compatible with your company's CNAE codes. 1 bid = 1 demand.",
       "buscaAriaLabel": "Search bids",
-      "buscaPlaceholder": "Search bids by number and name…",
-      "filtros": "Filters",
+      "buscaPlaceholder": "Search by object or department…",
       "carregando": "Loading…",
       "vazioTitulo": "No bids compatible with your line of business at the moment.",
       "vazioDica": "We'll notify you when a compatible bid becomes available.",
-      "vazioBuscaTitulo": "No bids found for this search.",
-      "vazioBuscaDica": "Adjust your search terms.",
-      "iniciar": "Start"
+      "vazioBuscaTitulo": "No notices found.",
+      "vazioBuscaDica": "Adjust the search or the department filter.",
+      "iniciar": "Start",
+      "colObjeto": "Notice",
+      "colSecretaria": "Department",
+      "colPrazo": "Deadline",
+      "colQuantitativos": "Quantities",
+      "filtroSecretariaAriaLabel": "Filter by department",
+      "todasSecretarias": "All departments",
+      "exportarCsv": "CSV",
+      "exportarPdf": "PDF",
+      "bannerCnae": "Filtering by <1>CNAE {{cnae}}</1>. Notices from other segments are not shown here.",
+      "prazoDias_one": "{{count}} day",
+      "prazoDias_other": "{{count}} days",
+      "prazoHoje": "Closes today",
+      "prazoEncerrado": "Deadline passed",
+      "semPrazo": "No deadline set",
+      "paginacaoInfo": "Showing {{de}}–{{ate}} of {{total}} notices",
+      "irParaPagina": "Go to page {{n}}"
     },
     "contestarCnae": {
       "titulo": "Contest CNAE classification",
@@ -278,38 +1072,61 @@
     }
   },
   "inicio": {
+    "estado": {
+      "carregando": "Loading your dashboard…",
+      "semEmpresa": "No company linked to your session.",
+      "erro": "Could not load dashboard data."
+    },
     "cabecalho": {
       "bemVindo": "Welcome, {{nome}}",
       "cnpjCidade": "CNPJ {{cnpj}} · {{cidade}}",
-      "statusCredenciado": "Status: Accredited"
+      "status": "Status: {{status}}"
+    },
+    "statusFornecedor": {
+      "requerente": "Applicant",
+      "pendente_analise": "Pending review",
+      "credenciado": "Accredited",
+      "apto": "Eligible",
+      "em_correcao": "Under correction"
     },
     "alertaErro": {
       "titulo_one": "{{count}} expired document",
       "titulo_other": "{{count}} expired documents",
-      "descricao": "The <b>Municipal Clearance Certificate (PGM)</b> and the <b>Operating License</b> have expired. Notices requiring these documents remain blocked until they are brought up to date.",
-      "botao": "Resolve now"
+      "descricao": "Expired documents: <b>{{tipos}}</b>. Notices requiring these documents stay blocked until they are renewed.",
+      "botao": "Fix now"
     },
     "alertaAtencao": {
       "titulo": "A certificate expires soon",
-      "descricao": "The Federal Tax Clearance Certificate expires in <b>{{dias}} days</b> ({{data}}). The system's daily scan has already sent a notice by <c>SMS and email</c>. Update it so you don't miss any notices.",
+      "descricao": "The <b>{{tipo}}</b> document expires in {{dias}} days ({{data}}). Renew it so you don't miss notices.",
       "botao": "Update document"
     },
     "kpis": {
       "editaisCompativeis": "Open compatible notices",
-      "novos": "new",
       "credenciamentosAndamento": "Accreditations in progress",
       "documentosAprovados": "Approved documents",
-      "demandaDistribuida": "Active distributed demand"
+      "demandaDistribuida": "Active distributed demand",
+      "demandaNaoAtiva": "Distribution not active yet"
     },
     "painelEditais": {
       "titulo": "Open compatible notices",
-      "verTodos": "View all",
+      "verTodos": "See all",
       "iniciar": "Start",
-      "mostrando": "Showing {{atual}} of {{total}} compatible notices"
+      "mostrando": "Showing {{atual}} of {{total}} compatible notices",
+      "vazio": "No compatible open notices at the moment.",
+      "prazo_one": "Closes in {{count}} day",
+      "prazo_other": "Closes in {{count}} days",
+      "prazoHoje": "Closes today",
+      "prazoEncerrado": "Deadline passed"
     },
     "painelCredenciamentos": {
       "titulo": "Accreditations in progress",
-      "verMeus": "View my accreditations"
+      "verMeus": "See my accreditations",
+      "vazio": "You have no accreditations in progress."
+    },
+    "credStatus": {
+      "iniciado": "Under review",
+      "aceito": "Term accepted",
+      "cancelado": "Canceled"
     }
   },
   "minhaConta": {
@@ -320,6 +1137,8 @@
       "ultima": "Last sync: <b>{{quando}}</b>",
       "sucesso": "Official data updated. Trade Name, Address and Phone were preserved.",
       "erro": "Sync failed",
+      "revisao": "Sent to CPL for review",
+      "revisaoDetalhe": "The CNPJ is no longer active at Receita. The data was updated and the case was forwarded to the CPL for review.",
       "sincronizando": "Syncing…",
       "sincronizarAgora": "Sync now"
     },
@@ -330,19 +1149,52 @@
       "razaoSocial": "Legal Name",
       "cnpj": "CNPJ",
       "situacaoCadastral": "Registration Status",
-      "porteEmpresa": "Company Size"
+      "porteEmpresa": "Company Size",
+      "situacao": {
+        "ativa": "Active",
+        "baixada": "Cancelled",
+        "inapta": "Unfit",
+        "suspensa": "Suspended"
+      }
+    },
+    "estado": {
+      "carregando": "Loading your data…",
+      "erro": "Could not load your account data.",
+      "semEmpresa": "Your account is not linked to a company."
     },
     "responsavel": {
       "secaoLabel": "LEGAL REPRESENTATIVE DATA",
       "responsavelLegal": "Legal representative",
       "procurador": "Attorney-in-fact",
       "alterarFoto": "Change photo",
+      "removerFoto": "Remove photo",
+      "fotoErroTipo": "Invalid format. Use PNG, JPG or WEBP.",
+      "fotoErroTamanho": "Image too large (max. {{mb}} MB).",
+      "fotoErro": "Could not update the photo. Please try again.",
+      "erroCarregar": "Could not load your data.",
       "nome": "First name",
       "sobrenome": "Last name",
+      "salvarNome": "Save",
+      "nomeSalvo": "Name updated.",
+      "nomeErro": "Could not save the name. Please try again.",
+      "nomeObrigatorio": "Enter at least the first name.",
       "senha": "Password",
       "alterarSenha": "Change my password",
       "novaSenhaPlaceholder": "New password (min. 8 characters)",
-      "cancelar": "Cancel"
+      "cancelar": "Cancel",
+      "senhaAtualPlaceholder": "Current password",
+      "confirmarPlaceholder": "Confirm new password",
+      "salvarSenha": "Save new password",
+      "salvando": "Saving…",
+      "sucesso": "Password changed successfully.",
+      "fechar": "Close",
+      "ver": "Show passwords",
+      "ocultar": "Hide passwords",
+      "erroAtual": "Current password is incorrect.",
+      "erroFraca": "The new password must be at least 8 characters long.",
+      "erroConfirma": "The passwords do not match.",
+      "erroGenerico": "Could not change the password. Please try again.",
+      "sessaoExpirada": "Your session has expired. Sign in again to change your password."
     },
     "editaveis": {
       "secaoLabel": "ADDITIONAL DATA · EDITABLE",
@@ -358,14 +1210,50 @@
       "cepBuscando": "Looking up address…",
       "cepPreenchido": "Address filled in by BrasilAPI",
       "cepNaoEncontrado": "Postal code not found",
-      "cpfResponsavel": "Representative's CPF",
-      "cpfInvalido": "Invalid CPF",
-      "cpfValido": "Valid CPF",
+      "numero": "Number",
+      "complemento": "Complement",
       "cancelar": "Cancel",
-      "salvar": "Save changes"
+      "salvar": "Save changes",
+      "salvando": "Saving…",
+      "salvo": "Changes saved",
+      "salvarErro": "Could not save. Please try again."
+    }
+  },
+  "procuradores": {
+    "titulo": "Attorneys",
+    "subtitulo": "Authorize third parties to act on behalf of the company, with an audit trail for every action.",
+    "convite": {
+      "titulo": "Invite attorney",
+      "identificadorLabel": "Attorney e-mail or ID",
+      "identificadorPlaceholder": "name@company.com",
+      "enviar": "Invite",
+      "enviando": "Inviting…",
+      "erro": "Could not invite. Check the details and try again.",
+      "dica": "We'll send an invitation to link access to the company."
+    },
+    "lista": {
+      "titulo": "Active attorneys",
+      "vazio": "No attorneys linked yet.",
+      "vazioDica": "Invite someone by e-mail or ID to act on behalf of the company.",
+      "ativo": "Active",
+      "removido": "Removed",
+      "convidadoEm": "Linked on {{data}}",
+      "remover": "Remove",
+      "removendo": "Removing…"
+    },
+    "removidos": {
+      "titulo": "Removal history",
+      "subtitulo": "Immutable record of revoked access, kept for auditing."
+    },
+    "estado": {
+      "carregando": "Loading attorneys…",
+      "erro": "Could not load attorneys.",
+      "semEmpresa": "No company linked to your account.",
+      "somenteTitular": "Only the company's data subject can manage attorneys."
     }
   },
   "painelTitular": {
+    "semEmpresa": "No company linked to your account.",
     "titulo": "My panel",
     "subtitulo": "Consolidated pending items and your data subject rights (LGPD).",
     "pendencias": {
@@ -381,5 +1269,144 @@
       "solicitar": "Request",
       "registrada": "Request submitted."
     }
+  },
+  "privacidade": {
+    "titulo": "My data / Privacy",
+    "subtitulo": "Exercise your data subject rights (LGPD): access, correction and deletion. Handled by the Data Protection Officer (DPO).",
+    "semSessao": "Sign in as the data subject to exercise your rights.",
+    "erro": "We could not register your request. Please try again.",
+    "tipos": {
+      "acesso": "Access to my data",
+      "correcao": "Data correction",
+      "exclusao": "Deletion"
+    },
+    "categorias": {
+      "cadastral": "Registration",
+      "fiscal": "Tax",
+      "contratual": "Contractual"
+    },
+    "status": {
+      "pendente": "Pending",
+      "atendida": "Fulfilled",
+      "recusada": "Rejected"
+    },
+    "novo": {
+      "titulo": "New request",
+      "tipo": "Right",
+      "categoria": "Data category (optional)",
+      "categoriaAny": "All categories",
+      "detalhe": "Details (optional)",
+      "detalhePlaceholder": "Describe what you want to access, correct or delete.",
+      "solicitar": "Submit request",
+      "enviando": "Submitting…",
+      "registrada": "Request submitted. The DPO will review it."
+    },
+    "lista": {
+      "titulo": "My requests",
+      "carregando": "Loading…",
+      "vazio": "You have no requests yet.",
+      "resposta": "Response"
+    }
+  },
+  "adminLgpd": {
+    "titulo": "LGPD Requests",
+    "subtitulo": "Queue of pending data subject rights (DPO). The procurement team does not handle these (RNF007).",
+    "carregando": "Loading…",
+    "vazio": "No pending requests.",
+    "titular": "Data subject",
+    "respostaPlaceholder": "Response to the data subject (optional)",
+    "motivoPlaceholder": "Rejection reason (required)",
+    "atender": "Fulfill",
+    "recusar": "Reject",
+    "descartar": "Dispose of data",
+    "atendidaPadrao": "Fulfilled",
+    "feedback": {
+      "atendida": "Request fulfilled.",
+      "recusada": "Request rejected.",
+      "descartada": "Data disposed of (retention met).",
+      "retido": "Disposal denied: data still under legal retention.",
+      "erro": "The action could not be completed."
+    }
+  },
+  "demandasDistribuidas": {
+    "titulo": "Distributed demands",
+    "subtitulo": "The split is equal among eligible suppliers and always capped at your declared capacity (ceiling).",
+    "carregando": "Loading…",
+    "vazioTitulo": "No distributed demand yet",
+    "vazioDica": "As soon as a distribution runs on a tender where you are eligible, it will appear here.",
+    "semEmpresa": "Sign in as a supplier to see your distributed demands.",
+    "status": {
+      "emExecucao": "In progress",
+      "reserva": "Reserve List · 2nd Demand"
+    },
+    "rateioLabel": "MATHEMATICAL SPLIT OF THIS DEMAND",
+    "demandaTotal": "Total demand",
+    "fornecedoresAptos": "Eligible suppliers",
+    "cotaFinal": "Your final quota",
+    "capacidadeLabel": "Allocated quota vs. your capacity (ceiling)",
+    "dentroDoTeto": "Within declared ceiling",
+    "reservaAviso": "<b>You completed your accreditation after the initial distribution.</b> You were placed on the <b>Reserve List (2nd Demand)</b>. Active contracts are not changed — you will be called automatically, in queue order, if a primary supplier fails to deliver."
+  },
+  "meusCredenciamentos": {
+    "titulo": "My Accreditations",
+    "subtitulo": "Track all of your company’s accreditations and pick up where you left off.",
+    "etapa": "Step {{atual}}/{{total}}",
+    "carregando": "Loading…",
+    "semEmpresa": "No company linked to your account.",
+    "editalRemovido": "Notice removed",
+    "buscaAriaLabel": "Search accreditations",
+    "buscaPlaceholder": "Search by number or subject…",
+    "exportarCsv": "Excel",
+    "exportarPdf": "PDF",
+    "colEdital": "Notice",
+    "colObjeto": "Subject",
+    "colStatus": "Status",
+    "colCriadoEm": "Created on",
+    "colAtualizadoEm": "Last update",
+    "colAcoes": "Actions",
+    "filtro": {
+      "todos": "All",
+      "andamento": "In progress",
+      "finalizados": "Completed",
+      "cancelados": "Cancelled"
+    },
+    "estado": {
+      "iniciado": "In progress",
+      "aceito": "Completed",
+      "cancelado": "Cancelled"
+    },
+    "acao": {
+      "continuar": "Continue",
+      "visualizar": "View",
+      "recredenciar": "Apply again",
+      "cancelar": "Cancel accreditation"
+    },
+    "vazioTitulo": "No accreditations yet",
+    "vazioDica": "Go to the Notices showcase and click “Start Accreditation” to begin.",
+    "vazioFiltroTitulo": "No accreditations in this filter",
+    "vazioFiltroDica": "Adjust the search or pick another status.",
+    "paginacaoInfo": "Showing {{de}}–{{ate}} of {{total}} accreditations",
+    "irParaPagina": "Go to page {{n}}"
+  },
+  "credenciamentoDetalhe": {
+    "titulo": "Accreditation detail",
+    "voltar": "Back to accreditations",
+    "carregando": "Loading…",
+    "naoEncontrado": "Accreditation not found.",
+    "naoEncontradoDica": "It may have been removed or does not belong to your company.",
+    "edital": "Notice",
+    "objeto": "Subject",
+    "secretaria": "Department",
+    "situacao": "Status",
+    "capacidade": "Declared capacity",
+    "capacidadeUnidades": "{{n}} units",
+    "etapa": "Step",
+    "termoTitulo": "Acceptance Term",
+    "termoVersao": "Version",
+    "termoFinalidade": "Purpose",
+    "termoAceitoEm": "Accepted on",
+    "semTermo": "Acceptance Term not signed yet.",
+    "criadoEm": "Created on",
+    "atualizadoEm": "Last update"
   }
 }

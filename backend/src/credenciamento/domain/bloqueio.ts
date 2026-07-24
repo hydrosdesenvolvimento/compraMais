@@ -3,6 +3,16 @@ import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-b
 export type TipoBloqueio = 'debito' | 'penalidade' | 'inidoneidade';
 export type OrigemTermino = 'fonte' | 'manual';
 
+export interface BloqueioState {
+  meta: MetadadosBase;
+  fornecedorId: string;
+  tipo: TipoBloqueio;
+  dataTermino: string | null;
+  origemTermino: OrigemTermino | null;
+  situacao: 'ativo' | 'liberado';
+  motivo: string;
+}
+
 /**
  * Bloqueio transitório por inadimplência (FR-006/007, RN002/AD-12) — entidade rica (AD-33).
  * NUNCA permanente: débito vigora enquanto ativo; penalidade/inidoneidade até a dataTermino.
@@ -26,6 +36,22 @@ export class Bloqueio extends EntidadeBase {
       input.fornecedorId, input.tipo, input.dataTermino ?? null,
       input.dataTermino ? (input.origemTermino ?? 'fonte') : null, 'ativo', input.motivo,
     );
+  }
+
+  /** Reconstrução a partir da persistência (sem regra de criação — aceita qualquer estado do ciclo). */
+  static deEstado(s: BloqueioState): Bloqueio {
+    return new Bloqueio(
+      s.meta, s.fornecedorId, s.tipo, s.dataTermino, s.origemTermino, s.situacao, s.motivo,
+    );
+  }
+
+  /** Snapshot plano para persistência (AD-33). */
+  estado(): BloqueioState {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      fornecedorId: this.fornecedorId, tipo: this.tipo, dataTermino: this._dataTermino,
+      origemTermino: this._origemTermino, situacao: this._situacao, motivo: this.motivo,
+    };
   }
 
   get situacao(): 'ativo' | 'liberado' { return this._situacao; }

@@ -1,20 +1,42 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, HttpError } from '../../lib/api';
 import { Card, Botao } from '../../design-system/components';
 
-interface Filtros { usuario: string; evento: string; de: string; ate: string; editalId: string }
-const VAZIO: Filtros = { usuario: '', evento: '', de: '', ate: '', editalId: '' };
+interface Filtros { usuario: string; evento: string; de: string; ate: string; editalId: string; fornecedorId: string }
+const VAZIO: Filtros = { usuario: '', evento: '', de: '', ate: '', editalId: '', fornecedorId: '' };
 
 function paramsDe(f: Filtros): URLSearchParams {
   const p = new URLSearchParams();
   if (f.usuario) p.set('usuario', f.usuario);
   if (f.evento) p.set('evento', f.evento);
-  if (f.de) p.set('de', f.de);
-  if (f.ate) p.set('ate', f.ate);
+  // Intervalo inclusivo: o input `date` só entrega o dia (YYYY-MM-DD). Ancoramos `de` no início e
+  // `ate` no fim do dia para que os eventos do próprio dia final também entrem no filtro (>= / <=).
+  if (f.de) p.set('de', `${f.de}T00:00:00`);
+  if (f.ate) p.set('ate', `${f.ate}T23:59:59.999`);
   if (f.editalId) p.set('editalId', f.editalId);
+  if (f.fornecedorId) p.set('fornecedorId', f.fornecedorId);
   return p;
+}
+
+/** Formata o timestamp ISO (UTC) para data/hora local do idioma ativo; entrada inválida cai no valor bruto. */
+function formatarQuando(iso: string, lang: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return new Intl.DateTimeFormat(lang, { dateStyle: 'short', timeStyle: 'medium' }).format(d);
+}
+
+/** Dispara o download do blob no navegador (sem navegar para fora da SPA). */
+function salvarArquivo(blob: Blob, nome: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nome;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 /**
@@ -22,20 +44,26 @@ function paramsDe(f: Filtros): URLSearchParams {
  * 400 = intervalo inválido, 403 = sem permissão. Exportação CSV/JSON por download. Somente leitura.
  */
 export function ConsultaAuditoria() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [filtros, setFiltros] = useState<Filtros>(VAZIO);
   const [aplicado, setAplicado] = useState<Filtros>(VAZIO);
   const set = (k: keyof Filtros, v: string) => setFiltros((f) => ({ ...f, [k]: v }));
 
   const { data: registros = [], error } = useQuery({ queryKey: ['auditoria', aplicado], queryFn: () => api.auditoria(paramsDe(aplicado)), retry: false });
-  const erro = error instanceof HttpError
-    ? (error.status === 400 ? t('admin.auditoria.erroIntervalo') : error.status === 403 ? t('admin.auditoria.erroAcesso') : t('admin.auditoria.erroConsulta'))
-    : null;
 
-  function exportar(formato: 'csv' | 'json') {
-    const p = paramsDe(aplicado); p.set('formato', formato);
-    window.location.href = `/auditoria/exportar?${p.toString()}`;
-  }
+  // Exportação via fetch (carrega o Bearer — a rota é protegida por RBAC) + download local; nunca navega para fora.
+  const exportacao = useMutation({
+    mutationFn: (formato: 'csv' | 'json') => {
+      const p = paramsDe(aplicado); p.set('formato', formato);
+      return api.auditoriaExportar(p);
+    },
+    onSuccess: ({ blob, nome }) => salvarArquivo(blob, nome),
+  });
+
+  const falha = error ?? exportacao.error;
+  const erro = falha instanceof HttpError
+    ? (falha.status === 400 ? t('admin.auditoria.erroIntervalo') : falha.status === 403 ? t('admin.auditoria.erroAcesso') : t('admin.auditoria.erroConsulta'))
+    : null;
 
   return (
     <div className="stack">
@@ -47,18 +75,32 @@ export function ConsultaAuditoria() {
           <input data-cy="de" className="input" style={{ maxWidth: 150 }} type="date" value={filtros.de} onChange={(e) => set('de', e.target.value)} />
           <input data-cy="ate" className="input" style={{ maxWidth: 150 }} type="date" value={filtros.ate} onChange={(e) => set('ate', e.target.value)} />
           <input data-cy="edital" className="input" style={{ maxWidth: 150 }} placeholder={t('admin.auditoria.editalPlaceholder')} value={filtros.editalId} onChange={(e) => set('editalId', e.target.value)} />
+          <input data-cy="fornecedor" className="input" style={{ maxWidth: 160 }} placeholder={t('admin.auditoria.fornecedorPlaceholder')} value={filtros.fornecedorId} onChange={(e) => set('fornecedorId', e.target.value)} />
           <Botao data-cy="consultar" onClick={() => setAplicado({ ...filtros })}>{t('admin.auditoria.consultar')}</Botao>
-          <Botao data-cy="exportar-csv" variante="secundario" onClick={() => exportar('csv')}>{t('admin.auditoria.exportarCsv')}</Botao>
-          <Botao data-cy="exportar-json" variante="secundario" onClick={() => exportar('json')}>{t('admin.auditoria.exportarJson')}</Botao>
+          <Botao data-cy="exportar-csv" variante="secundario" disabled={exportacao.isPending} onClick={() => exportacao.mutate('csv')}>{t('admin.auditoria.exportarCsv')}</Botao>
+          <Botao data-cy="exportar-json" variante="secundario" disabled={exportacao.isPending} onClick={() => exportacao.mutate('json')}>{t('admin.auditoria.exportarJson')}</Botao>
         </div>
       </Card>
       {erro && <p data-cy="erro" role="alert" style={{ color: 'var(--erro)' }}>{erro}</p>}
       <Card>
         <table data-cy="trilha">
-          <thead><tr><th>{t('admin.auditoria.colQuando')}</th><th>{t('admin.auditoria.colAtor')}</th><th>{t('admin.auditoria.colAcao')}</th><th>{t('admin.auditoria.colIp')}</th></tr></thead>
+          <thead><tr><th>{t('admin.auditoria.colQuando')}</th><th>{t('admin.auditoria.colAtor')}</th><th>{t('admin.auditoria.colPapel')}</th><th>{t('admin.auditoria.colAcao')}</th><th>{t('admin.auditoria.colIp')}</th></tr></thead>
           <tbody>
             {registros.map((r) => (
-              <tr key={r.id} data-cy="registro"><td>{r.timestamp}</td><td>{r.usuario ?? '—'}</td><td>{r.evento}</td><td>{r.ip ?? '—'}</td></tr>
+              <tr key={r.id} data-cy="registro">
+                <td>{formatarQuando(r.timestamp, i18n.language)}</td>
+                <td data-cy="ator">
+                  {r.usuario ? (
+                    <>
+                      <div>{r.usuarioNome ?? r.usuario}</div>
+                      {r.usuarioNome && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.usuario}</div>}
+                    </>
+                  ) : '—'}
+                </td>
+                <td>{r.papel ? t(`common.papel.${r.papel}`, { defaultValue: r.papel }) : '—'}</td>
+                <td>{r.evento}</td>
+                <td>{r.ip ?? '—'}</td>
+              </tr>
             ))}
           </tbody>
         </table>

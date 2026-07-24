@@ -3,6 +3,7 @@
  * Barrel: preserva o import `from '.../design-system/components'` usado pelas telas.
  */
 export { Botao } from './Botao';
+export { BotaoIcone } from './BotaoIcone';
 export { Tag } from './Tag';
 export { Pill } from './Pill';
 export { Etiqueta } from './Etiqueta';
@@ -11,3 +12,6 @@ export { Avatar } from './Avatar';
 export { Campo } from './Campo';
 export { Stepper } from './Stepper';
 export { BarraAcessibilidade } from './BarraAcessibilidade';
+export { ToastProvider, useToast } from './Toast';
+export { toastBus } from './toast-bus';
+export type { ToastEntrada, TomToast } from './toast-bus';

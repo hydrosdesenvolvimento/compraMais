@@ -5,14 +5,15 @@ part: DESIGN
 scope: 'Identidade visual e tokens de design da Prefeitura de Rio Branco aplicados ao Compra Mais'
 status: ratified
 created: '2026-06-29'
-updated: '2026-06-29'
-source: 'source/AI-UI-Design/ (Design System Prefeitura + Portal do Fornecedor; ratificado por Sales 2026-06-29)'
-companions: ['EXPERIENCE.md']
+updated: '2026-07-16'
+source: '../../Brandbook/ (Design System Prefeitura de Rio Branco; ratificado por Sales 2026-06-29). Endereço atualizado 2026-07-16 (AD-39) — vinha de spec/AI-UI-Design/'
+companions: ['EXPERIENCE.md', '../../Prototipo/portal-fornecedor.html', '../../Prototipo/painel-administrativo.html', '../../Prototipo/index.html']
 ---
 
 # Compra Mais — Design (Identidade Visual)
 
-> Destilado dos designs em `source/AI-UI-Design/`. Ratificado sob responsabilidade do solicitante. **Aberto:** confirmar a cor azul oficial com o brandbook da Prefeitura e decidir LAYOUT A vs B do login (ver EXPERIENCE.md).
+> Destilado do brandbook em [`../../Brandbook/`](../../Brandbook/). Ratificado sob responsabilidade do solicitante.
+> **Aberto:** a cor azul oficial — **arbitragem 0.7** (o brandbook diz `#0061AE`; bundles e código dizem navy `#14467F`); e LAYOUT A vs B do login (ver EXPERIENCE.md).
 
 ## Princípios
 
@@ -22,7 +23,27 @@ companions: ['EXPERIENCE.md']
 
 ## Tokens de Cor
 
-**Azul institucional (primária / ação):**
+> ## ⚠️ PALETA EM ARBITRAGEM (item 0.7) — 2026-07-16
+>
+> Este documento **não está desatualizado**: ele destilou corretamente o **brandbook oficial da Prefeitura de
+> Rio Branco** ([`../../Brandbook/`](../../Brandbook/)), onde `#0061AE` aparece 52× e `#003A68` 32×.
+>
+> **A divergência (D1) é real e é do cliente, não da engenharia:**
+>
+> | Fonte | Paleta |
+> |---|---|
+> | **Brandbook oficial da Prefeitura** | `#003A68` · `#00497F` · **`#0061AE`** (ação) |
+> | **Bundles ratificados** (`../../Prototipo/`, desde 2026-06-29) | `#0A2A52` · `#0E3A6E` · **`#14467F`** (navy) |
+> | **Implementação** (`frontend/src/index.css`, PRJ-DEC-10) | `#0A2A52` · `#0E3A6E` · **`#14467F`** (navy) |
+>
+> Bundles e código **batem entre si** e **divergem do brandbook**. O protótipo navy foi o que o cliente viu e
+> validou (Validação 01); o brandbook é a identidade institucional formal.
+>
+> **A Prefeitura decide.** A régua geral "código implementado permanece" (2026-07-16) **não se aplica aqui** —
+> paleta é marca do cliente, não escolha de engenharia. Enquanto 0.7 não for respondida, a escala abaixo
+> registra o **brandbook**, e o produto roda em navy.
+
+**Azul institucional — brandbook oficial (primária / ação):**
 | Token | Hex |
 |---|---|
 | azul-900 | #003A68 |

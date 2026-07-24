@@ -18,4 +18,13 @@ export function registrarRotasDocumentos(app: FastifyInstance, deps: { docs: Ger
     const { id } = req.params as { id: string };
     return reply.send(await deps.docs.listar(id));
   });
+
+  // FR-007/008 — Visualizar/Baixar: recupera o arquivo decifrado (o front recebe `conteudo` em
+  // base64 e monta o data URL para preview/download). 404 se o documento ou o blob não existem.
+  app.get('/documentos/:docId/conteudo', async (req, reply) => {
+    const { docId } = req.params as { docId: string };
+    const out = await deps.docs.baixar(docId);
+    if (!out) return reply.code(404).send({ codigo: 'DocumentoNaoEncontrado', mensagem: 'Document not found' });
+    return reply.send(out);
+  });
 }

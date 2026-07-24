@@ -10,6 +10,17 @@ export interface Peca { tipo: TipoPeca; ref: string; tamanhoBytes: number }
 /** `acimaLimite` (FR-009): fragmento com peça única indivisível maior que o limite — sinalizado p/ a CPL. */
 export interface Fragmento { indice: number; pecasRefs: string[]; tamanhoBytes: number; acimaLimite: boolean }
 
+/** Snapshot do agregado para persistência (AD-33) — reconstruído por `Malote.deEstado`. */
+export interface MaloteState {
+  meta: MetadadosBase;
+  fornecedorId: string;
+  editalId: string;
+  pecas: Peca[];
+  fragmentos: Fragmento[];
+  status: StatusMalote;
+  limiteBytes: number;
+}
+
 /**
  * Malote — pacote documental para protocolo no SEI (Épico 6, AD-21). Entidade rica (AD-33).
  * Monta peças na ordem legal; fragmenta por limite; exportação idempotente.
@@ -29,6 +40,26 @@ export class Malote extends EntidadeBase {
 
   static criar(input: { id: string; fornecedorId: string; editalId: string; limiteBytes: number; userName?: string }): Malote {
     return new Malote(EntidadeBase.metaNova(input.id, input.userName), input.fornecedorId, input.editalId, [], [], 'pendente', input.limiteBytes);
+  }
+
+  /** Reconstrução a partir da persistência (sem regra de criação — aceita qualquer status do ciclo). */
+  static deEstado(s: MaloteState): Malote {
+    return new Malote(
+      s.meta, s.fornecedorId, s.editalId,
+      s.pecas.map((p) => ({ ...p })), s.fragmentos.map((f) => ({ ...f, pecasRefs: [...f.pecasRefs] })),
+      s.status, s.limiteBytes,
+    );
+  }
+
+  /** Snapshot imutável para o adaptador de persistência (AD-33). */
+  estado(): MaloteState {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      fornecedorId: this.fornecedorId, editalId: this.editalId,
+      pecas: this._pecas.map((p) => ({ ...p })),
+      fragmentos: this._fragmentos.map((f) => ({ ...f, pecasRefs: [...f.pecasRefs] })),
+      status: this._status, limiteBytes: this.limiteBytes,
+    };
   }
 
   get pecas(): readonly Peca[] { return this._pecas; }

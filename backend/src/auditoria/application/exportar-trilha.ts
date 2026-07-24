@@ -1,6 +1,5 @@
-import type { AuditRecord } from '../domain/audit-record.js';
 import type { AuditQuery } from '../infra/audit-repository.js';
-import { ConsultarTrilha } from './consultar-trilha.js';
+import { ConsultarTrilha, type AuditRecordView } from './consultar-trilha.js';
 
 export type FormatoExport = 'csv' | 'json';
 export interface ResultadoExport {
@@ -11,7 +10,7 @@ export interface ResultadoExport {
   volumeSinalizado: boolean; // FR-011: acima do teto configurável
 }
 
-const COLUNAS = ['id', 'usuario', 'evento', 'timestamp', 'ip', 'payload'] as const;
+const COLUNAS = ['id', 'usuario', 'usuarioNome', 'papel', 'evento', 'timestamp', 'ip', 'payload'] as const;
 
 /**
  * Exportação fiel do conjunto filtrado (FR-005/006/007). SOMENTE LEITURA — reusa ConsultarTrilha para
@@ -37,15 +36,15 @@ export class ExportarTrilha {
   }
 }
 
-function toJson(registros: AuditRecord[]): string {
-  return JSON.stringify(registros.map((r) => ({ id: r.id, usuario: r.usuario, evento: r.evento, timestamp: r.timestamp, ip: r.ip, payload: r.payload })));
+function toJson(registros: AuditRecordView[]): string {
+  return JSON.stringify(registros.map((r) => ({ id: r.id, usuario: r.usuario, usuarioNome: r.usuarioNome, papel: r.papel, evento: r.evento, timestamp: r.timestamp, ip: r.ip, payload: r.payload })));
 }
 
-function toCsv(registros: AuditRecord[]): string {
+function toCsv(registros: AuditRecordView[]): string {
   const linhas = [COLUNAS.join(',')]; // cabeçalho (FR-005)
   for (const r of registros) {
     linhas.push([
-      campo(r.id), campo(r.usuario), campo(r.evento), campo(r.timestamp), campo(r.ip), campo(JSON.stringify(r.payload)),
+      campo(r.id), campo(r.usuario), campo(r.usuarioNome), campo(r.papel), campo(r.evento), campo(r.timestamp), campo(r.ip), campo(JSON.stringify(r.payload)),
     ].join(','));
   }
   return linhas.join('\n');

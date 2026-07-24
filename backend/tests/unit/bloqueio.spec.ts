@@ -21,4 +21,15 @@ describe('Bloqueio (domínio) — transitório', () => {
     expect(b.origemTermino).toBe('manual');
     expect(b.estaAtivo('2027-01-01T00:00:00Z')).toBe(false);
   });
+
+  it('round-trip estado()/deEstado() preserva o agregado (durabilidade — migração 0009)', () => {
+    const b = Bloqueio.aplicar({ id: 'b4', fornecedorId: 'f9', tipo: 'penalidade', dataTermino: '2026-08-01T00:00:00Z', motivo: 'penalidade', userName: 'cpl1' });
+    b.liberar('cpl2'); // muta situação + auditoria de linha
+    const restaurado = Bloqueio.deEstado(b.estado());
+    expect(restaurado.estado()).toEqual(b.estado());
+    expect(restaurado.situacao).toBe('liberado');
+    expect(restaurado.dataTermino).toBe('2026-08-01T00:00:00Z');
+    expect(restaurado.origemTermino).toBe('fonte');
+    expect(restaurado.lastUserUpdate).toBe('cpl2');
+  });
 });

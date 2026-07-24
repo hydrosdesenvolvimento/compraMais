@@ -3,6 +3,18 @@ import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-b
 export type FormatoDoc = 'pdf' | 'jpg' | 'png';
 export type StatusDoc = 'pendente' | 'aprovado' | 'reprovado';
 
+/** Snapshot plano do agregado (AD-33) — formato exato que o adaptador de persistência grava e lê. */
+export interface DocumentoState {
+  meta: MetadadosBase;
+  fornecedorId: string;
+  tipo: string;
+  arquivoRef: string;
+  formato: FormatoDoc;
+  dataValidade: string | null;
+  status: StatusDoc;
+  motivoReprovacao: string | null;
+}
+
 /** Documento — classe rica (AD-32) que estende EntidadeBase (AD-33). Status transicionado pela Covalidação (AD-15). */
 export class Documento extends EntidadeBase {
   private constructor(
@@ -24,6 +36,27 @@ export class Documento extends EntidadeBase {
       input.fornecedorId, input.tipo, input.arquivoRef, input.formato, input.dataValidade ?? null,
       'pendente', null,
     );
+  }
+
+  /**
+   * Reidrata o agregado a partir do snapshot (AD-33). Diferente de `enviar`, NÃO reinicia o ciclo:
+   * preserva `status`/`motivoReprovacao` já transicionados pela Covalidação (AD-15) e os metadados.
+   */
+  static deEstado(s: DocumentoState): Documento {
+    return new Documento(
+      s.meta, s.fornecedorId, s.tipo, s.arquivoRef, s.formato, s.dataValidade,
+      s.status, s.motivoReprovacao,
+    );
+  }
+
+  /** Snapshot plano para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
+  estado(): DocumentoState {
+    return {
+      meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
+      fornecedorId: this.fornecedorId, tipo: this.tipo, arquivoRef: this.arquivoRef,
+      formato: this.formato, dataValidade: this.dataValidade,
+      status: this._status, motivoReprovacao: this._motivoReprovacao,
+    };
   }
 
   get status(): StatusDoc { return this._status; }
@@ -65,6 +98,9 @@ export class Documento extends EntidadeBase {
 
 export class FormatoInvalido extends Error {
   constructor(f: string) { super(`Unsupported format: ${f}. Accepted: pdf, jpg, png.`); this.name = 'FormatoInvalido'; }
+}
+export class TipoDocumentoDesconhecido extends Error {
+  constructor(tipo: string) { super(`Unknown document type: ${tipo}. It must be an active type in the catalog (RF022).`); this.name = 'TipoDocumentoDesconhecido'; }
 }
 export class JustificativaObrigatoria extends Error {
   constructor() { super('Rejection requires a textual justification (RN003/FR-002).'); this.name = 'JustificativaObrigatoria'; }

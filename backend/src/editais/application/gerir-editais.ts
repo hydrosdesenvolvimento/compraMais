@@ -1,7 +1,10 @@
 import { randomUUID } from 'node:crypto';
 import { Edital } from '../domain/edital.js';
+import { formatarNumeroEdital } from '../domain/numero-edital.js';
 import { EditalCriado, EditalPublicado, EditalEncerrado, EditalEditado, PublicoAlvoAmpliado } from '../domain/eventos.js';
 import type { EditalRepository } from './listar-editais-compativeis.js';
+import type { NumeradorEditais } from './numerador-editais.js';
+import { NumeradorEditaisMemory } from '../adapters/numerador-editais-memory.js';
 import type { EventBus } from '../../shared/events/event-bus.js';
 
 type Actor = { userId: string; empresaId?: string };
@@ -31,15 +34,22 @@ export class GerirEditais {
     private readonly cnaes: CnaeValidator = new CnaeFormatoValidator(),
     private readonly contestacoes?: ContestacoesPendentesQuery,
     private readonly now: () => string = () => new Date().toISOString(),
+    private readonly numerador: NumeradorEditais = new NumeradorEditaisMemory(),
   ) {}
 
-  async criar(input: { secretariaId: string; objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string }, actor: Actor): Promise<{ editalId: string }> {
+  /**
+   * Cria o edital em rascunho já com a numeração oficial do ano corrente (ED-AAAA/NNN). O número é
+   * reservado pelo `NumeradorEditais` (atômico) e é imutável: `editar` não o alcança.
+   */
+  async criar(input: { secretariaId: string; objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string }, actor: Actor): Promise<{ editalId: string; numero: string }> {
     await this.cnaes.validar(input.cnaesAlvo);
     const id = randomUUID();
-    const edital = Edital.criar({ id, ...input, userName: actor.userId });
+    const ano = new Date(this.now()).getUTCFullYear();
+    const numero = formatarNumeroEdital(ano, await this.numerador.proximo(ano));
+    const edital = Edital.criar({ id, numero, ...input, userName: actor.userId });
     await this.repo.salvar(edital);
-    await this.bus.publish(new EditalCriado(id, { editalId: id, secretariaId: input.secretariaId }, actor).toEnvelope(randomUUID(), this.now()));
-    return { editalId: id };
+    await this.bus.publish(new EditalCriado(id, { editalId: id, numero, secretariaId: input.secretariaId }, actor).toEnvelope(randomUUID(), this.now()));
+    return { editalId: id, numero };
   }
 
   async publicar(editalId: string, actor: Actor): Promise<void> {

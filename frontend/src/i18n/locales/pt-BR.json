@@ -10,11 +10,28 @@
       "credenciamentos": "Meus credenciamentos",
       "documentos": "Documentos",
       "demandas": "Demandas distribuídas",
+      "procuradores": "Procuradores",
       "painel": "Painel",
       "covalidacao": "Covalidação",
       "gestaoEditais": "Gestão de editais",
       "contestacoes": "Contestações",
-      "auditoria": "Auditoria"
+      "auditoria": "Auditoria",
+      "catalogos": "Catálogos",
+      "usuarios": "Usuários",
+      "malote": "Malote SEI",
+      "privacidade": "Privacidade",
+      "lgpd": "Atendimento LGPD",
+      "fornecedores": "Fornecedores",
+      "credenciamento": "Credenciamento",
+      "analiseDocumental": "Análise Documental",
+      "distribuicao": "Distribuição",
+      "cadastroReserva": "Cadastro de Reserva",
+      "desistencias": "Desistências",
+      "secretarias": "Secretarias",
+      "setoresIndustriais": "Setores Industriais",
+      "tiposArquivos": "Tipos de Arquivos",
+      "perfis": "Telas por perfil",
+      "contestacao": "Contestações"
     },
     "shell": {
       "menu": "MENU",
@@ -30,7 +47,8 @@
       "myAccount": "Minha conta",
       "logout": "Sair",
       "footerFornecedor": "Versão 2.0 · MVP FIEAC",
-      "footerAdmin": "Painel administrativo · CPL / SMGA"
+      "footerAdmin": "Painel administrativo · CPL / SMGA",
+      "userGeneric": "Visitante"
     },
     "language": {
       "label": "Idioma",
@@ -41,6 +59,19 @@
       "highContrast": "Alto contraste",
       "increaseFont": "Aumentar fonte",
       "decreaseFont": "Diminuir fonte"
+    },
+    "papel": {
+      "titular": "Titular",
+      "procurador": "Procurador",
+      "administrador": "Administrador",
+      "cpl": "Analista CPL",
+      "smga": "Secretaria / Gestor",
+      "auditor": "Auditor",
+      "dpo": "Encarregado (DPO)",
+      "leitura": "Somente leitura"
+    },
+    "toast": {
+      "fechar": "Fechar"
     }
   },
   "auth": {
@@ -70,6 +101,23 @@
       "qsa": "QUADRO SOCIETÁRIO (QSA)",
       "manualLink": "Receita Federal indisponível? Preencher manualmente",
       "submit": "Criar conta de fornecedor",
+      "submitting": "Criando conta…",
+      "nomeFantasia": "NOME FANTASIA",
+      "nomeFantasiaPlaceholder": "Nome fantasia (opcional)",
+      "telefone": "TELEFONE",
+      "telefonePlaceholder": "(00) 00000-0000",
+      "email": "E-MAIL DE ACESSO",
+      "emailPlaceholder": "voce@empresa.com",
+      "senha": "SENHA",
+      "senhaPlaceholder": "Mínimo de 8 caracteres",
+      "consent": "Autorizo o tratamento dos meus dados para fins de credenciamento, conforme a LGPD.",
+      "errors": {
+        "cnpjInvalido": "CNPJ inválido. Confira os números informados.",
+        "situacao": "CNPJ com situação cadastral não ativa na Receita — cadastro não permitido.",
+        "cnpjDuplicado": "Este CNPJ já possui cadastro. Use a recuperação de acesso.",
+        "emailDuplicado": "Este e-mail já está em uso. Faça login ou use outro e-mail.",
+        "generico": "Não foi possível concluir o cadastro. Tente novamente."
+      },
       "statusNote": "Sua conta iniciará com o status <b>Requerente</b>."
     },
     "login": {
@@ -88,9 +136,384 @@
       "submit": "Entrar",
       "submitting": "Entrando…",
       "error": "Credenciais inválidas."
+    },
+    "reset": {
+      "title": "Recuperar senha",
+      "subtitle": "Informe o e-mail cadastrado. Se houver uma conta, enviaremos um link para redefinir a senha.",
+      "enviar": "Enviar link de recuperação",
+      "enviando": "Enviando…",
+      "erro": "Não foi possível enviar o link. Tente novamente.",
+      "voltarLogin": "Voltar ao login",
+      "enviadoTitle": "Verifique seu e-mail",
+      "enviadoInfo": "Se houver uma conta com esse e-mail, você receberá um link para redefinir a senha em instantes.",
+      "voltar": "Voltar ao login"
+    },
+    "redefinir": {
+      "title": "Definir nova senha",
+      "subtitle": "Escolha uma nova senha para a sua conta.",
+      "novaSenha": "Nova senha",
+      "novaSenhaPlaceholder": "Mínimo de 8 caracteres",
+      "confirmar": "Confirmar nova senha",
+      "confirmarPlaceholder": "Repita a nova senha",
+      "enviar": "Redefinir senha",
+      "enviando": "Redefinindo…",
+      "erroToken": "Link inválido ou expirado. Solicite uma nova recuperação de senha.",
+      "erroFraca": "A senha deve ter pelo menos 8 caracteres.",
+      "erroConfirma": "As senhas não coincidem.",
+      "erroGenerico": "Não foi possível redefinir a senha. Tente novamente.",
+      "irLogin": "Ir para o login",
+      "sucessoTitle": "Senha redefinida",
+      "sucessoInfo": "Sua senha foi atualizada. Você já pode entrar com a nova senha."
     }
   },
   "admin": {
+    "credenciamentoEdital": {
+      "titulo": "Credenciamento em Edital",
+      "subtitulo": "Adesão filtrada por CNAE (RN001) e checagem de inadimplência (RN002)",
+      "seletorLabel": "Edital",
+      "cnaeExigido": "CNAE exigido: {{cnae}}",
+      "elegiveisTitulo": "Fornecedores elegíveis",
+      "elegiveisFiltro": "(filtro CNAE aplicado)",
+      "capacidade": "Cap. {{cap}} un/mês",
+      "semCapacidade": "Capacidade não declarada",
+      "pills": {
+        "pgm": "PGM: {{estado}}",
+        "sicaf": "SICAF: {{estado}}",
+        "cnaeCompativel": "CNAE compatível"
+      },
+      "regularidade": {
+        "regular": "Regular",
+        "irregular": "Irregular"
+      },
+      "status": {
+        "credenciado": "Credenciado",
+        "requerente": "Requerente",
+        "elegivel": "Elegível"
+      },
+      "situacaoEdital": {
+        "rascunho": "Rascunho",
+        "publicado": "Aberto",
+        "encerrado": "Encerrado"
+      },
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar os fornecedores elegíveis.",
+      "semEditais": "Nenhum edital aberto no momento.",
+      "vazioTitulo": "Nenhum fornecedor elegível",
+      "vazioDica": "Nenhuma empresa com CNAE compatível para este edital."
+    },
+    "distribuicao": {
+      "eyebrow": "Operação · Distribuição",
+      "titulo": "Distribuição Inteligente",
+      "subtitulo": "Rateio equitativo respeitando a capacidade declarada (RN005)",
+      "seletorLabel": "Edital",
+      "carregando": "Carregando distribuição…",
+      "erroCarregar": "Não foi possível carregar a distribuição.",
+      "semEditais": "Nenhum edital publicado para distribuição.",
+      "chip": {
+        "emDistribuicao": "Em Distribuição",
+        "homologada": "Homologada"
+      },
+      "stats": {
+        "total": "Total da demanda",
+        "distribuido": "Distribuído",
+        "habilitados": "Habilitados"
+      },
+      "resultadoTitulo": "Resultado da distribuição",
+      "col": {
+        "fornecedor": "Fornecedor",
+        "capacidade": "Capacidade",
+        "cota": "Cota atribuída",
+        "percentual": "% da demanda"
+      },
+      "capacidade": "{{cap}} un/mês",
+      "vazioTitulo": "Sem fornecedores habilitados",
+      "vazioDica": "Ainda não há credenciados aceitos para ratear a demanda deste edital.",
+      "deficitAviso": "Déficit de abastecimento: a capacidade declarada ({{distribuido}}) não cobre a demanda ({{total}}). Saldo não coberto: {{deficit}}.",
+      "homologar": "Homologar distribuição",
+      "homologando": "Homologando…",
+      "homologadaEm": "Distribuição homologada · versão {{versao}}",
+      "erroHomologar": "Não foi possível homologar a distribuição."
+    },
+    "reserva": {
+      "eyebrow": "Operação · Cadastro de Reserva",
+      "titulo": "Cadastro de Reserva",
+      "subtitulo": "Gestão de retardatários sem alterar contratos vigentes (RN004)",
+      "avisoTitulo": "Fila de reserva.",
+      "avisoTexto": "Fornecedores aprovados após a distribuição inicial são alocados aqui sem alterar as cotas já distribuídas. Serão acionados em ordem cronológica caso algum titular descumpra a entrega.",
+      "carregando": "Carregando fila de reserva…",
+      "erroCarregar": "Não foi possível carregar o cadastro de reserva.",
+      "vazioTitulo": "Nenhum fornecedor em reserva",
+      "vazioDica": "Fornecedores aprovados após a distribuição inicial aparecerão aqui, em ordem cronológica.",
+      "capacidade": "Cap. {{cap}} un/mês",
+      "posicaoLabel": "Posição {{posicao}} na fila de reserva",
+      "chip": "Reserva"
+    },
+    "desistencias": {
+      "eyebrow": "Operação · Desistências",
+      "titulo": "Desistências",
+      "subtitulo": "Registro de fornecedores que declinaram de cotas atribuídas",
+      "carregando": "Carregando desistências…",
+      "erroCarregar": "Não foi possível carregar as desistências.",
+      "vazioTitulo": "Nenhuma desistência registrada",
+      "vazioDica": "Quando um fornecedor titular declinar de uma cota, o registro aparece aqui e o próximo da fila de reserva é acionado automaticamente.",
+      "cota": "Cota {{cota}} un/mês",
+      "chip": "Desistência"
+    },
+    "setoresIndustriais": {
+      "titulo": "Setores Industriais (CNAE)",
+      "subtitulo": "Códigos de atividade econômica aceitos",
+      "novoCadastro": "Novo setor",
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar os setores. Verifique suas permissões.",
+      "vazioTitulo": "Nenhum setor cadastrado",
+      "vazioDica": "Clique em \"Novo setor\" para adicionar o primeiro.",
+      "semCategoria": "—",
+      "fechar": "Fechar",
+      "campos": {
+        "codigo": "Código",
+        "descricao": "Descrição",
+        "categoria": "Categoria",
+        "status": "Situação",
+        "acoes": "Ações"
+      },
+      "status": {
+        "ativo": "Ativo",
+        "inativo": "Inativo"
+      },
+      "acao": {
+        "editar": "Editar setor",
+        "inativar": "Inativar setor",
+        "reativar": "Reativar setor"
+      },
+      "modal": {
+        "tituloCriar": "Novo setor industrial",
+        "tituloEditar": "Editar setor industrial",
+        "subtitulo": "Preencha os campos e salve",
+        "codigoPlaceholder": "0000-0/00",
+        "descricaoPlaceholder": "Descrição da atividade",
+        "categoriaLabel": "Categoria",
+        "categoriaPlaceholder": "Indústria têxtil, Alimentos…",
+        "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo, preservando os editais que já exigiram o código.",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "erroSalvar": "Não foi possível salvar. Verifique o código CNAE (7 dígitos) e a descrição."
+      }
+    },
+    "tiposArquivos": {
+      "titulo": "Tipos de Arquivos",
+      "subtitulo": "Documentos exigidos no credenciamento",
+      "novoCadastro": "Novo tipo",
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar os tipos de arquivo. Verifique suas permissões.",
+      "vazioTitulo": "Nenhum tipo cadastrado",
+      "vazioDica": "Clique em \"Novo tipo\" para adicionar o primeiro.",
+      "fechar": "Fechar",
+      "campos": {
+        "documento": "Documento",
+        "formato": "Formato",
+        "categoria": "Categoria",
+        "obrigatorio": "Obrigatório",
+        "validade": "Validade",
+        "status": "Situação",
+        "acoes": "Ações"
+      },
+      "obrigatorioSim": "Obrigatório",
+      "obrigatorioNao": "Opcional",
+      "status": {
+        "ativo": "Ativo",
+        "inativo": "Inativo"
+      },
+      "categorias": {
+        "cadastral": "Cadastral",
+        "fiscal": "Fiscal",
+        "contratual": "Contratual"
+      },
+      "validade": {
+        "sem": "Sem validade",
+        "exige": "Exige validade",
+        "exercicio": "Exercício",
+        "dias": "{{dias}} dias"
+      },
+      "acao": {
+        "editar": "Editar tipo",
+        "inativar": "Inativar tipo",
+        "reativar": "Reativar tipo"
+      },
+      "modal": {
+        "tituloCriar": "Novo tipo de arquivo",
+        "tituloEditar": "Editar tipo de arquivo",
+        "subtitulo": "Preencha os campos e salve",
+        "nomePlaceholder": "Ex.: Certidão FGTS",
+        "formatoLabel": "Formato aceito",
+        "formatoPlaceholder": "PDF",
+        "categoriaLabel": "Categoria",
+        "categoriaPlaceholder": "Selecione a categoria",
+        "validadeLabel": "Validade",
+        "validadeModo": {
+          "sem": "Sem validade",
+          "dias": "Prazo em dias",
+          "exercicio": "Exercício (ex.: Balanço)"
+        },
+        "diasLabel": "Prazo (dias)",
+        "diasPlaceholder": "90",
+        "obrigatorioLabel": "Obrigatório no credenciamento",
+        "obrigatorioAjuda": "Destaca este documento como exigido no Passo 2 do credenciamento (não bloqueia o envio).",
+        "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo, preservando os vínculos históricos (editais e uploads).",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "erroSalvar": "Não foi possível salvar. Verifique o documento, o formato e a categoria."
+      }
+    },
+    "perfis": {
+      "titulo": "Administração de telas por perfil",
+      "subtitulo": "Defina quais telas do Painel Admin cada papel enxerga. As permissões do Administrador também são editáveis, mas ele nunca perde o acesso a esta tela.",
+      "colPerfil": "Perfil (papel)",
+      "superusuario": "vê todas",
+      "customizado": "personalizado",
+      "salvar": "Salvar",
+      "salvo": "Visibilidade atualizada.",
+      "erro": "Não foi possível salvar. Verifique suas permissões."
+    },
+    "emConstrucao": {
+      "subtitulo": "Tela em construção.",
+      "corpo": "Esta funcionalidade ainda será implementada. O item já aparece no menu e na Administração de telas por perfil."
+    },
+    "fornecedores": {
+      "titulo": "Gestão de Fornecedores",
+      "subtitulo": "Empresas locais cadastradas na plataforma.",
+      "buscaPlaceholder": "Buscar por CNPJ ou razão social…",
+      "buscaAriaLabel": "Buscar fornecedores",
+      "novoFornecedor": "Novo fornecedor",
+      "novoFornecedorIndisponivel": "O cadastro é feito pelo próprio fornecedor (autocadastro).",
+      "filtros": "Filtros",
+      "ordenar": "Ordenar",
+      "exportar": "Exportar",
+      "ordenarPor": "Ordenar por",
+      "ordenacaoPadrao": "Mais recentes",
+      "direcao": {
+        "asc": "Crescente",
+        "desc": "Decrescente"
+      },
+      "capProdutivaIndisponivel": "Capacidade é declarada por edital (não é atributo do fornecedor).",
+      "filtroStatusTodos": "Todos os status",
+      "filtroSituacaoTodas": "Todas as situações",
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar os fornecedores. Verifique suas permissões.",
+      "vazioTitulo": "Nenhum fornecedor encontrado",
+      "vazioDica": "Ajuste a busca ou os filtros para ver outros resultados.",
+      "verDetalhes": "Ver detalhes",
+      "fechar": "Fechar",
+      "detalheTitulo": "Detalhes do fornecedor",
+      "contatoTitulo": "Dados de contato (editáveis)",
+      "salvarContato": "Salvar contato",
+      "contatoSalvo": "Contato atualizado.",
+      "erroSalvarContato": "Não foi possível salvar. Verifique os campos.",
+      "sincronizar": "Sincronizar com a Receita",
+      "sincronizando": "Sincronizando…",
+      "nuncaSincronizado": "Nunca sincronizado",
+      "paginacaoInfo": "Mostrando {{de}}–{{ate}} de {{total}} fornecedores",
+      "irParaPagina": "Ir para a página {{n}}",
+      "campos": {
+        "cnpj": "CNPJ",
+        "razaoSocial": "Razão social",
+        "nomeFantasia": "Nome fantasia",
+        "porte": "Porte",
+        "cnaePrincipal": "CNAE principal",
+        "capProdutiva": "Cap. produtiva",
+        "cnaes": "CNAEs",
+        "situacao": "Situação cadastral",
+        "status": "Status",
+        "telefone": "Telefone",
+        "sincronizadoEm": "Última sincronização",
+        "acoes": "Ações"
+      },
+      "acao": {
+        "ver": "Ver detalhes",
+        "editar": "Editar contato",
+        "bloquearIndisponivel": "Bloqueio por inadimplência é feito no módulo de credenciamento (RN002)."
+      },
+      "modal": {
+        "tituloCriar": "Novo fornecedor",
+        "subtituloCriar": "Preencha os campos e salve",
+        "tituloVer": "Detalhes do fornecedor",
+        "tituloEditar": "Editar fornecedor",
+        "subtituloVerEditar": "Dados oficiais são somente leitura; edite os dados de contato.",
+        "razaoPlaceholder": "Razão social da empresa",
+        "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "editar": "Editar",
+        "erroCriar": "Não foi possível cadastrar. Verifique o CNPJ e os campos obrigatórios."
+      },
+      "endereco": {
+        "logradouro": "Logradouro",
+        "numero": "Número",
+        "bairro": "Bairro",
+        "cidade": "Cidade",
+        "uf": "UF",
+        "cep": "CEP"
+      },
+      "status": {
+        "requerente": "Requerente",
+        "pendente_analise": "Pendente de análise",
+        "credenciado": "Credenciado",
+        "apto": "Apto",
+        "em_correcao": "Em correção"
+      },
+      "situacao": {
+        "ativa": "Ativa",
+        "baixada": "Baixada",
+        "inapta": "Inapta",
+        "suspensa": "Suspensa"
+      },
+      "sincResultado": {
+        "sucesso": "Dados atualizados com sucesso.",
+        "revisao": "Dados atualizados — situação exige revisão da CPL.",
+        "erro": "Receita indisponível — dados atuais preservados."
+      }
+    },
+    "secretarias": {
+      "titulo": "Secretarias",
+      "subtitulo": "Gestão das unidades demandantes",
+      "novoCadastro": "Novo cadastro",
+      "carregando": "Carregando…",
+      "erroCarregar": "Não foi possível carregar as secretarias. Verifique suas permissões.",
+      "vazioTitulo": "Nenhuma secretaria cadastrada",
+      "vazioDica": "Clique em \"Novo cadastro\" para adicionar a primeira.",
+      "semContato": "—",
+      "fechar": "Fechar",
+      "campos": {
+        "sigla": "Sigla",
+        "nome": "Nome",
+        "responsavel": "Responsável",
+        "contato": "Contato",
+        "status": "Status",
+        "acoes": "Ações"
+      },
+      "status": {
+        "ativa": "Ativa",
+        "inativa": "Inativa"
+      },
+      "acao": {
+        "editar": "Editar secretaria",
+        "inativar": "Inativar secretaria",
+        "reativar": "Reativar secretaria"
+      },
+      "modal": {
+        "tituloCriar": "Nova secretaria",
+        "tituloEditar": "Editar secretaria",
+        "subtitulo": "Preencha os campos e salve",
+        "siglaPlaceholder": "SEME",
+        "nomePlaceholder": "Secretaria Municipal de…",
+        "responsavelPlaceholder": "Nome do responsável",
+        "contatoLabel": "E-mail de contato",
+        "contatoPlaceholder": "setor@riobranco.ac.gov.br",
+        "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
+        "cancelar": "Cancelar",
+        "salvar": "Salvar",
+        "erroSalvar": "Não foi possível salvar. Verifique os campos obrigatórios e o e-mail."
+      }
+    },
     "dashboard": {
       "carregando": "Carregando…",
       "titulo": "Painel administrativo",
@@ -111,20 +534,72 @@
       "vazio": "Nenhum documento para os filtros atuais.",
       "aprovar": "Aprovar",
       "motivoPlaceholder": "Motivo (obrigatório p/ reprovar)",
-      "reprovar": "Reprovar"
+      "reprovar": "Reprovar",
+      "enviadoHa": "Enviado {{tempo}}"
     },
     "gerirEditais": {
-      "titulo": "Gestão de editais",
-      "subtitulo": "Crie, publique e encerre editais individualizados (1 secretaria por edital).",
-      "objetoPlaceholder": "Objeto da demanda",
-      "cnaePlaceholder": "CNAE(s) alvo (vírgula)",
-      "criar": "Criar edital (rascunho)",
-      "filtrarSituacao": "Filtrar situação",
-      "situacaoRascunho": "Rascunho",
-      "situacaoPublicado": "Publicado",
-      "situacaoEncerrado": "Encerrado",
+      "eyebrow": "Operação · Editais",
+      "titulo": "Editais de Credenciamento",
+      "subtitulo": "1 edital = 1 demanda de secretaria (RN007)",
+      "novoEdital": "Novo edital",
+      "colEdital": "Edital",
+      "colObjeto": "Objeto",
+      "colSecretaria": "Secretaria",
+      "colPrazo": "Prazo",
+      "colStatus": "Status",
+      "colAcoes": "Ações",
+      "cnaePrefixo": "CNAE {{cnae}}",
+      "unidades": "{{n}} un.",
+      "semPrazo": "—",
+      "status": {
+        "rascunho": "Rascunho",
+        "publicado": "Publicado",
+        "encerrado": "Encerrado"
+      },
+      "acaoVer": "Visualizar",
+      "carregando": "Carregando editais…",
+      "erroCarregar": "Não foi possível carregar os editais.",
+      "vazioTitulo": "Nenhum edital cadastrado",
+      "vazioDica": "Crie o primeiro edital para iniciar a operação.",
+      "vazioFiltroTitulo": "Nenhum edital encontrado",
+      "vazioFiltroDica": "Ajuste a busca ou os filtros para ver mais resultados.",
+      "buscaPlaceholder": "Buscar por número ou objeto…",
+      "buscaAriaLabel": "Buscar editais por número ou objeto",
+      "filtros": "Filtros",
+      "filtroSituacaoTodas": "Todas as situações",
+      "filtroSecretariaTodas": "Todas as secretarias",
+      "filtroCnaeLabel": "CNAE",
+      "filtroCnaePlaceholder": "Ex.: 1091101",
+      "limparFiltros": "Limpar filtros",
+      "paginacaoInfo": "Exibindo {{de}}–{{ate}} de {{total}}",
+      "irParaPagina": "Ir para a página {{n}}",
       "publicar": "Publicar",
-      "encerrar": "Encerrar"
+      "encerrar": "Encerrar",
+      "modalTitulo": "Detalhes do edital",
+      "campoNumero": "Edital",
+      "campoObjeto": "Objeto",
+      "campoSecretaria": "Secretaria",
+      "campoCnaes": "CNAE(s) alvo",
+      "campoQuantitativos": "Quantitativo",
+      "campoPrazo": "Prazo de vigência",
+      "campoStatus": "Status",
+      "fechar": "Fechar",
+      "novoTitulo": "Novo edital",
+      "novoSub": "Preencha os campos e salve",
+      "numeroLabel": "Número do edital",
+      "numeroAuto": "Gerado automaticamente ao salvar",
+      "objetoLabel": "Objeto",
+      "objetoPlaceholder": "Descrição da demanda",
+      "secretariaLabel": "Secretaria demandante",
+      "secretariaPlaceholder": "Selecione a secretaria",
+      "cnaeLabel": "CNAE exigido",
+      "cnaePlaceholder": "Ex.: 1091101, 4721102",
+      "cnaeAjuda": "Separe múltiplos CNAEs por vírgula.",
+      "quantitativosLabel": "Quantitativo",
+      "prazoLabel": "Prazo de vigência",
+      "softDeleteNota": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
+      "salvar": "Salvar",
+      "cancelar": "Cancelar"
     },
     "contestacoes": {
       "titulo": "Contestações de CNAE",
@@ -141,6 +616,7 @@
       "usuarioPlaceholder": "Usuário/ator",
       "eventoPlaceholder": "Ação/evento",
       "editalPlaceholder": "Edital",
+      "fornecedorPlaceholder": "Fornecedor (CNPJ)",
       "consultar": "Consultar",
       "exportarCsv": "Exportar CSV",
       "exportarJson": "Exportar JSON",
@@ -149,14 +625,245 @@
       "erroConsulta": "Erro ao consultar.",
       "colQuando": "Quando",
       "colAtor": "Ator",
+      "colPapel": "Papel",
       "colAcao": "Ação",
       "colIp": "IP",
       "vazio": "Nenhum registro para os filtros atuais."
+    },
+    "catalogos": {
+      "titulo": "Catálogos base",
+      "subtitulo": "Mantenha secretarias, setores (CNAE) e tipos de documento. A exclusão é lógica: o item inativado sai das listas mas preserva os vínculos.",
+      "tabs": {
+        "secretarias": "Secretarias",
+        "setores": "Setores (CNAE)",
+        "tiposDoc": "Tipos de documento"
+      },
+      "campos": {
+        "nome": "Nome",
+        "sigla": "Sigla",
+        "responsavel": "Responsável",
+        "codigo": "Código CNAE (7 dígitos)",
+        "descricao": "Descrição",
+        "nomeTipo": "Nome do tipo",
+        "formato": "Formato aceito (ex.: pdf)",
+        "categoria": "Categoria",
+        "exigeValidade": "Exige data de validade",
+        "exigeExercicio": "Exige exercício (ex.: Balanço)"
+      },
+      "categorias": {
+        "cadastral": "Cadastral",
+        "fiscal": "Fiscal",
+        "contratual": "Contratual"
+      },
+      "criar": "Adicionar item",
+      "erroCriar": "Não foi possível salvar. Verifique se a chave já existe ou se os campos são válidos.",
+      "mostrarInativos": "Mostrar inativos",
+      "situacaoInativo": "inativo",
+      "inativar": "Inativar",
+      "reativar": "Reativar",
+      "vazio": "Nenhum item cadastrado ainda."
+    },
+    "usuarios": {
+      "breadcrumb": "Administração · Usuários",
+      "titulo": "Usuários",
+      "subtitulo": "Gestão de acessos ao sistema",
+      "novoCadastro": "Novo usuário",
+      "carregando": "Carregando usuários…",
+      "erroCarregar": "Não foi possível carregar os usuários.",
+      "vazioTitulo": "Nenhum usuário cadastrado ainda",
+      "vazioDica": "Use “Novo usuário” para cadastrar o primeiro servidor.",
+      "semSecretaria": "—",
+      "semLogin": "—",
+      "selecioneCargo": "Selecione um cargo",
+      "selecioneSecretaria": "Selecione uma secretaria",
+      "fechar": "Fechar",
+      "resetarSenha": "Redefinir senha",
+      "novaSenha": "Nova senha (mín. 8)",
+      "confirmarReset": "Confirmar",
+      "resetOk": "Senha redefinida.",
+      "erroReset": "Não foi possível redefinir. Verifique a senha (mín. 8).",
+      "campos": {
+        "nome": "Nome",
+        "email": "E-mail",
+        "cargo": "Cargo",
+        "secretaria": "Secretaria",
+        "perfil": "Perfil",
+        "login": "Login",
+        "status": "Status",
+        "acoes": "Ações",
+        "senha": "Senha inicial (mín. 8 caracteres)"
+      },
+      "cargos": {
+        "administrador": "Administrador",
+        "analistaCpl": "Analista CPL",
+        "coordenadorCpl": "Coordenador(a) CPL",
+        "secretario": "Secretário(a)",
+        "gestor": "Gestor",
+        "auditor": "Auditor",
+        "dpo": "DPO / Encarregado"
+      },
+      "perfis": {
+        "administrador": "Administrador",
+        "cpl": "Analista",
+        "smga": "Gestor",
+        "auditor": "Auditor",
+        "dpo": "DPO",
+        "leitura": "Leitura"
+      },
+      "status": {
+        "ativo": "Ativo",
+        "inativo": "Inativo"
+      },
+      "acao": {
+        "editar": "Editar",
+        "inativar": "Inativar",
+        "reativar": "Reativar"
+      },
+      "modal": {
+        "tituloCriar": "Novo usuário",
+        "tituloEditar": "Editar usuário",
+        "subtitulo": "O cargo define o perfil de acesso (RBAC). A exclusão é lógica: o usuário inativado não acessa, mas o histórico de suas ações é preservado.",
+        "nomePlaceholder": "Nome completo do servidor",
+        "emailPlaceholder": "email@prefeitura.gov.br",
+        "loginPlaceholder": "ex.: silas.cpl",
+        "senhaPlaceholder": "Mínimo de 8 caracteres",
+        "salvar": "Salvar",
+        "cancelar": "Cancelar",
+        "erroSalvar": "Não foi possível salvar. Verifique os dados (e-mail/login já em uso, cargo e senha)."
+      }
+    },
+    "malote": {
+      "titulo": "Malote SEI",
+      "subtitulo": "Consolide a documentação aprovada de um fornecedor em um dossiê ordenado (CNPJ → Pessoal → Anexos → Certidões) e otimizado para upload no SEI. A geração é assíncrona e durável; peça indivisível acima do limite é sinalizada para tratamento manual.",
+      "novoMalote": "Gerar malote",
+      "carregando": "Carregando malotes…",
+      "erroCarregar": "Não foi possível carregar os malotes.",
+      "vazioTitulo": "Nenhum malote ainda",
+      "vazioDica": "Gere um malote a partir da documentação aprovada de um fornecedor.",
+      "campos": {
+        "fornecedor": "Fornecedor",
+        "edital": "Edital",
+        "status": "Status",
+        "fragmentos": "Fragmentos",
+        "acoes": "Ações"
+      },
+      "modal": {
+        "subtitulo": "A ordem legal (CNPJ → Pessoal → Anexos → Certidões) e a fragmentação pelo limite do SEI são aplicadas automaticamente na geração.",
+        "fechar": "Fechar",
+        "cancelar": "Cancelar",
+        "removerPeca": "Remover peça"
+      },
+      "gerar": {
+        "titulo": "Gerar novo malote",
+        "fornecedorId": "ID do fornecedor",
+        "editalId": "ID do edital",
+        "pecas": "Peças (documentos aprovados)",
+        "ref": "Referência",
+        "tamanho": "Tamanho (bytes)",
+        "adicionarPeca": "Adicionar peça",
+        "semPecas": "Nenhuma peça adicionada.",
+        "enviar": "Gerar malote",
+        "enviado": "Geração solicitada — processando em segundo plano.",
+        "erro": "Não foi possível solicitar a geração. Verifique os campos e o papel de acesso."
+      },
+      "tipos": {
+        "cnpj": "CNPJ",
+        "pessoal": "Documento pessoal",
+        "anexo": "Anexo do edital",
+        "certidao": "Certidão"
+      },
+      "filtros": {
+        "titulo": "Filtros",
+        "fornecedorId": "Fornecedor",
+        "editalId": "Edital",
+        "status": "Status",
+        "todos": "Todos",
+        "aplicar": "Filtrar"
+      },
+      "status": {
+        "pendente": "Pendente",
+        "gerado": "Gerado",
+        "exportado": "Exportado"
+      },
+      "lista": {
+        "fragmentos": "{{n}} fragmento(s)",
+        "acimaLimite": "Peça acima do limite — tratar manualmente",
+        "exportar": "Exportar",
+        "exportado": "Exportado.",
+        "jaExportado": "Já exportado (idempotente).",
+        "atualizar": "Atualizar",
+        "vazio": "Nenhum malote encontrado."
+      }
+    },
+    "analiseDocumental": {
+      "migalha": "Operação · Análise Documental",
+      "titulo": "Análise Documental",
+      "tituloComplemento": "(covalidação)",
+      "subtitulo": "Aprovação ou reprovação com justificativa obrigatória (RN003)",
+      "carregando": "Carregando fila…",
+      "erroCarregar": "Não foi possível carregar a fila de análise.",
+      "vazioTitulo": "Nenhum documento na fila",
+      "vazioDica": "Todas as análises foram concluídas.",
+      "pendente": "Pendente",
+      "enviadoEm": "enviado em {{data}}",
+      "visualizar": "Visualizar documento",
+      "reprovar": "Reprovar",
+      "aprovar": "Aprovar",
+      "toastAprovado": "Documento de {{empresa}} aprovado.",
+      "toastReprovado": "Documento de {{empresa}} reprovado.",
+      "toastErro": "Não foi possível registrar o veredito.",
+      "modal": {
+        "titulo": "Reprovar documento",
+        "label": "Justificativa da reprovação",
+        "placeholder": "Descreva o motivo (ex.: imagem ilegível, documento vencido, dados divergentes…). O fornecedor verá esta justificativa.",
+        "aviso": "A justificativa é obrigatória e fica registrada na auditoria (RN003).",
+        "cancelar": "Cancelar",
+        "confirmar": "Confirmar reprovação"
+      }
     }
   },
+  "erros": {
+    "status": "Erro inesperado (status {{status}}).",
+    "rede": "Falha de conexão. Verifique sua internet e tente novamente.",
+    "RBAC": "Você não tem permissão para esta ação.",
+    "NAO_AUTENTICADO": "Sessão expirada. Entre novamente.",
+    "FornecedorNaoEncontrado": "Fornecedor não encontrado.",
+    "EditalNaoEncontrado": "Edital não encontrado.",
+    "DocumentoNaoEncontrado": "Documento não encontrado.",
+    "CredenciamentoNaoEncontrado": "Credenciamento não encontrado.",
+    "CredenciamentoDuplicado": "Você já tem um credenciamento ativo neste edital.",
+    "EditalNaoAberto": "Este edital não está aberto para credenciamento.",
+    "EditalIncompativel": "Sua empresa não é elegível para este edital (CNAE incompatível).",
+    "CapacidadeInvalida": "Informe uma capacidade válida: um número inteiro maior que zero.",
+    "TermoIncompleto": "Não foi possível registrar o Termo de Aceite. Tente novamente.",
+    "TransicaoCredenciamentoInvalida": "Esta ação não é permitida no estado atual do credenciamento.",
+    "CredenciamentoJaDistribuido": "Este credenciamento já foi distribuído e não pode ser cancelado.",
+    "ContestacaoNaoEncontrada": "Contestação não encontrada.",
+    "MaloteNaoEncontrado": "Malote não encontrado.",
+    "SolicitacaoNaoEncontrada": "Solicitação não encontrada.",
+    "UsuarioNaoEncontrado": "Usuário não encontrado.",
+    "ProcuradorNaoEncontrado": "Procurador não encontrado.",
+    "ItemCatalogoNaoEncontrado": "Item de catálogo não encontrado.",
+    "TitularNaoEncontrado": "Titular não encontrado.",
+    "SenhaAtualIncorreta": "Senha atual incorreta.",
+    "SenhaFraca": "A nova senha não atende aos requisitos de segurança.",
+    "CredenciaisInvalidas": "E-mail ou senha inválidos.",
+    "EmailJaCadastrado": "Este e-mail já está cadastrado.",
+    "CnpjJaCadastrado": "Este CNPJ já está cadastrado.",
+    "TokenResetInvalido": "Link de redefinição inválido ou expirado.",
+    "ApenasTitularConvida": "Apenas o titular pode convidar procuradores.",
+    "ApenasTitularGere": "Apenas o titular pode gerir procuradores.",
+    "LGPDTitular": "Apenas o próprio titular pode exercer este direito.",
+    "DescarteRetido": "Descarte bloqueado: o dado ainda está em retenção legal.",
+    "JustificativaObrigatoria": "Informe a justificativa.",
+    "MotivoRecusaObrigatorio": "Informe o motivo da recusa.",
+    "CampoNaoEditavel": "Este campo não pode ser editado.",
+    "TransicaoInvalida": "Operação não permitida no estado atual."
+  },
   "contestacao": {
-    "titulo": "Meus Credenciamentos",
-    "subtitulo": "Acompanhe seus credenciamentos em editais e continue o que estiver em rascunho.",
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
+    "titulo": "Contestações e Regularizações",
+    "subtitulo": "Resolva as pendências que impedem seu credenciamento e acompanhe as análises em curso.",
     "carregando": "Carregando…",
     "filtros": "Filtros",
     "busca": {
@@ -172,15 +879,33 @@
     "status": {
       "rascunho": "rascunho"
     },
+    "tipos": {
+      "documento": "Documento reprovado",
+      "bloqueio": "Pendência fiscal",
+      "contestacao-cnae": "Contestação de CNAE",
+      "lgpd": "Solicitação de dados (LGPD)"
+    },
+    "acao": {
+      "reenviar": "Reenviar documento",
+      "regularizar": "Regularizar e reconsultar",
+      "processando": "Processando…",
+      "aguardando": "Em análise",
+      "sucesso": "Solicitação enviada.",
+      "erro": "Não foi possível concluir. Tente novamente."
+    },
     "contagem_one": "{{count}} credenciamento",
     "contagem_other": "{{count}} credenciamentos"
   },
   "credenciamento": {
     "voltarVitrine": "Voltar à vitrine",
+    "noEdital": "Credenciamento no edital",
+    "retomado": "Retomamos seu credenciamento de onde você parou.",
+    "carregando": "Carregando…",
+    "erroGenerico": "Não foi possível concluir esta etapa. Tente novamente.",
     "passos": {
       "capacidade": "Capacidade",
       "documentos": "Documentos",
-      "provaVida": "Prova de vida",
+      "termo": "Termo de Aceite",
       "concluido": "Concluído"
     },
     "acoes": {
@@ -188,7 +913,7 @@
       "enviar": "Enviar credenciamento",
       "voltar": "Voltar",
       "cancelar": "Cancelar",
-      "pular": "Pular esta etapa"
+      "enviando": "Enviando…"
     },
     "capacidade": {
       "passo": "PASSO 1",
@@ -207,42 +932,96 @@
       "titulo": "Documentos exigidos",
       "descricao": "Documentos válidos enviados em editais anteriores são <b>reaproveitados automaticamente</b>. Você só precisa anexar o que falta.",
       "importado": "Importado de edital anterior",
+      "emAnalise": "Em análise",
       "necessarioEnviar": "Necessário enviar",
+      "obrigatorio": "Obrigatório",
+      "reprovadoCurto": "Reprovado — reenvie",
+      "vencidoCurto": "Vencido — atualize",
+      "listaVazia": "Nenhum tipo de documento configurado no catálogo.",
+      "semPendentes": "Todos os documentos exigidos já estão no seu repositório e são reaproveitados automaticamente.",
       "enviarPendentes": "Enviar documentos pendentes",
-      "arraste": "Arraste o PDF aqui (upload será integrado posteriormente)",
-      "limite": "PDF até 10 MB · será comprimido para o SEI"
+      "arraste": "Selecionar arquivo (PDF, JPG ou PNG)",
+      "limite": "PDF, JPG ou PNG · até 10 MB",
+      "validadeLabel": "Validade do documento",
+      "validadeObrigatoria": "Informe a validade deste documento.",
+      "erroFormato": "Formato inválido. Aceitos: PDF, JPG ou PNG.",
+      "erroTamanho": "Arquivo acima de {{mb}} MB.",
+      "erroEnviar": "Não foi possível enviar o documento. Tente novamente.",
+      "enviarArquivo": "Enviar documento",
+      "enviando": "Enviando…",
+      "enviadoSucesso": "{{tipo}} enviado para análise."
     },
-    "provaVida": {
-      "passo": "PASSO 3 · OPCIONAL",
-      "titulo": "Autenticação facial do procurador",
-      "descricao": "Prova de vida (liveness) para validar a assinatura, cruzando o rosto com o documento de identidade. Esta etapa é opcional.",
-      "verificando": "Verificando…",
-      "validada": "Prova de vida validada",
-      "realizar": "Realizar prova de vida"
+    "termo": {
+      "passo": "PASSO 3",
+      "titulo": "Termo de Aceite",
+      "descricao": "Ao concluir, você assina o <b>Termo de Aceite</b> do credenciamento. O aceite é registrado na trilha de auditoria com finalidade, versão e data.",
+      "versaoLabel": "Versão do termo",
+      "finalidadeLabel": "Finalidade",
+      "finalidade": "Credenciamento em edital",
+      "resumo": "Declaro que as informações e documentos enviados são verdadeiros e concordo com as condições de participação do edital, nos termos da Lei Complementar 123 e das regras do programa Compra Mais.",
+      "checkbox": "Li e aceito o Termo de Aceite do credenciamento."
     },
     "enviado": {
       "titulo": "Credenciamento enviado!",
-      "descricao": "Sua proposta para <b>{{edital}}</b> foi submetida à Comissão de Licitação.",
+      "descricao": "Sua solicitação de credenciamento foi submetida à Comissão de Licitação.",
       "status": "Status: Pendente de Análise",
       "baixarPdf": "Baixar PDF",
+      "baixarPdfProcessando": "Gerando…",
+      "baixarPdfErro": "Não foi possível gerar o comprovante. Tente novamente.",
       "voltarPainel": "Voltar ao painel"
     }
   },
   "documentos": {
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta. Conclua seu cadastro para enviar documentos.",
     "tituloPagina": "Gestão de Documentos",
     "subtituloPagina": "Repositório central da sua empresa. Reaproveitado automaticamente em novos editais.",
     "enviarNovo": "Enviar novo documento",
     "formatosAceitos": "Formatos aceitos: PDF, JPG ou PNG.",
-    "alertaExpirados_one": "<b>{{count}} documento expirado.</b> Atualize os documentos abaixo para continuar participando dos editais.",
-    "alertaExpirados_other": "<b>{{count}} documentos expirados.</b> Atualize os documentos abaixo para continuar participando dos editais.",
+    "alertaPendencias_one": "<b>{{count}} documento com pendência.</b> Regularize os documentos abaixo para continuar participando dos editais.",
+    "alertaPendencias_other": "<b>{{count}} documentos com pendência.</b> Regularize os documentos abaixo para continuar participando dos editais.",
     "colunaDocumento": "DOCUMENTO",
+    "colunaValidade": "VALIDADE",
     "colunaStatus": "STATUS",
     "colunaAcoes": "AÇÕES",
-    "statusVigente": "Vigente",
-    "statusExpirado": "Expirado",
+    "statusAprovado": "Aprovado",
+    "statusVenceEm_one": "Vence em {{count}} dia",
+    "statusVenceEm_other": "Vence em {{count}} dias",
+    "statusReprovado": "Reprovado",
+    "statusVencido": "Vencido",
+    "statusEmAnalise": "Em análise",
+    "reprovadoPelaCpl": "Reprovado pela CPL:",
+    "motivoIndisponivel": "Motivo não informado.",
+    "reenviarCorrigido": "Reenviar Documento Corrigido",
+    "reenvioSucesso": "Documento reenviado. A CPL fará nova análise.",
+    "visualizarDocumento": "Visualizar {{tipo}}",
     "baixarDocumento": "Baixar {{tipo}}",
-    "atualizarDocumento": "Atualizar documento",
-    "reenviar": "Reenviar"
+    "listaVazia": "Nenhum documento enviado ainda. Use o botão acima para enviar o primeiro.",
+    "uploadSucesso": "Documento enviado. A CPL fará a análise.",
+    "erroBaixar": "Não foi possível baixar o documento. Tente novamente.",
+    "modalUpload": {
+      "titulo": "Enviar documento",
+      "subtitulo": "Selecione o tipo, o arquivo e a validade (quando houver).",
+      "campoTipo": "Tipo de documento",
+      "selecioneTipo": "Selecione o tipo…",
+      "campoArquivo": "Arquivo",
+      "arquivoAjuda": "PDF, JPG ou PNG — até {{mb}} MB.",
+      "campoValidade": "Validade (opcional)",
+      "validadeAjuda": "Deixe em branco para documentos sem data de validade.",
+      "enviar": "Enviar",
+      "cancelar": "Cancelar",
+      "erroFormato": "Formato não aceito. Envie PDF, JPG ou PNG.",
+      "erroTamanho": "Arquivo acima do limite de {{mb}} MB.",
+      "erroTipoObrigatorio": "Selecione o tipo de documento.",
+      "erroArquivoObrigatorio": "Selecione um arquivo para enviar.",
+      "erroEnviar": "Não foi possível enviar o documento. Tente novamente."
+    },
+    "preview": {
+      "subtitulo": "Pré-visualização do documento enviado.",
+      "carregando": "Carregando documento…",
+      "erro": "Não foi possível carregar o documento.",
+      "fechar": "Fechar",
+      "baixar": "Baixar"
+    }
   },
   "transparencia": {
     "carregando": "Carregando…",
@@ -259,14 +1038,29 @@
       "titulo": "Vitrine de Editais",
       "subtitulo": "Apenas editais compatíveis com os CNAEs da sua empresa. 1 edital = 1 demanda.",
       "buscaAriaLabel": "Buscar editais",
-      "buscaPlaceholder": "Buscar editais por número e nome…",
-      "filtros": "Filtros",
+      "buscaPlaceholder": "Buscar por objeto ou secretaria…",
       "carregando": "Carregando…",
       "vazioTitulo": "Nenhum edital compatível com seu ramo no momento.",
       "vazioDica": "Avisaremos quando surgir um edital compatível.",
-      "vazioBuscaTitulo": "Nenhum edital encontrado para esta busca.",
-      "vazioBuscaDica": "Ajuste os termos da busca.",
-      "iniciar": "Iniciar"
+      "vazioBuscaTitulo": "Nenhum edital encontrado.",
+      "vazioBuscaDica": "Ajuste a busca ou o filtro de secretaria.",
+      "iniciar": "Iniciar",
+      "colObjeto": "Edital",
+      "colSecretaria": "Secretaria",
+      "colPrazo": "Prazo",
+      "colQuantitativos": "Quantitativos",
+      "filtroSecretariaAriaLabel": "Filtrar por secretaria",
+      "todasSecretarias": "Todas as secretarias",
+      "exportarCsv": "CSV",
+      "exportarPdf": "PDF",
+      "bannerCnae": "Filtrando por <1>CNAE {{cnae}}</1>. Editais de outros segmentos não aparecem aqui.",
+      "prazoDias_one": "{{count}} dia",
+      "prazoDias_other": "{{count}} dias",
+      "prazoHoje": "Encerra hoje",
+      "prazoEncerrado": "Prazo encerrado",
+      "semPrazo": "Sem prazo definido",
+      "paginacaoInfo": "Mostrando {{de}}–{{ate}} de {{total}} editais",
+      "irParaPagina": "Ir para a página {{n}}"
     },
     "contestarCnae": {
       "titulo": "Contestar enquadramento de CNAE",
@@ -278,38 +1072,61 @@
     }
   },
   "inicio": {
+    "estado": {
+      "carregando": "Carregando seu painel…",
+      "semEmpresa": "Nenhuma empresa vinculada à sua sessão.",
+      "erro": "Não foi possível carregar os dados do painel."
+    },
     "cabecalho": {
       "bemVindo": "Bem-vindo, {{nome}}",
       "cnpjCidade": "CNPJ {{cnpj}} · {{cidade}}",
-      "statusCredenciado": "Status: Credenciado"
+      "status": "Status: {{status}}"
+    },
+    "statusFornecedor": {
+      "requerente": "Requerente",
+      "pendente_analise": "Pendente de análise",
+      "credenciado": "Credenciado",
+      "apto": "Apto",
+      "em_correcao": "Em correção"
     },
     "alertaErro": {
       "titulo_one": "{{count}} documento vencido",
       "titulo_other": "{{count}} documentos vencidos",
-      "descricao": "A <b>Certidão Municipal (PGM)</b> e o <b>Alvará de Funcionamento</b> estão vencidos. Editais que exigem esses documentos ficam bloqueados até a regularização.",
+      "descricao": "Documentos vencidos: <b>{{tipos}}</b>. Editais que exigem esses documentos ficam bloqueados até a regularização.",
       "botao": "Regularizar agora"
     },
     "alertaAtencao": {
       "titulo": "Uma certidão vence em breve",
-      "descricao": "Certidão Negativa de Débitos Federais vence em <b>{{dias}} dias</b> ({{data}}). A varredura diária do sistema já enviou aviso por <c>SMS e e-mail</c>. Atualize para não perder editais.",
+      "descricao": "O documento <b>{{tipo}}</b> vence em {{dias}} dias ({{data}}). Atualize para não perder editais.",
       "botao": "Atualizar documento"
     },
     "kpis": {
       "editaisCompativeis": "Editais compatíveis abertos",
-      "novos": "novos",
       "credenciamentosAndamento": "Credenciamentos em andamento",
       "documentosAprovados": "Documentos aprovados",
-      "demandaDistribuida": "Demanda distribuída ativa"
+      "demandaDistribuida": "Demanda distribuída ativa",
+      "demandaNaoAtiva": "Distribuição ainda não ativada"
     },
     "painelEditais": {
       "titulo": "Editais abertos compatíveis",
       "verTodos": "Ver todos",
       "iniciar": "Iniciar",
-      "mostrando": "Mostrando {{atual}} de {{total}} editais compatíveis"
+      "mostrando": "Mostrando {{atual}} de {{total}} editais compatíveis",
+      "vazio": "Nenhum edital compatível aberto no momento.",
+      "prazo_one": "Encerra em {{count}} dia",
+      "prazo_other": "Encerra em {{count}} dias",
+      "prazoHoje": "Encerra hoje",
+      "prazoEncerrado": "Prazo encerrado"
     },
     "painelCredenciamentos": {
       "titulo": "Credenciamentos em andamento",
-      "verMeus": "Ver meus credenciamentos"
+      "verMeus": "Ver meus credenciamentos",
+      "vazio": "Você não tem credenciamentos em andamento."
+    },
+    "credStatus": {
+      "iniciado": "Em análise",
+      "aceito": "Termo aceito",
+      "cancelado": "Cancelado"
     }
   },
   "minhaConta": {
@@ -320,6 +1137,8 @@
       "ultima": "Última sincronização: <b>{{quando}}</b>",
       "sucesso": "Dados oficiais atualizados. Nome Fantasia, Endereço e Telefone foram preservados.",
       "erro": "Erro na sincronização",
+      "revisao": "Enviado para revisão da CPL",
+      "revisaoDetalhe": "O CNPJ deixou de estar ativo na Receita. Os dados foram atualizados e o caso foi encaminhado à CPL para revisão.",
       "sincronizando": "Sincronizando…",
       "sincronizarAgora": "Sincronizar agora"
     },
@@ -330,19 +1149,52 @@
       "razaoSocial": "Razão Social",
       "cnpj": "CNPJ",
       "situacaoCadastral": "Situação Cadastral",
-      "porteEmpresa": "Porte da Empresa"
+      "porteEmpresa": "Porte da Empresa",
+      "situacao": {
+        "ativa": "Ativa",
+        "baixada": "Baixada",
+        "inapta": "Inapta",
+        "suspensa": "Suspensa"
+      }
+    },
+    "estado": {
+      "carregando": "Carregando seus dados…",
+      "erro": "Não foi possível carregar os dados da sua conta.",
+      "semEmpresa": "Sua conta não está vinculada a uma empresa."
     },
     "responsavel": {
       "secaoLabel": "DADOS DO RESPONSÁVEL",
       "responsavelLegal": "Responsável legal",
       "procurador": "Procurador",
       "alterarFoto": "Alterar foto",
+      "removerFoto": "Remover foto",
+      "fotoErroTipo": "Formato inválido. Use PNG, JPG ou WEBP.",
+      "fotoErroTamanho": "Imagem muito grande (máx. {{mb}} MB).",
+      "fotoErro": "Não foi possível atualizar a foto. Tente novamente.",
+      "erroCarregar": "Não foi possível carregar seus dados.",
       "nome": "Nome",
       "sobrenome": "Sobrenome",
+      "salvarNome": "Salvar",
+      "nomeSalvo": "Nome atualizado.",
+      "nomeErro": "Não foi possível salvar o nome. Tente novamente.",
+      "nomeObrigatorio": "Informe ao menos o nome.",
       "senha": "Senha",
       "alterarSenha": "Alterar minha senha",
       "novaSenhaPlaceholder": "Nova senha (mín. 8 caracteres)",
-      "cancelar": "Cancelar"
+      "cancelar": "Cancelar",
+      "senhaAtualPlaceholder": "Senha atual",
+      "confirmarPlaceholder": "Confirmar nova senha",
+      "salvarSenha": "Salvar nova senha",
+      "salvando": "Salvando…",
+      "sucesso": "Senha alterada com sucesso.",
+      "fechar": "Fechar",
+      "ver": "Ver senhas",
+      "ocultar": "Ocultar senhas",
+      "erroAtual": "Senha atual incorreta.",
+      "erroFraca": "A nova senha deve ter pelo menos 8 caracteres.",
+      "erroConfirma": "As senhas não coincidem.",
+      "erroGenerico": "Não foi possível alterar a senha. Tente novamente.",
+      "sessaoExpirada": "Sua sessão expirou. Entre novamente para alterar a senha."
     },
     "editaveis": {
       "secaoLabel": "DADOS COMPLEMENTARES · EDITÁVEIS",
@@ -358,14 +1210,50 @@
       "cepBuscando": "Buscando endereço…",
       "cepPreenchido": "Endereço preenchido pela BrasilAPI",
       "cepNaoEncontrado": "CEP não encontrado",
-      "cpfResponsavel": "CPF do responsável",
-      "cpfInvalido": "CPF inválido",
-      "cpfValido": "CPF válido",
+      "numero": "Número",
+      "complemento": "Complemento",
       "cancelar": "Cancelar",
-      "salvar": "Salvar alterações"
+      "salvar": "Salvar alterações",
+      "salvando": "Salvando…",
+      "salvo": "Alterações salvas",
+      "salvarErro": "Não foi possível salvar. Tente novamente."
+    }
+  },
+  "procuradores": {
+    "titulo": "Procuradores",
+    "subtitulo": "Autorize terceiros a agir em nome da empresa, com rastro de cada ação.",
+    "convite": {
+      "titulo": "Convidar procurador",
+      "identificadorLabel": "E-mail ou CPF do procurador",
+      "identificadorPlaceholder": "nome@empresa.com",
+      "enviar": "Convidar",
+      "enviando": "Convidando…",
+      "erro": "Não foi possível convidar. Verifique os dados e tente novamente.",
+      "dica": "Enviaremos um convite para vincular o acesso à empresa."
+    },
+    "lista": {
+      "titulo": "Procuradores ativos",
+      "vazio": "Nenhum procurador vinculado ainda.",
+      "vazioDica": "Convide alguém pelo e-mail ou CPF para agir em nome da empresa.",
+      "ativo": "Ativo",
+      "removido": "Removido",
+      "convidadoEm": "Vinculado em {{data}}",
+      "remover": "Remover",
+      "removendo": "Removendo…"
+    },
+    "removidos": {
+      "titulo": "Histórico de remoções",
+      "subtitulo": "Registro imutável de acessos revogados, preservado para auditoria."
+    },
+    "estado": {
+      "carregando": "Carregando procuradores…",
+      "erro": "Não foi possível carregar os procuradores.",
+      "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
+      "somenteTitular": "Apenas o titular da empresa pode gerir procuradores."
     }
   },
   "painelTitular": {
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
     "titulo": "Meu painel",
     "subtitulo": "Pendências consolidadas e seus direitos de titular (LGPD).",
     "pendencias": {
@@ -381,5 +1269,144 @@
       "solicitar": "Solicitar",
       "registrada": "Solicitação registrada."
     }
+  },
+  "privacidade": {
+    "titulo": "Meus dados / Privacidade",
+    "subtitulo": "Exerça seus direitos de titular (LGPD): acesso, correção e exclusão. Atendidos pelo Encarregado (DPO).",
+    "semSessao": "Faça login como titular para exercer seus direitos.",
+    "erro": "Não foi possível registrar sua solicitação. Tente novamente.",
+    "tipos": {
+      "acesso": "Acesso aos meus dados",
+      "correcao": "Correção de dado",
+      "exclusao": "Exclusão"
+    },
+    "categorias": {
+      "cadastral": "Cadastral",
+      "fiscal": "Fiscal",
+      "contratual": "Contratual"
+    },
+    "status": {
+      "pendente": "Pendente",
+      "atendida": "Atendida",
+      "recusada": "Recusada"
+    },
+    "novo": {
+      "titulo": "Nova solicitação",
+      "tipo": "Direito",
+      "categoria": "Categoria do dado (opcional)",
+      "categoriaAny": "Todas as categorias",
+      "detalhe": "Detalhe (opcional)",
+      "detalhePlaceholder": "Descreva o que deseja acessar, corrigir ou excluir.",
+      "solicitar": "Enviar solicitação",
+      "enviando": "Enviando…",
+      "registrada": "Solicitação registrada. O Encarregado (DPO) avaliará."
+    },
+    "lista": {
+      "titulo": "Minhas solicitações",
+      "carregando": "Carregando…",
+      "vazio": "Você ainda não tem solicitações.",
+      "resposta": "Resposta"
+    }
+  },
+  "adminLgpd": {
+    "titulo": "Atendimento LGPD",
+    "subtitulo": "Fila de direitos do titular pendentes (Encarregado/DPO). A CPL não atende (RNF007).",
+    "carregando": "Carregando…",
+    "vazio": "Nenhuma solicitação pendente.",
+    "titular": "Titular",
+    "respostaPlaceholder": "Resposta ao titular (opcional)",
+    "motivoPlaceholder": "Motivo da recusa (obrigatório)",
+    "atender": "Atender",
+    "recusar": "Recusar",
+    "descartar": "Descartar dado",
+    "atendidaPadrao": "Atendida",
+    "feedback": {
+      "atendida": "Solicitação atendida.",
+      "recusada": "Solicitação recusada.",
+      "descartada": "Dado descartado (retenção cumprida).",
+      "retido": "Descarte negado: dado ainda sob retenção legal.",
+      "erro": "Não foi possível concluir a ação."
+    }
+  },
+  "demandasDistribuidas": {
+    "titulo": "Demandas distribuídas",
+    "subtitulo": "O rateio é igualitário entre os fornecedores aptos e sempre limitado à sua capacidade declarada (teto).",
+    "carregando": "Carregando…",
+    "vazioTitulo": "Nenhuma demanda distribuída ainda",
+    "vazioDica": "Assim que uma distribuição for realizada em um edital em que você é apto, ela aparece aqui.",
+    "semEmpresa": "Entre como fornecedor para ver suas demandas distribuídas.",
+    "status": {
+      "emExecucao": "Em execução",
+      "reserva": "Cadastro de Reserva · 2ª Demanda"
+    },
+    "rateioLabel": "RATEIO MATEMÁTICO DESTA DEMANDA",
+    "demandaTotal": "Demanda total",
+    "fornecedoresAptos": "Fornecedores aptos",
+    "cotaFinal": "Sua cota final",
+    "capacidadeLabel": "Cota alocada vs. sua capacidade (teto)",
+    "dentroDoTeto": "Dentro do teto declarado",
+    "reservaAviso": "<b>Você concluiu o credenciamento após a distribuição inicial.</b> Foi classificado no <b>Cadastro de Reserva (2ª Demanda)</b>. Os contratos vigentes não são alterados — você será acionado automaticamente, por ordem de fila, caso um fornecedor titular não cumpra a entrega."
+  },
+  "meusCredenciamentos": {
+    "titulo": "Meus Credenciamentos",
+    "subtitulo": "Acompanhe todos os credenciamentos da sua empresa e continue de onde parou.",
+    "etapa": "Etapa {{atual}}/{{total}}",
+    "carregando": "Carregando…",
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
+    "editalRemovido": "Edital removido",
+    "buscaAriaLabel": "Buscar credenciamentos",
+    "buscaPlaceholder": "Buscar por número ou objeto…",
+    "exportarCsv": "Excel",
+    "exportarPdf": "PDF",
+    "colEdital": "Edital",
+    "colObjeto": "Objeto",
+    "colStatus": "Status",
+    "colCriadoEm": "Criado em",
+    "colAtualizadoEm": "Última atualização",
+    "colAcoes": "Ações",
+    "filtro": {
+      "todos": "Todos",
+      "andamento": "Em andamento",
+      "finalizados": "Finalizados",
+      "cancelados": "Cancelados"
+    },
+    "estado": {
+      "iniciado": "Em andamento",
+      "aceito": "Finalizado",
+      "cancelado": "Cancelado"
+    },
+    "acao": {
+      "continuar": "Continuar",
+      "visualizar": "Visualizar",
+      "recredenciar": "Credenciar novamente",
+      "cancelar": "Cancelar credenciamento"
+    },
+    "vazioTitulo": "Nenhum credenciamento ainda",
+    "vazioDica": "Acesse a Vitrine de Editais e clique em “Iniciar Credenciamento” para começar.",
+    "vazioFiltroTitulo": "Nenhum credenciamento neste filtro",
+    "vazioFiltroDica": "Ajuste a busca ou escolha outra situação.",
+    "paginacaoInfo": "Mostrando {{de}}–{{ate}} de {{total}} credenciamentos",
+    "irParaPagina": "Ir para a página {{n}}"
+  },
+  "credenciamentoDetalhe": {
+    "titulo": "Detalhe do credenciamento",
+    "voltar": "Voltar aos credenciamentos",
+    "carregando": "Carregando…",
+    "naoEncontrado": "Credenciamento não encontrado.",
+    "naoEncontradoDica": "Ele pode ter sido removido ou não pertence à sua empresa.",
+    "edital": "Edital",
+    "objeto": "Objeto",
+    "secretaria": "Secretaria",
+    "situacao": "Situação",
+    "capacidade": "Capacidade declarada",
+    "capacidadeUnidades": "{{n}} unidades",
+    "etapa": "Etapa",
+    "termoTitulo": "Termo de Aceite",
+    "termoVersao": "Versão",
+    "termoFinalidade": "Finalidade",
+    "termoAceitoEm": "Aceito em",
+    "semTermo": "Termo de Aceite ainda não assinado.",
+    "criadoEm": "Criado em",
+    "atualizadoEm": "Última atualização"
   }
 }

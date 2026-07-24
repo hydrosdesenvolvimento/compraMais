@@ -18,4 +18,9 @@ export class FornecedorRepositoryMemory implements FornecedorRepository {
   async salvar(f: Fornecedor): Promise<void> {
     this.porIdMap.set(f.id, f);
   }
+
+  /** Mais recentes primeiro (por registro), como o adaptador pg ordena no SQL. */
+  async listar(): Promise<Fornecedor[]> {
+    return [...this.porIdMap.values()].sort((a, b) => b.registerDate.localeCompare(a.registerDate));
+  }
 }

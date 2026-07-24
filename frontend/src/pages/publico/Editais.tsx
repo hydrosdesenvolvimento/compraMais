@@ -6,6 +6,7 @@ import { api, type EditalItem, type CatalogoItemView } from '../../lib/api';
 import { obterUsuario } from '../../lib/auth';
 import { diasAte, tomPrazo, CORES_PRAZO } from '../../lib/prazos';
 import { exportarCsv } from '../../lib/exportar';
+import { consumirBuscaPendente } from '../../lib/busca-global';
 import { celula, siglaTag, botaoExportar, cabecalho, setaOrdem, Paginacao, type Direcao } from '../../design-system/tabela';
 import { IconeBusca, IconeDownload, IconeInfo, IconeSeta } from '../../design-system/icons';
 
@@ -39,7 +40,7 @@ export function Editais() {
   const { data: secretarias } = useQuery({ queryKey: ['catalogo', 'secretarias'], queryFn: () => api.catalogoListar('secretarias') });
   const { data: perfil } = useQuery({ queryKey: ['fornecedor', fornecedorId], queryFn: () => api.fornecedor(fornecedorId as string), enabled: !!fornecedorId });
 
-  const [busca, setBusca] = useState('');
+  const [busca, setBusca] = useState(() => consumirBuscaPendente('/editais'));
   const [secretariaFiltro, setSecretariaFiltro] = useState('all');
   const [ordem, setOrdem] = useState<Coluna>('prazo');
   const [direcao, setDirecao] = useState<Direcao>('asc');

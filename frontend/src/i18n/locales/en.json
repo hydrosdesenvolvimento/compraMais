@@ -37,6 +37,15 @@
       "menu": "MENU",
       "search": "Search tenders, documents…",
       "searchAria": "Search",
+      "busca": {
+        "carregando": "Searching…",
+        "vazio": "No results for “{{termo}}”.",
+        "tipo": {
+          "editais": "Tenders",
+          "documentos": "Documents",
+          "fornecedores": "Suppliers"
+        }
+      },
       "openMenu": "Open menu",
       "notificationsAria": "Notifications",
       "notificationsTitle": "Notifications",
@@ -549,12 +558,34 @@
     },
     "dashboard": {
       "carregando": "Loading…",
-      "titulo": "Administrative panel",
-      "subtitulo": "CPL / SMGA pending-items funnel.",
+      "titulo": "Overview",
+      "subtitulo": "Overview of municipal procurement.",
+      "totalDemandas": "Total demands",
+      "abertos_one": "{{count}} open",
+      "abertos_other": "{{count}} open",
+      "fornecedoresAtivos": "Active suppliers",
+      "meiPct": "{{pct}}% MEI",
+      "valorEstimado": "Estimated value",
+      "valorEstimadoSub": "across ongoing tenders",
       "documentosPendentes": "Pending documents",
-      "editaisPublicados": "Published tenders",
-      "editaisRascunho": "Draft tenders",
-      "bloqueiosAtivos": "Active blocks"
+      "aguardando": "awaiting review",
+      "editaisEmAndamento": "Ongoing tenders",
+      "verTodos": "View all",
+      "credenciados_one": "{{count}} accredited",
+      "credenciados_other": "{{count}} accredited",
+      "emAndamento": "Ongoing",
+      "semEditais": "No ongoing tenders.",
+      "alertas": "Alerts",
+      "semAlertas": "No alerts at the moment.",
+      "fornecedoresBloqueados_one": "{{count}} blocked supplier",
+      "fornecedoresBloqueados_other": "{{count}} blocked suppliers",
+      "fornecedoresBloqueadosSub": "Active debt at PGM/SICAF.",
+      "docsAnalise_one": "{{count}} document awaiting review",
+      "docsAnalise_other": "{{count}} documents awaiting review",
+      "docsAnaliseSub": "Human co-validation queue.",
+      "editaisVencendo_one": "{{count}} tender nearing its deadline",
+      "editaisVencendo_other": "{{count}} tenders nearing their deadline",
+      "editaisVencendoSub": "Closing within {{dias}} days."
     },
     "covalidacao": {
       "titulo": "Document co-validation",
@@ -1521,6 +1552,7 @@
   "notificacoes": {
     "titulo": "Notifications",
     "subtitulo": "History of your notifications",
+    "alertas": "Alerts",
     "vazio": "You have no notifications.",
     "marcarTodas": "Mark all as read",
     "carregando": "Loading…",

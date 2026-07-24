@@ -207,7 +207,16 @@ export interface DemandaDistribuidaView {
   geradoEm: string;
   hash: string;
 }
-export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
+export interface EditalEmAndamentoView { id: string; numero: string; objeto: string; secretariaId: string; prazoVigencia: string | null; credenciados: number; valorEstimado: number }
+export interface Funil {
+  documentosPendentes: number;
+  editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number };
+  bloqueiosAtivos: number;
+  fornecedoresAtivos: number;
+  fornecedoresMei: number;
+  valorEstimado: number;
+  editaisEmAndamento: EditalEmAndamentoView[];
+}
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; usuarioNome: string | null; papel: string | null; evento: string; timestamp: string; ip: string | null }
 /** UC020 — item de catálogo base (superset: cada catálogo acrescenta seus campos). */

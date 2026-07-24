@@ -7,6 +7,7 @@ import { celula, cabecalho, Paginacao } from '../../design-system/tabela';
 import { Botao, BotaoIcone, Campo, useToast } from '../../design-system/components';
 import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro, IconeDemandas, IconeLapis, IconeUpload, IconeVoltar, IconeCadeado, IconeMais } from '../../design-system/icons';
 import { textoDoErro } from '../../lib/erros';
+import { consumirBuscaPendente } from '../../lib/busca-global';
 
 const POR_PAGINA = 10;
 
@@ -42,7 +43,7 @@ export function GerirEditais() {
   const [itensId, setItensId] = useState<string | null>(null); // edital cujo modal de itens está aberto
   const [editandoId, setEditandoId] = useState<string | null>(null); // edital em edição (só rascunho)
   const [criando, setCriando] = useState(false);
-  const [busca, setBusca] = useState('');
+  const [busca, setBusca] = useState(() => consumirBuscaPendente('/admin/editais'));
   const [situacao, setSituacao] = useState('');
   const [secretariaFiltro, setSecretariaFiltro] = useState('');
   const [cnaeFiltro, setCnaeFiltro] = useState('');

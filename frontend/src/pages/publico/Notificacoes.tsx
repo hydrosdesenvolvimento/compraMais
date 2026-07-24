@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { api, type CatalogoItemView, type NotificacaoView } from '../../lib/api';
 import { obterUsuario } from '../../lib/auth';
 import { renderNotificacao } from '../../lib/notificacoes-render';
+import { construirNotificacoesFornecedor } from '../../lib/notificacoes-fornecedor';
 import { IconeRelogio, IconeEditais } from '../../design-system/icons';
 import { Botao } from '../../design-system/components';
 
@@ -23,6 +24,7 @@ export function Notificacoes() {
 
   const { data, isLoading } = useQuery({ queryKey: ['notificacoes-pagina'], queryFn: () => api.notificacoes(1, 50), enabled: !!empresaId });
   const secretarias = useQuery({ queryKey: ['catalogo', 'secretarias'], queryFn: () => api.catalogoListar('secretarias') });
+  const documentos = useQuery({ queryKey: ['documentos', empresaId], queryFn: () => api.documentos(empresaId as string), enabled: !!empresaId });
   const invalidar = () => { void qc.invalidateQueries({ queryKey: ['notificacoes-pagina'] }); void qc.invalidateQueries({ queryKey: ['notificacoes'] }); };
   const marcarLida = useMutation({ mutationFn: (id: string) => api.marcarNotificacaoLida(id), onSuccess: invalidar });
   const marcarTodas = useMutation({ mutationFn: () => api.marcarNotificacoesLidas(), onSuccess: invalidar });
@@ -33,6 +35,12 @@ export function Notificacoes() {
 
   const itens = useMemo(() => data?.itens ?? [], [data]);
   const naoLidas = data?.naoLidas ?? 0;
+  // Alertas ao vivo (documento a vencer/vencido) — derivados do estado atual, sem histórico/lida.
+  // Espelham o sino; ficam acima do histórico persistido para a página não "não listar" o que o sino mostra.
+  const alertas = useMemo(
+    () => construirNotificacoesFornecedor(documentos.data ?? [], [], secretariasLista, t, i18n.language),
+    [documentos.data, secretariasLista, t, i18n.language],
+  );
 
   function abrir(n: NotificacaoView, href: string | null) {
     if (!n.lida) marcarLida.mutate(n.id);
@@ -55,10 +63,26 @@ export function Notificacoes() {
         )}
       </div>
 
+      {alertas.length > 0 && (
+        <div style={{ display: 'grid', gap: 10 }} data-cy="alertas">
+          <h2 className="page-sub" style={{ fontSize: 13, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em', color: 'var(--cinza-500)', margin: 0 }}>{t('notificacoes.alertas')}</h2>
+          {alertas.map((a, i) => (
+            <div key={`alerta-${i}`} data-cy="alerta" style={{ ...cardBase, cursor: 'default', borderColor: 'var(--amarelo-300, #e6c47a)', background: 'var(--amarelo-50, #fdf6e3)' }}>
+              <span style={{ flexShrink: 0, marginTop: 1, color: a.tom === 'atencao' ? '#8A5410' : 'var(--azul-600)' }}>
+                {a.tom === 'atencao' ? <IconeRelogio width={20} height={20} /> : <IconeEditais width={20} height={20} />}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, lineHeight: 1.5, color: 'var(--azul-900)' }}><strong>{a.titulo}</strong> <span style={{ color: 'var(--cinza-700)' }}>{a.texto}</span></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {isLoading ? (
         <p data-cy="carregando" className="page-sub">{t('notificacoes.carregando')}</p>
       ) : itens.length === 0 ? (
-        <div data-cy="vazio" className="card" style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>{t('notificacoes.vazio')}</div>
+        alertas.length === 0 && <div data-cy="vazio" className="card" style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>{t('notificacoes.vazio')}</div>
       ) : (
         <div style={{ display: 'grid', gap: 10 }}>
           {itens.map((n) => {

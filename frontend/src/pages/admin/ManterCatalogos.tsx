@@ -20,7 +20,13 @@ import { exportarCsv } from '../../lib/exportar';
  * serviços as declara — é o catálogo que cresce para centenas/milhares de linhas.
  */
 type TipoCampo = 'text' | 'select' | 'checkbox' | 'textarea' | 'lista';
-interface CampoDef { nome: string; labelKey: string; tipo: TipoCampo; opcoes?: { valor: string; labelKey: string }[]; dicaKey?: string }
+/**
+ * `largura: 'total'` faz o campo ocupar a linha inteira da grade de duas colunas — reservado a campos
+ * de texto longo (nome, especificações). Sem isso o formulário volta a ser uma coluna estreita com
+ * metade do cartão vazia. A ordem dos campos é a ordem visual: cada par consecutivo de campos "meia
+ * largura" divide uma linha.
+ */
+interface CampoDef { nome: string; labelKey: string; tipo: TipoCampo; opcoes?: { valor: string; labelKey: string }[]; dicaKey?: string; largura?: 'total' }
 interface FiltroDef { nome: string; labelKey: string; todosKey: string; opcoes: { valor: string; labelKey: string }[]; valorDoItem: (i: CatalogoItemView) => string }
 interface ExportacaoDef { nomeArquivo: string; colunasKey: string[]; linha: (i: CatalogoItemView, rotular: (chave: string) => string) => string[] }
 interface CatalogoDef {
@@ -45,8 +51,8 @@ const CATALOGOS: CatalogoDef[] = [
     slug: 'secretarias', tabKey: 'admin.catalogos.tabs.secretarias',
     resumo: (i) => `${i.sigla ?? ''} — ${i.nome ?? ''}`,
     campos: [
+      { nome: 'nome', labelKey: 'admin.catalogos.campos.nome', tipo: 'text', largura: 'total' },
       { nome: 'sigla', labelKey: 'admin.catalogos.campos.sigla', tipo: 'text' },
-      { nome: 'nome', labelKey: 'admin.catalogos.campos.nome', tipo: 'text' },
       { nome: 'responsavel', labelKey: 'admin.catalogos.campos.responsavel', tipo: 'text' },
     ],
   },
@@ -62,7 +68,7 @@ const CATALOGOS: CatalogoDef[] = [
     slug: 'tipos-documento', tabKey: 'admin.catalogos.tabs.tiposDoc',
     resumo: (i) => `${i.nome ?? ''} (${i.categoria ?? ''})`,
     campos: [
-      { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeTipo', tipo: 'text' },
+      { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeTipo', tipo: 'text', largura: 'total' },
       { nome: 'formato', labelKey: 'admin.catalogos.campos.formato', tipo: 'text' },
       {
         nome: 'categoria', labelKey: 'admin.catalogos.campos.categoria', tipo: 'select',
@@ -82,10 +88,10 @@ const CATALOGOS: CatalogoDef[] = [
     resumo: (i) => `${i.numero ?? ''} — ${i.nome ?? ''}`,
     busca: (i) => `${i.numero ?? ''} ${i.nome ?? ''} ${i.especificacoes ?? ''}`,
     campos: [
-      { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeItem', tipo: 'text' },
+      { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeItem', tipo: 'text', largura: 'total' },
       { nome: 'tipo', labelKey: 'admin.catalogos.campos.tipoItem', tipo: 'select', opcoes: TIPOS_ITEM },
       { nome: 'unidades', labelKey: 'admin.catalogos.campos.unidades', tipo: 'lista', dicaKey: 'admin.catalogos.campos.unidadesDica' },
-      { nome: 'especificacoes', labelKey: 'admin.catalogos.campos.especificacoes', tipo: 'textarea' },
+      { nome: 'especificacoes', labelKey: 'admin.catalogos.campos.especificacoes', tipo: 'textarea', largura: 'total' },
     ],
     filtro: {
       nome: 'tipo', labelKey: 'admin.catalogos.filtros.tipo', todosKey: 'admin.catalogos.filtros.tipoTodos',
@@ -194,30 +200,44 @@ export function ManterCatalogos() {
       </div>
 
       <Card>
-        <form data-cy="form-catalogo" onSubmit={(e) => { e.preventDefault(); criar.mutate(valores); }} style={{ display: 'grid', gap: 10, maxWidth: 480 }}>
+        <form data-cy="form-catalogo" className="cm-form-grid" style={{ maxWidth: 880 }}
+          onSubmit={(e) => { e.preventDefault(); criar.mutate(valores); }}>
           {def.campos.map((campo) => (
-            <label key={campo.nome} className="label" style={{ display: 'grid', gap: 4 }}>
-              {t(campo.labelKey)}
-              {campo.tipo === 'checkbox' ? (
+            campo.tipo === 'checkbox' ? (
+              // Booleano é caixa + rótulo na MESMA linha: empilhá-los (como nos demais campos) deixava a
+              // caixinha órfã sob o texto, sem alvo de clique claro.
+              <label key={campo.nome} className={`label${campo.largura === 'total' ? ' cm-campo-total' : ''}`}
+                style={{ display: 'flex', gap: 8, alignItems: 'center', minHeight: 38, cursor: 'pointer' }}>
                 <input data-cy={`campo-${campo.nome}`} type="checkbox" checked={Boolean(valores[campo.nome])}
+                  style={{ width: 17, height: 17, flexShrink: 0, accentColor: 'var(--azul-700)' }}
                   onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.checked })} />
-              ) : campo.tipo === 'select' ? (
-                <select data-cy={`campo-${campo.nome}`} className="input" value={String(valores[campo.nome] ?? '')}
-                  onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.value })}>
-                  {campo.opcoes?.map((o) => <option key={o.valor} value={o.valor}>{t(o.labelKey)}</option>)}
-                </select>
-              ) : campo.tipo === 'textarea' ? (
-                <textarea data-cy={`campo-${campo.nome}`} className="input" rows={3} value={String(valores[campo.nome] ?? '')}
-                  onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.value })} />
-              ) : (
-                <input data-cy={`campo-${campo.nome}`} className="input" value={String(valores[campo.nome] ?? '')}
-                  onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.value })} />
-              )}
-              {campo.dicaKey && <small style={{ color: 'var(--texto-suave, #667085)' }}>{t(campo.dicaKey)}</small>}
-            </label>
+                <span style={{ minWidth: 0 }}>{t(campo.labelKey)}</span>
+              </label>
+            ) : (
+              <label key={campo.nome} className={`label${campo.largura === 'total' ? ' cm-campo-total' : ''}`}
+                style={{ display: 'grid', gap: 4, alignContent: 'start' }}>
+                {t(campo.labelKey)}
+                {campo.tipo === 'select' ? (
+                  <select data-cy={`campo-${campo.nome}`} className="input" value={String(valores[campo.nome] ?? '')}
+                    onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.value })}>
+                    {campo.opcoes?.map((o) => <option key={o.valor} value={o.valor}>{t(o.labelKey)}</option>)}
+                  </select>
+                ) : campo.tipo === 'textarea' ? (
+                  <textarea data-cy={`campo-${campo.nome}`} className="input" rows={3} value={String(valores[campo.nome] ?? '')}
+                    onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.value })} />
+                ) : (
+                  <input data-cy={`campo-${campo.nome}`} className="input" value={String(valores[campo.nome] ?? '')}
+                    onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.value })} />
+                )}
+                {campo.dicaKey && <small style={{ color: 'var(--cinza-500)' }}>{t(campo.dicaKey)}</small>}
+              </label>
+            )
           ))}
-          <Botao data-cy="criar" type="submit" disabled={criar.isPending}>{t('admin.catalogos.criar')}</Botao>
-          {criar.isError && <p data-cy="erro" role="alert" style={{ color: 'var(--erro, #c0392b)' }}>{t('admin.catalogos.erroCriar')}</p>}
+          {/* Rodapé: o botão não se estica pela linha — largura própria, à esquerda, como nos demais formulários. */}
+          <div className="cm-campo-total" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 4 }}>
+            <Botao data-cy="criar" type="submit" disabled={criar.isPending}>{t('admin.catalogos.criar')}</Botao>
+            {criar.isError && <p data-cy="erro" role="alert" style={{ margin: 0, color: 'var(--erro, #c0392b)' }}>{t('admin.catalogos.erroCriar')}</p>}
+          </div>
         </form>
       </Card>
 

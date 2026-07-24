@@ -57,7 +57,6 @@ export function CredenciamentoEmEdital() {
     <div className="stack" data-cy="admin-credenciamento-edital">
       <div>
         <h1 className="page-title">{t('admin.credenciamentoEdital.titulo')}</h1>
-        <p className="page-sub">{t('admin.credenciamentoEdital.subtitulo')}</p>
       </div>
 
       {carregandoEditais ? (

@@ -169,7 +169,6 @@
   "admin": {
     "credenciamentoEdital": {
       "titulo": "Acreditación en Convocatoria",
-      "subtitulo": "Adhesión filtrada por CNAE (RN001) y verificación de morosidad (RN002)",
       "seletorLabel": "Convocatoria",
       "cnaeExigido": "CNAE exigido: {{cnae}}",
       "elegiveisTitulo": "Proveedores elegibles",
@@ -204,7 +203,6 @@
     "distribuicao": {
       "eyebrow": "Operación · Distribución",
       "titulo": "Distribución Inteligente",
-      "subtitulo": "Reparto equitativo respetando la capacidad declarada (RN005)",
       "seletorLabel": "Convocatoria",
       "carregando": "Cargando distribución…",
       "erroCarregar": "No se pudo cargar la distribución.",
@@ -237,7 +235,6 @@
     "reserva": {
       "eyebrow": "Operación · Registro de Reserva",
       "titulo": "Registro de Reserva",
-      "subtitulo": "Gestión de rezagados sin alterar contratos vigentes (RN004)",
       "avisoTitulo": "Cola de reserva.",
       "avisoTexto": "Los proveedores aprobados después de la distribución inicial se ubican aquí sin alterar las cuotas ya distribuidas. Serán convocados en orden cronológico si algún titular incumple la entrega.",
       "carregando": "Cargando cola de reserva…",
@@ -540,7 +537,6 @@
     "gerirEditais": {
       "eyebrow": "Operación · Convocatorias",
       "titulo": "Convocatorias de Acreditación",
-      "subtitulo": "1 convocatoria = 1 demanda de secretaría (RN007)",
       "novoEdital": "Nueva convocatoria",
       "colEdital": "Convocatoria",
       "colObjeto": "Objeto",
@@ -845,7 +841,6 @@
       "migalha": "Operación · Análisis Documental",
       "titulo": "Análisis Documental",
       "tituloComplemento": "(covalidación)",
-      "subtitulo": "Aprobación o rechazo con justificación obligatoria (RN003)",
       "carregando": "Cargando cola…",
       "erroCarregar": "No se pudo cargar la cola de análisis.",
       "vazioTitulo": "Ningún documento en la cola",
@@ -1356,7 +1351,6 @@
   },
   "adminLgpd": {
     "titulo": "Solicitudes LGPD",
-    "subtitulo": "Cola de derechos del titular pendientes (Encargado/DPO). La CPL no atiende (RNF007).",
     "carregando": "Cargando…",
     "vazio": "Ninguna solicitud pendiente.",
     "titular": "Titular",

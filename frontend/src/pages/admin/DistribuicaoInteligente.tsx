@@ -61,7 +61,6 @@ export function DistribuicaoInteligente() {
       <div>
         <div style={{ fontSize: 12, color: 'var(--cinza-400)' }}>{t('admin.distribuicao.eyebrow')}</div>
         <h1 className="page-title">{t('admin.distribuicao.titulo')}</h1>
-        <p className="page-sub">{t('admin.distribuicao.subtitulo')}</p>
       </div>
 
       {carregandoEditais ? (

@@ -4,9 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { limparSessao } from '../lib/auth';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import {
-  IconePredio, IconeBusca, IconeSino, IconeChevron, IconeMenu,
+  IconeBusca, IconeSino, IconeChevron, IconeMenu,
   IconeUsuario, IconeSair, IconeRelogio, IconeEditais,
 } from './icons';
+import emblemaCompraMais from './image/logoCompraMaisEmblema.png';
 
 type MenuLinkTo = ComponentProps<typeof Link>['to'];
 
@@ -58,13 +59,13 @@ export function AppShell({
       <aside className="cm-sidebar cm-scroll" data-open={aberto ? '1' : '0'} data-collapsed={recolhido ? '1' : '0'}>
         <div className="cm-brandrow">
           <span className="cm-brandfull">
-            <span className="cm-brand-icon"><IconePredio width={24} height={24} /></span>
+            <span className="cm-brand-icon"><img className="cm-brand-emblema" src={emblemaCompraMais} alt="" /></span>
             <span className="cm-brand-text">
               <span className="cm-brand-name">{t('common.brand.name')}</span>
               <span className="cm-brand-sub">{t('common.brand.sub')}</span>
             </span>
           </span>
-          <span className="cm-brandmini"><IconePredio width={22} height={22} /></span>
+          <span className="cm-brandmini"><img className="cm-brand-emblema" src={emblemaCompraMais} alt={t('common.brand.name')} /></span>
         </div>
 
         <nav className="cm-nav" aria-label={t('common.shell.menu')}>

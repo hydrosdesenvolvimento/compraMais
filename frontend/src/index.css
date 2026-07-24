@@ -209,11 +209,14 @@ input[type="date"], input[type="number"], input[type="tel"], select, textarea {
 }
 .cm-brandrow { padding: 20px 18px 16px; display: flex; align-items: center; justify-content: center; gap: 11px; }
 .cm-brandfull { display: flex; align-items: center; gap: 11px; }
-.cm-brand-icon { width: 42px; height: 42px; border-radius: 11px; background: linear-gradient(135deg, var(--azul-700), var(--azul-900)); color: #fff; display: grid; place-items: center; flex-shrink: 0; }
+.cm-brand-icon { height: 44px; display: grid; place-items: center; flex-shrink: 0; }
 .cm-brand-text { line-height: 1.1; }
 .cm-brand-name { font-weight: 700; font-size: 17px; color: var(--azul-900); display: block; }
 .cm-brand-sub { font-size: 10.5px; letter-spacing: .12em; color: var(--cinza-400); font-weight: 600; }
-.cm-brandmini { display: none; width: 42px; height: 42px; border-radius: 11px; background: linear-gradient(135deg, var(--azul-700), var(--azul-900)); color: #fff; place-items: center; flex-shrink: 0; }
+.cm-brandmini { display: none; place-items: center; flex-shrink: 0; }
+/* Emblema oficial (marca circular do logotipo Compra Mais); substitui o ícone placeholder na sidebar. */
+.cm-brand-emblema { height: 40px; width: auto; display: block; }
+.cm-brandmini .cm-brand-emblema { height: 34px; }
 
 .cm-nav { padding: 18px 16px; flex: 1; }
 .cm-grouplabel { font: 600 11px var(--font-body); letter-spacing: .1em; color: var(--cinza-400); padding: 0 8px 12px; }

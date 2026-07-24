@@ -20,12 +20,17 @@ describe('montarChip', () => {
       'Procurador',
       'Vale do Acre Uniformes',
     );
-    expect(chip).toEqual({ nome: 'Marcos Albuquerque', papel: 'Procurador', fantasia: 'Vale do Acre Uniformes', iniciais: 'VA' });
+    expect(chip).toEqual({ nome: 'Marcos Albuquerque', papel: 'Procurador', fantasia: 'Vale do Acre Uniformes', iniciais: 'VA', avatar: null });
   });
 
   it('servidor interno: sem empresa, iniciais do nome da pessoa', () => {
     const chip = montarChip({ userId: 'u2', papel: 'cpl', nome: 'Ana Beatriz' }, 'Analista CPL');
-    expect(chip).toEqual({ nome: 'Ana Beatriz', papel: 'Analista CPL', fantasia: undefined, iniciais: 'AB' });
+    expect(chip).toEqual({ nome: 'Ana Beatriz', papel: 'Analista CPL', fantasia: undefined, iniciais: 'AB', avatar: null });
+  });
+
+  it('propaga a foto de perfil (avatar) para o chip quando existir', () => {
+    const chip = montarChip({ userId: 'u4', papel: 'titular', nome: 'Marcos Albuquerque' }, 'Titular', 'MAC Soluções', 'data:image/png;base64,AAA');
+    expect(chip.avatar).toBe('data:image/png;base64,AAA');
   });
 
   it('sem sessão: cai no rótulo do papel (nunca mock)', () => {

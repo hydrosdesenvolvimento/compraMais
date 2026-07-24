@@ -1,4 +1,4 @@
-import { useState, type ComponentProps, type ReactNode } from 'react';
+import { useState, type ComponentProps, type CSSProperties, type ReactNode } from 'react';
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { limparSessao } from '../lib/auth';
@@ -12,7 +12,7 @@ type MenuLinkTo = ComponentProps<typeof Link>['to'];
 
 /** `rotuloKey` é uma chave i18n (ex.: 'common.nav.inicio'); o rótulo é traduzido no render. */
 export interface ItemMenu { rotuloKey: string; href: MenuLinkTo; icone: ReactNode; cy?: string }
-export interface UsuarioChip { nome: string; papel: string; iniciais: string; fantasia?: string }
+export interface UsuarioChip { nome: string; papel: string; iniciais: string; fantasia?: string; avatar?: string | null }
 export interface Notificacao { tom: 'atencao' | 'info'; titulo: string; texto: string }
 
 const NOTIF_PADRAO: Notificacao[] = [
@@ -22,6 +22,14 @@ const NOTIF_PADRAO: Notificacao[] = [
 
 function ehMobile() {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 920px)').matches;
+}
+
+/** Avatar do chip/menu: mostra a foto de perfil quando existir, senão as iniciais. */
+function AvatarChip({ usuario, style }: { usuario: UsuarioChip; style?: CSSProperties }) {
+  if (usuario.avatar) {
+    return <img className="cm-avatar-sm" style={{ objectFit: 'cover', ...style }} src={usuario.avatar} alt={usuario.nome} />;
+  }
+  return <span className="cm-avatar-sm" style={style}>{usuario.iniciais}</span>;
 }
 
 /**
@@ -132,7 +140,7 @@ export function AppShell({
 
           <div style={{ position: 'relative' }}>
             <button className="cm-profile-btn" onClick={() => setProfileOpen((v) => !v)} data-cy="user-chip" aria-label={t('common.shell.userMenuAria')}>
-              <span className="cm-avatar-sm">{usuario.iniciais}</span>
+              <AvatarChip usuario={usuario} />
               <span className="cm-hide-sm" style={{ textAlign: 'left', lineHeight: 1.25 }}>
                 <span style={{ display: 'block', font: '600 13px var(--font-body)', color: 'var(--azul-900)' }}>{usuario.fantasia ?? usuario.nome}</span>
                 <span style={{ display: 'block', fontSize: 11, color: 'var(--cinza-400)' }}>{usuario.papel}</span>
@@ -143,7 +151,7 @@ export function AppShell({
               <>
                 <div className="cm-menu-pop" style={{ width: 272 }} role="region" aria-label={t('common.shell.userMenuAria')}>
                   <div className="cm-menu-head">
-                    <span className="cm-avatar-sm" style={{ width: 44, height: 44, fontSize: 16 }}>{usuario.iniciais}</span>
+                    <AvatarChip usuario={usuario} style={{ width: 44, height: 44, fontSize: 16 }} />
                     <div style={{ minWidth: 0 }}>
                       <div className="cm-menu-name">{usuario.nome}</div>
                       <div className="cm-menu-role">{usuario.papel}{usuario.fantasia ? ` · ${usuario.fantasia}` : ''}</div>

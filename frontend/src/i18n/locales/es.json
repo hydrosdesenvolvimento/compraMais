@@ -37,6 +37,15 @@
       "menu": "MENÚ",
       "search": "Buscar licitaciones, documentos…",
       "searchAria": "Buscar",
+      "busca": {
+        "carregando": "Buscando…",
+        "vazio": "Sin resultados para «{{termo}}».",
+        "tipo": {
+          "editais": "Licitaciones",
+          "documentos": "Documentos",
+          "fornecedores": "Proveedores"
+        }
+      },
       "openMenu": "Abrir menú",
       "notificationsAria": "Notificaciones",
       "notificationsTitle": "Notificaciones",

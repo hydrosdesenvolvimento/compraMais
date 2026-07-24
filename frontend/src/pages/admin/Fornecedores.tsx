@@ -7,6 +7,7 @@ import { exportarCsv } from '../../lib/exportar';
 import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeBusca, IconeFiltro, IconeOrdenar, IconeDownload, IconeOlho, IconeLapis, IconeBloquear, IconeSeta } from '../../design-system/icons';
 import { ModalFornecedor, type ModoModal } from './ModalFornecedor';
+import { consumirBuscaPendente } from '../../lib/busca-global';
 
 /**
  * Painel Admin · "Gestão de Fornecedores" (Operação — smga/administrador). Lista as empresas
@@ -43,7 +44,7 @@ export function Fornecedores() {
   const { t } = useTranslation();
   const qc = useQueryClient();
 
-  const [busca, setBusca] = useState('');
+  const [busca, setBusca] = useState(() => consumirBuscaPendente('/admin/fornecedores'));
   const [status, setStatus] = useState('');
   const [situacao, setSituacao] = useState('');
   const [ordenarPor, setOrdenarPor] = useState<Coluna | ''>('');

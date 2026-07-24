@@ -30,11 +30,18 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
     expect(cad.statusCode).toBe(201);
     empresaId = cad.json().fornecedorId as string;
 
+    // Prova de vida (UC007): referência do responsável no cadastro; a MESMA foto aprova na verificação.
+    const foto = Buffer.from('rosto-do-titular-1').toString('base64');
+    const bio = await app.inject({ method: 'POST', url: `/fornecedores/${empresaId}/biometria`, headers: fornecedor(), payload: { imagem: foto } });
+    expect(bio.statusCode).toBe(201);
+
     editalDistribuido = await criarPublicar(['1412601'], 10);
-    // Fornecedor credencia (teto 10) e assina o termo → vira apto (`aceito`).
+    // Fornecedor credencia (teto 10), prova vida e assina o termo → vira apto (`aceito`).
     const cred = await app.inject({ method: 'POST', url: `/editais/${editalDistribuido}/credenciamentos`, headers: fornecedor(), payload: { capacidade: 10 } });
     expect(cred.statusCode).toBe(201);
     const credId = cred.json().credenciamentoId as string;
+    const prova = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/prova-de-vida`, headers: fornecedor(), payload: { imagem: foto } });
+    expect(prova.statusCode).toBe(200);
     const termo = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: fornecedor(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
     expect(termo.statusCode).toBe(200);
   });

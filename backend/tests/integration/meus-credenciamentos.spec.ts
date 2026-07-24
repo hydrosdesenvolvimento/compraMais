@@ -25,6 +25,7 @@ describe('ListarCredenciamentos — projeção de "Meus Credenciamentos" (UC004)
     repo = new CredenciamentoRepositoryMemory();
     const iniciado = Credenciamento.iniciar({ id: 'c1', fornecedorId: 'f1', editalId: 'e1', capacidadeTeto: 100 });
     const aceito = Credenciamento.iniciar({ id: 'c2', fornecedorId: 'f1', editalId: 'e2', capacidadeTeto: 50 });
+    aceito.registrarProvaDeVida({ status: 'aprovada', score: 0.9, modelo: 'mock-arcface' }); // gate UC007
     aceito.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' });
     const cancelado = Credenciamento.iniciar({ id: 'c3', fornecedorId: 'f1', editalId: 'e1', capacidadeTeto: 10 });
     cancelado.cancelar();
@@ -40,16 +41,16 @@ describe('ListarCredenciamentos — projeção de "Meus Credenciamentos" (UC004)
     expect(c.estado).toBe('iniciado');
   });
 
-  it('expõe passoAtual (onde parou) e totalPassos=4 do domínio (Etapa n/N — não 5 do protótipo)', async () => {
+  it('expõe passoAtual (onde parou) e totalPassos=5 do domínio (Etapa n/N — inclui Prova de Vida)', async () => {
     const emPasso2 = Credenciamento.iniciar({ id: 'c4', fornecedorId: 'f1', editalId: 'e1', capacidadeTeto: 20 });
     emPasso2.registrarPasso(2);
     await repo.salvar(emPasso2);
     const uc = new ListarCredenciamentos(repo, editais, secretarias);
     const lista = await uc.doFornecedor('f1', { incluirCancelados: true });
-    expect(lista.every((c) => c.totalPassos === 4)).toBe(true);
+    expect(lista.every((c) => c.totalPassos === 5)).toBe(true);
     expect(lista.find((c) => c.id === 'c4')?.passoAtual).toBe(2); // parou em Documentos
     expect(lista.find((c) => c.id === 'c1')?.passoAtual).toBe(1); // recém-iniciado (Capacidade)
-    expect(lista.find((c) => c.id === 'c2')?.passoAtual).toBe(4); // aceito → Concluído
+    expect(lista.find((c) => c.id === 'c2')?.passoAtual).toBe(5); // aceito → Concluído
   });
 
   it('expõe criadoEm/atualizadoEm a partir da auditoria de linha (AD-33), sem coluna nova', async () => {

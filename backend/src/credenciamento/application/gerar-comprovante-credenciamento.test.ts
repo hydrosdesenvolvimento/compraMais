@@ -16,6 +16,7 @@ const fornecedores: FornecedorIdentidadeLookup = {
 /** Credenciamento persistido e já aceito (Passo Concluído) — o cenário do botão "Baixar PDF". */
 async function semearAceito(repo: CredenciamentoRepositoryMemory): Promise<string> {
   const c = Credenciamento.iniciar({ id: 'cred1', fornecedorId: 'forn1', editalId: 'ed1', capacidadeTeto: 250 });
+  c.registrarProvaDeVida({ status: 'aprovada', score: 0.9, modelo: 'mock-arcface' }, 'titular1', '2026-07-20T12:59:00.000Z'); // gate UC007
   c.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' }, 'titular1', '2026-07-20T13:00:00.000Z');
   await repo.salvar(c);
   return c.id;

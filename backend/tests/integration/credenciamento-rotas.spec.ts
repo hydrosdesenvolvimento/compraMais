@@ -7,12 +7,18 @@ import { comoPapel } from '../helpers/auth.js';
  * UC004 — Solicitar Credenciamento e concluir por Termo de Aceite, no nível HTTP. App em memória (sem
  * DATABASE_URL) com a Receita mockada (CNPJ demo → CNAE 1412601). Cobre a precondição de edital
  * Aberto + compatível (403), a conclusão pelo Termo (fornecedor → pendente_analise, rastro RN016) e o
- * cancelamento antes da distribuição (A2). Biometria/liveness (UC007) NÃO faz parte deste fluxo (R2).
+ * cancelamento antes da distribuição (A2). A prova de vida facial (UC007) faz parte do fluxo: o
+ * Termo exige a referência do cadastro batida com a captura (FACE_PROVIDER=mock → determinístico:
+ * mesma imagem casa, imagem diferente reprova).
  *
  * ⚠️ Histórico (2026-07-16, AD-20): o fornecedor se identificava por `x-papel`/`x-empresa-id`, headers
  * de texto — qualquer chamador se dizia titular de qualquer empresa. Agora a empresa representada é a
  * do JWT.
  */
+/** Foto do responsável (base64). Com o mock facial, o mesmo conteúdo gera o mesmo template. */
+const FOTO_TITULAR = Buffer.from('rosto-do-titular-1').toString('base64');
+const FOTO_OUTRA = Buffer.from('rosto-de-outra-pessoa').toString('base64');
+
 describe('Rotas de credenciamento (UC004 — HTTP)', () => {
   let app: FastifyInstance;
   let empresaId: string;
@@ -39,6 +45,11 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect(cad.statusCode).toBe(201);
     empresaId = cad.json().fornecedorId as string;
 
+    // Prova de vida (UC007): cadastra a referência biométrica do responsável (onboarding, D4). Com o
+    // mock, o template é determinístico por conteúdo → verificar depois com a MESMA foto aprova.
+    const bio = await app.inject({ method: 'POST', url: `/fornecedores/${empresaId}/biometria`, headers: forn(), payload: { imagem: FOTO_TITULAR } });
+    expect(bio.statusCode).toBe(201);
+
     editalCompativel = await criarEPublicar(['1412601']);
     editalIncompativel = await criarEPublicar(['9999999']);
     editalRascunho = await criar(['1412601']); // compatível mas não publicado
@@ -62,6 +73,9 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
   }
   const iniciar = (editalId: string, capacidade: unknown = 500) =>
     app.inject({ method: 'POST', url: `/editais/${editalId}/credenciamentos`, headers: forn(), payload: { capacidade } });
+  // Passo 3 (UC007): prova de vida com a MESMA foto da referência → aprovada (precondição do Termo).
+  const provarVida = (credId: string, imagem: string = FOTO_TITULAR) =>
+    app.inject({ method: 'POST', url: `/credenciamentos/${credId}/prova-de-vida`, headers: forn(), payload: { imagem } });
 
   it('iniciar em edital incompatível → 403 (precondição UC003)', async () => {
     const r = await iniciar(editalIncompativel);
@@ -100,6 +114,10 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     const credId = ini.json().credenciamentoId as string;
     expect(ini.json().estado).toBe('iniciado');
 
+    const prova = await provarVida(credId);
+    expect(prova.statusCode).toBe(200);
+    expect(prova.json()).toMatchObject({ status: 'aprovada' });
+
     const aceite = await app.inject({
       method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(),
       payload: { versaoTermo: 'v1', finalidade: 'credenciamento' },
@@ -113,9 +131,38 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect((trilha.json() as { evento: string }[]).some((r) => r.evento === 'TermoAceito')).toBe(true);
   });
 
+  it('aceitar o Termo sem prova de vida aprovada → 409 (gate UC007)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 300)).json().credenciamentoId as string;
+    const r = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
+    expect(r.statusCode).toBe(409);
+    expect(r.json()).toMatchObject({ codigo: 'ProvaDeVidaPendente' });
+  });
+
+  it('prova de vida com rosto diferente da referência → reprovada (não libera o Termo)', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 300)).json().credenciamentoId as string;
+    const prova = await provarVida(credId, FOTO_OUTRA);
+    expect(prova.statusCode).toBe(200);
+    expect(prova.json()).toMatchObject({ status: 'reprovada' });
+    const termo = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
+    expect(termo.statusCode).toBe(409);
+    expect(termo.json()).toMatchObject({ codigo: 'ProvaDeVidaPendente' });
+  });
+
+  it('prova de vida sem rosto detectado → 422 com o motivo tipado', async () => {
+    const edital = await criarEPublicar(['1412601']);
+    const credId = (await iniciar(edital, 300)).json().credenciamentoId as string;
+    const semRosto = Buffer.from('FACE:NONE-sem-rosto').toString('base64');
+    const r = await provarVida(credId, semRosto);
+    expect(r.statusCode).toBe(422);
+    expect(r.json()).toMatchObject({ codigo: 'rosto_nao_detectado' });
+  });
+
   it('aceitar o mesmo credenciamento duas vezes → 409 (transição inválida)', async () => {
     const edital = await criarEPublicar(['1412601']); // edital novo para não colidir com credenciamentos ativos
     const credId = (await iniciar(edital, 300)).json().credenciamentoId as string;
+    await provarVida(credId);
     const primeiro = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
     expect(primeiro.statusCode).toBe(200);
     const segundo = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
@@ -161,7 +208,7 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
 
     const lista = await app.inject({ method: 'GET', url: `/fornecedores/${empresaId}/credenciamentos?incluirCancelados=true`, headers: forn() });
     const item = (lista.json() as { id: string; passoAtual: number; totalPassos: number }[]).find((c) => c.id === credId);
-    expect(item).toMatchObject({ passoAtual: 2, totalPassos: 4 });
+    expect(item).toMatchObject({ passoAtual: 2, totalPassos: 5 });
   });
 
   it('passo fora de 1..N-1 → 422 (PassoInvalido)', async () => {
@@ -175,16 +222,18 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
   it('GET /credenciamentos/:id devolve o detalhe do dono, com o Termo após o aceite (RN016)', async () => {
     const edital = await criarEPublicar(['1412601']);
     const credId = (await iniciar(edital, 250)).json().credenciamentoId as string;
+    await provarVida(credId);
     await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
     const det = await app.inject({ method: 'GET', url: `/credenciamentos/${credId}`, headers: forn() });
     expect(det.statusCode).toBe(200);
-    expect(det.json()).toMatchObject({ id: credId, estado: 'aceito', capacidadeTeto: 250, passoAtual: 4, totalPassos: 4 });
+    expect(det.json()).toMatchObject({ id: credId, estado: 'aceito', capacidadeTeto: 250, passoAtual: 5, totalPassos: 5, provaVidaStatus: 'aprovada' });
     expect(det.json().termo).toMatchObject({ versao: 'v1', finalidade: 'credenciamento' });
   });
 
   it('GET /credenciamentos/:id/comprovante.pdf devolve o PDF do comprovante (Passo Concluído)', async () => {
     const edital = await criarEPublicar(['1412601']);
     const credId = (await iniciar(edital, 250)).json().credenciamentoId as string;
+    await provarVida(credId);
     await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
 
     const pdf = await app.inject({ method: 'GET', url: `/credenciamentos/${credId}/comprovante.pdf`, headers: forn() });
@@ -217,7 +266,7 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     const r = await app.inject({ method: 'GET', url: `/editais/${edital}/credenciamentos/meu`, headers: forn() });
     expect(r.statusCode).toBe(200);
     // Retomada: id + capacidade declarada + passo salvo, sem tomar CredenciamentoDuplicado.
-    expect(r.json()).toMatchObject({ id: credId, estado: 'iniciado', capacidadeTeto: 320, passoAtual: 2, totalPassos: 4 });
+    expect(r.json()).toMatchObject({ id: credId, estado: 'iniciado', capacidadeTeto: 320, passoAtual: 2, totalPassos: 5 });
   });
 
   it('GET /editais/:id/credenciamentos/meu após cancelar → 204 (A2 reversível, começa do zero)', async () => {

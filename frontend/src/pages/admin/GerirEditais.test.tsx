@@ -8,19 +8,31 @@ import type { EditalGestao, CatalogoItemView, PaginaEditais, FiltroEditais } fro
 configure({ testIdAttribute: 'data-cy' });
 
 const buscarEditaisGestao = vi.fn<(f?: FiltroEditais) => Promise<PaginaEditais>>();
-const catalogoListar = vi.fn<() => Promise<CatalogoItemView[]>>();
+const catalogoListar = vi.fn<(slug: string) => Promise<CatalogoItemView[]>>();
 const criarEdital = vi.fn<(body: unknown) => Promise<unknown>>();
 const publicarEdital = vi.fn<(id: string) => Promise<unknown>>();
 const encerrarEdital = vi.fn<(id: string) => Promise<unknown>>();
+const editalItens = vi.fn<(id: string) => Promise<unknown[]>>();
+const adicionarItemEdital = vi.fn<(id: string, body: unknown) => Promise<unknown>>();
+const removerItemEdital = vi.fn<(id: string, itemId: string) => Promise<unknown>>();
 vi.mock('../../lib/api', () => ({
   api: {
     buscarEditaisGestao: (f: FiltroEditais) => buscarEditaisGestao(f),
-    catalogoListar: () => catalogoListar(),
+    catalogoListar: (slug: string) => catalogoListar(slug),
     criarEdital: (body: unknown) => criarEdital(body),
     publicarEdital: (id: string) => publicarEdital(id),
     encerrarEdital: (id: string) => encerrarEdital(id),
+    editalItens: (id: string) => editalItens(id),
+    adicionarItemEdital: (id: string, body: unknown) => adicionarItemEdital(id, body),
+    removerItemEdital: (id: string, itemId: string) => removerItemEdital(id, itemId),
   },
 }));
+
+/** Catálogo de materiais para o modal de itens (o dropdown consome `catalogoListar('materiais-servicos')`). */
+const MATERIAIS: CatalogoItemView[] = [
+  { id: 'm1', numero: 'ITM-2026/001', nome: 'Cabo de rede CAT6', tipo: 'material', unidades: ['un', 'm'], ativo: true, situacao: 'ativo' },
+  { id: 'm2', numero: 'ITM-2026/002', nome: 'Instalação elétrica', tipo: 'servico', unidades: ['h'], ativo: true, situacao: 'ativo' },
+];
 
 function edital(over: Partial<EditalGestao> & Pick<EditalGestao, 'id' | 'numero'>): EditalGestao {
   return { objeto: 'Objeto', secretariaId: 's1', situacao: 'publicado', cnaesAlvo: ['1412601'], quantitativos: 10, prazoVigencia: '2099-12-31', ...over };
@@ -46,10 +58,16 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     criarEdital.mockReset().mockResolvedValue({ editalId: 'novo', situacao: 'rascunho' });
     publicarEdital.mockReset().mockResolvedValue({ situacao: 'publicado' });
     encerrarEdital.mockReset().mockResolvedValue({ situacao: 'encerrado' });
-    catalogoListar.mockReset().mockResolvedValue([
-      { id: 's1', sigla: 'SEME', nome: 'Educação', ativo: true, situacao: 'ativo' },
-      { id: 's2', sigla: 'SEMSA', nome: 'Saúde', ativo: true, situacao: 'ativo' },
-    ]);
+    // Slug-aware: o modal de itens pede 'materiais-servicos'; o resto da tela pede 'secretarias'.
+    catalogoListar.mockReset().mockImplementation((slug: string) => Promise.resolve(
+      slug === 'materiais-servicos' ? MATERIAIS : [
+        { id: 's1', sigla: 'SEME', nome: 'Educação', ativo: true, situacao: 'ativo' },
+        { id: 's2', sigla: 'SEMSA', nome: 'Saúde', ativo: true, situacao: 'ativo' },
+      ],
+    ));
+    editalItens.mockReset().mockResolvedValue([]);
+    adicionarItemEdital.mockReset().mockResolvedValue({ id: 'it1', numero: 1 });
+    removerItemEdital.mockReset().mockResolvedValue({ ok: true });
   });
 
   it('lista os editais com número, objeto, sigla da secretaria e CNAE mascarado', async () => {
@@ -162,5 +180,33 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
 
     fireEvent.click(screen.getByTestId('publicar'));
     await waitFor(() => expect(publicarEdital).toHaveBeenCalledWith('e9'));
+  });
+
+  it('abre a gestão de itens de um edital em rascunho e adiciona um item do catálogo', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e5', numero: 'ED-2026/050', situacao: 'rascunho' })]));
+    renderTela();
+    await screen.findAllByTestId('item-edital');
+
+    // Abre o modal de itens pela ação da linha (só existe em rascunho).
+    fireEvent.click(screen.getByTestId('gerir-itens'));
+    const modal = await screen.findByTestId('modal-itens-edital');
+    expect(await within(modal).findByTestId('itens-vazio')).toBeInTheDocument();
+
+    // Escolhe o item do catálogo → a unidade default vem das unidades daquele item; preenche e adiciona.
+    fireEvent.change(within(modal).getByTestId('item-catalogo'), { target: { value: 'm1' } });
+    fireEvent.change(within(modal).getByTestId('item-quantidade'), { target: { value: '500' } });
+    fireEvent.change(within(modal).getByTestId('item-preco'), { target: { value: '4.90' } });
+    fireEvent.submit(within(modal).getByTestId('form-item-edital'));
+
+    await waitFor(() => expect(adicionarItemEdital).toHaveBeenCalledWith('e5', {
+      itemCatalogoId: 'm1', unidade: 'un', quantidade: 500, precoTeto: 4.9,
+    }));
+  });
+
+  it('não oferece gestão de itens para editais já publicados', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e6', numero: 'ED-2026/060', situacao: 'publicado' })]));
+    renderTela();
+    await screen.findAllByTestId('item-edital');
+    expect(screen.queryByTestId('gerir-itens')).not.toBeInTheDocument();
   });
 });

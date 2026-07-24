@@ -599,7 +599,31 @@
       "prazoLabel": "Plazo de vigencia",
       "softDeleteNota": "Los registros nunca se eliminan definitivamente — la exclusión los convierte en Inactivo o Bloqueado, preservando el historial.",
       "salvar": "Guardar",
-      "cancelar": "Cancelar"
+      "cancelar": "Cancelar",
+      "itens": {
+        "acao": "Ítems del edicto",
+        "titulo": "Ítems del edicto",
+        "subtitulo": "Registre los ítems del edicto {{numero}} desde el catálogo de materiales y servicios. Disponible mientras el edicto está en borrador.",
+        "itemLabel": "Ítem del catálogo",
+        "itemPlaceholder": "Seleccione un material o servicio…",
+        "unidadeLabel": "Unidad",
+        "quantidadeLabel": "Cantidad",
+        "precoLabel": "Precio tope (R$)",
+        "adicionar": "Agregar ítem",
+        "erroAdicionar": "No se pudo agregar. Verifique los campos (ítem ya incluido, unidad o precio inválidos).",
+        "carregando": "Cargando ítems…",
+        "vazio": "Aún no hay ítems registrados en este edicto.",
+        "remover": "Eliminar ítem",
+        "notaPreco": "El precio tope es de uso interno de la administración y no se muestra en el portal público de transparencia.",
+        "col": {
+          "num": "N.º",
+          "item": "Ítem",
+          "unidade": "Unid.",
+          "quantidade": "Cant.",
+          "preco": "Precio tope",
+          "acoes": "Acciones"
+        }
+      }
     },
     "contestacoes": {
       "titulo": "Impugnaciones de CNAE",

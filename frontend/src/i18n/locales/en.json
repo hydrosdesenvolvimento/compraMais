@@ -599,7 +599,31 @@
       "prazoLabel": "Validity deadline",
       "softDeleteNota": "Records are never permanently deleted — deletion converts them to Inactive or Blocked, preserving history.",
       "salvar": "Save",
-      "cancelar": "Cancel"
+      "cancelar": "Cancel",
+      "itens": {
+        "acao": "Edital items",
+        "titulo": "Edital items",
+        "subtitulo": "Register the items of edital {{numero}} from the goods and services catalog. Available while the edital is a draft.",
+        "itemLabel": "Catalog item",
+        "itemPlaceholder": "Select a good or service…",
+        "unidadeLabel": "Unit",
+        "quantidadeLabel": "Quantity",
+        "precoLabel": "Ceiling price (R$)",
+        "adicionar": "Add item",
+        "erroAdicionar": "Could not add. Check the fields (item already included, invalid unit or price).",
+        "carregando": "Loading items…",
+        "vazio": "No items registered for this edital yet.",
+        "remover": "Remove item",
+        "notaPreco": "The ceiling price is for internal administration use and is not shown on the public transparency portal.",
+        "col": {
+          "num": "No.",
+          "item": "Item",
+          "unidade": "Unit",
+          "quantidade": "Qty",
+          "preco": "Ceiling price",
+          "acoes": "Actions"
+        }
+      }
     },
     "contestacoes": {
       "titulo": "CNAE challenges",

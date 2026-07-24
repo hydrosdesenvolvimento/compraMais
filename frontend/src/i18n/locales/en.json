@@ -668,13 +668,14 @@
         "nomeItem": "Item name",
         "tipoItem": "Nature",
         "unidades": "Units of measure",
-        "unidadesDica": "Separate with commas. E.g.: ea, m, box",
+        "unidadesDica": "Select one or more registered units.",
         "especificacoes": "Technical specifications",
         "situacao": "Status",
         "acoes": "Actions",
         "simbolo": "Symbol",
         "simboloDica": "E.g.: un, kg, m², L, h, cx",
-        "descricaoUnidade": "Description"
+        "descricaoUnidade": "Description",
+        "unidadesVazio": "No units registered. Add them in the \"Units of measure\" tab."
       },
       "categorias": {
         "cadastral": "Registration",

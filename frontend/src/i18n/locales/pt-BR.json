@@ -668,13 +668,14 @@
         "nomeItem": "Nome do item",
         "tipoItem": "Natureza",
         "unidades": "Unidades de medida",
-        "unidadesDica": "Separe por vírgula. Ex.: un, m, cx",
+        "unidadesDica": "Selecione uma ou mais unidades cadastradas.",
         "especificacoes": "Especificações técnicas",
         "situacao": "Situação",
         "acoes": "Ações",
         "simbolo": "Símbolo",
         "simboloDica": "Ex.: un, kg, m², L, h, cx",
-        "descricaoUnidade": "Descrição"
+        "descricaoUnidade": "Descrição",
+        "unidadesVazio": "Nenhuma unidade cadastrada. Cadastre na aba \"Unidades de medida\"."
       },
       "categorias": {
         "cadastral": "Cadastral",

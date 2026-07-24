@@ -113,54 +113,68 @@ export function DistribuicaoInteligente() {
                 </div>
               )}
 
-              {/* Tabela do rateio */}
-              <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--divider)', font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>
-                  {t('admin.distribuicao.resultadoTitulo')}
+              {/* Resultado da distribuição POR ITEM (Fase 2): uma tabela de rateio por item do edital. */}
+              <div style={{ font: '600 14.5px var(--font-body)', color: 'var(--azul-900)' }}>{t('admin.distribuicao.resultadoTitulo')}</div>
+              {data.itens.length === 0 ? (
+                <div data-cy="vazio" className="card" style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>
+                  <div style={{ font: '600 15px var(--font-body)', color: 'var(--azul-900)', marginBottom: 4 }}>{t('admin.distribuicao.vazioTitulo')}</div>
+                  <div style={{ fontSize: 13.5 }}>{t('admin.distribuicao.vazioDica')}</div>
                 </div>
-                {data.rateio.length === 0 ? (
-                  <div data-cy="vazio" style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>
-                    <div style={{ font: '600 15px var(--font-body)', color: 'var(--azul-900)', marginBottom: 4 }}>{t('admin.distribuicao.vazioTitulo')}</div>
-                    <div style={{ fontSize: 13.5 }}>{t('admin.distribuicao.vazioDica')}</div>
-                  </div>
-                ) : (
-                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                      <tr>
-                        <th scope="col" style={{ ...th, textAlign: 'left' }}>{t('admin.distribuicao.col.fornecedor')}</th>
-                        <th scope="col" style={{ ...th, textAlign: 'left' }}>{t('admin.distribuicao.col.capacidade')}</th>
-                        <th scope="col" style={{ ...th, textAlign: 'right' }}>{t('admin.distribuicao.col.cota')}</th>
-                        <th scope="col" style={{ ...th, textAlign: 'right' }}>{t('admin.distribuicao.col.percentual')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.rateio.map((r) => (
-                        <tr key={r.fornecedorId} data-cy="linha-rateio">
-                          <td style={td}><span style={{ fontWeight: 600, color: 'var(--azul-900)' }}>{r.nome}</span></td>
-                          <td style={{ ...td, color: 'var(--cinza-600, #52607a)' }}>{t('admin.distribuicao.capacidade', { cap: numero(r.capacidade) })}</td>
-                          <td style={{ ...td, textAlign: 'right' }}><span style={{ fontWeight: 600, color: 'var(--azul-700)' }} data-cy="cota">{numero(r.cota)}</span></td>
-                          <td style={{ ...td, textAlign: 'right', color: 'var(--cinza-500)' }} data-cy="percentual">{percentual(r.cota, data.total)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-
-                {(data.homologada || data.rateio.length > 0) && (
-                  <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, padding: '16px 20px', borderTop: '1px solid var(--divider)' }}>
-                    {homologar.isError && <span role="alert" style={{ fontSize: 13, color: 'var(--erro, #c0392b)' }}>{t('admin.distribuicao.erroHomologar')}</span>}
-                    {data.homologada ? (
-                      <span data-cy="homologada-em" style={{ fontSize: 13.5, color: 'var(--sucesso)', fontWeight: 600 }}>
-                        {t('admin.distribuicao.homologadaEm', { versao: data.versao ?? 1 })}
+              ) : (
+                data.itens.map((item) => (
+                  <div key={item.itemId} className="card" data-cy="item-distribuicao" data-id={item.itemId} data-deficit={item.deficit} style={{ padding: 0, overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8, padding: '13px 20px', borderBottom: '1px solid var(--divider)' }}>
+                      <span style={{ font: '600 14px var(--font-body)', color: 'var(--azul-900)' }}>
+                        <span style={{ color: 'var(--azul-700)', fontVariantNumeric: 'tabular-nums' }}>{String(item.numero).padStart(2, '0')}</span> · {item.nome}
                       </span>
+                      <span style={{ fontSize: 12.5, color: 'var(--cinza-500)' }}>
+                        {t('admin.distribuicao.itemResumo', { distribuido: numero(item.distribuido), demanda: numero(item.demanda), unidade: item.unidade })}
+                        {item.deficit && <span data-cy="item-deficit" style={{ marginLeft: 8, color: '#8A5410', fontWeight: 600 }}>· {t('admin.distribuicao.itemDeficit', { deficit: numero(item.deficitQuantidade) })}</span>}
+                      </span>
+                    </div>
+                    {item.rateio.length === 0 ? (
+                      <div data-cy="item-sem-rateio" style={{ padding: '20px', textAlign: 'center', color: 'var(--cinza-500)', fontSize: 13 }}>{t('admin.distribuicao.itemSemRateio')}</div>
                     ) : (
-                      <Botao data-cy="homologar" variante="primario" onClick={() => homologar.mutate()} disabled={homologar.isPending}>
-                        {homologar.isPending ? t('admin.distribuicao.homologando') : t('admin.distribuicao.homologar')}
-                      </Botao>
+                      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <thead>
+                          <tr>
+                            <th scope="col" style={{ ...th, textAlign: 'left' }}>{t('admin.distribuicao.col.fornecedor')}</th>
+                            <th scope="col" style={{ ...th, textAlign: 'left' }}>{t('admin.distribuicao.col.capacidade')}</th>
+                            <th scope="col" style={{ ...th, textAlign: 'right' }}>{t('admin.distribuicao.col.cota')}</th>
+                            <th scope="col" style={{ ...th, textAlign: 'right' }}>{t('admin.distribuicao.col.percentual')}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {item.rateio.map((r) => (
+                            <tr key={r.fornecedorId} data-cy="linha-rateio">
+                              <td style={td}><span style={{ fontWeight: 600, color: 'var(--azul-900)' }}>{r.nome}</span></td>
+                              <td style={{ ...td, color: 'var(--cinza-600, #52607a)' }}>{t('admin.distribuicao.capacidade', { cap: numero(r.capacidade) })}</td>
+                              <td style={{ ...td, textAlign: 'right' }}><span style={{ fontWeight: 600, color: 'var(--azul-700)' }} data-cy="cota">{numero(r.cota)}</span></td>
+                              <td style={{ ...td, textAlign: 'right', color: 'var(--cinza-500)' }} data-cy="percentual">{percentual(r.cota, item.demanda)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     )}
                   </div>
-                )}
-              </div>
+                ))
+              )}
+
+              {/* Rodapé: homologar / homologada — vale para o edital inteiro (todas as matrizes por item). */}
+              {(data.homologada || data.distribuido > 0) && (
+                <div className="card" style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, padding: '16px 20px' }}>
+                  {homologar.isError && <span role="alert" style={{ fontSize: 13, color: 'var(--erro, #c0392b)' }}>{t('admin.distribuicao.erroHomologar')}</span>}
+                  {data.homologada ? (
+                    <span data-cy="homologada-em" style={{ fontSize: 13.5, color: 'var(--sucesso)', fontWeight: 600 }}>
+                      {t('admin.distribuicao.homologadaEm', { versao: data.versao ?? 1 })}
+                    </span>
+                  ) : (
+                    <Botao data-cy="homologar" variante="primario" onClick={() => homologar.mutate()} disabled={homologar.isPending}>
+                      {homologar.isPending ? t('admin.distribuicao.homologando') : t('admin.distribuicao.homologar')}
+                    </Botao>
+                  )}
+                </div>
+              )}
             </>
           )}
         </>

@@ -417,15 +417,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   // (como `editais`/`credenciamentos`), senão memória (testes sem banco). O fornecedor lê suas
   // "Demandas distribuídas" (rateio + Cadastro de Reserva) derivadas da matriz vigente + credenciamento.
   const distribuicaoRepo: DistribuicaoRepository = pool ? new DistribuicaoRepositoryPg(pool) : new DistribuicaoRepositoryMemory();
-  // Demanda total do edital = soma das quantidades dos itens (o edital não tem mais quantitativo
-  // agregado). Fonte única consumida pelo Motor e pelo resumo da distribuição.
-  const demandaDoEdital = async (id: string): Promise<number> =>
-    (await itensEditalRepo.listarDoEdital(id)).reduce((soma, it) => soma + it.quantidade, 0);
   const editalParaDistribuir = {
     porId: async (id: string) => {
       const e = await editaisRepo.porId(id);
+      if (!e) return null;
       // Guarda de estado: só distribui edital publicado (develop não tem a máquina AD-37/em_distribuicao).
-      return e ? { podeDistribuir: e.situacao === 'publicado', demanda: await demandaDoEdital(id) } : null;
+      // Fase 2: o rateio roda por item — expõe os itens do edital (id + quantidade demandada).
+      const itens = (await itensEditalRepo.listarDoEdital(id)).map((it) => ({ itemId: it.id, quantidade: it.quantidade }));
+      return { podeDistribuir: e.situacao === 'publicado', itens };
     },
   };
   const executarDistribuicao = new ExecutarDistribuicao(editalParaDistribuir, credRepo, fornecedores, distribuicaoRepo, bus);
@@ -441,7 +440,10 @@ export async function buildServer(): Promise<FastifyInstance> {
   const editalResumoDistribuicao = {
     porId: async (id: string) => {
       const e = await editaisRepo.porId(id);
-      return e ? { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, demanda: await demandaDoEdital(id) } : null;
+      if (!e) return null;
+      // Fase 2: o resumo roda por item — expõe os itens do edital (id + metadados + quantidade).
+      const itens = (await itensEditalRepo.listarDoEdital(id)).map((it) => ({ itemId: it.id, numero: it.numero, nome: it.nomeSnapshot, unidade: it.unidade, quantidade: it.quantidade }));
+      return { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, itens };
     },
   };
   const resumoDistribuicao = new ResumoDistribuicaoEdital(editalResumoDistribuicao, credRepo, fornecedores, distribuicaoRepo, secretariaLookup);

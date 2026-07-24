@@ -26,3 +26,30 @@ export async function montarAptosDoEdital(
   }
   return aptos;
 }
+
+/**
+ * Aptos de UM item do edital (Fase 2 — rateio por item): apenas os credenciados `aceito` que
+ * DECLARARAM capacidade nesse item, cada um com o teto do item (RN005). Credenciamentos legados
+ * nível-edital (sem itens) não participam do rateio por item.
+ */
+export async function montarAptosDoItem(
+  creds: CredenciamentoRepository,
+  fornecedores: FornecedorRepository,
+  editalId: string,
+  itemId: string,
+): Promise<AptoDistribuicao[]> {
+  const aceitos = (await creds.listarPorEdital(editalId)).filter((c) => c.situacao === 'aceito');
+  const aptos: AptoDistribuicao[] = [];
+  for (const c of aceitos) {
+    const declarado = c.itens.find((i) => i.itemId === itemId);
+    if (!declarado) continue; // não declarou capacidade neste item
+    const f = await fornecedores.porId(c.fornecedorId);
+    aptos.push({
+      id: c.fornecedorId,
+      teto: declarado.capacidadeTeto, // teto declarado PARA o item (RN005)
+      ordemCredenciamento: Date.parse(c.registerDate),
+      cnpj: f?.cnpj.valor ?? c.fornecedorId,
+    });
+  }
+  return aptos;
+}

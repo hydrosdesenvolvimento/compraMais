@@ -9,7 +9,7 @@ export class DistribuicaoRepositoryMemory implements DistribuicaoRepository {
   private readonly registros: RegistroDistribuicao[] = [];
 
   async append(r: RegistroDistribuicao): Promise<void> {
-    this.registros.push({ ...r, alocacoes: r.alocacoes.map((a) => ({ ...a })) });
+    this.registros.push({ ...r, alocacoes: r.alocacoes.map((a) => ({ ...a })), itens: r.itens.map((it) => ({ ...it, alocacoes: it.alocacoes.map((a) => ({ ...a })) })) });
   }
 
   async ultimaDoEdital(editalId: string): Promise<RegistroDistribuicao | null> {

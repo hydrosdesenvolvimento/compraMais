@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ResumoDistribuicaoEdital, type EditalResumoDistribuicaoLookup } from '../../src/distribuicao/application/resumir-distribuicao-edital.js';
-import { distribuir } from '../../src/distribuicao/domain/motor.js';
-import { montarRegistro } from '../../src/distribuicao/domain/registro-distribuicao.js';
+import { montarRegistroPorItem } from '../../src/distribuicao/domain/registro-distribuicao.js';
 import { DistribuicaoRepositoryMemory } from '../../src/distribuicao/adapters/distribuicao-repository-memory.js';
 import { Fornecedor, type FornecedorState, type SituacaoCadastral, type Cnae } from '../../src/catalogo/domain/fornecedor.js';
 import { FornecedorRepositoryMemory } from '../../src/catalogo/adapters/fornecedor-repository-memory.js';
@@ -27,15 +26,18 @@ function fornecedor(over: { id: string; cnpj: string; razaoSocial?: string; situ
   return Fornecedor.deEstado(state);
 }
 
+// Credenciamento por item (Fase 2): teto declarado no item 'it1'.
 function credenciamento(fornecedorId: string, estado: EstadoCredenciamento, capacidadeTeto: number, registerDate = '2026-02-01T00:00:00Z'): Credenciamento {
   return Credenciamento.deEstado({
     meta: { id: `cred-${fornecedorId}`, registerDate, updateDate: registerDate, lastUserUpdate: 'seed' },
-    fornecedorId, editalId: 'edital-1', capacidadeTeto, estado, passoAtual: 1, termo: null, distribuidoEm: null,
+    fornecedorId, editalId: 'edital-1', capacidadeTeto,
+    itens: [{ itemId: 'it1', capacidadeTeto }],
+    estado, passoAtual: 1, termo: null, provaVida: null, distribuidoEm: null,
   });
 }
 
-// A demanda vem da soma das quantidades dos itens (o edital não tem mais quantitativo agregado).
-const EDITAL = { id: 'edital-1', numero: 'ED-2026/001', objeto: 'Mobiliário escolar', secretariaId: 'sec-educacao', situacao: 'publicado', demanda: 100 };
+// O edital tem UM item (it1) com demanda 100 — o rateio roda por item.
+const EDITAL = { id: 'edital-1', numero: 'ED-2026/001', objeto: 'Mobiliário escolar', secretariaId: 'sec-educacao', situacao: 'publicado', itens: [{ itemId: 'it1', numero: 1, nome: 'Cadeira escolar', unidade: 'un', quantidade: 100 }] };
 const editaisFake: EditalResumoDistribuicaoLookup = { porId: async (id) => (id === EDITAL.id ? EDITAL : null) };
 const secretariasFake: SecretariaLookup = { siglaPorId: async (id) => (id === 'sec-educacao' ? 'SEME' : null) };
 
@@ -104,14 +106,11 @@ describe('ResumoDistribuicaoEdital (Painel Admin · Distribuição Inteligente)'
   it('com matriz congelada: mostra o resultado HOMOLOGADO (homologada=true, versão da matriz)', async () => {
     await creds.salvar(credenciamento('a', 'aceito', 50));
     await creds.salvar(credenciamento('b', 'aceito', 100));
-    const resultado = distribuir({
-      demanda: 100,
-      aptos: [
-        { id: 'a', teto: 50, ordemCredenciamento: 1, cnpj: '11.222.333/0001-81' },
-        { id: 'b', teto: 100, ordemCredenciamento: 2, cnpj: '22.333.444/0001-81' },
-      ],
-    });
-    await repo.append(montarRegistro({ id: 'reg-1', editalId: 'edital-1', versao: 1, geradoEm: '2026-03-01T00:00:00Z', resultado }));
+    // Matriz POR ITEM congelada (Fase 2): item it1 com a=50, b=50.
+    await repo.append(montarRegistroPorItem({
+      id: 'reg-1', editalId: 'edital-1', versao: 1, geradoEm: '2026-03-01T00:00:00Z', regraDesempate: 'ordem_credenciamento_cnpj',
+      itens: [{ itemId: 'it1', demanda: 100, distribuido: 100, deficit: false, deficitQuantidade: 0, alocacoes: [{ fornecedorId: 'a', cota: 50 }, { fornecedorId: 'b', cota: 50 }] }],
+    }));
 
     const out = await uc.resumir('edital-1');
     expect(out.homologada).toBe(true);
@@ -119,6 +118,9 @@ describe('ResumoDistribuicaoEdital (Painel Admin · Distribuição Inteligente)'
     expect(out.habilitados).toBe(2);
     const porId = Object.fromEntries(out.rateio.map((r) => [r.fornecedorId, r]));
     expect(porId['a']).toMatchObject({ nome: 'Alfa', capacidade: 50, cota: 50 });
+    // Detalhamento por item exposto (Fase 2).
+    expect(out.itens).toHaveLength(1);
+    expect(out.itens[0]).toMatchObject({ itemId: 'it1', nome: 'Cadeira escolar', demanda: 100, distribuido: 100 });
   });
 
   it('404 (EditalNaoEncontrado) quando o edital não existe', async () => {

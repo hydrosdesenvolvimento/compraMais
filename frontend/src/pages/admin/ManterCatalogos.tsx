@@ -1,8 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { api, type CatalogoSlug, type CatalogoItemView } from '../../lib/api';
-import { Card, Botao } from '../../design-system/components';
+import { Card, Botao, BotaoIcone } from '../../design-system/components';
+import { celula, cabecalho } from '../../design-system/tabela';
+import { IconePower } from '../../design-system/icons';
 import { exportarCsv } from '../../lib/exportar';
 
 /**
@@ -29,16 +32,24 @@ type TipoCampo = 'text' | 'select' | 'checkbox' | 'textarea' | 'lista';
 interface CampoDef { nome: string; labelKey: string; tipo: TipoCampo; opcoes?: { valor: string; labelKey: string }[]; dicaKey?: string; largura?: 'total' }
 interface FiltroDef { nome: string; labelKey: string; todosKey: string; opcoes: { valor: string; labelKey: string }[]; valorDoItem: (i: CatalogoItemView) => string }
 interface ExportacaoDef { nomeArquivo: string; colunasKey: string[]; linha: (i: CatalogoItemView, rotular: (chave: string) => string) => string[] }
+/** Uma coluna da tabela de itens (a de Situação e a de Ações são fixas, acrescentadas no render). */
+interface ColunaDef { rotuloKey: string; dataCy?: string; render: (i: CatalogoItemView, t: TFunction) => ReactNode; estilo?: CSSProperties }
 interface CatalogoDef {
   slug: CatalogoSlug;
   tabKey: string;
   campos: CampoDef[];
-  resumo: (i: CatalogoItemView) => string;
+  /** Colunas próprias do catálogo na tabela de itens (RN015: a listagem espelha as telas irmãs). */
+  colunas: ColunaDef[];
   /** Texto pesquisável do item; declarar habilita o campo de busca. */
   busca?: (i: CatalogoItemView) => string;
   filtro?: FiltroDef;
   exportacao?: ExportacaoDef;
 }
+
+/** Célula de identificador (sigla/código/número): monoespaçada tabular, em navy — como nas telas irmãs. */
+const celulaChave: CSSProperties = { ...celula, font: '700 14px var(--font-body)', color: 'var(--azul-900)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' };
+const celulaTexto: CSSProperties = { ...celula, fontSize: 13.5, color: 'var(--cinza-800)' };
+const pill: CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '5px 12px', borderRadius: 999, font: '600 12.5px var(--font-body)', whiteSpace: 'nowrap' };
 
 /** Opções de natureza do item — espelham o domínio `TipoItem` ('material' | 'servico'). */
 const TIPOS_ITEM = [
@@ -49,24 +60,30 @@ const TIPOS_ITEM = [
 const CATALOGOS: CatalogoDef[] = [
   {
     slug: 'secretarias', tabKey: 'admin.catalogos.tabs.secretarias',
-    resumo: (i) => `${i.sigla ?? ''} — ${i.nome ?? ''}`,
     campos: [
       { nome: 'nome', labelKey: 'admin.catalogos.campos.nome', tipo: 'text', largura: 'total' },
       { nome: 'sigla', labelKey: 'admin.catalogos.campos.sigla', tipo: 'text' },
       { nome: 'responsavel', labelKey: 'admin.catalogos.campos.responsavel', tipo: 'text' },
     ],
+    colunas: [
+      { rotuloKey: 'admin.catalogos.campos.sigla', estilo: celulaChave, render: (i) => i.sigla },
+      { rotuloKey: 'admin.catalogos.campos.nome', render: (i) => i.nome },
+      { rotuloKey: 'admin.catalogos.campos.responsavel', render: (i) => i.responsavel },
+    ],
   },
   {
     slug: 'setores-cnae', tabKey: 'admin.catalogos.tabs.setores',
-    resumo: (i) => `${i.codigo ?? ''} — ${i.descricao ?? ''}`,
     campos: [
       { nome: 'codigo', labelKey: 'admin.catalogos.campos.codigo', tipo: 'text' },
       { nome: 'descricao', labelKey: 'admin.catalogos.campos.descricao', tipo: 'text' },
     ],
+    colunas: [
+      { rotuloKey: 'admin.catalogos.campos.codigo', estilo: celulaChave, render: (i) => i.codigo },
+      { rotuloKey: 'admin.catalogos.campos.descricao', render: (i) => i.descricao },
+    ],
   },
   {
     slug: 'tipos-documento', tabKey: 'admin.catalogos.tabs.tiposDoc',
-    resumo: (i) => `${i.nome ?? ''} (${i.categoria ?? ''})`,
     campos: [
       { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeTipo', tipo: 'text', largura: 'total' },
       { nome: 'formato', labelKey: 'admin.catalogos.campos.formato', tipo: 'text' },
@@ -81,17 +98,27 @@ const CATALOGOS: CatalogoDef[] = [
       { nome: 'exigeValidade', labelKey: 'admin.catalogos.campos.exigeValidade', tipo: 'checkbox' },
       { nome: 'exigeExercicio', labelKey: 'admin.catalogos.campos.exigeExercicio', tipo: 'checkbox' },
     ],
+    colunas: [
+      { rotuloKey: 'admin.catalogos.campos.nomeTipo', estilo: { ...celulaTexto, fontWeight: 600, color: 'var(--azul-900)' }, render: (i) => i.nome },
+      { rotuloKey: 'admin.catalogos.campos.formato', render: (i) => i.formato },
+      { rotuloKey: 'admin.catalogos.campos.categoria', render: (i) => i.categoria },
+    ],
   },
   {
     slug: 'materiais-servicos', tabKey: 'admin.catalogos.tabs.materiais',
-    // O número (ITM-AAAA/NNN) é gerado pelo backend — aparece no resumo, nunca no formulário.
-    resumo: (i) => `${i.numero ?? ''} — ${i.nome ?? ''}`,
     busca: (i) => `${i.numero ?? ''} ${i.nome ?? ''} ${i.especificacoes ?? ''}`,
     campos: [
       { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeItem', tipo: 'text', largura: 'total' },
       { nome: 'tipo', labelKey: 'admin.catalogos.campos.tipoItem', tipo: 'select', opcoes: TIPOS_ITEM },
       { nome: 'unidades', labelKey: 'admin.catalogos.campos.unidades', tipo: 'lista', dicaKey: 'admin.catalogos.campos.unidadesDica' },
       { nome: 'especificacoes', labelKey: 'admin.catalogos.campos.especificacoes', tipo: 'textarea', largura: 'total' },
+    ],
+    // O número (ITM-AAAA/NNN) é gerado pelo backend — aparece na tabela, nunca no formulário.
+    colunas: [
+      { rotuloKey: 'admin.catalogos.campos.numero', estilo: celulaChave, render: (i) => i.numero },
+      { rotuloKey: 'admin.catalogos.campos.nomeItem', estilo: { ...celulaTexto, fontWeight: 600, color: 'var(--azul-900)' }, render: (i) => i.nome },
+      { rotuloKey: 'admin.catalogos.campos.tipoItem', dataCy: 'tipo-item', render: (i, t) => (i.tipo ? t(`admin.catalogos.tiposItem.${i.tipo}`) : '') },
+      { rotuloKey: 'admin.catalogos.campos.unidades', dataCy: 'unidades-item', render: (i) => (i.unidades ?? []).join(', ') },
     ],
     filtro: {
       nome: 'tipo', labelKey: 'admin.catalogos.filtros.tipo', todosKey: 'admin.catalogos.filtros.tipoTodos',
@@ -274,27 +301,54 @@ export function ManterCatalogos() {
         )}
       </div>
 
-      {visiveis.length === 0 ? (
-        <p data-cy="vazio" className="page-sub">{t('admin.catalogos.vazio')}</p>
-      ) : (
-        <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {visiveis.map((i) => (
-            <li key={i.id} data-cy="item-catalogo" data-ativo={i.ativo} className="card" style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-              <span style={{ flex: 1 }}>
-                {def.resumo(i)}
-                {i.tipo && <span data-cy="tipo-item" style={{ marginLeft: 8, color: 'var(--texto-suave, #667085)' }}>({t(`admin.catalogos.tiposItem.${i.tipo}`)})</span>}
-                {i.unidades && i.unidades.length > 0 && (
-                  <span data-cy="unidades-item" style={{ marginLeft: 8, color: 'var(--texto-suave, #667085)' }}>· {i.unidades.join(', ')}</span>
-                )}
-                {!i.ativo && <em style={{ color: 'var(--texto-suave)' }}> — {t('admin.catalogos.situacaoInativo')}</em>}
-              </span>
-              {i.ativo
-                ? <Botao data-cy="inativar" variante="secundario" onClick={() => inativar.mutate(i.id)}>{t('admin.catalogos.inativar')}</Botao>
-                : <Botao data-cy="reativar" onClick={() => reativar.mutate(i.id)}>{t('admin.catalogos.reativar')}</Botao>}
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* Lista em tabela, alinhada às telas irmãs (Secretarias/Setores/Tipos): card sem padding, cabeçalho
+          via `cabecalho()`, células via `celula`, pill de situação e ações em `BotaoIcone`. */}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        {visiveis.length === 0 ? (
+          <div data-cy="vazio" style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>
+            {t('admin.catalogos.vazio')}
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table data-cy="tabela-catalogo" style={{ width: '100%', borderCollapse: 'collapse', border: 'none', borderRadius: 0 }}>
+              <thead>
+                <tr>
+                  {def.colunas.map((c) => <th key={c.rotuloKey} scope="col" style={cabecalho(false)}>{t(c.rotuloKey)}</th>)}
+                  <th scope="col" style={cabecalho(false)}>{t('admin.catalogos.campos.situacao')}</th>
+                  <th scope="col" style={cabecalho(false, 'right')}>{t('admin.catalogos.campos.acoes')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visiveis.map((i) => (
+                  <tr key={i.id} data-cy="item-catalogo" data-id={i.id} data-ativo={i.ativo}>
+                    {def.colunas.map((c) => (
+                      <td key={c.rotuloKey} data-cy={c.dataCy} style={c.estilo ?? celulaTexto}>{c.render(i, t)}</td>
+                    ))}
+                    <td style={celula}>
+                      <span data-cy="situacao" style={{ ...pill, background: i.ativo ? 'var(--sucesso-bg)' : 'var(--cinza-100, #eef1f5)', color: i.ativo ? 'var(--sucesso)' : 'var(--cinza-500)' }}>
+                        {t(i.ativo ? 'admin.catalogos.situacaoAtivo' : 'admin.catalogos.situacaoInativo')}
+                      </span>
+                    </td>
+                    <td style={{ ...celula, textAlign: 'right' }}>
+                      {/* Um único botão de alternância (o mesmo alvo do protótipo); o `data-cy` reflete a
+                          ação disponível — `inativar` quando ativo, `reativar` quando inativo. */}
+                      <BotaoIcone
+                        icone={IconePower}
+                        data-cy={i.ativo ? 'inativar' : 'reativar'}
+                        title={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
+                        aria-label={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
+                        disabled={inativar.isPending || reativar.isPending}
+                        onClick={() => (i.ativo ? inativar : reativar).mutate(i.id)}
+                        style={{ color: i.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

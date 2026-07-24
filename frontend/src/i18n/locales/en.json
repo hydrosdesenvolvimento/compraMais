@@ -656,7 +656,8 @@
         "unidades": "Units of measure",
         "unidadesDica": "Separate with commas. E.g.: ea, m, box",
         "especificacoes": "Technical specifications",
-        "situacao": "Status"
+        "situacao": "Status",
+        "acoes": "Actions"
       },
       "categorias": {
         "cadastral": "Registration",

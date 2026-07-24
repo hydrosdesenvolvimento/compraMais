@@ -46,7 +46,9 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
 
     const itens = await screen.findAllByTestId('item-catalogo');
     expect(itens).toHaveLength(2);
-    expect(screen.getByText(/SME — Educação/)).toBeInTheDocument();
+    // Tabela: sigla e nome em células próprias (não mais concatenados num card).
+    expect(screen.getByText('SME')).toBeInTheDocument();
+    expect(screen.getByText('Educação')).toBeInTheDocument();
     // ativo → botão inativar; inativo → botão reativar
     fireEvent.click(screen.getByTestId('inativar'));
     await waitFor(() => expect(catalogoInativar).toHaveBeenCalledWith('secretarias', 's1'));
@@ -103,9 +105,12 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
   it('lista os itens com número, natureza e unidades — o número não é campo do formulário', async () => {
     await abrirAba();
 
-    expect(await screen.findByText(/ITM-2026\/001 — Cabo de rede CAT6/)).toBeInTheDocument();
+    // Tabela: cada atributo em sua coluna.
+    expect(await screen.findByText('ITM-2026/001')).toBeInTheDocument();
+    expect(screen.getByText('Cabo de rede CAT6')).toBeInTheDocument();
     expect(screen.getAllByTestId('unidades-item')[0]).toHaveTextContent('un, m');
-    // O número é gerado pelo backend: aparece na lista, nunca como input.
+    expect(screen.getAllByTestId('tipo-item')[0]).toHaveTextContent('Material');
+    // O número é gerado pelo backend: aparece na tabela, nunca como input.
     expect(screen.queryByTestId('campo-numero')).not.toBeInTheDocument();
   });
 

@@ -656,7 +656,8 @@
         "unidades": "Unidades de medida",
         "unidadesDica": "Separe por vírgula. Ex.: un, m, cx",
         "especificacoes": "Especificações técnicas",
-        "situacao": "Situação"
+        "situacao": "Situação",
+        "acoes": "Ações"
       },
       "categorias": {
         "cadastral": "Cadastral",

@@ -1,15 +1,20 @@
-# docker-compose.yml UNICO do compraMais (PRJ-DEC-05).
+# docker-compose.yml do compraMais — DEV/TEST + referencia de prod (PRJ-DEC-05).
 #
 # Profiles:
 #   - dev  : build local, bind mount e hot reload (docker compose --profile dev up)
-#   - prod : referencia imagem do GHCR + bloco deploy: para Docker Swarm
-#            (docker stack deploy -c docker-compose.yml compramais)
+#   - test : suite no container (docker compose --profile test run --rm <svc>-test)
+#   - prod : *referencia* dos servicos de producao (imagem do GHCR + bloco deploy:).
+#
+# PRODUCAO (Portainer/Swarm) usa o STACK DEDICADO, NAO este arquivo:
+#   -> deploy/compramais-stack.yml  (ver deploy/README.md)
+#   Motivo: `docker stack deploy` e o Portainer IGNORAM `profiles:`, entao apontar
+#   este compose ao Swarm traria os servicos de dev/test para a stack de prod.
+#   Os servicos `*-prod` aqui permanecem como referencia; mantenha-os em sincronia
+#   com deploy/compramais-stack.yml ao mudar env/imagens.
 #
 # IMPORTANTE sobre `deploy:`:
 #   O bloco `deploy:` (replicas, update_config, restart_policy, secrets) e
-#   IGNORADO por `docker compose up` e lido APENAS por `docker stack deploy`
-#   (Swarm). Por isso os servicos de prod servem de referencia de stack para
-#   o Portainer/Swarm fazerem pull do GHCR (PRJ-DEC-06), sem build em producao.
+#   IGNORADO por `docker compose up` e lido APENAS por `docker stack deploy` (Swarm).
 #
 # Segredos (PRJ-DEC-07):
 #   - DEV : valores sensiveis vem do arquivo .env local (NAO versionado).

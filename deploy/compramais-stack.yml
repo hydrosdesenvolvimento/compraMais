@@ -1,0 +1,193 @@
+# =========================================================================== #
+# compraMais — Stack de PRODUÇÃO para Docker Swarm + Portainer (PRJ-DEC-06)    #
+# =========================================================================== #
+#
+# Artefato CANÔNICO que o Portainer consome (Web editor ou "Git repository").
+# Só contém serviços de produção, TODOS com `image:` do GHCR — sem `build:`,
+# sem bind mount, sem `profiles:`.
+#
+# Por que um arquivo separado do docker-compose.yml da raiz?
+#   `docker stack deploy` (e o deploy de Swarm stack do Portainer) IGNORAM a
+#   chave `profiles:`. Apontar o compose de dev/test para o Portainer traria os
+#   serviços de desenvolvimento/teste (que só têm `build:`) para a stack de
+#   produção. Este arquivo é inequívoco: exatamente o que roda em prod.
+#   (O docker-compose.yml da raiz segue como fonte de dev/test — PRJ-DEC-05.)
+#
+# Deploy manual (fora do Portainer), a partir de um nó manager do Swarm:
+#   set -a && . ./stack.env && set +a
+#   docker stack deploy -c compramais-stack.yml --with-registry-auth compramais
+#   (--with-registry-auth propaga a credencial do GHCR aos nós — imagens privadas.)
+#
+# Segredos (PRJ-DEC-07): criados FORA daqui (Portainer → Secrets, ou CLI), nunca
+# versionados. Ver deploy/README.md.
+version: "3.8"
+
+# --------------------------------------------------------------------------- #
+# Âncoras reutilizáveis                                                        #
+# --------------------------------------------------------------------------- #
+x-deploy-stateless: &deploy-stateless
+  # Serviços stateless: réplicas + rolling update com rollback automático.
+  replicas: 2
+  update_config:
+    parallelism: 1
+    order: start-first
+    failure_action: rollback
+  rollback_config:
+    parallelism: 1
+    order: stop-first
+  restart_policy:
+    condition: on-failure
+    max_attempts: 3
+    delay: 5s
+
+services:
+  # ----------------------------------------------------------------------- #
+  # PostgreSQL + PostGIS (PRJ-DEC-08). Stateful: 1 réplica, fixada no manager #
+  # (onde vive o volume). Pode ser externalizado para um Postgres gerenciado  #
+  # removendo este serviço e apontando POSTGRES_HOST/PORT do backend.         #
+  # ----------------------------------------------------------------------- #
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-compramais}
+      POSTGRES_USER: ${POSTGRES_USER:-compramais}
+      # Senha via Docker secret (nunca em texto). O entrypoint do postgis lê *_FILE.
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-compramais} -d ${POSTGRES_DB:-compramais}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    secrets:
+      - db_password
+    networks:
+      - compramais
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+
+  # ----------------------------------------------------------------------- #
+  # Backend Fastify — imagem do GHCR (sem build em prod). Aplica migrations   #
+  # no startup (src/shared/db/migracoes.ts). Réplicas + rolling update.       #
+  # ----------------------------------------------------------------------- #
+  backend:
+    image: ghcr.io/${GHCR_REPOSITORY:-hydrosdesenvolvimento/compramais}/backend:${IMAGE_TAG:-latest}
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      POSTGRES_HOST: ${POSTGRES_HOST:-db}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-compramais}
+      POSTGRES_USER: ${POSTGRES_USER:-compramais}
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://compramais.example}
+      RECEITA_PROVIDER: ${RECEITA_PROVIDER:-brasilapi}
+      # Reconhecimento facial (UC007): serviço Python real em prod.
+      FACE_PROVIDER: ${FACE_PROVIDER:-insightface}
+      FACE_SERVICE_URL: ${FACE_SERVICE_URL:-http://face:8000}
+      FACE_MATCH_THRESHOLD: ${FACE_MATCH_THRESHOLD:-0.35}
+      INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
+      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      # Integração SEI (Épico 6). Default 'mock' (seguro). Para habilitar a integração real:
+      #   1) SEI_PROVIDER=web + SEI_BASE_URL/SEI_USUARIO/SEI_SEL_ORGAO/SEI_ID_TIPO_PROCEDIMENTO
+      #   2) criar o secret `sei_senha` e descomentar SEI_SENHA_FILE + o secret na lista do serviço.
+      SEI_PROVIDER: ${SEI_PROVIDER:-mock}
+      SEI_BASE_URL: ${SEI_BASE_URL:-}
+      SEI_USUARIO: ${SEI_USUARIO:-}
+      SEI_SENHA_FILE: ${SEI_SENHA_FILE:-}
+      SEI_SEL_ORGAO: ${SEI_SEL_ORGAO:-}
+      SEI_ID_TIPO_PROCEDIMENTO: ${SEI_ID_TIPO_PROCEDIMENTO:-}
+      # Autenticação/PII: OBRIGATÓRIOS em prod (AD-19/AD-20/AD-29). Sem eles o backend RECUSA subir.
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      PII_ENCRYPTION_KEY_FILE: /run/secrets/pii_encryption_key
+      JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-3600}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-https://compramais.example/auth/google/callback}
+      AUTH_FRONTEND_REDIRECT: ${AUTH_FRONTEND_REDIRECT:-https://compramais.example/#/cadastro}
+    secrets:
+      - db_password
+      - jwt_secret
+      - pii_encryption_key
+      # - sei_senha   # descomentar ao habilitar SEI_PROVIDER=web
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - compramais
+    deploy:
+      <<: *deploy-stateless
+
+  # ----------------------------------------------------------------------- #
+  # Frontend nginx (SPA + proxy /api → backend:3000). nginx.conf embutido na  #
+  # imagem. Publica a porta pública via routing mesh (ingress).               #
+  # O nginx faz proxy para o host `backend` — manter o serviço com esse nome. #
+  # ----------------------------------------------------------------------- #
+  frontend:
+    image: ghcr.io/${GHCR_REPOSITORY:-hydrosdesenvolvimento/compramais}/frontend:${IMAGE_TAG:-latest}
+    ports:
+      - target: 8080
+        published: ${FRONTEND_PUBLIC_PORT:-80}
+        protocol: tcp
+        mode: ingress
+    networks:
+      - compramais
+    deploy:
+      <<: *deploy-stateless
+
+  # ----------------------------------------------------------------------- #
+  # Reconhecimento facial (UC007) — imagem do GHCR (modelos embutidos na       #
+  # build, runtime offline). Pesado (ML): 1 réplica por padrão; escale                                   #
+  # conforme CPU. Só é exigido quando FACE_PROVIDER=insightface no backend.    #
+  # ----------------------------------------------------------------------- #
+  face:
+    image: ghcr.io/${GHCR_REPOSITORY:-hydrosdesenvolvimento/compramais}/face-service:${IMAGE_TAG:-latest}
+    environment:
+      FACE_MIN_QUALITY: ${FACE_MIN_QUALITY:-0.5}
+    networks:
+      - compramais
+    deploy:
+      replicas: ${FACE_REPLICAS:-1}
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+        delay: 10s
+
+volumes:
+  db_data:
+
+networks:
+  compramais:
+    # Arquivo exclusivo de Swarm: driver overlay explícito (rede entre nós).
+    driver: overlay
+    attachable: true
+
+# --------------------------------------------------------------------------- #
+# Docker secrets — EXTERNOS: criados no Portainer (Secrets) ou via CLI, nunca  #
+# versionados (PRJ-DEC-07). Ver deploy/README.md para os comandos.            #
+# --------------------------------------------------------------------------- #
+secrets:
+  db_password:
+    external: true
+  jwt_secret:
+    external: true
+  pii_encryption_key:
+    external: true
+  # sei_senha:            # descomentar SÓ ao habilitar SEI_PROVIDER=web (junto com a
+  #   external: true      # referência no serviço `backend` e SEI_SENHA_FILE=/run/secrets/sei_senha).

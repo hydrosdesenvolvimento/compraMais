@@ -22,6 +22,9 @@ coverage/
 .env
 .env.*
 !.env.example
+# Env do stack de prod (Portainer/Swarm): valores reais nao versionados; so o *.example.
+stack.env
+deploy/stack.env
 *.local
 
 # Logs

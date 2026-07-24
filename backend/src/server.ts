@@ -132,6 +132,7 @@ import { TipoDocumento } from './catalogos/domain/tipo-documento.js';
 import { TIPOS_DOCUMENTO_BASELINE } from './catalogos/domain/tipos-documento-baseline.js';
 import type { CatalogoRepository } from './catalogos/application/catalogo-repository.js';
 import { registrarRotasCatalogos } from './catalogos/adapters/catalogos-controller.js';
+import { ExcluirMaterialServico } from './catalogos/application/excluir-material-servico.js';
 import { GerirVisibilidadeTelas } from './permissoes/application/gerir-visibilidade.js';
 import { VisibilidadeRepositoryMemory } from './permissoes/adapters/visibilidade-repository-memory.js';
 import { VisibilidadeRepositoryPg } from './permissoes/adapters/visibilidade-repository-pg.js';
@@ -193,7 +194,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'DireitoTitularSolicitado', 'DireitoTitularAtendido',
     'UsuarioRegistrado', 'UsuarioAutenticado', 'GoogleVinculado',
     'SenhaAlterada', 'ResetSenhaSolicitado', 'SenhaRedefinida',
-    'CatalogoItemCriado', 'CatalogoItemEditado', 'CatalogoItemInativado', 'CatalogoItemReativado',
+    'CatalogoItemCriado', 'CatalogoItemEditado', 'CatalogoItemInativado', 'CatalogoItemReativado', 'CatalogoItemExcluido',
     'UsuarioInternoCriado', 'UsuarioInternoEditado', 'UsuarioSenhaResetada', 'UsuarioInternoInativado', 'UsuarioInternoReativado',
     'VisibilidadeTelasAlterada',
     'DistribuicaoExecutada',
@@ -310,7 +311,12 @@ export async function buildServer(): Promise<FastifyInstance> {
     { secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo, materiaisServicos: materiaisRepo, unidadesMedida: unidadesRepo },
     bus, undefined, numeradorItens,
   );
-  registrarRotasCatalogos(app, { manter: manterCatalogos });
+  // Repositório de itens de edital declarado aqui (antes de `editais`) porque a exclusão física de um
+  // material precisa checar se ele é referenciado por ALGUM edital. O módulo editais reaproveita a
+  // mesma instância adiante.
+  const itensEditalRepo = pool ? new ItemEditalRepositoryPg(pool) : new ItemEditalRepositoryMemory();
+  const excluirMaterial = new ExcluirMaterialServico(materiaisRepo, itensEditalRepo, bus);
+  registrarRotasCatalogos(app, { manter: manterCatalogos, excluirMaterial });
 
   // Módulo editais — vitrine filtrada por CNAE (002) + gestão/contestação de editais (003)
   // Persistência: Postgres quando disponível (durável, como `fornecedores`/`contas_acesso`); senão
@@ -330,8 +336,8 @@ export async function buildServer(): Promise<FastifyInstance> {
 
   // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). O lookup do catálogo é o
   // próprio `materiaisRepo` (definido acima) — `MaterialServico` satisfaz o contrato estruturalmente
-  // (nome/unidades/especificacoes/ativo). Persistência durável em Postgres; memória nos testes.
-  const itensEditalRepo = pool ? new ItemEditalRepositoryPg(pool) : new ItemEditalRepositoryMemory();
+  // (nome/unidades/especificacoes/ativo). `itensEditalRepo` foi declarado acima (usado pela exclusão de
+  // material). Persistência durável em Postgres; memória nos testes.
   const gerirItensEdital = new GerirItensEdital(editaisRepo, materiaisRepo, itensEditalRepo, bus);
   registrarRotasItensEdital(app, { gerir: gerirItensEdital });
 

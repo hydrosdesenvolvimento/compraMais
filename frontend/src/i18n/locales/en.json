@@ -701,7 +701,10 @@
       "buscaAriaLabel": "Search the catalog",
       "exportarCsv": "Export Excel",
       "exportarPdf": "Export PDF",
-      "situacaoAtivo": "active"
+      "situacaoAtivo": "active",
+      "excluir": "Delete",
+      "excluido": "Item deleted.",
+      "confirmarExcluir": "Permanently delete \"{{nome}}\"? This action cannot be undone."
     },
     "usuarios": {
       "breadcrumb": "Administration · Users",
@@ -911,7 +914,9 @@
     "JustificativaObrigatoria": "Please provide a justification.",
     "MotivoRecusaObrigatorio": "Please provide a reason for the rejection.",
     "CampoNaoEditavel": "This field can't be edited.",
-    "TransicaoInvalida": "This operation isn't allowed in the current state."
+    "TransicaoInvalida": "This operation isn't allowed in the current state.",
+    "MaterialVinculadoAEdital": "Item is linked to an edital and cannot be deleted.",
+    "MaterialAtivoNaoExcluivel": "Only inactive items can be deleted. Inactivate it first."
   },
   "contestacao": {
     "semEmpresa": "No company linked to your account.",

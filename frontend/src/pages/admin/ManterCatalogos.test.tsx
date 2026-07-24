@@ -11,12 +11,14 @@ const catalogoListar = vi.fn<(slug?: string, incluirInativos?: boolean) => Promi
 const catalogoCriar = vi.fn<(...a: unknown[]) => Promise<{ id: string }>>();
 const catalogoInativar = vi.fn<(...a: unknown[]) => Promise<{ situacao: string }>>();
 const catalogoReativar = vi.fn<(...a: unknown[]) => Promise<{ situacao: string }>>();
+const materialServicoExcluir = vi.fn<(id: string) => Promise<void>>();
 vi.mock('../../lib/api', () => ({
   api: {
     catalogoListar: (slug: string, incluirInativos?: boolean) => catalogoListar(slug, incluirInativos),
     catalogoCriar: (slug: string, body: unknown) => catalogoCriar(slug, body),
     catalogoInativar: (slug: string, id: string) => catalogoInativar(slug, id),
     catalogoReativar: (slug: string, id: string) => catalogoReativar(slug, id),
+    materialServicoExcluir: (id: string) => materialServicoExcluir(id),
   },
 }));
 
@@ -122,6 +124,7 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
     catalogoCriar.mockReset().mockResolvedValue({ id: 'novo' });
     catalogoInativar.mockReset().mockResolvedValue({ situacao: 'inativo' });
     catalogoReativar.mockReset().mockResolvedValue({ situacao: 'ativo' });
+    materialServicoExcluir.mockReset().mockResolvedValue(undefined);
   });
 
   async function abrirAba() {
@@ -192,6 +195,26 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
     fireEvent.change(screen.getByTestId('filtro-tipo'), { target: { value: 'servico' } });
     await waitFor(() => expect(screen.getAllByTestId('item-catalogo')).toHaveLength(1));
     expect(screen.getByText(/Instalação elétrica/)).toBeInTheDocument();
+  });
+
+  it('item INATIVO oferece Excluir; confirmar chama a API de exclusão física', async () => {
+    const inativo: CatalogoItemView = { id: 'm9', ativo: false, situacao: 'inativo', numero: 'ITM-2026/009', nome: 'Item obsoleto', tipo: 'material', unidades: ['un'] };
+    catalogoListar.mockImplementation((slug?: string) => Promise.resolve(slug === 'unidades-medida' ? unidades : [inativo]));
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    try {
+      renderTela();
+      fireEvent.click(await screen.findByTestId('tab-materiais-servicos'));
+      fireEvent.click(await screen.findByTestId('excluir'));
+      await waitFor(() => expect(materialServicoExcluir).toHaveBeenCalledWith('m9'));
+    } finally {
+      confirmSpy.mockRestore();
+    }
+  });
+
+  it('item ATIVO não oferece Excluir (precisa inativar antes)', async () => {
+    await abrirAba(); // itens padrão são ativos
+    await screen.findAllByTestId('item-catalogo');
+    expect(screen.queryByTestId('excluir')).not.toBeInTheDocument();
   });
 
   it('busca e exportação só existem neste catálogo (os três base não os declaram)', async () => {

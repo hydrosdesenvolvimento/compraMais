@@ -701,7 +701,10 @@
       "buscaAriaLabel": "Buscar en el catálogo",
       "exportarCsv": "Exportar Excel",
       "exportarPdf": "Exportar PDF",
-      "situacaoAtivo": "activo"
+      "situacaoAtivo": "activo",
+      "excluir": "Eliminar",
+      "excluido": "Ítem eliminado.",
+      "confirmarExcluir": "¿Eliminar definitivamente \"{{nome}}\"? Esta acción no se puede deshacer."
     },
     "usuarios": {
       "breadcrumb": "Administración · Usuarios",
@@ -911,7 +914,9 @@
     "JustificativaObrigatoria": "Indica la justificación.",
     "MotivoRecusaObrigatorio": "Indica el motivo del rechazo.",
     "CampoNaoEditavel": "Este campo no se puede editar.",
-    "TransicaoInvalida": "Operación no permitida en el estado actual."
+    "TransicaoInvalida": "Operación no permitida en el estado actual.",
+    "MaterialVinculadoAEdital": "El ítem está vinculado a un edicto y no puede eliminarse.",
+    "MaterialAtivoNaoExcluivel": "Solo se pueden eliminar ítems inactivos. Inactívelo primero."
   },
   "contestacao": {
     "semEmpresa": "Ninguna empresa vinculada a su cuenta.",

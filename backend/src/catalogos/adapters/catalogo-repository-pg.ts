@@ -43,6 +43,10 @@ export abstract class CatalogoPgBase<T extends ItemCatalogo> implements Catalogo
     return row ? this.mapear(row) : null;
   }
 
+  async remover(id: string): Promise<void> {
+    await this.pool.query(`DELETE FROM ${this.tabela} WHERE id = $1`, [id]);
+  }
+
   async porChave(chave: string): Promise<T | null> {
     const r = await this.pool.query(`SELECT * FROM ${this.tabela} WHERE lower(${this.chaveCol}) = lower($1) LIMIT 1`, [chave]);
     const row = r.rows[0] as Record<string, unknown> | undefined;

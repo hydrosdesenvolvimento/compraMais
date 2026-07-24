@@ -22,3 +22,7 @@ export class CatalogoItemReativado extends DomainEvent<{ catalogo: NomeCatalogo;
   readonly eventName = 'CatalogoItemReativado'; readonly eventVersion = 1;
   constructor(aggregateId: string, payload: { catalogo: NomeCatalogo; itemId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
 }
+export class CatalogoItemExcluido extends DomainEvent<{ catalogo: NomeCatalogo; itemId: string }> {
+  readonly eventName = 'CatalogoItemExcluido'; readonly eventVersion = 1; // exclusão FÍSICA (só inativo sem vínculo)
+  constructor(aggregateId: string, payload: { catalogo: NomeCatalogo; itemId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}

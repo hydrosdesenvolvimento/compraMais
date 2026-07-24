@@ -18,6 +18,11 @@ export class ItemEditalRepositoryMemory implements ItemEditalRepository {
     return false;
   }
 
+  async usadoEmAlgumEdital(itemCatalogoId: string): Promise<boolean> {
+    for (const i of this.map.values()) if (i.itemCatalogoId === itemCatalogoId) return true;
+    return false;
+  }
+
   async proximoNumero(editalId: string): Promise<number> {
     const doEdital = [...this.map.values()].filter((i) => i.editalId === editalId);
     return doEdital.reduce((max, i) => Math.max(max, i.numero), 0) + 1;

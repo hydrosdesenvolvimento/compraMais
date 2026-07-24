@@ -12,6 +12,7 @@ const maloteGerar = vi.fn<(...a: unknown[]) => Promise<{ maloteId: string; statu
 const maloteExportar = vi.fn<(...a: unknown[]) => Promise<{ status: string; jaExportado: boolean }>>();
 const maloteEnviarSei = vi.fn<(id: string) => Promise<unknown>>();
 const seiConsultarProcesso = vi.fn<(numero: string) => Promise<unknown>>();
+const seiStatus = vi.fn<() => Promise<{ configurado: boolean; provider: string }>>();
 vi.mock('../../lib/api', () => ({
   api: {
     malotesListar: () => malotesListar(),
@@ -19,6 +20,7 @@ vi.mock('../../lib/api', () => ({
     maloteExportar: (id: string) => maloteExportar(id),
     maloteEnviarSei: (id: string) => maloteEnviarSei(id),
     seiConsultarProcesso: (numero: string) => seiConsultarProcesso(numero),
+    seiStatus: () => seiStatus(),
   },
 }));
 
@@ -38,6 +40,18 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
     maloteExportar.mockReset().mockResolvedValue({ status: 'exportado', jaExportado: false });
     maloteEnviarSei.mockReset().mockResolvedValue({ maloteId: 'm1', numeroProcesso: '4004.017444.00012/2026-02', idProtocolo: '23351546', jaProtocolado: false });
     seiConsultarProcesso.mockReset().mockResolvedValue({ numero: '4004.017444.00012/2026-02', idProtocolo: '23351546', documentos: [{ idDocumento: '999001', titulo: 'Despacho 1' }] });
+    seiStatus.mockReset().mockResolvedValue({ configurado: true, provider: 'web' }); // configurado por padrão
+  });
+
+  it('quando o SEI não está configurado (SEI_BASE_URL ausente): exibe o aviso e desabilita as ações', async () => {
+    seiStatus.mockResolvedValue({ configurado: false, provider: 'mock' });
+    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2 }]);
+    renderTela();
+
+    expect(await screen.findByTestId('sei-nao-configurado')).toBeInTheDocument();
+    expect(screen.getByTestId('consultar-sei')).toBeDisabled();
+    await screen.findAllByTestId('item-malote');
+    expect(screen.getByTestId('enviar-sei')).toBeDisabled();
   });
 
   it('envia um malote gerado ao SEI (push) e mostra o número do processo protocolado', async () => {

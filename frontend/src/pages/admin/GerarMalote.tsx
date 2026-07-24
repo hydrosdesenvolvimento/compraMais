@@ -58,6 +58,11 @@ export function GerarMalote() {
   });
   const invalidar = () => qc.invalidateQueries({ queryKey: ['malotes'] });
 
+  // Status da integração SEI: se SEI_BASE_URL/credenciais não estão setados, a tela avisa e desabilita
+  // as ações de SEI. Default `true` enquanto carrega, para não piscar o aviso nem esconder as ações.
+  const { data: seiStatus } = useQuery({ queryKey: ['sei-status'], queryFn: () => api.seiStatus(), retry: false, staleTime: 60000 });
+  const seiConfigurado = seiStatus?.configurado ?? true;
+
   const exportar = useMutation({
     mutationFn: (id: string) => api.maloteExportar(id),
     onSuccess: (r, id) => { setExportInfo((m) => ({ ...m, [id]: r.jaExportado ? 'jaExportado' : 'exportado' })); void invalidar(); },
@@ -84,12 +89,20 @@ export function GerarMalote() {
           <p className="page-sub">{t('admin.malote.subtitulo')}</p>
         </div>
         <div style={{ display: 'inline-flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <Botao data-cy="consultar-sei" variante="secundario" onClick={() => setConsultaAberta(true)}>{t('admin.malote.sei.consultarTitulo')}</Botao>
+          <Botao data-cy="consultar-sei" variante="secundario" disabled={!seiConfigurado} title={seiConfigurado ? undefined : t('admin.malote.sei.naoConfiguradoDica')} onClick={() => setConsultaAberta(true)}>{t('admin.malote.sei.consultarTitulo')}</Botao>
           <Botao data-cy="novo-malote" onClick={() => setModalAberto(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <span aria-hidden style={{ fontSize: 16, lineHeight: 1 }}>+</span>{t('admin.malote.novoMalote')}
           </Botao>
         </div>
       </div>
+
+      {/* Aviso quando a integração SEI não está configurada (SEI_BASE_URL/credenciais ausentes). */}
+      {seiStatus && !seiStatus.configurado && (
+        <div data-cy="sei-nao-configurado" role="status" style={{ display: 'flex', gap: 10, padding: '12px 16px', borderRadius: 10, background: 'var(--atencao-bg, #FEF3C7)', color: '#8A5410', border: '1px solid #F1D08A', fontSize: 13.5, lineHeight: 1.5 }}>
+          <span aria-hidden style={{ display: 'inline-flex', flexShrink: 0 }}><IconeAlerta width={18} height={18} /></span>
+          <span>{t('admin.malote.sei.naoConfigurado')}</span>
+        </div>
+      )}
 
       <div className="card">
         <div data-cy="filtros" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -156,7 +169,7 @@ export function GerarMalote() {
                           )}
                           {/* Enviar ao SEI: só para malote gerado ainda não protocolado. */}
                           {m.status === 'gerado' && !m.protocoloSei && !seiInfo[m.id] && (
-                            <button type="button" data-cy="enviar-sei" title={t('admin.malote.sei.enviar')} aria-label={t('admin.malote.sei.enviar')} disabled={enviarSei.isPending} onClick={() => enviarSei.mutate(m.id)} style={iconeAcao}>
+                            <button type="button" data-cy="enviar-sei" title={seiConfigurado ? t('admin.malote.sei.enviar') : t('admin.malote.sei.naoConfiguradoDica')} aria-label={t('admin.malote.sei.enviar')} disabled={enviarSei.isPending || !seiConfigurado} onClick={() => enviarSei.mutate(m.id)} style={{ ...iconeAcao, ...(seiConfigurado ? {} : { opacity: 0.5, cursor: 'not-allowed' }) }}>
                               <span style={{ font: '600 13px var(--font-body)' }}>{t('admin.malote.sei.enviar')}</span>
                             </button>
                           )}

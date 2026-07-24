@@ -492,7 +492,12 @@ export async function buildServer(): Promise<FastifyInstance> {
     : new SeiMockGateway();
   const enviarMaloteSei = new EnviarMaloteSei(maloteRepo, seiGateway, bus);
   registrarRotasMalote(app, { gerar: gerarMalote, enviarSei: enviarMaloteSei });
-  registrarRotasSei(app, { consultar: new ConsultarProcessoSei(seiGateway) });
+  // `configurado` = integração pronta para o SEI real (provider 'web', que exige SEI_BASE_URL +
+  // credenciais/órgão/tipo). Sem isso, a UI de malote avisa que falta configuração.
+  registrarRotasSei(app, {
+    consultar: new ConsultarProcessoSei(seiGateway),
+    status: { configurado: config.sei.provider === 'web', provider: config.sei.provider },
+  });
   // Recuperação no boot: reprocessa jobs pendentes/órfãos que sobreviveram a um restart (durabilidade FR-002).
   if (filaMalote instanceof FilaMalotePg) await filaMalote.recuperar();
 

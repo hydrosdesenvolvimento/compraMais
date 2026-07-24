@@ -839,7 +839,9 @@
         "fechar": "Close",
         "processoLabel": "Process {{numero}}",
         "documentos": "{{n}} document(s)",
-        "erroConsulta": "Could not query. Check the number, or SEI may be unavailable."
+        "erroConsulta": "Could not query. Check the number, or SEI may be unavailable.",
+        "naoConfigurado": "SEI integration is not configured. Set SEI_BASE_URL and the SEI credentials (user, password, department and process type) to enable sending and querying.",
+        "naoConfiguradoDica": "Configure the SEI integration (SEI_BASE_URL and credentials)."
       }
     },
     "analiseDocumental": {

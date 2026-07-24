@@ -1,6 +1,6 @@
 import type { Pool } from 'pg';
 import type { DistribuicaoRepository, CotaFornecedor } from '../application/executar-distribuicao.js';
-import type { RegistroDistribuicao, AlocacaoRegistro } from '../domain/registro-distribuicao.js';
+import type { RegistroDistribuicao, AlocacaoRegistro, ItemDistribuicao } from '../domain/registro-distribuicao.js';
 
 /**
  * Adaptador PostgreSQL da matriz de distribuição (tabela `distribuicoes`, append-only via trigger —
@@ -14,12 +14,12 @@ export class DistribuicaoRepositoryPg implements DistribuicaoRepository {
     await this.pool.query(
       `INSERT INTO distribuicoes
          (id, edital_id, versao, gerado_em, regra_desempate, demanda_total, quantidade_distribuida,
-          deficit, deficit_quantidade, alocacoes, hash)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+          deficit, deficit_quantidade, alocacoes, itens, hash)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12)
        ON CONFLICT (id) DO NOTHING`,
       [
         r.id, r.editalId, r.versao, r.geradoEm, r.regraDesempate, r.demandaTotal,
-        r.quantidadeDistribuida, r.deficit, r.deficitQuantidade, JSON.stringify(r.alocacoes), r.hash,
+        r.quantidadeDistribuida, r.deficit, r.deficitQuantidade, JSON.stringify(r.alocacoes), JSON.stringify(r.itens), r.hash,
       ],
     );
   }
@@ -70,6 +70,7 @@ function mapear(row: Record<string, unknown>): RegistroDistribuicao {
     deficit: Boolean(row.deficit),
     deficitQuantidade: Number(row.deficit_quantidade),
     alocacoes: (row.alocacoes as AlocacaoRegistro[]) ?? [], // jsonb já parseado pelo driver pg
+    itens: (row.itens as ItemDistribuicao[]) ?? [], // matriz por item (Fase 2); [] em registros legados
     hash: String(row.hash),
   };
 }

@@ -230,7 +230,10 @@
       "homologar": "Homologar distribuição",
       "homologando": "Homologando…",
       "homologadaEm": "Distribuição homologada · versão {{versao}}",
-      "erroHomologar": "Não foi possível homologar a distribuição."
+      "erroHomologar": "Não foi possível homologar a distribuição.",
+      "itemResumo": "{{distribuido}} de {{demanda}} {{unidade}} distribuído",
+      "itemDeficit": "déficit de {{deficit}}",
+      "itemSemRateio": "Nenhum credenciado declarou capacidade neste item."
     },
     "reserva": {
       "eyebrow": "Operação · Cadastro de Reserva",

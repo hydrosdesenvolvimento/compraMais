@@ -100,6 +100,12 @@ export interface EditalElegiveisView {
 }
 /** Tela "Distribuição Inteligente" (Painel Admin · Operação) — uma linha do rateio (UC008/RN005). */
 export interface RateioLinhaView { fornecedorId: string; nome: string; capacidade: number; cota: number }
+/** Rateio de UM item do edital (Fase 2 — distribuição por item). */
+export interface ItemDistribuicaoView {
+  itemId: string; numero: number; nome: string; unidade: string;
+  demanda: number; distribuido: number; deficit: boolean; deficitQuantidade: number;
+  rateio: RateioLinhaView[];
+}
 /**
  * Resumo da distribuição de um edital. `homologada=true` = matriz congelada (append-only); `false` =
  * preview determinístico do Motor, ainda por homologar. `total` = demanda; `distribuido` = soma das
@@ -114,7 +120,8 @@ export interface ResumoDistribuicaoView {
   habilitados: number;
   deficit: boolean;
   deficitQuantidade: number;
-  rateio: RateioLinhaView[];
+  itens: ItemDistribuicaoView[]; // rateio POR item (Fase 2)
+  rateio: RateioLinhaView[]; // rateio AGREGADO por fornecedor (resumo)
 }
 /**
  * Uma posição na fila do Cadastro de Reserva (UC009 / RN004). Fornecedor apto (credenciamento aceito)

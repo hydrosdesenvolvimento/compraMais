@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
-import { distribuir } from '../domain/motor.js';
-import { montarRegistro, type RegistroDistribuicao } from '../domain/registro-distribuicao.js';
+import { distribuir, REGRA_DESEMPATE_PADRAO } from '../domain/motor.js';
+import { montarRegistroPorItem, type ItemDistribuicao, type RegistroDistribuicao } from '../domain/registro-distribuicao.js';
 import { DistribuicaoExecutada } from '../domain/eventos.js';
-import { montarAptosDoEdital } from './montar-aptos.js';
+import { montarAptosDoItem } from './montar-aptos.js';
 import type { EventBus } from '../../shared/events/event-bus.js';
 import type { CredenciamentoRepository } from '../../credenciamento/application/solicitar-credenciamento.js';
 import type { FornecedorRepository } from '../../catalogo/application/fornecedor-repository.js';
@@ -10,12 +10,12 @@ import type { FornecedorRepository } from '../../catalogo/application/fornecedor
 type Actor = { userId: string; empresaId?: string };
 
 /**
- * Fonte de leitura mínima do edital para distribuir: guarda de estado + demanda total. A `demanda`
- * deixou de ser um campo do edital e passa a ser a **soma das quantidades dos itens** (o edital não tem
- * mais quantitativo agregado); quem implementa a porta faz essa soma.
+ * Fonte de leitura mínima do edital para distribuir (Fase 2): guarda de estado + os ITENS do edital
+ * (id + quantidade demandada). O rateio roda por item; quem implementa a porta lista os itens.
  */
+export interface ItemParaDistribuir { itemId: string; quantidade: number }
 export interface EditalParaDistribuir {
-  porId(id: string): Promise<{ podeDistribuir: boolean; demanda: number } | null>;
+  porId(id: string): Promise<{ podeDistribuir: boolean; itens: ItemParaDistribuir[] } | null>;
 }
 
 /** Cota vigente de um fornecedor num edital (projeção de leitura para "Demandas distribuídas"). */
@@ -41,6 +41,9 @@ export class EditalNaoEncontrado extends Error {
 export class EditalNaoDistribuivel extends Error {
   constructor() { super('Edital is not in a distributable state (published tender required).'); this.name = 'EditalNaoDistribuivel'; }
 }
+export class EditalSemItens extends Error {
+  constructor() { super('Edital has no items to distribute.'); this.name = 'EditalSemItens'; }
+}
 
 /**
  * Executa o Motor de Distribuição (UC008 / RF005, Story 5.1+5.2). Reúne os aptos (credenciados
@@ -62,13 +65,28 @@ export class ExecutarDistribuicao {
     const e = await this.editais.porId(editalId);
     if (!e) throw new EditalNaoEncontrado();
     if (!e.podeDistribuir) throw new EditalNaoDistribuivel(); // guarda de estado
+    if (e.itens.length === 0) throw new EditalSemItens();
 
-    const aptos = await montarAptosDoEdital(this.creds, this.fornecedores, editalId);
+    // Rateio POR ITEM (Fase 2): cada item distribui a sua quantidade entre os credenciados NAQUELE item,
+    // com o teto declarado do item. Item sem credenciado vira déficit total (não chama o motor — que
+    // lançaria SemAptos). O kernel `distribuir` é puro e reprodutível (RNF008).
+    const itens: ItemDistribuicao[] = [];
+    for (const it of e.itens) {
+      const aptos = await montarAptosDoItem(this.creds, this.fornecedores, editalId, it.itemId);
+      if (aptos.length === 0) {
+        itens.push({ itemId: it.itemId, demanda: it.quantidade, distribuido: 0, deficit: true, deficitQuantidade: it.quantidade, alocacoes: [] });
+        continue;
+      }
+      const r = distribuir({ demanda: it.quantidade, aptos });
+      itens.push({
+        itemId: it.itemId, demanda: r.demandaTotal, distribuido: r.quantidadeDistribuida,
+        deficit: r.deficit, deficitQuantidade: r.deficitQuantidade,
+        alocacoes: r.alocacoes.map((a) => ({ fornecedorId: a.id, cota: a.cota })),
+      });
+    }
 
-    // Kernel puro (AD-7/AD-24): lança SemAptos se `aptos` vazio, DemandaInvalida se demanda ≤ 0.
-    const resultado = distribuir({ demanda: e.demanda, aptos });
     const versao = (await this.repo.contarDoEdital(editalId)) + 1;
-    const registro = montarRegistro({ id: randomUUID(), editalId, versao, geradoEm: this.now(), resultado });
+    const registro = montarRegistroPorItem({ id: randomUUID(), editalId, versao, geradoEm: this.now(), regraDesempate: REGRA_DESEMPATE_PADRAO, itens });
     await this.repo.append(registro); // append-only — jamais sobrescreve versões anteriores (AD-10)
 
     await this.bus.publish(

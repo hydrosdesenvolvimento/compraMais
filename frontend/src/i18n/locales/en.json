@@ -230,7 +230,10 @@
       "homologar": "Approve distribution",
       "homologando": "Approving…",
       "homologadaEm": "Distribution approved · version {{versao}}",
-      "erroHomologar": "Could not approve the distribution."
+      "erroHomologar": "Could not approve the distribution.",
+      "itemResumo": "{{distribuido}} of {{demanda}} {{unidade}} distributed",
+      "itemDeficit": "deficit of {{deficit}}",
+      "itemSemRateio": "No supplier declared capacity for this item."
     },
     "reserva": {
       "eyebrow": "Operations · Reserve List",

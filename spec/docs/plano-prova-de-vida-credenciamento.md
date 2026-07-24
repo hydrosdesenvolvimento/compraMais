@@ -218,8 +218,8 @@ flowchart TD
 |---|---|---|
 | 0 | Decisões confirmadas + RIPD/consentimento | Tech Lead + BA + DBA |
 | 1 ✅ | Porta, mock, `compararCosseno`, adapter HTTP, serviço Python (build+smoke ok), compose, env | Senior Dev |
-| 2 | Referência biométrica (front onboarding + back + 0027) | Senior Dev + UX |
-| 3 | Passo do wizard + verificação + gate + 0028 + auditoria | Senior Dev |
+| 2 🔶 | **Back pronto** (migration 0027 + `POST /fornecedores/:id/biometria` + repo cifrado). Falta o front (onboarding). | Senior Dev + UX |
+| 3 🔶 | **Back pronto** (gate no agregado + `POST /credenciamentos/:id/prova-de-vida` + migration 0028). Falta o front (passo webcam) e a trilha UC012. | Senior Dev |
 | 4 | i18n + a11y + estados de erro | Senior Dev + UX |
 | 5 | Validação QA + evidências Cypress | QA Expert |
 | 6 | Security review + aprovação final | Tech Lead |

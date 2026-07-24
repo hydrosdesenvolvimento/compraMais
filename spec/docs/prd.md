@@ -6,8 +6,8 @@
 
 **Projeto:** Compra Mais (Programa de Compras Municipalizadas)
 **Cliente/Patrocinador:** Prefeitura Municipal de Rio Branco (SMGA / Gabinete do Prefeito)
-**Versão:** 2.4 (validação de mockups)
-**Data:** 2026-07-02
+**Versão:** 2.5 (validação do cliente — Validação 01)
+**Data:** 2026-07-05
 **Autores:** John (PM), Mary (BA), Winston (Arquiteto), Sally (UX), Amelia (Dev), Murat (Test Architect), Paige (Tech Writer) — sessão BMad Party Mode
 **Base:** `source/` (Descritivo, Escopo, HDR, Arquitetura, Histórias, Casos de Uso, Backlog, BPMN) + artefatos da sessão ([matriz-lacunas.md](matriz-lacunas.md), [plano-releases.md](plano-releases.md))
 
@@ -23,6 +23,7 @@
 | 2.2 | 2026-06-29 | Party Mode (Update por designs) | Incorporação dos designs ratificados em `source/AI-UI-Design/`: slogan/value props (§1), papel **Procurador** (§4), **RF018** (re-sincronização Receita), **RN009** (dados da Receita read-only), referência ao contrato de UX (DESIGN/EXPERIENCE) em RNF006 |
 | 2.3 | 2026-07-02 | Party Mode (Convergência) | Convergência de linhagens de doc (ver [CONVERGENCIA.md](CONVERGENCIA.md)): resgate de 13 decisões do Spec-Kit — **RF019** (georreferenciamento/endereço estruturado), refino de RF003/RN001 (CNAE match exato 7 dígitos), **RN010–RN013** novas, **§15 Papéis/RBAC** e **§16 Catálogo de parâmetros**; correção do path do contrato de UX em RNF006; AD-34/35/36 na espinha |
 | 2.4 | 2026-07-02 | Party Mode (Validação de mockups) | Validação dos mockups `AI-UI-Design/` vs doc (ver [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)): gaps do Painel Admin preenchidos — **RF020** (CRUD Secretarias), **RF021** (catálogo CNAE/setores), **RF022** (catálogo de tipos de documento), **RF023** (gestão de usuários internos); **RN014** (ciclo de vida do Edital), **RN015** (inativação preservando histórico), **RN016** (Termo de Aceite + cancelamento de credenciamento); §15 cargos operacionais; AD-37/AD-38 na espinha; conflito **"Prova de vida" × biometria removida** registrado para ratificação |
+| 2.5 | 2026-07-05 | Party Mode (Validação 01 do cliente) | Incorporação do feedback das visitas técnicas 5/6 (ver [VALIDACAO-CLIENTE-01.md](VALIDACAO-CLIENTE-01.md)): **RF024** (Termo de Responsabilidade sobre capacidade), **RF025** (anexação/download do PDF oficial do Edital — complementa RF008), **RF026** (desistência covalidada); **RN017** (imutabilidade das cotas a edição manual), **RN018** (formalização da desistência por covalidação), **RN019** (aceite obrigatório do Termo de Responsabilidade), **RN020** (confidencialidade do rateio na visão do fornecedor), **RN021** ("Em Análise" vs "Bloqueado"); AD-39/AD-40/AD-41 na espinha; **conflito G5 (biometria) FECHADO** — cliente ratificou o adiamento; ajustes de UI (landing "Compra Mais Rio Branco", jornada de entrada, e-mail da comissão); LAC-22/23/24 |
 
 ---
 
@@ -66,12 +67,12 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 
 ### 5.1 Incluído (por onda — ver [plano-releases.md](plano-releases.md))
 - **Onda 1 (Demo FIEAC, dados sintéticos):** cadastro CNPJ, filtro CNAE, motor de distribuição, geração de malote.
-- **Onda 2 (MVP de produção):** integrações reais, bloqueio transitório de inadimplência, controles LGPD, tela de contestação, upload manual ao SEI.
+- **Onda 2 (MVP de produção):** integrações reais, bloqueio transitório de inadimplência, controles LGPD, tela de contestação, upload manual ao SEI, **Termo de Responsabilidade (RF024)**, **PDF oficial do Edital anexado/baixável (RF025)** e **desistência covalidada (RF026)**.
 - **Onda 3 (Release 2):** SEI automático, portal público de transparência, dashboard interno, notificações, covalidação madura, biometria condicional.
 
 ### 5.2 Não incluído (MVP)
 - Transferência automática para o SEI (Release 2).
-- Biometria facial / liveness (condicional, Release 2, somente com RIPD aprovado).
+- Biometria facial / liveness (condicional, Release 2, somente com RIPD aprovado). **Adiamento ratificado pelo cliente na Validação 01** — a API de "prova de vida" não foi homologada tecnicamente (fecha o conflito G5, ver [VALIDACAO-CLIENTE-01.md](VALIDACAO-CLIENTE-01.md) §5).
 - Notificações SMS/e-mail (Release 2, requer gateway).
 - GPI / Leilão / desfazimento.
 - Empenho e pagamento (permanecem no SEI).
@@ -103,6 +104,9 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | **RF021** | **Gestão (CRUD) do catálogo de CNAE / Setores industriais** — cadastro de código CNAE + descrição da atividade, base selecionável para "CNAE exigido" do edital e para o match do fornecedor (RF003) | 2 | **Novo** (validação mockup Admin) |
 | **RF022** | **Gestão (CRUD) do catálogo de Tipos de Documento** — define os documentos aceitos (Nome, Formato aceito, regra de Validade/"Sem validade", Categoria, exigência de Exercício p/ Balanço); parametriza o upload (RF002) e a covalidação (RF004) | 2 | **Novo** (validação mockup Admin) |
 | **RF023** | **Gestão de Usuários internos (servidores)** — CRUD de usuários da Prefeitura com atribuição de **cargo/perfil** (RBAC §15) e reset de senha; distinto do autocadastro do fornecedor (RF001/RF015) | 2 | **Novo** (validação mockup Admin) |
+| **RF024** | **Termo de Responsabilidade** — no credenciamento, ao declarar a **capacidade produtiva** (RN005), o fornecedor deve aceitar um termo com validade jurídica atestando a veracidade do que informa; sem aceite o Sistema **bloqueia o prosseguimento**; o aceite (versão + timestamp) é registrado na trilha (RNF003) | 2 | **Novo** (Validação 01) |
+| **RF025** | **Anexação e download do PDF oficial do Edital** — o admin/Secretaria anexa o PDF do edital (gerado no SEI) na criação; o upload é **obrigatório para publicar** (transição `Rascunho → Aberto`, AD-39); o fornecedor pode **baixar o edital em PDF**. **Complementa** RF008 (o preenchimento estruturado é mantido) | 2 | **Novo** (Validação 01) |
+| **RF026** | **Solicitação e covalidação de desistência** — a desistência de um fornecedor **não é automática**: gera pendência que exige **confirmação de admin SMGA/CPL** (RN018) antes de efetivar a saída e acionar o Cadastro de Reserva | 2 | **Novo** (Validação 01) |
 
 ## 7. Requisitos Não Funcionais (revisados)
 
@@ -157,6 +161,11 @@ O **Compra Mais** é uma plataforma B2G (Business-to-Government) de gestão de c
 | **RN014** | **Ciclo de vida do Edital:** `Rascunho → Aberto → Em Análise → Em Distribuição → Homologado → Em Execução`. Transições são auditadas (RN012, AD-16/AD-37); só edital **Aberto** aparece na vitrine do fornecedor; a distribuição (RF005) só ocorre a partir de **Em Distribuição**; **Homologado** congela a alocação (AD-10). (validação mockup) |
 | **RN015** | **Exclusão é lógica, preservando histórico:** entidades de cadastro administrativo (Secretaria, Setor/CNAE, Tipo de Documento, Usuário, Fornecedor, Edital) **não são apagadas** — passam a **Inativo**, mantendo o histórico e as referências existentes; registros já vinculados a processos permanecem íntegros (complementa a trilha append-only AD-18/AD-38). (validação mockup) |
 | **RN016** | **Conclusão de credenciamento por Termo de Aceite; cancelamento pelo fornecedor:** no MVP o credenciamento conclui com o **Termo de Aceite** (aceite formal registrado na trilha; a etapa "Prova de vida"/biometria é **Release 2 condicional a RIPD** — ver §12 e [VALIDACAO-MOCKUPS.md](VALIDACAO-MOCKUPS.md)). O fornecedor pode **cancelar** um credenciamento **antes da distribuição**; após homologação, saída se dá por substituição de desistente (RN004, AD-10). (validação mockup) |
+| **RN017** | **Distribuição matematicamente soberana:** após o cálculo (RF005/§8), é **vedada a edição manual das cotas** por administradores/secretários — a matemática do motor é irrevogável (reforça a alocação append-only AD-10). Realocação só ocorre por **eventos legítimos** (desistência covalidada RN018 / substituição RN004). (Validação 01) |
+| **RN018** | **Formalização da desistência por covalidação:** a solicitação de desistência muda o status para **Pendente de Desistência**; a CPL/SMGA **confirma** → **Desistente** (aciona o Cadastro de Reserva, RN004/AD-25) **ou rejeita** → reverte ao status anterior. Complementa RN016: o **cancelamento antes da distribuição** permanece self-service; a **desistência após distribuição** exige covalidação humana (AD-40). (Validação 01) |
+| **RN019** | **Aceite obrigatório do Termo de Responsabilidade:** o Sistema exige o aceite do termo (RF024) para o fornecedor **declarar/confirmar a capacidade produtiva** (RN005); sem aceite o credenciamento não prossegue. (Validação 01) |
+| **RN020** | **Confidencialidade do rateio:** na **visão do fornecedor**, a distribuição exibe apenas a **demanda total do edital e a cota própria** — o comparativo entre fornecedores **não** é exposto (o agregado permanece disponível à CPL/auditoria). (Validação 01) |
+| **RN021** | **Semântica de status na comunicação:** pendência meramente **documental** deve exibir **"Em Análise"**; o rótulo **"Bloqueado"** é reservado à **inadimplência/dívida ativa** (RN002). Aplica-se à UI de alertas e dashboards (RF013). (Validação 01) |
 
 ## 10. Roadmap de Releases
 
@@ -182,13 +191,14 @@ Ver [plano-releases.md](plano-releases.md). Síntese: **Onda 1** (demo FIEAC, si
 
 ## 13. Rastreabilidade
 
-Mantida a espinha original HU ↔ RF ↔ RN ↔ UC ↔ Backlog (`source/`), estendida pelos requisitos novos (RF015–RF017, RNF007–RNF008) e pelas lacunas catalogadas em [matriz-lacunas.md](matriz-lacunas.md).
+Mantida a espinha original HU ↔ RF ↔ RN ↔ UC ↔ Backlog (`source/`), estendida pelos requisitos novos (RF015–RF017, RF024–RF026, RNF007–RNF008) e pelas lacunas catalogadas em [matriz-lacunas.md](matriz-lacunas.md). A reconciliação da Validação 01 (mapa Validação 01 → ID global) está em [VALIDACAO-CLIENTE-01.md](VALIDACAO-CLIENTE-01.md).
 
 ## 14. Lacunas Remanescentes (pós-revisão)
 
 - 🔴 LAC-09 (parecer LGPD) — única bloqueadora puramente institucional.
 - 🟡 LAC-04c/d (resto e desempate do motor) — recomendação pronta, aguarda ratificação.
 - 🟠 LAC-04e (validação de capacidade), LAC-06 (SLA), LAC-07 (gateway), LAC-16 (item × lote).
+- 🟠 **LAC-22** (texto jurídico do Termo de Responsabilidade — RF024), **LAC-23** (critérios de convocação do Cadastro de Reserva), **LAC-24** (PDF do SEI: extração automática vs. só armazenamento). (Validação 01)
 - Demais 🟡/⚪ conforme matriz.
 
 ## 15. Papéis e Controle de Acesso (RBAC)

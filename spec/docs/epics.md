@@ -18,6 +18,8 @@ inputDocuments:
 
 Decomposição de épicos e histórias do Compra Mais a partir do PRD (v2.2), da Espinha de Arquitetura (33 ADs), do **contrato de UX** (DESIGN/EXPERIENCE, ratificado) e do plano de releases (3 ondas). Run regenerada do zero com o contrato de UX presente — UX-DRs são requisitos de primeira classe.
 
+> Atualizado para PRD v2.5 / 41 ADs — Validação 01 incorporada (ver seção "Cobertura da Validação 01" e [VALIDACAO-CLIENTE-01.md](VALIDACAO-CLIENTE-01.md)).
+
 ## Requirements Inventory
 
 ### Functional Requirements
@@ -106,6 +108,7 @@ DECISÕES ABERTAS: LAYOUT A vs B do login; cor azul oficial (brandbook).
 RF001→E1 · RF002→E2 · RF003→E3 · RF004→E2 · RF005→E5 · RF006→E5 · RF007→E6 · RF008→E3
 RF009→[R2] · RF010→E9 · RF011→E4 · RF012→[R2] · RF013→E9 · RF014→E8 · RF015→E1
 RF016→E7 · RF017→E7 · RF018→E1
+RF024→E2 · RF025→E3 · RF026→E5
 UX-DR1/2/4/7/8→E1 · UX-DR3→E3 · UX-DR9→E4 · UX-DR6→E7 · UX-DR5/10→E9
 ```
 
@@ -597,3 +600,45 @@ As a Administrador, I want cadastrar servidores e atribuir cargo/perfil, So that
 - **Given** o Painel Admin, **When** crio um usuário (Nome, E-mail, **Cargo**), **Then** o cargo mapeia num papel RBAC (§15/AD-35) e as permissões efetivas seguem o papel.
 - **Given** um usuário, **When** aciono reset de senha, **Then** o fluxo de nova/confirmar senha respeita o provedor de identidade (AD-20) e registra o evento.
 - **Given** um usuário desligado, **When** o removo, **Then** é **inativado** (RN015/AD-38), preservando a autoria histórica de suas ações na trilha.
+
+---
+
+## Cobertura da Validação 01 — Feedback do cliente (2026-07-05)
+
+Histórias novas identificadas na primeira validação com o cliente (ver [VALIDACAO-CLIENTE-01.md](VALIDACAO-CLIENTE-01.md)). Complementam os épicos existentes (não reescrevem nem renumeram as histórias já publicadas); AC em Given/When/Then. Novos requisitos: RF024 (Termo de Responsabilidade), RF025 (PDF oficial do Edital, complementa RF008), RF026 (Desistência covalidada). Novas RN017–RN021 e AD-39/40/41. A biometria (RF012) segue **fora do MVP** (Release 2) — adiamento ratificado pelo cliente. O PDF oficial do Edital **complementa** o formulário estruturado, não o substitui.
+
+### Story 1.8 — Migração de nomenclatura Requerente→Cadastrado *(AD-41)*
+As a equipe de desenvolvimento, I want renomear o rótulo da fase inicial de "Requerente" para "Cadastrado", So that a nomenclatura da máquina de estado reflita a linguagem validada com o cliente sem quebrar a trilha.
+- **Given** a máquina de fase do fornecedor (AD-14) com a fase inicial rotulada `Requerente`, **When** aplico a migração, **Then** o rótulo passa a `Cadastrado` no schema/enum, nos `data-cy` e na UI, cobrindo AD-41.
+- **Given** a trilha de auditoria existente, **When** a migração é aplicada, **Then** ela é **forward-only** (AD-28), sem mutar eventos históricos, e a renomeação de código é tratada como história dedicada.
+
+### Story 2.4 — Termo de Responsabilidade na declaração de capacidade *(RF024, RN019)*
+As a fornecedor, I want aceitar um Termo de Responsabilidade ao informar minha capacidade produtiva, So that a declaração de capacidade seja formalizada com rastro (RN005).
+- **Given** a etapa de credenciamento em que informo a **capacidade produtiva**, **When** preencho a capacidade, **Then** o sistema exige o **aceite do Termo de Responsabilidade** (RF024) e o botão "Prosseguir" fica **bloqueado** enquanto o aceite não for marcado (RN019).
+- **Given** o aceite do termo, **When** prossigo, **Then** o aceite (**versão do termo + timestamp**) é registrado na trilha.
+
+### Story 3.5 — Anexação e download do PDF oficial do Edital *(RF025, AD-39)*
+As a Secretaria/Gestor, I want anexar o PDF oficial do Edital (SEI) e disponibilizá-lo para download, So that o fornecedor acesse o documento formal que complementa o formulário estruturado (Story 3.1).
+- **Given** um edital em `Rascunho`, **When** tento publicá-lo (`Rascunho → Aberto`, RN014), **Then** a anexação do **PDF oficial do SEI é obrigatória** (RF025, AD-39) e a publicação é impedida sem o arquivo.
+- **Given** um edital `Aberto` com PDF anexado, **When** o fornecedor acessa o edital, **Then** vê a ação **"Baixar Edital em PDF"** e obtém o arquivo oficial, que **complementa** (não substitui) o formulário estruturado da Story 3.1.
+
+### Story 5.6 — Visão individual da cota e vedação de edição manual *(RN020, RN017)*
+As a fornecedor, I want ver apenas a demanda total e a minha própria cota, So that o rateio dos demais participantes permaneça confidencial (RN020). *(Épico 5 segue **BLOQUEADO** até fechar Item × Lote — manter o aviso do épico.)*
+- **Given** uma distribuição calculada, **When** o fornecedor consulta sua alocação, **Then** vê **somente a demanda total do edital + a sua cota**, sem o rateio dos demais participantes (RN020).
+- **Given** cotas já calculadas pelo motor, **When** um administrador tenta ajustá-las, **Then** o sistema **veda a edição manual** das cotas (RN017): alterações só ocorrem por transição append-only `SubstituicaoCota` (AD-10), reforçando a imutabilidade.
+
+### Story 5.7 — Desistência covalidada e acionamento da Reserva *(RF026, RN018, AD-40)*
+As a fornecedor titular, I want solicitar a desistência da minha cota após a distribuição, So that a saída seja formalizada por covalidação e a Reserva assuma a cota liberada.
+- **Given** um titular com cota **após a distribuição**, **When** ele solicita a desistência (RF026), **Then** o registro passa a `Pendente de Desistência` (transição covalidada append-only na máquina AD-14, AD-40).
+- **Given** um registro `Pendente de Desistência`, **When** o administrador **confirma**, **Then** o titular passa a `Desistente` e é **acionada a substituição pela Reserva** (RN004, Story 5.3/5.4, AD-10/AD-25); **When** o administrador **rejeita**, **Then** a solicitação **reverte** ao estado anterior (RN018).
+- **Given** um credenciamento **antes da distribuição**, **When** o fornecedor quer sair, **Then** o cancelamento é **self-service** (Story 5.5, RN016), sem covalidação.
+
+### Story 9.8 — Card "Desistências Pendentes" no Painel Admin *(RN018, RF013)*
+As a gestor SMGA/CPL, I want um indicador de desistências aguardando covalidação no dashboard, So that eu acompanhe e trate as solicitações pendentes.
+- **Given** desistências em `Pendente de Desistência`, **When** abro o Painel Admin (RF013), **Then** vejo um card **"Desistências Pendentes"** clicável com a contagem das solicitações aguardando covalidação (RN018).
+- **Given** o card de indicadores, **When** o sistema apresenta os estados, **Then** distingue **"Em Análise"** (aguardando covalidação, reversível) de **"Bloqueado"** (impedimento efetivo), conforme RN021.
+
+### Story 9.9 — Landing pública "Compra Mais Rio Branco" *(RF010, UX)*
+As a cidadão/fornecedor, I want uma landing pública institucional como porta de entrada, So that eu conheça o programa e acesse o sistema a partir do site da Prefeitura (não por um link seco de login).
+- **Given** o portal público (RF010), **When** acesso a landing, **Then** vejo o título **"Compra Mais Rio Branco"**, as **logomarcas oficiais**, o e-mail da comissão **comissoes.smga22@gmail.com** e a **paleta azul institucional**.
+- **Given** a jornada de entrada (site da Prefeitura → Landing), **When** decido entrar, **Then** uso os CTAs **"Acessar Sistema" / "Cadastrar"** da landing, e não um link direto de login.

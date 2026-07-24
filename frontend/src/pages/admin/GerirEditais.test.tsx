@@ -12,6 +12,8 @@ const catalogoListar = vi.fn<(slug: string) => Promise<CatalogoItemView[]>>();
 const criarEdital = vi.fn<(body: unknown) => Promise<unknown>>();
 const publicarEdital = vi.fn<(id: string) => Promise<unknown>>();
 const encerrarEdital = vi.fn<(id: string) => Promise<unknown>>();
+const despublicarEdital = vi.fn<(id: string) => Promise<unknown>>();
+const editarEdital = vi.fn<(id: string, body: unknown) => Promise<unknown>>();
 const editalItens = vi.fn<(id: string) => Promise<unknown[]>>();
 const adicionarItemEdital = vi.fn<(id: string, body: unknown) => Promise<unknown>>();
 const removerItemEdital = vi.fn<(id: string, itemId: string) => Promise<unknown>>();
@@ -22,6 +24,8 @@ vi.mock('../../lib/api', () => ({
     criarEdital: (body: unknown) => criarEdital(body),
     publicarEdital: (id: string) => publicarEdital(id),
     encerrarEdital: (id: string) => encerrarEdital(id),
+    despublicarEdital: (id: string) => despublicarEdital(id),
+    editarEdital: (id: string, body: unknown) => editarEdital(id, body),
     editalItens: (id: string) => editalItens(id),
     adicionarItemEdital: (id: string, body: unknown) => adicionarItemEdital(id, body),
     removerItemEdital: (id: string, itemId: string) => removerItemEdital(id, itemId),
@@ -68,6 +72,34 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     editalItens.mockReset().mockResolvedValue([]);
     adicionarItemEdital.mockReset().mockResolvedValue({ id: 'it1', numero: 1 });
     removerItemEdital.mockReset().mockResolvedValue({ ok: true });
+    despublicarEdital.mockReset().mockResolvedValue({ situacao: 'rascunho' });
+    editarEdital.mockReset().mockResolvedValue({ ok: true });
+  });
+
+  it('edital publicado oferece Despublicar (não Editar); clicar chama a API', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/014', situacao: 'publicado' })]));
+    renderTela();
+    await screen.findByTestId('item-edital');
+    expect(screen.getByTestId('despublicar')).toBeInTheDocument();
+    expect(screen.queryByTestId('editar-edital')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('despublicar'));
+    await waitFor(() => expect(despublicarEdital).toHaveBeenCalledWith('e1'));
+  });
+
+  it('edital em rascunho oferece Editar (não Despublicar); o modal salva a edição', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/014', objeto: 'Fardamento', situacao: 'rascunho', cnaesAlvo: ['1412601'] })]));
+    renderTela();
+    await screen.findByTestId('item-edital');
+    expect(screen.getByTestId('editar-edital')).toBeInTheDocument();
+    expect(screen.queryByTestId('despublicar')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('editar-edital'));
+    const modal = await screen.findByTestId('modal-editar-edital');
+    fireEvent.change(within(modal).getByTestId('objeto'), { target: { value: 'Fardamento revisado' } });
+    fireEvent.submit(within(modal).getByTestId('form-editar-edital'));
+
+    await waitFor(() => expect(editarEdital).toHaveBeenCalledWith('e1', expect.objectContaining({ objeto: 'Fardamento revisado' })));
   });
 
   it('lista os editais com número, objeto, sigla da secretaria e CNAE mascarado', async () => {

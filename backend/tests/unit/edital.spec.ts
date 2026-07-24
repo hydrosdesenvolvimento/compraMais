@@ -38,6 +38,15 @@ describe('Edital (US1)', () => {
     expect(() => e.publicar()).toThrow(TransicaoInvalida);
   });
 
+  it('despublicar volta publicado → rascunho; fora de publicado é barrado', () => {
+    const e = rascunho();
+    e.publicar('gestor1');
+    e.despublicar('gestor1'); expect(e.situacao).toBe('rascunho');
+    expect(() => e.despublicar()).toThrow(TransicaoInvalida); // rascunho → rascunho não é despublicação
+    e.publicar('gestor1'); e.encerrar('gestor1');
+    expect(() => e.despublicar()).toThrow(TransicaoInvalida); // encerrado não se despublica
+  });
+
   it('editar devolve diff antes/depois (FR-013) e marca ampliação de público (FR-014)', () => {
     const e = rascunho(); e.publicar();
     const r = e.editar({ objeto: 'merenda escolar', cnaesAlvo: ['1091101', '1092900'] }, 'gestor1');

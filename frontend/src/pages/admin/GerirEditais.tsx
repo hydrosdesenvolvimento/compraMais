@@ -4,8 +4,9 @@ import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tansta
 import { useTranslation } from 'react-i18next';
 import { api, type EditalGestao, type CatalogoItemView, type FiltroEditais, type ItemEditalView } from '../../lib/api';
 import { celula, cabecalho, Paginacao } from '../../design-system/tabela';
-import { Botao, BotaoIcone, Campo } from '../../design-system/components';
-import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro, IconeDemandas } from '../../design-system/icons';
+import { Botao, BotaoIcone, Campo, useToast } from '../../design-system/components';
+import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro, IconeDemandas, IconeLapis } from '../../design-system/icons';
+import { textoDoErro } from '../../lib/erros';
 
 const POR_PAGINA = 10;
 
@@ -35,9 +36,11 @@ const pill: CSSProperties = { display: 'inline-flex', alignItems: 'center', padd
 
 export function GerirEditais() {
   const { t, i18n } = useTranslation();
+  const { ok, erro } = useToast();
   const qc = useQueryClient();
   const [verId, setVerId] = useState<string | null>(null);
   const [itensId, setItensId] = useState<string | null>(null); // edital cujo modal de itens está aberto
+  const [editandoId, setEditandoId] = useState<string | null>(null); // edital em edição (só rascunho)
   const [criando, setCriando] = useState(false);
   const [busca, setBusca] = useState('');
   const [situacao, setSituacao] = useState('');
@@ -87,6 +90,19 @@ export function GerirEditais() {
   });
   const publicar = useMutation({ mutationFn: (id: string) => api.publicarEdital(id), onSuccess: () => void invalidar() });
   const encerrar = useMutation({ mutationFn: (id: string) => api.encerrarEdital(id), onSuccess: () => void invalidar() });
+  // Despublicar (publicado → rascunho): o backend recusa (409) se houver credenciamentos associados;
+  // o toast traduz o código do erro (ex.: EditalComCredenciamentos).
+  const despublicar = useMutation({
+    mutationFn: (id: string) => api.despublicarEdital(id),
+    onSuccess: () => { ok(t('admin.gerirEditais.despublicadoOk')); void invalidar(); },
+    onError: (e) => erro(textoDoErro(e)),
+  });
+  const editar = useMutation({
+    mutationFn: (v: { id: string; objeto: string; cnae: string; prazo: string }) =>
+      api.editarEdital(v.id, { objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo || null }),
+    onSuccess: () => { setEditandoId(null); ok(t('admin.gerirEditais.editadoOk')); void invalidar(); },
+    onError: (e) => erro(textoDoErro(e)),
+  });
 
   const rotuloSituacao = (s: string) => t(`admin.gerirEditais.status.${s}`, { defaultValue: s });
   const formatarPrazo = (iso: string | null) => (iso ? new Date(`${iso.slice(0, 10)}T00:00:00`).toLocaleDateString(i18n.language) : t('admin.gerirEditais.semPrazo'));
@@ -213,8 +229,16 @@ export function GerirEditais() {
                             {e.situacao === 'rascunho' && (
                               <BotaoIcone icone={IconeDemandas} data-cy="gerir-itens" title={t('admin.gerirEditais.itens.acao')} aria-label={t('admin.gerirEditais.itens.acao')} onClick={() => setItensId(e.id)} />
                             )}
+                            {/* Editar: só rascunho (edital não publicado) — FR-013. */}
+                            {e.situacao === 'rascunho' && (
+                              <BotaoIcone icone={IconeLapis} data-cy="editar-edital" title={t('admin.gerirEditais.editar')} aria-label={t('admin.gerirEditais.editar')} onClick={() => setEditandoId(e.id)} />
+                            )}
                             {e.situacao === 'rascunho' && (
                               <Botao data-cy="publicar" onClick={() => publicar.mutate(e.id)} disabled={publicar.isPending}>{t('admin.gerirEditais.publicar')}</Botao>
+                            )}
+                            {/* Despublicar: só publicado; o backend bloqueia se houver credenciamentos. */}
+                            {e.situacao === 'publicado' && (
+                              <Botao data-cy="despublicar" variante="secundario" onClick={() => despublicar.mutate(e.id)} disabled={despublicar.isPending}>{t('admin.gerirEditais.despublicar')}</Botao>
                             )}
                             {e.situacao === 'publicado' && (
                               <Botao data-cy="encerrar" variante="secundario" onClick={() => encerrar.mutate(e.id)} disabled={encerrar.isPending}>{t('admin.gerirEditais.encerrar')}</Botao>
@@ -243,6 +267,10 @@ export function GerirEditais() {
 
       {edital && <ModalDetalhe edital={edital} sigla={siglaDe(edital.secretariaId)} prazo={formatarPrazo(edital.prazoVigencia)} rotuloSituacao={rotuloSituacao} onFechar={() => setVerId(null)} />}
       {criando && <ModalNovoEdital secretarias={secretariasLista} salvando={criar.isPending} onSalvar={(v) => criar.mutate(v)} onFechar={() => setCriando(false)} />}
+      {editandoId && (() => {
+        const alvo = editais.find((e) => e.id === editandoId);
+        return alvo ? <ModalEditarEdital edital={alvo} sigla={siglaDe(alvo.secretariaId)} salvando={editar.isPending} onSalvar={(v) => editar.mutate({ id: alvo.id, ...v })} onFechar={() => setEditandoId(null)} /> : null;
+      })()}
       {itensId && <ModalItensEdital editalId={itensId} numero={editais.find((e) => e.id === itensId)?.numero} onFechar={() => setItensId(null)} />}
     </div>
   );
@@ -403,6 +431,77 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
             <Botao type="button" variante="secundario" data-cy="cancelar" onClick={onFechar}>{t('admin.gerirEditais.cancelar')}</Botao>
             <Botao type="submit" data-cy="criar" disabled={salvando}>{t('admin.gerirEditais.salvar')}</Botao>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Modal "Editar edital" (FR-013). Só chega aqui para editais em RASCUNHO (a ação some quando publicado);
+ * o backend reforça a guarda. Edita objeto, CNAE(s) alvo e prazo — número e secretaria são imutáveis.
+ */
+function ModalEditarEdital({ edital, sigla, salvando, onSalvar, onFechar }: {
+  edital: EditalGestao;
+  sigla: string;
+  salvando: boolean;
+  onSalvar: (v: { objeto: string; cnae: string; prazo: string }) => void;
+  onFechar: () => void;
+}) {
+  const { t } = useTranslation();
+  const form = useForm({
+    defaultValues: {
+      objeto: edital.objeto,
+      cnae: [...edital.cnaesAlvo].map(formatarCnae).join(', '),
+      prazo: edital.prazoVigencia ? edital.prazoVigencia.slice(0, 10) : '',
+    },
+    onSubmit: ({ value }) => onSalvar(value),
+  });
+  return (
+    <div role="dialog" aria-modal="true" aria-label={t('admin.gerirEditais.editarTitulo')} data-cy="modal-editar-edital"
+      onClick={onFechar} style={{ position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'grid', placeItems: 'center', padding: 20, zIndex: 50 }}>
+      <div onClick={(ev) => ev.stopPropagation()} className="card" style={{ width: 'min(600px, 100%)', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 18 }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 18, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.editarTitulo')}</h2>
+            <p style={{ margin: '3px 0 0', fontSize: 13, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.editarSub', { numero: edital.numero })}</p>
+          </div>
+          <BotaoIcone icone={IconeFechar} variante="fechar" data-cy="fechar-modal" title={t('admin.gerirEditais.fechar')} aria-label={t('admin.gerirEditais.fechar')} onClick={onFechar} />
+        </div>
+
+        <form data-cy="form-editar-edital" onSubmit={(e) => { e.preventDefault(); void form.handleSubmit(); }}>
+          <div className="cm-form-grid">
+            <Campo label={t('admin.gerirEditais.numeroLabel')} htmlFor="edital-edit-numero">
+              <input id="edital-edit-numero" className="input" value={edital.numero} disabled readOnly />
+            </Campo>
+            <Campo label={t('admin.gerirEditais.secretariaLabel')} htmlFor="edital-edit-secretaria">
+              <input id="edital-edit-secretaria" className="input" value={sigla} disabled readOnly />
+            </Campo>
+          </div>
+
+          <form.Field name="objeto">{(f) => (
+            <Campo label={t('admin.gerirEditais.objetoLabel')} htmlFor="edital-edit-objeto">
+              <input id="edital-edit-objeto" data-cy="objeto" className="input" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
+            </Campo>
+          )}</form.Field>
+
+          <form.Field name="cnae">{(f) => (
+            <Campo label={t('admin.gerirEditais.cnaeLabel')} htmlFor="edital-edit-cnae">
+              <input id="edital-edit-cnae" data-cy="cnae" className="input" placeholder={t('admin.gerirEditais.cnaePlaceholder')} value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
+            </Campo>
+          )}</form.Field>
+          <span style={{ display: 'block', margin: '-6px 0 12px', fontSize: 12, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.cnaeAjuda')}</span>
+
+          <form.Field name="prazo">{(f) => (
+            <Campo label={t('admin.gerirEditais.prazoLabel')} htmlFor="edital-edit-prazo">
+              <input id="edital-edit-prazo" data-cy="prazo" className="input" type="date" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
+            </Campo>
+          )}</form.Field>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
+            <Botao type="button" variante="secundario" data-cy="cancelar" onClick={onFechar}>{t('admin.gerirEditais.cancelar')}</Botao>
+            <Botao type="submit" data-cy="salvar-edicao" disabled={salvando}>{t('admin.gerirEditais.salvar')}</Botao>
           </div>
         </form>
       </div>

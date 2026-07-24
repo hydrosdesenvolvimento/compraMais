@@ -101,6 +101,17 @@ export class Edital extends EntidadeBase {
   }
 
   /**
+   * Despublica um edital (publicado → rascunho), devolvendo-o à edição. Só a partir de `publicado`; a
+   * regra de negócio adicional — não haver credenciamentos associados — é verificada no caso de uso
+   * (o agregado não conhece credenciamentos). Reabrir um edital encerrado não é despublicação.
+   */
+  despublicar(userName = 'sistema'): void {
+    if (this._situacao !== 'publicado') throw new TransicaoInvalida(this._situacao, 'rascunho');
+    this._situacao = 'rascunho';
+    this.marcarAtualizacao(userName);
+  }
+
+  /**
    * Edição auditada (FR-013): aplica os campos e devolve o diff antes/depois para a trilha.
    * `ampliouPublico` = adicionou CNAE alvo (FR-014 — vitrine reavaliada, prazo mantido).
    */
@@ -140,4 +151,7 @@ export class EditalIncompleto extends Error {
 }
 export class TransicaoInvalida extends Error {
   constructor(de: string, para: string) { super(`Invalid transition from '${de}' to '${para}'.`); this.name = 'TransicaoInvalida'; }
+}
+export class EditalNaoEditavel extends Error {
+  constructor(situacao: string) { super(`Edital can only be edited while draft (rascunho); current: '${situacao}'.`); this.name = 'EditalNaoEditavel'; }
 }

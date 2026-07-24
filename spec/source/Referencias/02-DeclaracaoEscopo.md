@@ -30,7 +30,7 @@
   - [Escopo Incluído](#escopo-incluído)
   - [Escopo Não Incluído](#escopo-não-incluído)
   - [MVP – Produto Mínimo Viável](#mvp--produto-mínimo-viável)
-  - [Entegáveis do Projeto](#entegáveis-do-projeto)
+  - [Entregáveis do Projeto](#entregáveis-do-projeto)
   - [Integrações](#integrações)
   - [Documentos Relacionados](#documentos-relacionados)
 

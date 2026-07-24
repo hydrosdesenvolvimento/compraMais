@@ -10,12 +10,12 @@ export class UsuarioRepositoryPg implements UsuarioRepository {
     const s = u.estado();
     await this.pool.query(
       `INSERT INTO usuarios
-         (id, email, senha_hash, salt, google_id, nome, papel, fornecedor_id, ativo, cargo, login, secretaria, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+         (id, email, senha_hash, salt, google_id, nome, papel, fornecedor_id, ativo, cargo, login, secretaria, avatar, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
        ON CONFLICT (id) DO UPDATE SET
          email = $2, senha_hash = $3, salt = $4, google_id = $5, nome = $6,
-         papel = $7, fornecedor_id = $8, ativo = $9, cargo = $10, login = $11, secretaria = $12, update_date = $14, last_user_update = $15`,
-      [s.meta.id, s.email, s.senhaHash, s.salt, s.googleId, s.nome, s.papel, s.fornecedorId, s.ativo, s.cargo, s.login, s.secretaria, s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate],
+         papel = $7, fornecedor_id = $8, ativo = $9, cargo = $10, login = $11, secretaria = $12, avatar = $13, update_date = $15, last_user_update = $16`,
+      [s.meta.id, s.email, s.senhaHash, s.salt, s.googleId, s.nome, s.papel, s.fornecedorId, s.ativo, s.cargo, s.login, s.secretaria, s.avatar, s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate],
     );
   }
 
@@ -57,6 +57,7 @@ function mapear(row: Record<string, unknown>): Usuario {
     cargo: (row.cargo as string | null) ?? null,
     login: (row.login as string | null) ?? null,
     secretaria: (row.secretaria as string | null) ?? null,
+    avatar: (row.avatar as string | null) ?? null,
   });
 }
 

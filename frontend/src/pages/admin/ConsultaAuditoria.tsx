@@ -11,11 +11,20 @@ function paramsDe(f: Filtros): URLSearchParams {
   const p = new URLSearchParams();
   if (f.usuario) p.set('usuario', f.usuario);
   if (f.evento) p.set('evento', f.evento);
-  if (f.de) p.set('de', f.de);
-  if (f.ate) p.set('ate', f.ate);
+  // Intervalo inclusivo: o input `date` só entrega o dia (YYYY-MM-DD). Ancoramos `de` no início e
+  // `ate` no fim do dia para que os eventos do próprio dia final também entrem no filtro (>= / <=).
+  if (f.de) p.set('de', `${f.de}T00:00:00`);
+  if (f.ate) p.set('ate', `${f.ate}T23:59:59.999`);
   if (f.editalId) p.set('editalId', f.editalId);
   if (f.fornecedorId) p.set('fornecedorId', f.fornecedorId);
   return p;
+}
+
+/** Formata o timestamp ISO (UTC) para data/hora local do idioma ativo; entrada inválida cai no valor bruto. */
+function formatarQuando(iso: string, lang: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return new Intl.DateTimeFormat(lang, { dateStyle: 'short', timeStyle: 'medium' }).format(d);
 }
 
 /** Dispara o download do blob no navegador (sem navegar para fora da SPA). */
@@ -35,7 +44,7 @@ function salvarArquivo(blob: Blob, nome: string): void {
  * 400 = intervalo inválido, 403 = sem permissão. Exportação CSV/JSON por download. Somente leitura.
  */
 export function ConsultaAuditoria() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [filtros, setFiltros] = useState<Filtros>(VAZIO);
   const [aplicado, setAplicado] = useState<Filtros>(VAZIO);
   const set = (k: keyof Filtros, v: string) => setFiltros((f) => ({ ...f, [k]: v }));
@@ -75,10 +84,23 @@ export function ConsultaAuditoria() {
       {erro && <p data-cy="erro" role="alert" style={{ color: 'var(--erro)' }}>{erro}</p>}
       <Card>
         <table data-cy="trilha">
-          <thead><tr><th>{t('admin.auditoria.colQuando')}</th><th>{t('admin.auditoria.colAtor')}</th><th>{t('admin.auditoria.colAcao')}</th><th>{t('admin.auditoria.colIp')}</th></tr></thead>
+          <thead><tr><th>{t('admin.auditoria.colQuando')}</th><th>{t('admin.auditoria.colAtor')}</th><th>{t('admin.auditoria.colPapel')}</th><th>{t('admin.auditoria.colAcao')}</th><th>{t('admin.auditoria.colIp')}</th></tr></thead>
           <tbody>
             {registros.map((r) => (
-              <tr key={r.id} data-cy="registro"><td>{r.timestamp}</td><td>{r.usuario ?? '—'}</td><td>{r.evento}</td><td>{r.ip ?? '—'}</td></tr>
+              <tr key={r.id} data-cy="registro">
+                <td>{formatarQuando(r.timestamp, i18n.language)}</td>
+                <td data-cy="ator">
+                  {r.usuario ? (
+                    <>
+                      <div>{r.usuarioNome ?? r.usuario}</div>
+                      {r.usuarioNome && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{r.usuario}</div>}
+                    </>
+                  ) : '—'}
+                </td>
+                <td>{r.papel ? t(`common.papel.${r.papel}`, { defaultValue: r.papel }) : '—'}</td>
+                <td>{r.evento}</td>
+                <td>{r.ip ?? '—'}</td>
+              </tr>
             ))}
           </tbody>
         </table>

@@ -53,6 +53,9 @@ export interface UsuarioState {
   cargo: string | null;
   login: string | null;
   secretaria: string | null;
+  /** Foto de perfil já CIFRADA (blob PiiCipher base64) ou `null`. O caso de uso cifra/decifra; o
+   *  domínio só transporta o blob opaco — nunca vê a imagem em claro (AD-19). */
+  avatar: string | null;
 }
 
 /**
@@ -74,6 +77,7 @@ export class Usuario extends EntidadeBase {
     private _cargo: string | null,
     private _login: string | null,
     private _secretaria: string | null,
+    private _avatar: string | null,
   ) {
     super(meta);
   }
@@ -85,7 +89,7 @@ export class Usuario extends EntidadeBase {
     return new Usuario(
       EntidadeBase.metaNova(input.id, input.userName ?? email),
       email, calcularHash(input.senha, salt), salt, null, input.nome, input.papel, input.fornecedorId ?? null,
-      true, input.cargo ?? null, normalizarLogin(input.login), normalizarSecretaria(input.secretaria),
+      true, input.cargo ?? null, normalizarLogin(input.login), normalizarSecretaria(input.secretaria), null,
     );
   }
 
@@ -94,13 +98,13 @@ export class Usuario extends EntidadeBase {
     return new Usuario(
       EntidadeBase.metaNova(input.id, email),
       email, null, null, input.googleId, input.nome, input.papel, input.fornecedorId ?? null,
-      true, null, null, null,
+      true, null, null, null, null,
     );
   }
 
   /** Reconstrução a partir da persistência (sem regra de criação). */
   static deEstado(s: UsuarioState): Usuario {
-    return new Usuario(s.meta, s.email, s.senhaHash, s.salt, s.googleId, s.nome, s.papel, s.fornecedorId, s.ativo, s.cargo, s.login, s.secretaria);
+    return new Usuario(s.meta, s.email, s.senhaHash, s.salt, s.googleId, s.nome, s.papel, s.fornecedorId, s.ativo, s.cargo, s.login, s.secretaria, s.avatar ?? null);
   }
 
   get googleId(): string | null { return this._googleId; }
@@ -111,6 +115,8 @@ export class Usuario extends EntidadeBase {
   get cargo(): string | null { return this._cargo; }
   get login(): string | null { return this._login; }
   get secretaria(): string | null { return this._secretaria; }
+  /** Blob CIFRADO da foto de perfil (ou `null`). Quem lê decifra via PiiCipher no caso de uso. */
+  get avatar(): string | null { return this._avatar; }
 
   /** Verificação em tempo constante (timingSafeEqual). Lança se não houver credencial local. */
   verificarSenha(senha: string): boolean {
@@ -130,6 +136,17 @@ export class Usuario extends EntidadeBase {
   vincularGoogle(googleId: string, userName = 'sistema'): void {
     if (this._googleId && this._googleId !== googleId) throw new GoogleJaVinculado();
     this._googleId = googleId;
+    this.marcarAtualizacao(userName);
+  }
+
+  /**
+   * RF018 — define/remove a foto de perfil (tela "Minha conta"). Recebe o blob JÁ CIFRADO (PiiCipher)
+   * ou `null` para remover. O domínio não valida a imagem nem conhece a chave: tamanho, formato e cifra
+   * são responsabilidade do caso de uso (GerirPerfilProprio), preservando a pureza da entidade (AD-19).
+   */
+  definirAvatar(blobCifrado: string | null, userName = 'sistema'): void {
+    if (blobCifrado === this._avatar) return;
+    this._avatar = blobCifrado;
     this.marcarAtualizacao(userName);
   }
 
@@ -192,7 +209,7 @@ export class Usuario extends EntidadeBase {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
       email: this.email, senhaHash: this._senhaHash, salt: this._salt, googleId: this._googleId,
       nome: this._nome, papel: this._papel, fornecedorId: this.fornecedorId, ativo: this._ativo, cargo: this._cargo,
-      login: this._login, secretaria: this._secretaria,
+      login: this._login, secretaria: this._secretaria, avatar: this._avatar,
     };
   }
 }

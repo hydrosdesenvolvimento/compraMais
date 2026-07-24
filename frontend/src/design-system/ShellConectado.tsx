@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { AppShell, type ItemMenu } from './AppShell';
 import { api } from '../lib/api';
-import { obterUsuario, obterTelasAdmin, salvarTelasAdmin } from '../lib/auth';
+import { obterUsuario, obterTelasAdmin, salvarTelasAdmin, estaAutenticado } from '../lib/auth';
 import { montarChip } from '../lib/usuario-chip';
 import { menuAdminVisivel, telasPadraoDoPapel } from '../lib/telas-admin';
 
@@ -13,6 +13,22 @@ import { menuAdminVisivel, telasPadraoDoPapel } from '../lib/telas-admin';
 function rotuloPapel(t: TFunction, papel: string | undefined): string {
   if (!papel) return t('common.shell.userGeneric');
   return t(`common.papel.${papel}`, { defaultValue: papel });
+}
+
+/**
+ * Perfil do usuário logado (foto/nome) para o chip da topbar. Reusa a MESMA query key da "Minha conta"
+ * (`perfil-proprio`), então trocar/remover a foto lá atualiza o avatar do menu aqui sem recarregar.
+ * Só consulta com sessão (`GET /auth/perfil` exige Bearer); no modo demo permanece nas iniciais.
+ */
+function usePerfilProprio() {
+  const autenticado = estaAutenticado();
+  const { data } = useQuery({
+    queryKey: ['perfil-proprio'],
+    queryFn: () => api.perfilProprio(),
+    enabled: autenticado,
+    staleTime: 5 * 60_000,
+  });
+  return data;
 }
 
 /** Telas do fornecedor exclusivas do TITULAR (UC019/UC017 — não delegáveis ao procurador). */
@@ -33,8 +49,9 @@ export function ShellFornecedor({ menu }: { menu: ItemMenu[] }) {
     enabled: !!empresaId,
     staleTime: 5 * 60_000,
   });
+  const perfil = usePerfilProprio();
   const fantasia = data?.nomeFantasia || data?.razaoSocial;
-  const chip = montarChip(u, rotuloPapel(t, u?.papel), fantasia);
+  const chip = montarChip(u, rotuloPapel(t, u?.papel), fantasia, perfil?.avatar);
   // Restringe apenas o Procurador; anônimo/demo e Titular mantêm o menu completo.
   const menuVisivel = u?.papel === 'procurador' ? menu.filter((m) => !TELAS_SO_TITULAR.has(m.href as string)) : menu;
   return <AppShell menu={menuVisivel} usuario={chip}><Outlet /></AppShell>;
@@ -49,7 +66,8 @@ export function ShellFornecedor({ menu }: { menu: ItemMenu[] }) {
 export function ShellAdmin() {
   const { t } = useTranslation();
   const u = obterUsuario();
-  const chip = montarChip(u, rotuloPapel(t, u?.papel));
+  const perfil = usePerfilProprio();
+  const chip = montarChip(u, rotuloPapel(t, u?.papel), undefined, perfil?.avatar);
   const { data } = useQuery({
     queryKey: ['telas-admin', u?.papel],
     queryFn: () => api.telasVisiveis(),

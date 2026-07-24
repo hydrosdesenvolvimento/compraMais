@@ -1,6 +1,17 @@
 import { randomUUID } from 'node:crypto';
-import { Documento, FormatoInvalido, type FormatoDoc, type StatusDoc } from '../domain/documento.js';
+import { Documento, FormatoInvalido, TipoDocumentoDesconhecido, type FormatoDoc, type StatusDoc } from '../domain/documento.js';
 import type { PiiCipher } from '../../shared/crypto/pii-cipher.js';
+
+/**
+ * Porta de leitura do catálogo de Tipos de Documento (RF022) usada para validar o `tipo` do upload.
+ * Mantém o boundary do módulo: o adaptador (composition root) resolve contra o catálogo real. O upload
+ * de documentos exigidos só aceita tipos DEFINIDOS no catálogo (UC004/casos-de-uso §147), impedindo que
+ * a tela do fornecedor exiba tipos que não existem em "Tipos de Arquivos".
+ */
+export interface CatalogoTiposDocumento {
+  /** true se existe um tipo ATIVO com este nome (chave natural, case-insensitive; inativos → false por RN015). */
+  existeAtivo(nome: string): Promise<boolean>;
+}
 
 /** Probe QBE (FR-015) — instância parcial de Documento usada como critério de busca (campos AND; ausentes ignorados). */
 export interface DocumentoProbe {
@@ -27,6 +38,8 @@ export interface DocumentoRepository {
 /** Object storage (S3) atrás de adaptador; guarda conteúdo cifrado e devolve um ponteiro. */
 export interface ObjectStorage {
   put(chave: string, conteudoCifrado: string): Promise<string>; // retorna arquivoRef
+  /** Recupera o conteúdo cifrado a partir do arquivoRef devolvido por `put`; null se o blob sumiu. */
+  get(ref: string): Promise<string | null>;
 }
 
 const FORMATOS: FormatoDoc[] = ['pdf', 'jpg', 'png'];
@@ -37,11 +50,16 @@ export class GerirDocumentos {
     private readonly repo: DocumentoRepository,
     private readonly storage: ObjectStorage,
     private readonly cipher: PiiCipher,
+    private readonly catalogo: CatalogoTiposDocumento,
     private readonly hoje: () => string = () => new Date().toISOString(),
   ) {}
 
   async enviar(input: { fornecedorId: string; tipo: string; formato: string; conteudo: string; dataValidade?: string | null }): Promise<{ documentoId: string }> {
     if (!FORMATOS.includes(input.formato as FormatoDoc)) throw new FormatoInvalido(input.formato);
+    // Catálogo é a fonte de verdade dos tipos (RF022): rejeita `tipo` fora do catálogo ativo. O dropdown
+    // do front já restringe a escolha, mas a borda não pode confiar no cliente — sem esta guarda, um POST
+    // direto (ou seed) persistiria um tipo que a tela "Tipos de Arquivos" não conhece.
+    if (!(await this.catalogo.existeAtivo(input.tipo))) throw new TipoDocumentoDesconhecido(input.tipo);
     const id = randomUUID();
     const ref = await this.storage.put(`${input.fornecedorId}/${id}`, this.cipher.encrypt(input.conteudo));
     await this.repo.salvar(Documento.enviar({ id, fornecedorId: input.fornecedorId, tipo: input.tipo, arquivoRef: ref, formato: input.formato as FormatoDoc, dataValidade: input.dataValidade ?? null }));
@@ -60,5 +78,19 @@ export class GerirDocumentos {
       id: d.id, tipo: d.tipo, situacao: d.estaVigente(hoje) ? 'vigente' : 'expirado',
       status: d.status, dataValidade: d.dataValidade, motivoReprovacao: d.motivoReprovacao,
     }));
+  }
+
+  /**
+   * Recupera o arquivo para Visualizar/Baixar no portal (FR-007/008). Contraparte de `enviar`: o
+   * storage devolve o blob cifrado e SÓ aqui — onde vive a `PiiCipher` — ele é decifrado (AD-19). O
+   * conteúdo volta como a mesma string que foi enviada (o front trafega bytes binários em base64).
+   * `null` quando o documento não existe ou o blob sumiu do storage — a borda traduz para 404.
+   */
+  async baixar(documentoId: string): Promise<{ tipo: string; formato: FormatoDoc; conteudo: string; dataValidade: string | null } | null> {
+    const doc = await this.repo.porId(documentoId);
+    if (!doc) return null;
+    const cifrado = await this.storage.get(doc.arquivoRef);
+    if (cifrado === null) return null;
+    return { tipo: doc.tipo, formato: doc.formato, conteudo: this.cipher.decrypt(cifrado), dataValidade: doc.dataValidade };
   }
 }

@@ -31,6 +31,11 @@ export class ObjectStorageMemory implements ObjectStorage {
     this.map.set(chave, conteudoCifrado); // cifrado em repouso (AD-19)
     return `mem://${chave}`;
   }
+
+  /** Recupera pelo ref do put, removendo o esquema `mem://`. Devolve o blob cifrado ou null. */
+  async get(ref: string): Promise<string | null> {
+    return this.map.get(ref.replace(/^mem:\/\//, '')) ?? null;
+  }
 }
 
 /** Cifra de PII trivial para MVP/teste (NÃO usar em produção — usar AES-256-GCM com chave do secret manager). */

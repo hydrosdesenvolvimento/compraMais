@@ -23,9 +23,9 @@ vi.mock('../../lib/api', () => ({
 }));
 
 const ITENS: CatalogoItemView[] = [
-  { id: 't1', ativo: true, situacao: 'ativo', nome: 'Certidão FGTS', formato: 'pdf', categoria: 'fiscal', exigeValidade: true, validadeDias: 30 },
-  { id: 't2', ativo: false, situacao: 'inativo', nome: 'Balanço Patrimonial', formato: 'pdf', categoria: 'fiscal', exigeExercicio: true },
-  { id: 't3', ativo: true, situacao: 'ativo', nome: 'Contrato Social', formato: 'pdf', categoria: 'contratual' },
+  { id: 't1', ativo: true, situacao: 'ativo', nome: 'Certidão FGTS', formato: 'pdf', categoria: 'fiscal', exigeValidade: true, validadeDias: 30, obrigatorio: true },
+  { id: 't2', ativo: false, situacao: 'inativo', nome: 'Balanço Patrimonial', formato: 'pdf', categoria: 'fiscal', exigeExercicio: true, obrigatorio: false },
+  { id: 't3', ativo: true, situacao: 'ativo', nome: 'Contrato Social', formato: 'pdf', categoria: 'contratual', obrigatorio: false },
 ];
 
 function renderTela() {
@@ -92,7 +92,7 @@ describe('TiposArquivos — Painel Admin (Tipos de Documento, RF022)', () => {
 
     await waitFor(() => expect(criar).toHaveBeenCalledWith('tipos-documento', {
       nome: 'Certidão Negativa PGM', formato: 'pdf', categoria: 'fiscal',
-      exigeValidade: true, exigeExercicio: false, validadeDias: 90,
+      exigeValidade: true, exigeExercicio: false, validadeDias: 90, obrigatorio: false,
     }));
   });
 
@@ -108,8 +108,28 @@ describe('TiposArquivos — Painel Admin (Tipos de Documento, RF022)', () => {
 
     await waitFor(() => expect(criar).toHaveBeenCalledWith('tipos-documento', {
       nome: 'Cartão CNPJ', formato: 'pdf', categoria: 'cadastral',
-      exigeValidade: false, exigeExercicio: false, validadeDias: null,
+      exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: false,
     }));
+  });
+
+  it('marca "Obrigatório" e cria o tipo como exigido (RF022 parametrizável)', async () => {
+    renderTela();
+    await screen.findAllByTestId('item-tipo');
+    // A coluna reflete o flag por tipo: t1 obrigatório, t2/t3 opcionais.
+    expect(screen.getAllByTestId('obrigatorio')[0]).toHaveTextContent('Obrigatório');
+    expect(screen.getAllByTestId('obrigatorio')[1]).toHaveTextContent('Opcional');
+
+    fireEvent.click(screen.getByTestId('novo-cadastro'));
+    await screen.findByTestId('modal-tipo');
+    fireEvent.change(screen.getByTestId('campo-nome'), { target: { value: 'Certidão Negativa Estadual' } });
+    fireEvent.change(screen.getByTestId('campo-formato'), { target: { value: 'pdf' } });
+    fireEvent.change(screen.getByTestId('campo-categoria'), { target: { value: 'fiscal' } });
+    fireEvent.click(screen.getByTestId('campo-obrigatorio')); // marca como obrigatório
+    fireEvent.submit(screen.getByTestId('form-tipo'));
+
+    await waitFor(() => expect(criar).toHaveBeenCalledWith('tipos-documento', expect.objectContaining({
+      nome: 'Certidão Negativa Estadual', obrigatorio: true,
+    })));
   });
 
   it('editar abre o modal pré-preenchido (modo dias + prazo) e salva (PATCH)', async () => {

@@ -312,10 +312,13 @@
         "documento": "Documento",
         "formato": "Formato",
         "categoria": "Categoria",
+        "obrigatorio": "Obrigatório",
         "validade": "Validade",
         "status": "Situação",
         "acoes": "Ações"
       },
+      "obrigatorioSim": "Obrigatório",
+      "obrigatorioNao": "Opcional",
       "status": {
         "ativo": "Ativo",
         "inativo": "Inativo"
@@ -353,6 +356,8 @@
         },
         "diasLabel": "Prazo (dias)",
         "diasPlaceholder": "90",
+        "obrigatorioLabel": "Obrigatório no credenciamento",
+        "obrigatorioAjuda": "Destaca este documento como exigido no Passo 2 do credenciamento (não bloqueia o envio).",
         "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo, preservando os vínculos históricos (editais e uploads).",
         "cancelar": "Cancelar",
         "salvar": "Salvar",
@@ -620,6 +625,7 @@
       "erroConsulta": "Erro ao consultar.",
       "colQuando": "Quando",
       "colAtor": "Ator",
+      "colPapel": "Papel",
       "colAcao": "Ação",
       "colIp": "IP",
       "vazio": "Nenhum registro para os filtros atuais."
@@ -855,6 +861,7 @@
     "TransicaoInvalida": "Operação não permitida no estado atual."
   },
   "contestacao": {
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
     "titulo": "Contestações e Regularizações",
     "subtitulo": "Resolva as pendências que impedem seu credenciamento e acompanhe as análises em curso.",
     "carregando": "Carregando…",
@@ -892,6 +899,8 @@
   "credenciamento": {
     "voltarVitrine": "Voltar à vitrine",
     "noEdital": "Credenciamento no edital",
+    "retomado": "Retomamos seu credenciamento de onde você parou.",
+    "carregando": "Carregando…",
     "erroGenerico": "Não foi possível concluir esta etapa. Tente novamente.",
     "passos": {
       "capacidade": "Capacidade",
@@ -923,10 +932,24 @@
       "titulo": "Documentos exigidos",
       "descricao": "Documentos válidos enviados em editais anteriores são <b>reaproveitados automaticamente</b>. Você só precisa anexar o que falta.",
       "importado": "Importado de edital anterior",
+      "emAnalise": "Em análise",
       "necessarioEnviar": "Necessário enviar",
+      "obrigatorio": "Obrigatório",
+      "reprovadoCurto": "Reprovado — reenvie",
+      "vencidoCurto": "Vencido — atualize",
+      "listaVazia": "Nenhum tipo de documento configurado no catálogo.",
+      "semPendentes": "Todos os documentos exigidos já estão no seu repositório e são reaproveitados automaticamente.",
       "enviarPendentes": "Enviar documentos pendentes",
-      "arraste": "Arraste o PDF aqui (upload será integrado posteriormente)",
-      "limite": "PDF até 10 MB · será comprimido para o SEI"
+      "arraste": "Selecionar arquivo (PDF, JPG ou PNG)",
+      "limite": "PDF, JPG ou PNG · até 10 MB",
+      "validadeLabel": "Validade do documento",
+      "validadeObrigatoria": "Informe a validade deste documento.",
+      "erroFormato": "Formato inválido. Aceitos: PDF, JPG ou PNG.",
+      "erroTamanho": "Arquivo acima de {{mb}} MB.",
+      "erroEnviar": "Não foi possível enviar o documento. Tente novamente.",
+      "enviarArquivo": "Enviar documento",
+      "enviando": "Enviando…",
+      "enviadoSucesso": "{{tipo}} enviado para análise."
     },
     "termo": {
       "passo": "PASSO 3",
@@ -943,10 +966,13 @@
       "descricao": "Sua solicitação de credenciamento foi submetida à Comissão de Licitação.",
       "status": "Status: Pendente de Análise",
       "baixarPdf": "Baixar PDF",
+      "baixarPdfProcessando": "Gerando…",
+      "baixarPdfErro": "Não foi possível gerar o comprovante. Tente novamente.",
       "voltarPainel": "Voltar ao painel"
     }
   },
   "documentos": {
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta. Conclua seu cadastro para enviar documentos.",
     "tituloPagina": "Gestão de Documentos",
     "subtituloPagina": "Repositório central da sua empresa. Reaproveitado automaticamente em novos editais.",
     "enviarNovo": "Enviar novo documento",
@@ -968,7 +994,34 @@
     "reenviarCorrigido": "Reenviar Documento Corrigido",
     "reenvioSucesso": "Documento reenviado. A CPL fará nova análise.",
     "visualizarDocumento": "Visualizar {{tipo}}",
-    "baixarDocumento": "Baixar {{tipo}}"
+    "baixarDocumento": "Baixar {{tipo}}",
+    "listaVazia": "Nenhum documento enviado ainda. Use o botão acima para enviar o primeiro.",
+    "uploadSucesso": "Documento enviado. A CPL fará a análise.",
+    "erroBaixar": "Não foi possível baixar o documento. Tente novamente.",
+    "modalUpload": {
+      "titulo": "Enviar documento",
+      "subtitulo": "Selecione o tipo, o arquivo e a validade (quando houver).",
+      "campoTipo": "Tipo de documento",
+      "selecioneTipo": "Selecione o tipo…",
+      "campoArquivo": "Arquivo",
+      "arquivoAjuda": "PDF, JPG ou PNG — até {{mb}} MB.",
+      "campoValidade": "Validade (opcional)",
+      "validadeAjuda": "Deixe em branco para documentos sem data de validade.",
+      "enviar": "Enviar",
+      "cancelar": "Cancelar",
+      "erroFormato": "Formato não aceito. Envie PDF, JPG ou PNG.",
+      "erroTamanho": "Arquivo acima do limite de {{mb}} MB.",
+      "erroTipoObrigatorio": "Selecione o tipo de documento.",
+      "erroArquivoObrigatorio": "Selecione um arquivo para enviar.",
+      "erroEnviar": "Não foi possível enviar o documento. Tente novamente."
+    },
+    "preview": {
+      "subtitulo": "Pré-visualização do documento enviado.",
+      "carregando": "Carregando documento…",
+      "erro": "Não foi possível carregar o documento.",
+      "fechar": "Fechar",
+      "baixar": "Baixar"
+    }
   },
   "transparencia": {
     "carregando": "Carregando…",
@@ -1114,8 +1167,17 @@
       "responsavelLegal": "Responsável legal",
       "procurador": "Procurador",
       "alterarFoto": "Alterar foto",
+      "removerFoto": "Remover foto",
+      "fotoErroTipo": "Formato inválido. Use PNG, JPG ou WEBP.",
+      "fotoErroTamanho": "Imagem muito grande (máx. {{mb}} MB).",
+      "fotoErro": "Não foi possível atualizar a foto. Tente novamente.",
+      "erroCarregar": "Não foi possível carregar seus dados.",
       "nome": "Nome",
       "sobrenome": "Sobrenome",
+      "salvarNome": "Salvar",
+      "nomeSalvo": "Nome atualizado.",
+      "nomeErro": "Não foi possível salvar o nome. Tente novamente.",
+      "nomeObrigatorio": "Informe ao menos o nome.",
       "senha": "Senha",
       "alterarSenha": "Alterar minha senha",
       "novaSenhaPlaceholder": "Nova senha (mín. 8 caracteres)",
@@ -1148,9 +1210,6 @@
       "cepBuscando": "Buscando endereço…",
       "cepPreenchido": "Endereço preenchido pela BrasilAPI",
       "cepNaoEncontrado": "CEP não encontrado",
-      "cpfResponsavel": "CPF do responsável",
-      "cpfInvalido": "CPF inválido",
-      "cpfValido": "CPF válido",
       "numero": "Número",
       "complemento": "Complemento",
       "cancelar": "Cancelar",
@@ -1194,6 +1253,7 @@
     }
   },
   "painelTitular": {
+    "semEmpresa": "Nenhuma empresa vinculada à sua conta.",
     "titulo": "Meu painel",
     "subtitulo": "Pendências consolidadas e seus direitos de titular (LGPD).",
     "pendencias": {

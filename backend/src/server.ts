@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { registrarSegurancaHttp } from './shared/http/security.js';
 import { registrarAutenticacao } from './shared/http/autenticacao.js';
@@ -39,6 +40,7 @@ import { ResetTokenRepositoryMemory, type ResetTokenRepository } from './shared/
 import { ResetTokenRepositoryPg } from './shared/identity/reset-token-repository-pg.js';
 import { NotificadorResetLog } from './shared/identity/notificador-reset.js';
 import { registrarRotasAuth } from './shared/identity/auth-controller.js';
+import { GerirPerfilProprio } from './shared/identity/gerir-perfil.js';
 import { registrarGoogleOAuth } from './shared/http/google-oauth.js';
 import { EditalRepositoryMemory } from './editais/adapters/edital-repository-memory.js';
 import { EditalRepositoryPg } from './editais/adapters/edital-repository-pg.js';
@@ -62,6 +64,7 @@ import { PiiCipherAesGcm } from './shared/crypto/pii-cipher-aes.js';
 import { ConsentimentoRepositoryMemory } from './credenciamento/adapters/consentimento-repository-memory.js';
 import { ConsentimentoRepositoryPg } from './credenciamento/adapters/consentimento-repository-pg.js';
 import { registrarRotasDocumentos } from './credenciamento/adapters/documentos-controller.js';
+import { CatalogoTiposDocumentoRepo } from './credenciamento/adapters/catalogo-tipos-documento.js';
 import { Covalidar } from './credenciamento/application/covalidar.js';
 import { AnaliseRepositoryMemory } from './credenciamento/adapters/analise-repository-memory.js';
 import { registrarRotasCovalidacao } from './credenciamento/adapters/covalidacao-controller.js';
@@ -74,6 +77,7 @@ import { registrarRotasRegularizacao } from './credenciamento/adapters/regulariz
 import { SolicitarCredenciamento, type CredenciamentoRepository } from './credenciamento/application/solicitar-credenciamento.js';
 import { ListarCredenciamentos, type SecretariaLookup } from './credenciamento/application/listar-credenciamentos.js';
 import { DetalharCredenciamento } from './credenciamento/application/detalhar-credenciamento.js';
+import { GerarComprovanteCredenciamento } from './credenciamento/application/gerar-comprovante-credenciamento.js';
 import { CredenciamentoRepositoryMemory } from './credenciamento/adapters/credenciamento-repository-memory.js';
 import { CredenciamentoRepositoryPg } from './credenciamento/adapters/credenciamento-repository-pg.js';
 import { registrarRotasCredenciamento } from './credenciamento/adapters/credenciamento-controller.js';
@@ -81,6 +85,7 @@ import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
 import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
 import { registrarRotasAuditoria } from './auditoria/adapters/auditoria-controller.js';
+import { ResolvedorAtoresUsuario } from './auditoria/adapters/resolvedor-atores-usuario.js';
 import { GerarMalote, type MaloteRepository } from './malote/application/gerar-malote.js';
 import { MaloteRepositoryMemory } from './malote/adapters/malote-repository-memory.js';
 import { MaloteRepositoryPg } from './malote/adapters/malote-repository-pg.js';
@@ -99,7 +104,8 @@ import { CatalogoRepositoryMemory } from './catalogos/adapters/catalogo-reposito
 import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg } from './catalogos/adapters/catalogo-repository-pg.js';
 import type { Secretaria } from './catalogos/domain/secretaria.js';
 import type { SetorCnae } from './catalogos/domain/setor-cnae.js';
-import type { TipoDocumento } from './catalogos/domain/tipo-documento.js';
+import { TipoDocumento } from './catalogos/domain/tipo-documento.js';
+import { TIPOS_DOCUMENTO_BASELINE } from './catalogos/domain/tipos-documento-baseline.js';
 import type { CatalogoRepository } from './catalogos/application/catalogo-repository.js';
 import { registrarRotasCatalogos } from './catalogos/adapters/catalogos-controller.js';
 import { GerirVisibilidadeTelas } from './permissoes/application/gerir-visibilidade.js';
@@ -215,6 +221,8 @@ export async function buildServer(): Promise<FastifyInstance> {
     trocarSenha: new TrocarSenha(usuarioRepo, bus),
     solicitarReset: new SolicitarResetSenha(usuarioRepo, resetTokens, notificadorReset, bus, config.auth.jwtExpiraEmSeg),
     redefinirSenha: new RedefinirSenha(usuarioRepo, resetTokens, bus),
+    // RF018 — perfil próprio (nome + foto). A foto é PII cifrada em repouso (AD-19), como os documentos.
+    perfil: new GerirPerfilProprio(usuarioRepo, new PiiCipherAesGcm(config.crypto.piiKey)),
     tokens,
   });
   if (config.auth.google) {
@@ -257,6 +265,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   const secretariasRepo: CatalogoRepository<Secretaria> = pool ? new SecretariaRepositoryPg(pool) : new CatalogoRepositoryMemory<Secretaria>();
   const setoresRepo: CatalogoRepository<SetorCnae> = pool ? new SetorCnaeRepositoryPg(pool) : new CatalogoRepositoryMemory<SetorCnae>();
   const tiposDocRepo: CatalogoRepository<TipoDocumento> = pool ? new TipoDocumentoRepositoryPg(pool) : new CatalogoRepositoryMemory<TipoDocumento>();
+  // Modo memória (sem Postgres — dev rápido e testes): semeia o catálogo baseline para que o dropdown de
+  // upload não nasça vazio e a guarda de `GerirDocumentos.enviar` (tipo ∈ catálogo, RF022) tenha o mesmo
+  // conjunto de tipos do modo durável. No modo pg o `seed` cuida disso.
+  if (!pool) {
+    for (const td of TIPOS_DOCUMENTO_BASELINE) {
+      await tiposDocRepo.salvar(TipoDocumento.criar({ id: randomUUID(), formato: 'pdf', userName: 'bootstrap', ...td, validadeDias: td.validadeDias ?? undefined }));
+    }
+  }
   const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);
   registrarRotasCatalogos(app, { manter: manterCatalogos });
 
@@ -291,7 +307,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   // legado indecifrável assim que o conteúdo virasse durável.
   const docRepo = pool ? new DocumentoRepositoryPg(pool) : new DocumentoRepositoryMemory();
   const storage = pool ? new ObjectStoragePg(pool) : new ObjectStorageMemory();
-  const docs = new GerirDocumentos(docRepo, storage, new PiiCipherAesGcm(config.crypto.piiKey));
+  const docs = new GerirDocumentos(docRepo, storage, new PiiCipherAesGcm(config.crypto.piiKey), new CatalogoTiposDocumentoRepo(tiposDocRepo));
   registrarRotasDocumentos(app, { docs });
   const covalidar = new Covalidar(docRepo, new AnaliseRepositoryMemory(), bus, fornecedores);
   registrarRotasCovalidacao(app, { covalidar });
@@ -311,7 +327,17 @@ export async function buildServer(): Promise<FastifyInstance> {
   };
   const listarCredenciamentos = new ListarCredenciamentos(credRepo, editaisRepo, secretariaLookup);
   const detalharCredenciamento = new DetalharCredenciamento(credRepo, editaisRepo, secretariaLookup);
-  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento });
+  // Comprovante em PDF (Passo Concluído): reusa edital/secretaria e resolve a empresa que aderiu
+  // (razão social + CNPJ formatado) via o repo de fornecedores já instanciado. Sem lookup a emissão
+  // ainda funciona — apenas omite o bloco "Adesão" da empresa.
+  const fornecedorIdentidade = {
+    porId: async (id: string) => {
+      const f = await fornecedores.porId(id);
+      return f ? { razaoSocial: f.razaoSocial, cnpj: f.cnpj.valor } : null;
+    },
+  };
+  const gerarComprovanteCredenciamento = new GerarComprovanteCredenciamento(credRepo, editaisRepo, fornecedorIdentidade, secretariaLookup);
+  registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento, comprovante: gerarComprovanteCredenciamento });
 
   // Motor de Distribuição (Épico 5 / UC008 / RF005). A gestão dispara o rateio de um edital
   // distribuível (publicado); a matriz canônica append-only é durável em Postgres quando disponível
@@ -371,7 +397,8 @@ export async function buildServer(): Promise<FastifyInstance> {
   registrarRotaElegiveisEdital(app, { elegiveis: listarElegiveisEdital });
 
   // Auditoria — leitura/exportação da trilha (004). SOMENTE LEITURA: lê o mesmo auditRepo do escritor único.
-  const consultarTrilha = new ConsultarTrilha(auditRepo);
+  // Enriquece o ator (UUID → nome/papel) em tempo de leitura; o registro persistido segue imutável (AD-18).
+  const consultarTrilha = new ConsultarTrilha(auditRepo, new ResolvedorAtoresUsuario(usuarioRepo));
   // Teto de sinalização de volume da exportação (§16 — AUDITORIA_EXPORT_TETO); default 50k quando ausente/ inválido.
   const tetoExport = Number(process.env.AUDITORIA_EXPORT_TETO) || undefined;
   const exportarTrilha = new ExportarTrilha(consultarTrilha, tetoExport);

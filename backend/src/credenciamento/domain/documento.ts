@@ -99,6 +99,9 @@ export class Documento extends EntidadeBase {
 export class FormatoInvalido extends Error {
   constructor(f: string) { super(`Unsupported format: ${f}. Accepted: pdf, jpg, png.`); this.name = 'FormatoInvalido'; }
 }
+export class TipoDocumentoDesconhecido extends Error {
+  constructor(tipo: string) { super(`Unknown document type: ${tipo}. It must be an active type in the catalog (RF022).`); this.name = 'TipoDocumentoDesconhecido'; }
+}
 export class JustificativaObrigatoria extends Error {
   constructor() { super('Rejection requires a textual justification (RN003/FR-002).'); this.name = 'JustificativaObrigatoria'; }
 }

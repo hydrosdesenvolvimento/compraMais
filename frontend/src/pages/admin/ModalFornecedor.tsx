@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type EnderecoView } from '../../lib/api';
-import { Botao } from '../../design-system/components';
+import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeFechar, IconeInfo } from '../../design-system/icons';
 
 /** 7 dígitos da subclasse → máscara Receita DDDD-D/DD (ex.: 1412601 → 1412-6/01). */
@@ -15,7 +15,6 @@ export type ModoModal = 'criar' | 'ver' | 'editar';
 
 const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 };
 const card: CSSProperties = { background: '#fff', borderRadius: 16, width: 'min(680px, 100%)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,.25)' };
-const botaoX: CSSProperties = { width: 40, height: 40, borderRadius: 10, border: 'none', background: 'var(--cinza-100, #eef1f5)', color: 'var(--cinza-500)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 const rotulo: CSSProperties = { font: '600 13px var(--font-body)', color: 'var(--azul-900)', marginBottom: 6, display: 'block' };
 const CNPJ_VAZIO = { cnpj: '', razaoSocial: '', porte: '', cnaePrincipal: '' };
 
@@ -48,7 +47,7 @@ export function ModalFornecedor({ modo, id, onFechar, onMudou }: { modo: ModoMod
             <h2 style={{ margin: 0, fontSize: 20, color: 'var(--azul-900)' }}>{titulo}</h2>
             <p style={{ margin: '4px 0 0', fontSize: 13.5, color: 'var(--cinza-500)' }}>{subtitulo}</p>
           </div>
-          <button type="button" onClick={onFechar} style={botaoX} data-cy="fechar-modal" aria-label={t('admin.fornecedores.fechar')}><IconeFechar width={20} height={20} /></button>
+          <BotaoIcone icone={IconeFechar} variante="fechar" onClick={onFechar} data-cy="fechar-modal" aria-label={t('admin.fornecedores.fechar')} />
         </header>
 
         {modoAtual === 'criar'

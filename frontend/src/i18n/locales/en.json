@@ -312,10 +312,13 @@
         "documento": "Document",
         "formato": "Format",
         "categoria": "Category",
+        "obrigatorio": "Required",
         "validade": "Validity",
         "status": "Status",
         "acoes": "Actions"
       },
+      "obrigatorioSim": "Required",
+      "obrigatorioNao": "Optional",
       "status": {
         "ativo": "Active",
         "inativo": "Inactive"
@@ -353,6 +356,8 @@
         },
         "diasLabel": "Term (days)",
         "diasPlaceholder": "90",
+        "obrigatorioLabel": "Required for registration",
+        "obrigatorioAjuda": "Highlights this document as required in Step 2 of registration (does not block submission).",
         "avisoHistorico": "Records are never permanently deleted — deletion converts to Inactive, preserving historical links (notices and uploads).",
         "cancelar": "Cancel",
         "salvar": "Save",
@@ -620,6 +625,7 @@
       "erroConsulta": "Query error.",
       "colQuando": "When",
       "colAtor": "Actor",
+      "colPapel": "Role",
       "colAcao": "Action",
       "colIp": "IP",
       "vazio": "No records for the current filters."
@@ -855,6 +861,7 @@
     "TransicaoInvalida": "This operation isn't allowed in the current state."
   },
   "contestacao": {
+    "semEmpresa": "No company linked to your account.",
     "titulo": "Disputes and Regularizations",
     "subtitulo": "Resolve the issues blocking your accreditation and follow the reviews in progress.",
     "carregando": "Loading…",
@@ -892,6 +899,8 @@
   "credenciamento": {
     "voltarVitrine": "Back to showcase",
     "noEdital": "Application to notice",
+    "retomado": "We picked your application up where you left off.",
+    "carregando": "Loading…",
     "erroGenerico": "This step could not be completed. Please try again.",
     "passos": {
       "capacidade": "Capacity",
@@ -923,10 +932,24 @@
       "titulo": "Required documents",
       "descricao": "Valid documents submitted in previous notices are <b>reused automatically</b>. You only need to attach what is missing.",
       "importado": "Imported from previous notice",
+      "emAnalise": "Under review",
       "necessarioEnviar": "Upload required",
+      "obrigatorio": "Required",
+      "reprovadoCurto": "Rejected — resend",
+      "vencidoCurto": "Expired — update",
+      "listaVazia": "No document types configured in the catalog.",
+      "semPendentes": "All required documents are already in your repository and are reused automatically.",
       "enviarPendentes": "Upload pending documents",
-      "arraste": "Drag the PDF here (upload will be integrated later)",
-      "limite": "PDF up to 10 MB · will be compressed for SEI"
+      "arraste": "Select a file (PDF, JPG or PNG)",
+      "limite": "PDF, JPG or PNG · up to 10 MB",
+      "validadeLabel": "Document validity",
+      "validadeObrigatoria": "Please provide this document's validity date.",
+      "erroFormato": "Invalid format. Accepted: PDF, JPG or PNG.",
+      "erroTamanho": "File larger than {{mb}} MB.",
+      "erroEnviar": "The document could not be uploaded. Please try again.",
+      "enviarArquivo": "Upload document",
+      "enviando": "Uploading…",
+      "enviadoSucesso": "{{tipo}} submitted for review."
     },
     "termo": {
       "passo": "STEP 3",
@@ -943,10 +966,13 @@
       "descricao": "Your application has been submitted to the Bidding Committee.",
       "status": "Status: Pending Review",
       "baixarPdf": "Download PDF",
+      "baixarPdfProcessando": "Generating…",
+      "baixarPdfErro": "Could not generate the receipt. Please try again.",
       "voltarPainel": "Back to dashboard"
     }
   },
   "documentos": {
+    "semEmpresa": "No company linked to your account. Complete your registration to submit documents.",
     "tituloPagina": "Document Management",
     "subtituloPagina": "Your company's central repository. Automatically reused in new tenders.",
     "enviarNovo": "Upload new document",
@@ -968,7 +994,34 @@
     "reenviarCorrigido": "Resend Corrected Document",
     "reenvioSucesso": "Document resent. The CPL will review it again.",
     "visualizarDocumento": "View {{tipo}}",
-    "baixarDocumento": "Download {{tipo}}"
+    "baixarDocumento": "Download {{tipo}}",
+    "listaVazia": "No documents sent yet. Use the button above to send the first one.",
+    "uploadSucesso": "Document sent. The CPL will review it.",
+    "erroBaixar": "Could not download the document. Please try again.",
+    "modalUpload": {
+      "titulo": "Send document",
+      "subtitulo": "Choose the type, the file and the validity (if any).",
+      "campoTipo": "Document type",
+      "selecioneTipo": "Select the type…",
+      "campoArquivo": "File",
+      "arquivoAjuda": "PDF, JPG or PNG — up to {{mb}} MB.",
+      "campoValidade": "Validity (optional)",
+      "validadeAjuda": "Leave blank for documents without an expiry date.",
+      "enviar": "Send",
+      "cancelar": "Cancel",
+      "erroFormato": "Unsupported format. Send PDF, JPG or PNG.",
+      "erroTamanho": "File exceeds the {{mb}} MB limit.",
+      "erroTipoObrigatorio": "Select the document type.",
+      "erroArquivoObrigatorio": "Select a file to send.",
+      "erroEnviar": "Could not send the document. Please try again."
+    },
+    "preview": {
+      "subtitulo": "Preview of the submitted document.",
+      "carregando": "Loading document…",
+      "erro": "Could not load the document.",
+      "fechar": "Close",
+      "baixar": "Download"
+    }
   },
   "transparencia": {
     "carregando": "Loading…",
@@ -1114,8 +1167,17 @@
       "responsavelLegal": "Legal representative",
       "procurador": "Attorney-in-fact",
       "alterarFoto": "Change photo",
+      "removerFoto": "Remove photo",
+      "fotoErroTipo": "Invalid format. Use PNG, JPG or WEBP.",
+      "fotoErroTamanho": "Image too large (max. {{mb}} MB).",
+      "fotoErro": "Could not update the photo. Please try again.",
+      "erroCarregar": "Could not load your data.",
       "nome": "First name",
       "sobrenome": "Last name",
+      "salvarNome": "Save",
+      "nomeSalvo": "Name updated.",
+      "nomeErro": "Could not save the name. Please try again.",
+      "nomeObrigatorio": "Enter at least the first name.",
       "senha": "Password",
       "alterarSenha": "Change my password",
       "novaSenhaPlaceholder": "New password (min. 8 characters)",
@@ -1148,9 +1210,6 @@
       "cepBuscando": "Looking up address…",
       "cepPreenchido": "Address filled in by BrasilAPI",
       "cepNaoEncontrado": "Postal code not found",
-      "cpfResponsavel": "Representative's CPF",
-      "cpfInvalido": "Invalid CPF",
-      "cpfValido": "Valid CPF",
       "numero": "Number",
       "complemento": "Complement",
       "cancelar": "Cancel",
@@ -1194,6 +1253,7 @@
     }
   },
   "painelTitular": {
+    "semEmpresa": "No company linked to your account.",
     "titulo": "My panel",
     "subtitulo": "Consolidated pending items and your data subject rights (LGPD).",
     "pendencias": {

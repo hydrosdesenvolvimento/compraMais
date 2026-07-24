@@ -1,17 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useForm } from '@tanstack/react-form';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, Pill, Botao, Campo } from '../../design-system/components';
 import { IconeSync, IconeCadeado, IconeCamera, IconeCheck } from '../../design-system/icons';
-import { mascaraCpf, mascaraCep, validarCpf, consultarCep } from '../../lib/br';
+import { mascaraCep, consultarCep } from '../../lib/br';
 import { api, type EnderecoView } from '../../lib/api';
+import { atualizarUsuarioSessao } from '../../lib/auth';
+
+/** Foto de perfil: formatos aceitos e limite (coerente com AVATAR_MAX_BYTES do backend). */
+const AVATAR_MIME = ['image/png', 'image/jpeg', 'image/webp'];
+const AVATAR_MAX_MB = 1.5;
+
+/** Lê um arquivo como data URL completo (`data:<mime>;base64,...`) para enviar ao backend. */
+function lerDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result));
+    r.onerror = () => reject(r.error ?? new Error('read error'));
+    r.readAsDataURL(file);
+  });
+}
+
+/** Divide um nome completo em nome (1ª palavra) + sobrenome (resto), espelhando a junção ao salvar. */
+function dividirNome(completo: string): { nome: string; sobrenome: string } {
+  const partes = completo.trim().split(/\s+/).filter(Boolean);
+  return { nome: partes[0] ?? '', sobrenome: partes.slice(1).join(' ') };
+}
+
+/** Iniciais (até 2) de um nome, para o avatar textual quando não há foto. */
+function iniciaisDe(nome: string): string {
+  return nome.split(' ').filter(Boolean).slice(0, 2).map((s) => s[0]).join('').toUpperCase();
+}
 
 /**
  * "Minha conta" (UX-DR4 / RN009 / RF018) — dashboard do fornecedor (design de referência).
  * Sincronização e autofill de CEP via TanStack Query; formulário editável via TanStack Form
- * (autofill de endereço por CEP + CPF do responsável com validação de dígitos).
+ * (autofill de endereço por CEP). RN009 restringe os campos editáveis a Nome Fantasia, Endereço e
+ * Telefone — não há CPF do responsável aqui (o backend rejeita qualquer outro campo com 422).
  */
 export type SituacaoCadastral = 'ativa' | 'baixada' | 'inapta' | 'suspensa';
 
@@ -127,7 +154,7 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync, onSincronizad
       </div>
 
       {/* Dados do responsável / foto / senha */}
-      <ResponsavelCard iniciais={iniciais} fantasia={fornecedor.razaoSocial} />
+      <ResponsavelCard fantasia={fornecedor.razaoSocial} />
 
       {/* Empresa: identidade + dados oficiais (somente leitura) + editáveis */}
       <Card>
@@ -163,30 +190,36 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync, onSincronizad
   );
 }
 
-/** Cartão "Dados do responsável": avatar, nome/sobrenome, foto e alteração de senha (UC015 · A2). */
-function ResponsavelCard({ iniciais, fantasia }: { iniciais: string; fantasia: string }) {
+/**
+ * Cartão "Dados do responsável": foto, nome/sobrenome e alteração de senha (UC015 · A2, RF018).
+ * Foto e nome pertencem ao PRÓPRIO usuário autenticado (GET/PATCH /auth/perfil), não ao fornecedor —
+ * por isso o cartão busca o próprio perfil em vez de receber os dados por prop. O `nome` completo é
+ * dividido em nome + sobrenome na UI e rejuntado ao salvar (o backend guarda um único `nome`).
+ */
+function ResponsavelCard({ fantasia }: { fantasia: string }) {
   const { t } = useTranslation();
+  const qc = useQueryClient();
   const [editSenha, setEditSenha] = useState(false);
+
+  const perfilQ = useQuery({ queryKey: ['perfil-proprio'], queryFn: () => api.perfilProprio() });
+  const perfil = perfilQ.data;
 
   return (
     <Card>
       <SecaoLabel>{t('minhaConta.responsavel.secaoLabel')}</SecaoLabel>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingBottom: 22, borderBottom: '1px solid var(--divider)' }}>
-        <span className="avatar" style={{ width: 80, height: 80, fontSize: 28, flexShrink: 0 }}>{iniciais}</span>
-        <div>
-          <div style={{ font: '600 17px var(--font-body)', color: 'var(--azul-900)' }}>{t('minhaConta.responsavel.responsavelLegal')}</div>
-          <div style={{ fontSize: 13.5, color: 'var(--cinza-500)', margin: '2px 0 12px' }}>{t('minhaConta.responsavel.procurador')} · {fantasia}</div>
-          <button className="btn btn-ghost" style={{ padding: '9px 16px', fontSize: 13.5 }} type="button">
-            <IconeCamera width={16} height={16} /> {t('minhaConta.responsavel.alterarFoto')}
-          </button>
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16, marginTop: 22 }}>
-        <Campo label={t('minhaConta.responsavel.nome')}><input className="input" placeholder={t('minhaConta.responsavel.nome')} /></Campo>
-        <Campo label={t('minhaConta.responsavel.sobrenome')}><input className="input" placeholder={t('minhaConta.responsavel.sobrenome')} /></Campo>
-      </div>
+      {perfilQ.isError ? (
+        <p data-cy="perfil-proprio-erro" style={{ margin: 0, fontSize: 13.5, color: 'var(--erro)' }}>{t('minhaConta.responsavel.erroCarregar')}</p>
+      ) : (
+        <>
+          <FotoResponsavel avatar={perfil?.avatar ?? null} nome={perfil?.nome ?? fantasia} fantasia={fantasia} carregando={perfilQ.isLoading} />
+          <NomeResponsavel perfilNome={perfil?.nome} carregando={perfilQ.isLoading}
+            onSalvo={(atualizado) => {
+              qc.setQueryData(['perfil-proprio'], atualizado);
+              atualizarUsuarioSessao({ nome: atualizado.nome });
+            }} />
+        </>
+      )}
 
       <div style={{ marginTop: 16 }}>
         <label className="label">{t('minhaConta.responsavel.senha')}</label>
@@ -199,6 +232,108 @@ function ResponsavelCard({ iniciais, fantasia }: { iniciais: string; fantasia: s
         )}
       </div>
     </Card>
+  );
+}
+
+/** Bloco da foto de perfil: preview (imagem ou iniciais) + trocar/remover foto (PATCH /auth/perfil). */
+function FotoResponsavel({ avatar, nome, fantasia, carregando }: { avatar: string | null; nome: string; fantasia: string; carregando: boolean }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const fotoMut = useMutation({
+    mutationFn: (avatarPatch: string | null) => api.atualizarPerfilProprio({ avatar: avatarPatch }),
+    onSuccess: (atualizado) => { qc.setQueryData(['perfil-proprio'], atualizado); setErro(null); },
+  });
+
+  async function escolher(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // permite reescolher o mesmo arquivo
+    if (!file) return;
+    setErro(null);
+    if (!AVATAR_MIME.includes(file.type)) { setErro(t('minhaConta.responsavel.fotoErroTipo')); return; }
+    if (file.size > AVATAR_MAX_MB * 1024 * 1024) { setErro(t('minhaConta.responsavel.fotoErroTamanho', { mb: AVATAR_MAX_MB })); return; }
+    try {
+      fotoMut.mutate(await lerDataUrl(file));
+    } catch {
+      setErro(t('minhaConta.responsavel.fotoErro'));
+    }
+  }
+
+  const erroExibido = erro ?? (fotoMut.isError ? t('minhaConta.responsavel.fotoErro') : null);
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingBottom: 22, borderBottom: '1px solid var(--divider)' }}>
+      {avatar ? (
+        <img data-cy="avatar-foto" src={avatar} alt={t('minhaConta.responsavel.responsavelLegal')} style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid var(--divider)' }} />
+      ) : (
+        <span className="avatar" data-cy="avatar-iniciais" style={{ width: 80, height: 80, fontSize: 28, flexShrink: 0 }}>{iniciaisDe(nome || fantasia)}</span>
+      )}
+      <div>
+        <div style={{ font: '600 17px var(--font-body)', color: 'var(--azul-900)' }}>{t('minhaConta.responsavel.responsavelLegal')}</div>
+        <div style={{ fontSize: 13.5, color: 'var(--cinza-500)', margin: '2px 0 12px' }}>{t('minhaConta.responsavel.procurador')} · {fantasia}</div>
+        <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" data-cy="avatar-input" onChange={escolher} style={{ display: 'none' }} />
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+          <button data-cy="alterar-foto" className="btn btn-ghost" style={{ padding: '9px 16px', fontSize: 13.5 }} type="button" disabled={carregando || fotoMut.isPending} onClick={() => inputRef.current?.click()}>
+            <IconeCamera width={16} height={16} /> {fotoMut.isPending ? t('minhaConta.responsavel.salvando') : t('minhaConta.responsavel.alterarFoto')}
+          </button>
+          {avatar && (
+            <button data-cy="remover-foto" type="button" disabled={fotoMut.isPending} onClick={() => { setErro(null); fotoMut.mutate(null); }}
+              style={{ border: 'none', background: 'none', color: 'var(--erro)', font: '600 13px var(--font-body)', cursor: 'pointer', textDecoration: 'underline' }}>
+              {t('minhaConta.responsavel.removerFoto')}
+            </button>
+          )}
+        </div>
+        {erroExibido && <small data-cy="foto-erro" role="alert" style={{ display: 'block', color: 'var(--erro)', marginTop: 8 }}>{erroExibido}</small>}
+      </div>
+    </div>
+  );
+}
+
+/** Bloco nome + sobrenome (controlados, divididos do `nome` da sessão e rejuntados ao salvar). */
+function NomeResponsavel({ perfilNome, carregando, onSalvo }: { perfilNome: string | undefined; carregando: boolean; onSalvo: (p: { userId: string; email: string; nome: string; avatar: string | null }) => void }) {
+  const { t } = useTranslation();
+  const [nome, setNome] = useState('');
+  const [sobrenome, setSobrenome] = useState('');
+
+  // Reidrata os campos quando o perfil chega (ou muda). Antes disso, ficam vazios (placeholders).
+  useEffect(() => {
+    if (perfilNome === undefined) return;
+    const d = dividirNome(perfilNome);
+    setNome(d.nome);
+    setSobrenome(d.sobrenome);
+  }, [perfilNome]);
+
+  const nomeMut = useMutation({
+    mutationFn: (completo: string) => api.atualizarPerfilProprio({ nome: completo }),
+    onSuccess: (atualizado) => onSalvo(atualizado),
+  });
+
+  const completo = `${nome} ${sobrenome}`.replace(/\s+/g, ' ').trim();
+  const original = (perfilNome ?? '').trim().replace(/\s+/g, ' ');
+  const alterado = completo !== original;
+  const vazio = completo.length === 0;
+
+  return (
+    <div style={{ marginTop: 22 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
+        <Campo label={t('minhaConta.responsavel.nome')}>
+          <input data-cy="responsavel-nome" className="input" value={nome} disabled={carregando} onChange={(e) => setNome(e.target.value)} placeholder={t('minhaConta.responsavel.nome')} />
+        </Campo>
+        <Campo label={t('minhaConta.responsavel.sobrenome')}>
+          <input data-cy="responsavel-sobrenome" className="input" value={sobrenome} disabled={carregando} onChange={(e) => setSobrenome(e.target.value)} placeholder={t('minhaConta.responsavel.sobrenome')} />
+        </Campo>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
+        {nomeMut.isSuccess && !alterado && <small data-cy="nome-salvo" style={{ color: 'var(--sucesso)', marginRight: 'auto' }}>{t('minhaConta.responsavel.nomeSalvo')}</small>}
+        {nomeMut.isError && <small data-cy="nome-erro" style={{ color: 'var(--erro)', marginRight: 'auto' }}>{t('minhaConta.responsavel.nomeErro')}</small>}
+        {vazio && alterado && <small data-cy="nome-vazio" style={{ color: 'var(--erro)', marginRight: 'auto' }}>{t('minhaConta.responsavel.nomeObrigatorio')}</small>}
+        <Botao data-cy="salvar-nome" variante="primario" type="button" disabled={!alterado || vazio || nomeMut.isPending || carregando} onClick={() => nomeMut.mutate(completo)} style={{ padding: '11px 20px' }}>
+          <IconeCheck width={15} height={15} strokeWidth={2} /> {nomeMut.isPending ? t('minhaConta.responsavel.salvando') : t('minhaConta.responsavel.salvarNome')}
+        </Botao>
+      </div>
+    </div>
   );
 }
 
@@ -276,7 +411,7 @@ function TrocaSenhaForm({ onFechar }: { onFechar: () => void }) {
 
 interface HttpErrorLike { status?: number }
 
-/** Formulário editável (TanStack Form): autofill de CEP (Query) e CPF do responsável (validação). */
+/** Formulário editável (TanStack Form): Nome Fantasia, Telefone e Endereço com autofill de CEP (RN009). */
 function DadosEditaveis({ fornecedorId, inicial, onSalvo }: {
   fornecedorId: string;
   inicial?: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView };
@@ -296,7 +431,7 @@ function DadosEditaveis({ fornecedorId, inicial, onSalvo }: {
     defaultValues: {
       nomeFantasia: inicial?.nomeFantasia ?? '', telefone: inicial?.telefone ?? '',
       cep: end?.cep ? mascaraCep(end.cep) : '', rua: end?.logradouro ?? '', numero: end?.numero ?? '',
-      complemento: end?.complemento ?? '', bairro: end?.bairro ?? '', cidade: end?.cidade ?? '', uf: end?.uf ?? '', cpf: '',
+      complemento: end?.complemento ?? '', bairro: end?.bairro ?? '', cidade: end?.cidade ?? '', uf: end?.uf ?? '',
     },
     onSubmit: async ({ value }) => {
       const cep = value.cep.replace(/\D/g, '');
@@ -361,19 +496,6 @@ function DadosEditaveis({ fornecedorId, inicial, onSalvo }: {
               {cepMut.isPending && <small style={{ color: 'var(--texto-suave)' }}>{t('minhaConta.editaveis.cepBuscando')}</small>}
               {cepMut.isSuccess && cepMut.data && <small style={{ color: 'var(--sucesso)' }}>{t('minhaConta.editaveis.cepPreenchido')}</small>}
               {cepMut.isSuccess && !cepMut.data && <small style={{ color: 'var(--erro)' }}>{t('minhaConta.editaveis.cepNaoEncontrado')}</small>}
-            </Campo>
-          )}
-        </form.Field>
-
-        <form.Field name="cpf" validators={{ onChange: ({ value }: { value: string }) => (value.replace(/\D/g, '').length === 11 && !validarCpf(value) ? t('minhaConta.editaveis.cpfInvalido') : undefined) }}>
-          {(f) => (
-            <Campo label={t('minhaConta.editaveis.cpfResponsavel')}>
-              <input data-cy="cpf" className="input" inputMode="numeric" placeholder="000.000.000-00" value={f.state.value}
-                onChange={(e) => f.handleChange(mascaraCpf(e.target.value))}
-                aria-invalid={f.state.meta.errors.length > 0}
-                style={f.state.meta.errors.length > 0 ? { borderColor: 'var(--erro)' } : f.state.value.replace(/\D/g, '').length === 11 ? { borderColor: 'var(--sucesso)' } : undefined} />
-              {f.state.meta.errors[0] ? <small data-cy="cpf-erro" style={{ color: 'var(--erro)' }}>{String(f.state.meta.errors[0])}</small>
-                : f.state.value.replace(/\D/g, '').length === 11 && <small data-cy="cpf-ok" style={{ color: 'var(--sucesso)' }}>{t('minhaConta.editaveis.cpfValido')}</small>}
             </Campo>
           )}
         </form.Field>

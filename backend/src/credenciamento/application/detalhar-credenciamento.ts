@@ -1,6 +1,6 @@
 import type { CredenciamentoRepository } from './solicitar-credenciamento.js';
 import type { EditalLookup, SecretariaLookup } from './listar-credenciamentos.js';
-import { TOTAL_PASSOS_CREDENCIAMENTO, type EstadoCredenciamento, type TermoAceite } from '../domain/credenciamento.js';
+import { TOTAL_PASSOS_CREDENCIAMENTO, type Credenciamento, type EstadoCredenciamento, type TermoAceite } from '../domain/credenciamento.js';
 
 /**
  * Detalhe de leitura de um credenciamento para a tela "Visualizar" do portal (UC004). Reúne o que o
@@ -39,6 +39,22 @@ export class DetalharCredenciamento {
   async doFornecedor(credenciamentoId: string, fornecedorId: string): Promise<CredenciamentoDetalhe | null> {
     const c = await this.creds.porId(credenciamentoId);
     if (!c || c.fornecedorId !== fornecedorId) return null;
+    return this.montar(c);
+  }
+
+  /**
+   * Credenciamento **ativo** do fornecedor num edital (UC004 · retomada do wizard). Devolve o vínculo
+   * `iniciado`/`aceito` para o portal reidratar o wizard no passo salvo (RN005/RN016) em vez de tentar
+   * criar outro — o `iniciar` bloquearia com `CredenciamentoDuplicado`. `cancelado` conta como inexistente
+   * (A2 é reversível): o fornecedor pode recomeçar do zero. Sem vínculo ativo, devolve `null` (204 no HTTP).
+   */
+  async doFornecedorNoEdital(fornecedorId: string, editalId: string): Promise<CredenciamentoDetalhe | null> {
+    const c = await this.creds.porFornecedorEEdital(fornecedorId, editalId);
+    if (!c || c.situacao === 'cancelado') return null;
+    return this.montar(c);
+  }
+
+  private async montar(c: Credenciamento): Promise<CredenciamentoDetalhe> {
     const e = await this.editais.porId(c.editalId);
     return {
       id: c.id,

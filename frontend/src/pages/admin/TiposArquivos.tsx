@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type CatalogoItemView } from '../../lib/api';
 import { celula, cabecalho } from '../../design-system/tabela';
-import { Botao } from '../../design-system/components';
+import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeLapis, IconePower, IconeFechar, IconeInfo } from '../../design-system/icons';
 
 /**
@@ -13,11 +13,13 @@ import { IconeLapis, IconePower, IconeFechar, IconeInfo } from '../../design-sys
  * (cabeçalho "Documentos exigidos no credenciamento"). Reusa o CRUD genérico de catálogos (GET/POST/PATCH/
  * POST inativar|reativar `/catalogos/tipos-documento`); a lista inclui inativos.
  *
- * Arbitragem HTML×domínio (decisão do solicitante): a coluna "Obrigatório" do protótipo é omitida — a
- * obrigatoriedade documental é definida por edital (RF007), não por tipo — e dá lugar a "Categoria"
- * (cadastral/fiscal/contratual), que já existe no domínio e é obrigatória. A "Validade" é modelada em três
- * modos mutuamente exclusivos mapeados aos campos do domínio: sem validade, prazo fixo em dias
- * (`validadeDias`, ex.: "90 dias") ou por exercício (`exigeExercicio`, ex.: Balanço).
+ * Arbitragem HTML×domínio: além de "Categoria" (cadastral/fiscal/contratual), a tela expõe "Obrigatório"
+ * (2026-07-21, decisão do solicitante) — reintroduzida como atributo POR TIPO no catálogo (RF022
+ * parametrizável, §02), revertendo a omissão anterior que a tratava por edital (RF007). Uso advisório: o
+ * Passo 2 do UC004 destaca os obrigatórios pendentes, mas NÃO bloqueia (conclusão por Termo/RN016;
+ * validação real na covalidação da CPL/UC006). A "Validade" é modelada em três modos mutuamente
+ * exclusivos mapeados aos campos do domínio: sem validade, prazo fixo em dias (`validadeDias`, ex.:
+ * "90 dias") ou por exercício (`exigeExercicio`, ex.: Balanço).
  */
 const SLUG = 'tipos-documento' as const;
 
@@ -35,7 +37,6 @@ export function soDigitosDias(v: string): string {
 }
 
 const pill: CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '5px 12px', borderRadius: 999, font: '600 12.5px var(--font-body)', whiteSpace: 'nowrap' };
-const iconeAcao: CSSProperties = { width: 40, height: 40, border: '1px solid var(--border)', borderRadius: 9, background: '#fff', color: 'var(--cinza-600, #556)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 
 type Modal = { modo: 'criar' } | { modo: 'editar'; item: CatalogoItemView };
 
@@ -68,6 +69,7 @@ export function TiposArquivos() {
     t('admin.tiposArquivos.campos.documento'),
     t('admin.tiposArquivos.campos.formato'),
     t('admin.tiposArquivos.campos.categoria'),
+    t('admin.tiposArquivos.campos.obrigatorio'),
     t('admin.tiposArquivos.campos.validade'),
     t('admin.tiposArquivos.campos.status'),
     t('admin.tiposArquivos.campos.acoes'),
@@ -114,6 +116,13 @@ export function TiposArquivos() {
                       <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap' }}>
                         <span data-cy="categoria" style={{ color: 'var(--cinza-700)' }}>{rotuloCategoria(s.categoria)}</span>
                       </td>
+                      <td style={{ ...celula, fontSize: 13.5, whiteSpace: 'nowrap' }}>
+                        {s.obrigatorio ? (
+                          <span data-cy="obrigatorio" style={{ ...pill, background: 'var(--azul-50)', color: 'var(--azul-700)' }}>{t('admin.tiposArquivos.obrigatorioSim')}</span>
+                        ) : (
+                          <span data-cy="obrigatorio" style={{ color: 'var(--cinza-400)' }}>{t('admin.tiposArquivos.obrigatorioNao')}</span>
+                        )}
+                      </td>
                       <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-700)', whiteSpace: 'nowrap' }}>
                         <span data-cy="validade">{rotuloValidade(s)}</span>
                       </td>
@@ -124,12 +133,8 @@ export function TiposArquivos() {
                       </td>
                       <td style={{ ...celula, textAlign: 'right' }}>
                         <div style={{ display: 'inline-flex', gap: 8, justifyContent: 'flex-end' }}>
-                          <button type="button" data-cy="editar" title={t('admin.tiposArquivos.acao.editar')} aria-label={t('admin.tiposArquivos.acao.editar')} onClick={() => setModal({ modo: 'editar', item: s })} style={iconeAcao}>
-                            <IconeLapis width={20} height={20} />
-                          </button>
-                          <button type="button" data-cy="alternar-situacao" title={t(`admin.tiposArquivos.acao.${s.ativo ? 'inativar' : 'reativar'}`)} aria-label={t(`admin.tiposArquivos.acao.${s.ativo ? 'inativar' : 'reativar'}`)} disabled={inativar.isPending || reativar.isPending} onClick={() => alternar(s)} style={{ ...iconeAcao, color: s.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }}>
-                            <IconePower width={20} height={20} />
-                          </button>
+                          <BotaoIcone icone={IconeLapis} data-cy="editar" title={t('admin.tiposArquivos.acao.editar')} aria-label={t('admin.tiposArquivos.acao.editar')} onClick={() => setModal({ modo: 'editar', item: s })} />
+                          <BotaoIcone icone={IconePower} data-cy="alternar-situacao" title={t(`admin.tiposArquivos.acao.${s.ativo ? 'inativar' : 'reativar'}`)} aria-label={t(`admin.tiposArquivos.acao.${s.ativo ? 'inativar' : 'reativar'}`)} disabled={inativar.isPending || reativar.isPending} onClick={() => alternar(s)} style={{ color: s.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }} />
                         </div>
                       </td>
                     </tr>
@@ -154,7 +159,6 @@ export function TiposArquivos() {
 
 const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 };
 const card: CSSProperties = { background: '#fff', borderRadius: 16, width: 'min(680px, 100%)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,.25)' };
-const botaoX: CSSProperties = { width: 40, height: 40, borderRadius: 10, border: 'none', background: 'var(--cinza-100, #eef1f5)', color: 'var(--cinza-500)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 const rotulo: CSSProperties = { font: '600 13px var(--font-body)', color: 'var(--azul-900)', marginBottom: 6, display: 'block' };
 
 /** Deriva o modo de validade inicial dos campos do domínio (exercício > dias > exige → dias > sem). */
@@ -177,6 +181,7 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
     categoria: (item?.categoria as Categoria | '') ?? '',
     modo: modoDe(item),
     dias: item?.validadeDias != null ? String(item.validadeDias) : '',
+    obrigatorio: item?.obrigatorio ?? false,
   });
 
   useEffect(() => {
@@ -195,6 +200,7 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
         exigeExercicio: form.modo === 'exercicio',
         // Prazo fixo só no modo "dias"; nos demais, null limpa o campo no PATCH.
         validadeDias: form.modo === 'dias' ? Number(form.dias) : null,
+        obrigatorio: form.obrigatorio,
       };
       if (editando) await api.catalogoEditar(SLUG, item!.id, body);
       else await api.catalogoCriar(SLUG, body);
@@ -213,7 +219,7 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
             <h2 style={{ margin: 0, fontSize: 20, color: 'var(--azul-900)' }}>{titulo}</h2>
             <p style={{ margin: '4px 0 0', fontSize: 13.5, color: 'var(--cinza-500)' }}>{t('admin.tiposArquivos.modal.subtitulo')}</p>
           </div>
-          <button type="button" onClick={onFechar} style={botaoX} data-cy="fechar-modal" aria-label={t('admin.tiposArquivos.fechar')}><IconeFechar width={20} height={20} /></button>
+          <BotaoIcone icone={IconeFechar} variante="fechar" onClick={onFechar} data-cy="fechar-modal" aria-label={t('admin.tiposArquivos.fechar')} />
         </header>
 
         <form data-cy="form-tipo" onSubmit={(e) => { e.preventDefault(); salvar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -253,6 +259,13 @@ function ModalTipo({ item, onFechar, onMudou }: { item?: CatalogoItemView; onFec
                 </label>
               )}
             </div>
+            <label style={{ display: 'flex', gap: 11, alignItems: 'flex-start', padding: '14px 16px', border: `1.5px solid ${form.obrigatorio ? 'var(--azul-500)' : 'var(--border)'}`, borderRadius: 11, background: form.obrigatorio ? 'var(--azul-50)' : '#fff', cursor: 'pointer' }}>
+              <input data-cy="campo-obrigatorio" type="checkbox" checked={form.obrigatorio} onChange={(e) => setForm({ ...form, obrigatorio: e.target.checked })} style={{ width: 18, height: 18, marginTop: 1, flexShrink: 0, accentColor: 'var(--azul-700)' }} />
+              <span style={{ minWidth: 0 }}>
+                <span style={{ display: 'block', font: '600 14px var(--font-body)', color: 'var(--cinza-900)' }}>{t('admin.tiposArquivos.modal.obrigatorioLabel')}</span>
+                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--cinza-500)', marginTop: 2 }}>{t('admin.tiposArquivos.modal.obrigatorioAjuda')}</span>
+              </span>
+            </label>
             <BannerHistorico />
             {salvar.isError && <p role="alert" data-cy="erro-salvar" style={{ margin: 0, fontSize: 13, color: 'var(--erro)' }}>{t('admin.tiposArquivos.modal.erroSalvar')}</p>}
           </div>

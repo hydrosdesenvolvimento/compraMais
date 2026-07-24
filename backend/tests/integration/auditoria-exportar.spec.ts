@@ -17,7 +17,7 @@ describe('Auditoria — exportação (US2)', () => {
     expect(res.statusCode).toBe(200);
     expect(res.headers['content-type']).toContain('text/csv');
     expect(res.headers['content-disposition']).toContain('attachment');
-    expect(res.body.split('\n')[0]).toBe('id,usuario,evento,timestamp,ip,payload');
+    expect(res.body.split('\n')[0]).toBe('id,usuario,usuarioNome,papel,evento,timestamp,ip,payload');
     await app.close();
   });
 

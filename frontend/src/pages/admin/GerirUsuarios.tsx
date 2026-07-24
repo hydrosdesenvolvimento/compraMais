@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type UsuarioInternoView, type CargoOpcao, type CatalogoItemView } from '../../lib/api';
 import { celula, cabecalho } from '../../design-system/tabela';
-import { Botao } from '../../design-system/components';
+import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeLapis, IconeCadeado, IconeFechar } from '../../design-system/icons';
 
 /**
@@ -39,7 +39,6 @@ const PERFIL_PILL: Record<string, CSSProperties> = {
 };
 
 const pill: CSSProperties = { display: 'inline-flex', alignItems: 'center', padding: '5px 12px', borderRadius: 999, font: '600 12.5px var(--font-body)', whiteSpace: 'nowrap' };
-const iconeAcao: CSSProperties = { width: 40, height: 40, border: '1px solid var(--border)', borderRadius: 9, background: '#fff', color: 'var(--cinza-600, #556)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 
 type Modal = { modo: 'criar' } | { modo: 'editar'; item: UsuarioInternoView };
 
@@ -128,12 +127,8 @@ export function GerirUsuarios() {
                       </td>
                       <td style={{ ...celula, textAlign: 'right' }}>
                         <div style={{ display: 'inline-flex', gap: 8, justifyContent: 'flex-end' }}>
-                          <button type="button" data-cy="editar" title={t('admin.usuarios.acao.editar')} aria-label={t('admin.usuarios.acao.editar')} onClick={() => setModal({ modo: 'editar', item: u })} style={iconeAcao}>
-                            <IconeLapis width={20} height={20} />
-                          </button>
-                          <button type="button" data-cy="alternar-situacao" title={t(`admin.usuarios.acao.${u.ativo ? 'inativar' : 'reativar'}`)} aria-label={t(`admin.usuarios.acao.${u.ativo ? 'inativar' : 'reativar'}`)} disabled={inativar.isPending || reativar.isPending} onClick={() => alternar(u)} style={{ ...iconeAcao, color: u.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }}>
-                            <IconeCadeado width={20} height={20} />
-                          </button>
+                          <BotaoIcone icone={IconeLapis} data-cy="editar" title={t('admin.usuarios.acao.editar')} aria-label={t('admin.usuarios.acao.editar')} onClick={() => setModal({ modo: 'editar', item: u })} />
+                          <BotaoIcone icone={IconeCadeado} data-cy="alternar-situacao" title={t(`admin.usuarios.acao.${u.ativo ? 'inativar' : 'reativar'}`)} aria-label={t(`admin.usuarios.acao.${u.ativo ? 'inativar' : 'reativar'}`)} disabled={inativar.isPending || reativar.isPending} onClick={() => alternar(u)} style={{ color: u.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }} />
                         </div>
                       </td>
                     </tr>
@@ -158,7 +153,6 @@ export function GerirUsuarios() {
 
 const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 };
 const card: CSSProperties = { background: '#fff', borderRadius: 16, width: 'min(680px, 100%)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,.25)' };
-const botaoX: CSSProperties = { width: 40, height: 40, borderRadius: 10, border: 'none', background: 'var(--cinza-100, #eef1f5)', color: 'var(--cinza-500)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' };
 const rotulo: CSSProperties = { font: '600 13px var(--font-body)', color: 'var(--azul-900)', marginBottom: 6, display: 'block' };
 
 /** Modal único de usuário — CRIAR (sem `item`) ou EDITAR (com `item`). No modo editar, o e-mail é imutável
@@ -208,7 +202,7 @@ function ModalUsuario({ item, onFechar, onMudou }: { item?: UsuarioInternoView; 
             <h2 style={{ margin: 0, fontSize: 20, color: 'var(--azul-900)' }}>{titulo}</h2>
             <p style={{ margin: '4px 0 0', fontSize: 13.5, color: 'var(--cinza-500)' }}>{t('admin.usuarios.modal.subtitulo')}</p>
           </div>
-          <button type="button" onClick={onFechar} style={botaoX} data-cy="fechar-modal" aria-label={t('admin.usuarios.fechar')}><IconeFechar width={20} height={20} /></button>
+          <BotaoIcone icone={IconeFechar} variante="fechar" onClick={onFechar} data-cy="fechar-modal" aria-label={t('admin.usuarios.fechar')} />
         </header>
 
         <form data-cy="form-usuario" onSubmit={(e) => { e.preventDefault(); salvar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>

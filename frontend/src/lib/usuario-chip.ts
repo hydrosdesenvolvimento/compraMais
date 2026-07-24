@@ -16,7 +16,7 @@ export function iniciaisDe(texto: string | undefined): string {
  * `papelRotulo` já vem localizado; `fantasia` (nome fantasia/razão social da empresa) só existe
  * para titular/procurador. As iniciais derivam da empresa quando há, senão do nome da pessoa.
  */
-export function montarChip(usuario: Usuario | null, papelRotulo: string, fantasia?: string): UsuarioChip {
+export function montarChip(usuario: Usuario | null, papelRotulo: string, fantasia?: string, avatar?: string | null): UsuarioChip {
   const nome = usuario?.nome || fantasia || papelRotulo;
-  return { nome, papel: papelRotulo, fantasia, iniciais: iniciaisDe(fantasia || nome) };
+  return { nome, papel: papelRotulo, fantasia, iniciais: iniciaisDe(fantasia || nome), avatar: avatar ?? null };
 }

@@ -20,7 +20,9 @@ function headers(extra?: Record<string, string>): Record<string, string> | undef
 async function get<T>(url: string): Promise<T> {
   const r = await fetch(url, { headers: headers() });
   if (!r.ok) throw await HttpError.de(r, url);
-  return (await r.json()) as T;
+  // 204 (sem corpo) é resposta válida de leitura "não há" — ex.: credenciamento ativo inexistente no
+  // edital. Devolve undefined em vez de estourar no `r.json()` de corpo vazio (simetria com `send`).
+  return (r.status === 204 ? undefined : await r.json()) as T;
 }
 
 async function send<T>(url: string, method: string, body?: unknown): Promise<T> {
@@ -186,7 +188,7 @@ export interface DemandaDistribuidaView {
 }
 export interface Funil { documentosPendentes: number; editaisPorSituacao: { rascunho: number; publicado: number; encerrado: number }; bloqueiosAtivos: number }
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
-export interface RegistroAuditoria { id: string; usuario: string | null; evento: string; timestamp: string; ip: string | null }
+export interface RegistroAuditoria { id: string; usuario: string | null; usuarioNome: string | null; papel: string | null; evento: string; timestamp: string; ip: string | null }
 /** UC020 — item de catálogo base (superset: cada catálogo acrescenta seus campos). */
 export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento';
 export interface CatalogoItemView {
@@ -196,7 +198,7 @@ export interface CatalogoItemView {
   // Setor/CNAE
   codigo?: string; descricao?: string;
   // Tipo de documento
-  formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number;
+  formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number; obrigatorio?: boolean;
 }
 /** UC021 — servidor interno exibido no Painel Admin de usuários (sem segredos). */
 export interface UsuarioInternoView {
@@ -241,6 +243,9 @@ export interface SolicitacaoTitularView {
   id: string; titularId: string; tipo: TipoDireito; detalhe: string | null;
   categoria: CategoriaDado | null; status: 'pendente' | 'atendida' | 'recusada'; resultado: string | null;
 }
+/** RF018 — perfil do PRÓPRIO usuário autenticado (cartão "Responsável" da "Minha conta"). O `nome` é o
+ *  nome de exibição completo (a UI o divide em nome + sobrenome); `avatar` é o data URL da foto ou null. */
+export interface PerfilProprioView { userId: string; email: string; nome: string; avatar: string | null }
 /** UC018 passo 1: perfil do fornecedor exibido na "Minha conta" (dados oficiais read-only + contato). */
 export interface FornecedorPerfil {
   id: string; cnpj: string; razaoSocial: string; porte: string;
@@ -274,6 +279,13 @@ export const api = {
   // UC008 — Demandas distribuídas: o rateio que o Motor atribuiu ao fornecedor (empresa vem do token).
   demandasDistribuidas: () => get<DemandaDistribuidaView[]>('/distribuicao/minhas'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
+  // FR-007 — envio de documento comprobatório. `conteudo` são os bytes do arquivo em base64 (o
+  // backend cifra em repouso — AD-19). `formato` ∈ pdf|jpg|png; `dataValidade` opcional (ISO).
+  enviarDocumento: (fid: string, body: { tipo: string; formato: string; conteudo: string; dataValidade?: string | null }) =>
+    send<{ documentoId: string; situacao: string }>(`/fornecedores/${fid}/documentos`, 'POST', body),
+  // FR-008 — Visualizar/Baixar: o backend devolve o arquivo decifrado (`conteudo` em base64).
+  baixarConteudo: (docId: string) =>
+    get<{ tipo: string; formato: 'pdf' | 'jpg' | 'png'; conteudo: string; dataValidade: string | null }>(`/documentos/${docId}/conteudo`),
   // Credenciamentos do fornecedor. Sem `incluirCancelados` o backend devolve só os "em andamento"
   // (recorte da home); a tela "Meus Credenciamentos" pede o histórico completo para o filtro de cancelados.
   meusCredenciamentos: (fid: string, incluirCancelados = false) =>
@@ -295,6 +307,10 @@ export const api = {
   minhasSolicitacoes: (titularId: string) => get<SolicitacaoTitularView[]>(`/titular/solicitacoes?titularId=${encodeURIComponent(titularId)}`),
   // UC015 · A2 — troca da própria senha (autenticada via Bearer). 400 = senha atual incorreta; 422 = senha fraca.
   trocarSenha: (senhaAtual: string, novaSenha: string) => send<void>('/auth/senha', 'POST', { senhaAtual, novaSenha }),
+  // RF018 — perfil do próprio usuário (cartão "Responsável"). Leitura/edição de nome e foto (Bearer).
+  perfilProprio: () => get<PerfilProprioView>('/auth/perfil'),
+  // `avatar`: data URL para definir, `null` para remover, omitido para manter. 400 = imagem inválida; 413 = grande.
+  atualizarPerfilProprio: (patch: { nome?: string; avatar?: string | null }) => send<PerfilProprioView>('/auth/perfil', 'PATCH', patch),
   // UC019 — Gerir procuradores (só o titular; 403 quando o ator não é o titular).
   procuradores: (fid: string) => get<ProcuradorView[]>(`/fornecedores/${fid}/procuradores`),
   convidarProcurador: (fid: string, identificador: string) => send<{ procuradorContaId: string }>(`/fornecedores/${fid}/procuradores`, 'POST', { identificador }),
@@ -309,6 +325,13 @@ export const api = {
   registrarPassoCredenciamento: (credId: string, passo: number) => send<{ passoAtual: number }>(`/credenciamentos/${credId}/passo`, 'PATCH', { passo }),
   // Detalhe read-only para a ação "Visualizar" do credenciamento finalizado.
   detalharCredenciamento: (credId: string) => get<CredenciamentoDetalheView>(`/credenciamentos/${credId}`),
+  // Comprovante em PDF (Passo Concluído · botão "Baixar PDF"). Rota protegida → baixa via Bearer
+  // (não navega), como a exportação da auditoria; devolve o blob + nome sugerido pelo servidor.
+  comprovanteCredenciamento: (credId: string) => baixarArquivo(`/credenciamentos/${credId}/comprovante.pdf`),
+  // Retomada do wizard (UC004): credenciamento ATIVO do fornecedor neste edital, ou `undefined` (204) se
+  // não há. O wizard consulta na entrada para reidratar o passo salvo em vez de recriar (evita o 409
+  // CredenciamentoDuplicado ao reentrar num edital já iniciado).
+  credenciamentoNoEdital: (editalId: string) => get<CredenciamentoDetalheView | undefined>(`/editais/${editalId}/credenciamentos/meu`),
 
   // Painel admin
   dashboardAdmin: () => get<Funil>('/admin/dashboard'),

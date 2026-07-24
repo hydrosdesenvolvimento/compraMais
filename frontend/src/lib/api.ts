@@ -441,6 +441,8 @@ export const api = {
   catalogoEditar: (slug: CatalogoSlug, id: string, body: Record<string, unknown>) => send<{ ok: boolean }>(`/catalogos/${slug}/${id}`, 'PATCH', body),
   catalogoInativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/inativar`, 'POST'),
   catalogoReativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/reativar`, 'POST'),
+  // Exclusão física — só materiais e serviços (item inativo e sem vínculo a edital; guardas no backend).
+  materialServicoExcluir: (id: string) => send<void>(`/catalogos/materiais-servicos/${id}`, 'DELETE'),
 
   // UC021 — Gestão de usuários internos/servidores. Todas exigem papel administrador no token.
   cargos: () => get<CargoOpcao[]>('/admin/cargos'),

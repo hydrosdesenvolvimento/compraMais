@@ -22,6 +22,8 @@ export interface ItemEditalRepository {
   remover(id: string): Promise<void>;
   /** Já existe um item deste item-de-catálogo no edital? (unicidade — regra da referência). */
   existeCatalogoNoEdital(editalId: string, itemCatalogoId: string): Promise<boolean>;
+  /** O item de catálogo está referenciado por ALGUM edital (qualquer um)? Base da exclusão do material. */
+  usadoEmAlgumEdital(itemCatalogoId: string): Promise<boolean>;
   /** Próximo número sequencial do edital (maior número já usado + 1; 1 se vazio). */
   proximoNumero(editalId: string): Promise<number>;
 }

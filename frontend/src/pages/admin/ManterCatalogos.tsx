@@ -3,10 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { api, type CatalogoSlug, type CatalogoItemView } from '../../lib/api';
-import { Card, Botao, BotaoIcone } from '../../design-system/components';
+import { Card, Botao, BotaoIcone, useToast } from '../../design-system/components';
 import { celula, cabecalho } from '../../design-system/tabela';
-import { IconePower } from '../../design-system/icons';
+import { IconePower, IconeLixeira } from '../../design-system/icons';
 import { exportarCsv } from '../../lib/exportar';
+import { textoDoErro } from '../../lib/erros';
 
 /**
  * UC020 — Manter Catálogos (Painel Admin). Uma jornada, quatro catálogos: Secretarias (RF020),
@@ -44,6 +45,8 @@ interface CatalogoDef {
   busca?: (i: CatalogoItemView) => string;
   filtro?: FiltroDef;
   exportacao?: ExportacaoDef;
+  /** Permite exclusão FÍSICA de itens inativos (só materiais e serviços — item sem vínculo a edital). */
+  excluivel?: boolean;
 }
 
 /** Célula de identificador (sigla/código/número): monoespaçada tabular, em navy — como nas telas irmãs. */
@@ -105,7 +108,7 @@ const CATALOGOS: CatalogoDef[] = [
     ],
   },
   {
-    slug: 'materiais-servicos', tabKey: 'admin.catalogos.tabs.materiais',
+    slug: 'materiais-servicos', tabKey: 'admin.catalogos.tabs.materiais', excluivel: true,
     busca: (i) => `${i.numero ?? ''} ${i.nome ?? ''} ${i.especificacoes ?? ''}`,
     campos: [
       { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeItem', tipo: 'text', largura: 'total' },
@@ -162,6 +165,7 @@ function paraEnvio(def: CatalogoDef, valores: Record<string, unknown>): Record<s
 
 export function ManterCatalogos() {
   const { t } = useTranslation();
+  const { ok, erro } = useToast();
   const qc = useQueryClient();
   const [slug, setSlug] = useState<CatalogoSlug>(CATALOGOS[0].slug);
   const [incluirInativos, setIncluirInativos] = useState(false);
@@ -196,6 +200,16 @@ export function ManterCatalogos() {
   });
   const inativar = useMutation({ mutationFn: (id: string) => api.catalogoInativar(slug, id), onSuccess: () => void invalidar() });
   const reativar = useMutation({ mutationFn: (id: string) => api.catalogoReativar(slug, id), onSuccess: () => void invalidar() });
+  // Exclusão física (só materiais e serviços inativos sem vínculo a edital). O backend recusa (409) quando
+  // o item está vinculado; o toast traduz o `codigo` do erro (ex.: MaterialVinculadoAEdital).
+  const excluir = useMutation({
+    mutationFn: (id: string) => api.materialServicoExcluir(id),
+    onSuccess: () => { ok(t('admin.catalogos.excluido')); void invalidar(); },
+    onError: (e) => erro(textoDoErro(e)),
+  });
+  const confirmarExcluir = (i: CatalogoItemView) => {
+    if (window.confirm(t('admin.catalogos.confirmarExcluir', { nome: i.nome ?? i.numero ?? '' }))) excluir.mutate(i.id);
+  };
 
   // Busca e filtro são client-side: a listagem já vem inteira do backend (é dado de referência, sem
   // paginação de servidor). Se o catálogo crescer a milhares de itens, migrar para QBE no backend —
@@ -373,17 +387,32 @@ export function ManterCatalogos() {
                       </span>
                     </td>
                     <td style={{ ...celula, textAlign: 'right' }}>
-                      {/* Um único botão de alternância (o mesmo alvo do protótipo); o `data-cy` reflete a
-                          ação disponível — `inativar` quando ativo, `reativar` quando inativo. */}
-                      <BotaoIcone
-                        icone={IconePower}
-                        data-cy={i.ativo ? 'inativar' : 'reativar'}
-                        title={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
-                        aria-label={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
-                        disabled={inativar.isPending || reativar.isPending}
-                        onClick={() => (i.ativo ? inativar : reativar).mutate(i.id)}
-                        style={{ color: i.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }}
-                      />
+                      <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center', justifyContent: 'flex-end' }}>
+                        {/* Um único botão de alternância (o mesmo alvo do protótipo); o `data-cy` reflete a
+                            ação disponível — `inativar` quando ativo, `reativar` quando inativo. */}
+                        <BotaoIcone
+                          icone={IconePower}
+                          data-cy={i.ativo ? 'inativar' : 'reativar'}
+                          title={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
+                          aria-label={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
+                          disabled={inativar.isPending || reativar.isPending}
+                          onClick={() => (i.ativo ? inativar : reativar).mutate(i.id)}
+                          style={{ color: i.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }}
+                        />
+                        {/* Exclusão física: só materiais e serviços INATIVOS (o backend ainda recusa se houver
+                            vínculo a edital). Some para itens ativos — inativar primeiro. */}
+                        {def.excluivel && !i.ativo && (
+                          <BotaoIcone
+                            icone={IconeLixeira}
+                            data-cy="excluir"
+                            title={t('admin.catalogos.excluir')}
+                            aria-label={t('admin.catalogos.excluir')}
+                            disabled={excluir.isPending}
+                            onClick={() => confirmarExcluir(i)}
+                            style={{ color: 'var(--erro, #c0392b)' }}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -51,6 +51,11 @@ export class ItemEditalRepositoryPg implements ItemEditalRepository {
     return (r.rowCount ?? 0) > 0;
   }
 
+  async usadoEmAlgumEdital(itemCatalogoId: string): Promise<boolean> {
+    const r = await this.pool.query('SELECT 1 FROM edital_itens WHERE item_catalogo_id = $1 LIMIT 1', [itemCatalogoId]);
+    return (r.rowCount ?? 0) > 0;
+  }
+
   async proximoNumero(editalId: string): Promise<number> {
     const r = await this.pool.query('SELECT COALESCE(MAX(numero), 0)::int AS m FROM edital_itens WHERE edital_id = $1', [editalId]);
     return (r.rows[0] as { m: number }).m + 1;

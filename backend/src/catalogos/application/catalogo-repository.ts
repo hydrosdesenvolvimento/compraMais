@@ -14,4 +14,7 @@ export interface CatalogoRepository<T extends ItemCatalogo> {
   porChave(chave: string): Promise<T | null>;
   /** Lista ordenada por chave; por padrão só os ativos (RN015). */
   listar(filtro?: FiltroListagem): Promise<T[]>;
+  /** Remoção FÍSICA por id (exclusão definitiva). Uso restrito: itens inativos sem vínculo — a regra
+   *  de quando pode excluir vive no caso de uso, não aqui. Idempotente (id inexistente é no-op). */
+  remover(id: string): Promise<void>;
 }

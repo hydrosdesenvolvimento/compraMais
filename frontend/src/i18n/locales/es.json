@@ -668,13 +668,14 @@
         "nomeItem": "Nombre del ítem",
         "tipoItem": "Naturaleza",
         "unidades": "Unidades de medida",
-        "unidadesDica": "Separe con comas. Ej.: un, m, caja",
+        "unidadesDica": "Seleccione una o más unidades registradas.",
         "especificacoes": "Especificaciones técnicas",
         "situacao": "Situación",
         "acoes": "Acciones",
         "simbolo": "Símbolo",
         "simboloDica": "Ej.: un, kg, m², L, h, cx",
-        "descricaoUnidade": "Descripción"
+        "descricaoUnidade": "Descripción",
+        "unidadesVazio": "Ninguna unidad registrada. Regístrelas en la pestaña \"Unidades de medida\"."
       },
       "categorias": {
         "cadastral": "Registral",

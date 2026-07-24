@@ -7,13 +7,13 @@ import type { CatalogoItemView } from '../../lib/api';
 // Alinha o testId do Testing Library ao data-cy do contrato de testes (Cypress).
 configure({ testIdAttribute: 'data-cy' });
 
-const catalogoListar = vi.fn<() => Promise<CatalogoItemView[]>>();
+const catalogoListar = vi.fn<(slug?: string, incluirInativos?: boolean) => Promise<CatalogoItemView[]>>();
 const catalogoCriar = vi.fn<(...a: unknown[]) => Promise<{ id: string }>>();
 const catalogoInativar = vi.fn<(...a: unknown[]) => Promise<{ situacao: string }>>();
 const catalogoReativar = vi.fn<(...a: unknown[]) => Promise<{ situacao: string }>>();
 vi.mock('../../lib/api', () => ({
   api: {
-    catalogoListar: () => catalogoListar(),
+    catalogoListar: (slug: string, incluirInativos?: boolean) => catalogoListar(slug, incluirInativos),
     catalogoCriar: (slug: string, body: unknown) => catalogoCriar(slug, body),
     catalogoInativar: (slug: string, id: string) => catalogoInativar(slug, id),
     catalogoReativar: (slug: string, id: string) => catalogoReativar(slug, id),
@@ -107,9 +107,18 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
     { id: 'm1', ativo: true, situacao: 'ativo', numero: 'ITM-2026/001', nome: 'Cabo de rede CAT6', tipo: 'material', unidades: ['un', 'm'], especificacoes: 'U/UTP 4 pares' },
     { id: 'm2', ativo: true, situacao: 'ativo', numero: 'ITM-2026/002', nome: 'Instalação elétrica', tipo: 'servico', unidades: ['h'] },
   ];
+  // Unidades de medida ativas (catálogo próprio) — alimentam o seletor do campo "unidades".
+  const unidades: CatalogoItemView[] = [
+    { id: 'u1', ativo: true, situacao: 'ativo', simbolo: 'un', descricao: 'Unidade' },
+    { id: 'u2', ativo: true, situacao: 'ativo', simbolo: 'cx', descricao: 'Caixa' },
+    { id: 'u3', ativo: true, situacao: 'ativo', simbolo: 'resma', descricao: 'Resma' },
+    { id: 'u4', ativo: true, situacao: 'ativo', simbolo: 'h', descricao: 'Hora' },
+  ];
 
   beforeEach(() => {
-    catalogoListar.mockReset().mockResolvedValue(itens);
+    // Mock ciente do slug: a aba de materiais também consulta o catálogo 'unidades-medida'.
+    catalogoListar.mockReset().mockImplementation((slug?: string) =>
+      Promise.resolve(slug === 'unidades-medida' ? unidades : itens));
     catalogoCriar.mockReset().mockResolvedValue({ id: 'novo' });
     catalogoInativar.mockReset().mockResolvedValue({ situacao: 'inativo' });
     catalogoReativar.mockReset().mockResolvedValue({ situacao: 'ativo' });
@@ -133,16 +142,34 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
     expect(screen.queryByTestId('campo-numero')).not.toBeInTheDocument();
   });
 
-  it('envia as unidades como lista (o input é texto separado por vírgula)', async () => {
+  it('seleciona as unidades a partir do catálogo de Unidades de medida (múltipla escolha)', async () => {
     await abrirAba();
 
+    // O seletor é populado pelo catálogo 'unidades-medida' (chips por símbolo), não é texto livre.
+    const grupo = await screen.findByTestId('campo-unidades');
+    expect(grupo.tagName).not.toBe('INPUT');
     fireEvent.change(screen.getByTestId('campo-nome'), { target: { value: 'Papel A4' } });
-    fireEvent.change(screen.getByTestId('campo-unidades'), { target: { value: ' cx , resma , ' } });
+    fireEvent.click(screen.getByTestId('unidade-opcao-cx').querySelector('input')!);
+    fireEvent.click(screen.getByTestId('unidade-opcao-resma').querySelector('input')!);
     fireEvent.change(screen.getByTestId('campo-especificacoes'), { target: { value: '75 g/m²' } });
     fireEvent.submit(screen.getByTestId('form-catalogo'));
 
     await waitFor(() => expect(catalogoCriar).toHaveBeenCalledWith('materiais-servicos', {
       nome: 'Papel A4', tipo: 'material', unidades: ['cx', 'resma'], especificacoes: '75 g/m²',
+    }));
+  });
+
+  it('desmarcar um chip remove a unidade da seleção enviada', async () => {
+    await abrirAba();
+    fireEvent.change(screen.getByTestId('campo-nome'), { target: { value: 'Caneta' } });
+    const cx = screen.getByTestId('unidade-opcao-cx').querySelector('input')!;
+    fireEvent.click(cx); // marca
+    fireEvent.click(cx); // desmarca
+    fireEvent.click(screen.getByTestId('unidade-opcao-un').querySelector('input')!);
+    fireEvent.submit(screen.getByTestId('form-catalogo'));
+
+    await waitFor(() => expect(catalogoCriar).toHaveBeenCalledWith('materiais-servicos', {
+      nome: 'Caneta', tipo: 'material', unidades: ['un'], especificacoes: '',
     }));
   });
 

@@ -22,7 +22,7 @@ import { exportarCsv } from '../../lib/exportar';
  * `filtro` ganha o seletor correspondente e `exportacao` ganha os botões CSV/PDF. Hoje só materiais e
  * serviços as declara — é o catálogo que cresce para centenas/milhares de linhas.
  */
-type TipoCampo = 'text' | 'select' | 'checkbox' | 'textarea' | 'lista';
+type TipoCampo = 'text' | 'select' | 'checkbox' | 'textarea' | 'lista' | 'unidades';
 /**
  * `largura: 'total'` faz o campo ocupar a linha inteira da grade de duas colunas — reservado a campos
  * de texto longo (nome, especificações). Sem isso o formulário volta a ser uma coluna estreita com
@@ -110,7 +110,7 @@ const CATALOGOS: CatalogoDef[] = [
     campos: [
       { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeItem', tipo: 'text', largura: 'total' },
       { nome: 'tipo', labelKey: 'admin.catalogos.campos.tipoItem', tipo: 'select', opcoes: TIPOS_ITEM },
-      { nome: 'unidades', labelKey: 'admin.catalogos.campos.unidades', tipo: 'lista', dicaKey: 'admin.catalogos.campos.unidadesDica' },
+      { nome: 'unidades', labelKey: 'admin.catalogos.campos.unidades', tipo: 'unidades', dicaKey: 'admin.catalogos.campos.unidadesDica', largura: 'total' },
       { nome: 'especificacoes', labelKey: 'admin.catalogos.campos.especificacoes', tipo: 'textarea', largura: 'total' },
     ],
     // O número (ITM-AAAA/NNN) é gerado pelo backend — aparece na tabela, nunca no formulário.
@@ -142,7 +142,10 @@ const CATALOGOS: CatalogoDef[] = [
 function inicial(def: CatalogoDef): Record<string, unknown> {
   const v: Record<string, unknown> = {};
   for (const c of def.campos) {
-    v[c.nome] = c.tipo === 'checkbox' ? false : c.tipo === 'select' ? (c.opcoes?.[0]?.valor ?? '') : '';
+    v[c.nome] = c.tipo === 'checkbox' ? false
+      : c.tipo === 'unidades' ? []
+      : c.tipo === 'select' ? (c.opcoes?.[0]?.valor ?? '')
+      : '';
   }
   return v;
 }
@@ -172,6 +175,20 @@ export function ManterCatalogos() {
     queryFn: () => api.catalogoListar(slug, incluirInativos),
   });
   const invalidar = () => qc.invalidateQueries({ queryKey: ['catalogos', slug] });
+
+  // Campo de unidades (materiais/serviços) é alimentado pelo catálogo de Unidades de medida — só as
+  // unidades ATIVAS. Busca apenas quando o catálogo ativo tem um campo desse tipo (evita chamada nas
+  // demais abas). Compartilha a chave de cache com a listagem da própria aba "Unidades de medida".
+  const precisaUnidades = def.campos.some((c) => c.tipo === 'unidades');
+  const { data: unidadesDisponiveis = [] } = useQuery({
+    queryKey: ['catalogos', 'unidades-medida', false],
+    queryFn: () => api.catalogoListar('unidades-medida'),
+    enabled: precisaUnidades,
+  });
+  const alternarUnidade = (nome: string, simbolo: string) => setValores((v) => {
+    const atual = Array.isArray(v[nome]) ? (v[nome] as string[]) : [];
+    return { ...v, [nome]: atual.includes(simbolo) ? atual.filter((s) => s !== simbolo) : [...atual, simbolo] };
+  });
 
   const criar = useMutation({
     mutationFn: (v: Record<string, unknown>) => api.catalogoCriar(slug, paraEnvio(def, v)),
@@ -242,6 +259,32 @@ export function ManterCatalogos() {
                   onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.checked })} />
                 <span style={{ minWidth: 0 }}>{t(campo.labelKey)}</span>
               </label>
+            ) : campo.tipo === 'unidades' ? (
+              // Seleção múltipla alimentada pelo catálogo de Unidades de medida (só as ativas). Cada
+              // unidade é um chip-checkbox; o valor guardado é a lista de símbolos selecionados.
+              <div key={campo.nome} className={`label${campo.largura === 'total' ? ' cm-campo-total' : ''}`} style={{ display: 'grid', gap: 6, alignContent: 'start' }}>
+                <span>{t(campo.labelKey)}</span>
+                {unidadesDisponiveis.length === 0 ? (
+                  <small data-cy="unidades-vazio" style={{ color: 'var(--cinza-500)' }}>{t('admin.catalogos.campos.unidadesVazio')}</small>
+                ) : (
+                  <div data-cy={`campo-${campo.nome}`} role="group" aria-label={t(campo.labelKey)} style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {unidadesDisponiveis.map((u) => {
+                      const sel = Array.isArray(valores[campo.nome]) && (valores[campo.nome] as string[]).includes(u.simbolo ?? '');
+                      return (
+                        <label key={u.id} data-cy={`unidade-opcao-${u.simbolo}`} data-selected={sel} title={u.descricao}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, cursor: 'pointer',
+                            border: `1px solid ${sel ? 'var(--azul-700)' : 'var(--border)'}`, background: sel ? 'var(--azul-50)' : '#fff',
+                            color: sel ? 'var(--azul-800)' : 'var(--cinza-700)', font: '600 13px var(--font-body)', userSelect: 'none' }}>
+                          <input type="checkbox" checked={sel} onChange={() => alternarUnidade(campo.nome, u.simbolo ?? '')}
+                            style={{ width: 15, height: 15, flexShrink: 0, accentColor: 'var(--azul-700)' }} />
+                          {u.simbolo}
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+                {campo.dicaKey && <small style={{ color: 'var(--cinza-500)' }}>{t(campo.dicaKey)}</small>}
+              </div>
             ) : (
               <label key={campo.nome} className={`label${campo.largura === 'total' ? ' cm-campo-total' : ''}`}
                 style={{ display: 'grid', gap: 4, alignContent: 'start' }}>

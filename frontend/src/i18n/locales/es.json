@@ -656,7 +656,8 @@
         "unidades": "Unidades de medida",
         "unidadesDica": "Separe con comas. Ej.: un, m, caja",
         "especificacoes": "Especificaciones técnicas",
-        "situacao": "Situación"
+        "situacao": "Situación",
+        "acoes": "Acciones"
       },
       "categorias": {
         "cadastral": "Registral",

@@ -79,6 +79,12 @@
       "dpo": "Encarregado (DPO)",
       "leitura": "Somente leitura"
     },
+    "porte": {
+      "MEI": "MEI — Microempreendedor Individual",
+      "ME": "ME — Microempresa",
+      "EPP": "EPP — Empresa de Pequeno Porte",
+      "DEMAIS": "Demais portes"
+    },
     "toast": {
       "fechar": "Fechar"
     },
@@ -132,6 +138,7 @@
       "razaoSocial": "RAZÃO SOCIAL",
       "porte": "PORTE",
       "situacao": "SITUAÇÃO",
+      "mei": "Esta empresa é MEI (Microempreendedor Individual)",
       "address": "ENDEREÇO",
       "cepPlaceholder": "00000-000",
       "cepSearching": "Buscando endereço…",
@@ -481,6 +488,7 @@
         "tituloEditar": "Editar fornecedor",
         "subtituloVerEditar": "Dados oficiais são somente leitura; edite os dados de contato.",
         "razaoPlaceholder": "Razão social da empresa",
+        "portePlaceholder": "Selecione o porte",
         "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
         "cancelar": "Cancelar",
         "salvar": "Salvar",

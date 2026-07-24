@@ -79,6 +79,12 @@
       "dpo": "Data Protection Officer",
       "leitura": "Read-only"
     },
+    "porte": {
+      "MEI": "MEI — Individual Micro-entrepreneur",
+      "ME": "ME — Micro-enterprise",
+      "EPP": "EPP — Small Business",
+      "DEMAIS": "Other sizes"
+    },
     "toast": {
       "fechar": "Close"
     },
@@ -132,6 +138,7 @@
       "razaoSocial": "LEGAL NAME",
       "porte": "SIZE",
       "situacao": "STATUS",
+      "mei": "This company is an MEI (Individual Micro-entrepreneur)",
       "address": "ADDRESS",
       "cepPlaceholder": "00000-000",
       "cepSearching": "Looking up address…",
@@ -481,6 +488,7 @@
         "tituloEditar": "Edit supplier",
         "subtituloVerEditar": "Official data is read-only; edit the contact details.",
         "razaoPlaceholder": "Company legal name",
+        "portePlaceholder": "Select the company size",
         "avisoHistorico": "Records are never permanently deleted — deletion converts to Inactive or Blocked, preserving history.",
         "cancelar": "Cancel",
         "salvar": "Save",

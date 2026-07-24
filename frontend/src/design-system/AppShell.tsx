@@ -14,7 +14,7 @@ type MenuLinkTo = ComponentProps<typeof Link>['to'];
 /** `rotuloKey` é uma chave i18n (ex.: 'common.nav.inicio'); o rótulo é traduzido no render. */
 export interface ItemMenu { rotuloKey: string; href: MenuLinkTo; icone: ReactNode; cy?: string }
 export interface UsuarioChip { nome: string; papel: string; iniciais: string; fantasia?: string; avatar?: string | null }
-export interface Notificacao { tom: 'atencao' | 'info'; titulo: string; texto: string }
+export interface Notificacao { id?: string; tom: 'atencao' | 'info'; titulo: string; texto: string; href?: string; lida?: boolean }
 
 function ehMobile() {
   return typeof window !== 'undefined' && window.matchMedia('(max-width: 920px)').matches;
@@ -34,10 +34,16 @@ function AvatarChip({ usuario, style }: { usuario: UsuarioChip; style?: CSSPrope
  */
 export function AppShell({
   menu, usuario, children, rodapeKey = 'common.shell.footerFornecedor',
-  notificacoes = [], contaHref = '/minha-conta' as MenuLinkTo,
+  notificacoes = [], contaHref = '/minha-conta' as MenuLinkTo, alerta, verTodasHref, onNotificacao,
 }: {
   menu: ItemMenu[]; usuario: UsuarioChip; children: ReactNode; rodapeKey?: string;
   notificacoes?: Notificacao[]; contaHref?: MenuLinkTo;
+  /** Controla o ponto do sino (default: há notificações). Ex.: só quando há não-lidas. */
+  alerta?: boolean;
+  /** Destino do "Ver todas as notificações" (ex.: /notificacoes). Sem ele, o botão não aparece. */
+  verTodasHref?: string;
+  /** Clique numa notificação (ex.: marcar lida). A navegação usa `n.href`. */
+  onNotificacao?: (n: Notificacao) => void;
 }) {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -102,7 +108,7 @@ export function AppShell({
           <div style={{ position: 'relative' }}>
             <button className="cm-iconbtn" onClick={() => setNotifOpen((v) => !v)} aria-label={t('common.shell.notificationsAria')} data-cy="notificacoes">
               <IconeSino />
-              {notificacoes.length > 0 && <span className="cm-dot" />}
+              {(alerta ?? notificacoes.length > 0) && <span className="cm-dot" data-cy="notif-alerta" />}
             </button>
             {notifOpen && (
               <>
@@ -116,19 +122,28 @@ export function AppShell({
                       <div style={{ padding: '16px 12px', fontSize: 13, color: 'var(--cinza-500)' }}>{t('common.shell.notificationsEmpty')}</div>
                     )}
                     {notificacoes.map((n, i) => (
-                      <div key={i} style={{ display: 'flex', gap: 11, padding: '11px 12px', borderRadius: 10, background: n.tom === 'atencao' ? 'var(--atencao-bg)' : 'transparent' }}>
+                      <button
+                        key={n.id ?? i}
+                        type="button"
+                        data-cy="notif-item"
+                        onClick={() => { setNotifOpen(false); onNotificacao?.(n); if (n.href) void navigate({ to: n.href as MenuLinkTo }); }}
+                        style={{ display: 'flex', gap: 11, padding: '11px 12px', borderRadius: 10, border: 'none', textAlign: 'left', width: '100%', cursor: n.href || onNotificacao ? 'pointer' : 'default', background: n.lida === false ? 'var(--azul-50)' : n.tom === 'atencao' ? 'var(--atencao-bg)' : 'transparent' }}
+                      >
                         <span style={{ flexShrink: 0, marginTop: 1, color: n.tom === 'atencao' ? '#8A5410' : 'var(--azul-600)' }}>
                           {n.tom === 'atencao' ? <IconeRelogio width={18} height={18} /> : <IconeEditais width={18} height={18} />}
                         </span>
-                        <div style={{ fontSize: 13, lineHeight: 1.45, color: n.tom === 'atencao' ? '#8A5410' : 'var(--cinza-700)' }}>
+                        <div style={{ fontSize: 13, lineHeight: 1.45, color: n.tom === 'atencao' ? '#8A5410' : 'var(--cinza-700)', flex: 1, minWidth: 0 }}>
                           <strong>{n.titulo}</strong> {n.texto}
                         </div>
-                      </div>
+                        {n.lida === false && <span aria-hidden style={{ flexShrink: 0, width: 8, height: 8, borderRadius: 999, background: 'var(--azul-700)', marginTop: 5 }} />}
+                      </button>
                     ))}
                   </div>
-                  <div style={{ padding: '11px 16px', borderTop: '1px solid var(--divider)', textAlign: 'center' }}>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', font: '600 13px var(--font-body)', color: 'var(--azul-700)' }}>{t('common.shell.notificationsSeeAll')}</button>
-                  </div>
+                  {verTodasHref && (
+                    <div style={{ padding: '11px 16px', borderTop: '1px solid var(--divider)', textAlign: 'center' }}>
+                      <button data-cy="notif-ver-todas" onClick={() => { setNotifOpen(false); void navigate({ to: verTodasHref as MenuLinkTo }); }} style={{ background: 'none', border: 'none', cursor: 'pointer', font: '600 13px var(--font-body)', color: 'var(--azul-700)' }}>{t('common.shell.notificationsSeeAll')}</button>
+                    </div>
+                  )}
                 </div>
               </>
             )}

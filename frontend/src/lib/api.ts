@@ -186,6 +186,11 @@ export interface Transparencia { editaisVigentes: number; secretarias: string[];
  * presentes); `reserva` é apto mas ficou fora da matriz vigente (Cadastro de Reserva / 2ª demanda) e
  * traz apenas o teto declarado. `total`/`aptos`/`cota` são `null` no caso de reserva.
  */
+/** Notificação persistida do fornecedor (event-sourced). Dado estruturado; o texto é localizado no front. */
+export type TipoNotificacao = 'credenciado' | 'em_correcao' | 'distribuicao' | 'edital_compativel';
+export interface NotificacaoView { id: string; tipo: TipoNotificacao; payload: Record<string, unknown>; referencia: string | null; criadoEm: string; lida: boolean }
+export interface PaginaNotificacoesView { itens: NotificacaoView[]; total: number; naoLidas: number }
+
 /** Cota/teto do fornecedor em UM item do edital (Fase 3). */
 export interface DemandaItemView { itemId: string; numero: number; nome: string; unidade: string; demanda: number; cota: number; teto: number }
 export interface DemandaDistribuidaView {
@@ -304,6 +309,10 @@ export const api = {
   transparencia: () => get<Transparencia>('/transparencia'),
   // UC008 — Demandas distribuídas: o rateio que o Motor atribuiu ao fornecedor (empresa vem do token).
   demandasDistribuidas: () => get<DemandaDistribuidaView[]>('/distribuicao/minhas'),
+  // Notificações persistidas do fornecedor (histórico + lidas/não-lidas).
+  notificacoes: (page = 1, size = 20) => get<PaginaNotificacoesView>(`/notificacoes?page=${page}&size=${size}`),
+  marcarNotificacaoLida: (id: string) => send<void>(`/notificacoes/${id}/ler`, 'POST'),
+  marcarNotificacoesLidas: () => send<{ atualizadas: number }>('/notificacoes/ler-todas', 'POST'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   // FR-007 — envio de documento comprobatório. `conteudo` são os bytes do arquivo em base64 (o
   // backend cifra em repouso — AD-19). `formato` ∈ pdf|jpg|png; `dataValidade` opcional (ISO).

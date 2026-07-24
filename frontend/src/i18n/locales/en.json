@@ -86,6 +86,24 @@
       "editalNovo": {
         "titulo": "New compatible edital:",
         "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+      },
+      "tipo": {
+        "credenciado": {
+          "titulo": "Accreditation completed",
+          "texto": "You have been accredited. Track it in My Accreditations."
+        },
+        "em_correcao": {
+          "titulo": "Document rejected — fix it",
+          "texto": "{{motivo}}"
+        },
+        "distribuicao": {
+          "titulo": "You received a quota in the distribution",
+          "texto": "{{numero}}: quota of {{cota}}."
+        },
+        "edital_compativel": {
+          "titulo": "New compatible edital:",
+          "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+        }
       }
     }
   },
@@ -1499,5 +1517,13 @@
     "criadoEm": "Created on",
     "atualizadoEm": "Last update",
     "capacidadeItens": "{{n}} total, across {{itens}} item(s)"
+  },
+  "notificacoes": {
+    "titulo": "Notifications",
+    "subtitulo": "History of your notifications",
+    "vazio": "You have no notifications.",
+    "marcarTodas": "Mark all as read",
+    "carregando": "Loading…",
+    "naoLida": "Unread"
   }
 }

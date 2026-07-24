@@ -86,6 +86,24 @@
       "editalNovo": {
         "titulo": "Novo edital compatível:",
         "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+      },
+      "tipo": {
+        "credenciado": {
+          "titulo": "Credenciamento concluído",
+          "texto": "Você foi credenciado. Acompanhe em Meus Credenciamentos."
+        },
+        "em_correcao": {
+          "titulo": "Documento reprovado — corrija",
+          "texto": "{{motivo}}"
+        },
+        "distribuicao": {
+          "titulo": "Você recebeu cota na distribuição",
+          "texto": "{{numero}}: cota de {{cota}}."
+        },
+        "edital_compativel": {
+          "titulo": "Novo edital compatível:",
+          "texto": "{{numero}} — {{objeto}} ({{sigla}})"
+        }
       }
     }
   },
@@ -1499,5 +1517,13 @@
     "criadoEm": "Criado em",
     "atualizadoEm": "Última atualização",
     "capacidadeItens": "{{n}} no total, em {{itens}} item(ns)"
+  },
+  "notificacoes": {
+    "titulo": "Notificações",
+    "subtitulo": "Histórico das suas notificações",
+    "vazio": "Você não tem notificações.",
+    "marcarTodas": "Marcar todas como lidas",
+    "carregando": "Carregando…",
+    "naoLida": "Não lida"
   }
 }

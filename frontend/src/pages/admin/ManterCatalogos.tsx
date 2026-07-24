@@ -3,10 +3,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { api, type CatalogoSlug, type CatalogoItemView } from '../../lib/api';
-import { Card, Botao, BotaoIcone } from '../../design-system/components';
+import { Card, Botao, BotaoIcone, useToast } from '../../design-system/components';
 import { celula, cabecalho } from '../../design-system/tabela';
-import { IconePower } from '../../design-system/icons';
+import { IconePower, IconeLixeira } from '../../design-system/icons';
 import { exportarCsv } from '../../lib/exportar';
+import { textoDoErro } from '../../lib/erros';
 
 /**
  * UC020 — Manter Catálogos (Painel Admin). Uma jornada, quatro catálogos: Secretarias (RF020),
@@ -22,7 +23,7 @@ import { exportarCsv } from '../../lib/exportar';
  * `filtro` ganha o seletor correspondente e `exportacao` ganha os botões CSV/PDF. Hoje só materiais e
  * serviços as declara — é o catálogo que cresce para centenas/milhares de linhas.
  */
-type TipoCampo = 'text' | 'select' | 'checkbox' | 'textarea' | 'lista';
+type TipoCampo = 'text' | 'select' | 'checkbox' | 'textarea' | 'lista' | 'unidades';
 /**
  * `largura: 'total'` faz o campo ocupar a linha inteira da grade de duas colunas — reservado a campos
  * de texto longo (nome, especificações). Sem isso o formulário volta a ser uma coluna estreita com
@@ -44,6 +45,8 @@ interface CatalogoDef {
   busca?: (i: CatalogoItemView) => string;
   filtro?: FiltroDef;
   exportacao?: ExportacaoDef;
+  /** Permite exclusão FÍSICA de itens inativos (só materiais e serviços — item sem vínculo a edital). */
+  excluivel?: boolean;
 }
 
 /** Célula de identificador (sigla/código/número): monoespaçada tabular, em navy — como nas telas irmãs. */
@@ -94,12 +97,23 @@ const CATALOGOS: CatalogoDef[] = [
     ],
   },
   {
-    slug: 'materiais-servicos', tabKey: 'admin.catalogos.tabs.materiais',
+    slug: 'unidades-medida', tabKey: 'admin.catalogos.tabs.unidadesMedida',
+    campos: [
+      { nome: 'simbolo', labelKey: 'admin.catalogos.campos.simbolo', tipo: 'text', dicaKey: 'admin.catalogos.campos.simboloDica' },
+      { nome: 'descricao', labelKey: 'admin.catalogos.campos.descricaoUnidade', tipo: 'text', largura: 'total' },
+    ],
+    colunas: [
+      { rotuloKey: 'admin.catalogos.campos.simbolo', estilo: celulaChave, render: (i) => i.simbolo },
+      { rotuloKey: 'admin.catalogos.campos.descricaoUnidade', render: (i) => i.descricao },
+    ],
+  },
+  {
+    slug: 'materiais-servicos', tabKey: 'admin.catalogos.tabs.materiais', excluivel: true,
     busca: (i) => `${i.numero ?? ''} ${i.nome ?? ''} ${i.especificacoes ?? ''}`,
     campos: [
       { nome: 'nome', labelKey: 'admin.catalogos.campos.nomeItem', tipo: 'text', largura: 'total' },
       { nome: 'tipo', labelKey: 'admin.catalogos.campos.tipoItem', tipo: 'select', opcoes: TIPOS_ITEM },
-      { nome: 'unidades', labelKey: 'admin.catalogos.campos.unidades', tipo: 'lista', dicaKey: 'admin.catalogos.campos.unidadesDica' },
+      { nome: 'unidades', labelKey: 'admin.catalogos.campos.unidades', tipo: 'unidades', dicaKey: 'admin.catalogos.campos.unidadesDica', largura: 'total' },
       { nome: 'especificacoes', labelKey: 'admin.catalogos.campos.especificacoes', tipo: 'textarea', largura: 'total' },
     ],
     // O número (ITM-AAAA/NNN) é gerado pelo backend — aparece na tabela, nunca no formulário.
@@ -131,7 +145,10 @@ const CATALOGOS: CatalogoDef[] = [
 function inicial(def: CatalogoDef): Record<string, unknown> {
   const v: Record<string, unknown> = {};
   for (const c of def.campos) {
-    v[c.nome] = c.tipo === 'checkbox' ? false : c.tipo === 'select' ? (c.opcoes?.[0]?.valor ?? '') : '';
+    v[c.nome] = c.tipo === 'checkbox' ? false
+      : c.tipo === 'unidades' ? []
+      : c.tipo === 'select' ? (c.opcoes?.[0]?.valor ?? '')
+      : '';
   }
   return v;
 }
@@ -148,6 +165,7 @@ function paraEnvio(def: CatalogoDef, valores: Record<string, unknown>): Record<s
 
 export function ManterCatalogos() {
   const { t } = useTranslation();
+  const { ok, erro } = useToast();
   const qc = useQueryClient();
   const [slug, setSlug] = useState<CatalogoSlug>(CATALOGOS[0].slug);
   const [incluirInativos, setIncluirInativos] = useState(false);
@@ -162,12 +180,36 @@ export function ManterCatalogos() {
   });
   const invalidar = () => qc.invalidateQueries({ queryKey: ['catalogos', slug] });
 
+  // Campo de unidades (materiais/serviços) é alimentado pelo catálogo de Unidades de medida — só as
+  // unidades ATIVAS. Busca apenas quando o catálogo ativo tem um campo desse tipo (evita chamada nas
+  // demais abas). Compartilha a chave de cache com a listagem da própria aba "Unidades de medida".
+  const precisaUnidades = def.campos.some((c) => c.tipo === 'unidades');
+  const { data: unidadesDisponiveis = [] } = useQuery({
+    queryKey: ['catalogos', 'unidades-medida', false],
+    queryFn: () => api.catalogoListar('unidades-medida'),
+    enabled: precisaUnidades,
+  });
+  const alternarUnidade = (nome: string, simbolo: string) => setValores((v) => {
+    const atual = Array.isArray(v[nome]) ? (v[nome] as string[]) : [];
+    return { ...v, [nome]: atual.includes(simbolo) ? atual.filter((s) => s !== simbolo) : [...atual, simbolo] };
+  });
+
   const criar = useMutation({
     mutationFn: (v: Record<string, unknown>) => api.catalogoCriar(slug, paraEnvio(def, v)),
     onSuccess: () => { setValores(inicial(def)); void invalidar(); },
   });
   const inativar = useMutation({ mutationFn: (id: string) => api.catalogoInativar(slug, id), onSuccess: () => void invalidar() });
   const reativar = useMutation({ mutationFn: (id: string) => api.catalogoReativar(slug, id), onSuccess: () => void invalidar() });
+  // Exclusão física (só materiais e serviços inativos sem vínculo a edital). O backend recusa (409) quando
+  // o item está vinculado; o toast traduz o `codigo` do erro (ex.: MaterialVinculadoAEdital).
+  const excluir = useMutation({
+    mutationFn: (id: string) => api.materialServicoExcluir(id),
+    onSuccess: () => { ok(t('admin.catalogos.excluido')); void invalidar(); },
+    onError: (e) => erro(textoDoErro(e)),
+  });
+  const confirmarExcluir = (i: CatalogoItemView) => {
+    if (window.confirm(t('admin.catalogos.confirmarExcluir', { nome: i.nome ?? i.numero ?? '' }))) excluir.mutate(i.id);
+  };
 
   // Busca e filtro são client-side: a listagem já vem inteira do backend (é dado de referência, sem
   // paginação de servidor). Se o catálogo crescer a milhares de itens, migrar para QBE no backend —
@@ -231,6 +273,32 @@ export function ManterCatalogos() {
                   onChange={(e) => setValores({ ...valores, [campo.nome]: e.target.checked })} />
                 <span style={{ minWidth: 0 }}>{t(campo.labelKey)}</span>
               </label>
+            ) : campo.tipo === 'unidades' ? (
+              // Seleção múltipla alimentada pelo catálogo de Unidades de medida (só as ativas). Cada
+              // unidade é um chip-checkbox; o valor guardado é a lista de símbolos selecionados.
+              <div key={campo.nome} className={`label${campo.largura === 'total' ? ' cm-campo-total' : ''}`} style={{ display: 'grid', gap: 6, alignContent: 'start' }}>
+                <span>{t(campo.labelKey)}</span>
+                {unidadesDisponiveis.length === 0 ? (
+                  <small data-cy="unidades-vazio" style={{ color: 'var(--cinza-500)' }}>{t('admin.catalogos.campos.unidadesVazio')}</small>
+                ) : (
+                  <div data-cy={`campo-${campo.nome}`} role="group" aria-label={t(campo.labelKey)} style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {unidadesDisponiveis.map((u) => {
+                      const sel = Array.isArray(valores[campo.nome]) && (valores[campo.nome] as string[]).includes(u.simbolo ?? '');
+                      return (
+                        <label key={u.id} data-cy={`unidade-opcao-${u.simbolo}`} data-selected={sel} title={u.descricao}
+                          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, cursor: 'pointer',
+                            border: `1px solid ${sel ? 'var(--azul-700)' : 'var(--border)'}`, background: sel ? 'var(--azul-50)' : '#fff',
+                            color: sel ? 'var(--azul-800)' : 'var(--cinza-700)', font: '600 13px var(--font-body)', userSelect: 'none' }}>
+                          <input type="checkbox" checked={sel} onChange={() => alternarUnidade(campo.nome, u.simbolo ?? '')}
+                            style={{ width: 15, height: 15, flexShrink: 0, accentColor: 'var(--azul-700)' }} />
+                          {u.simbolo}
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+                {campo.dicaKey && <small style={{ color: 'var(--cinza-500)' }}>{t(campo.dicaKey)}</small>}
+              </div>
             ) : (
               <label key={campo.nome} className={`label${campo.largura === 'total' ? ' cm-campo-total' : ''}`}
                 style={{ display: 'grid', gap: 4, alignContent: 'start' }}>
@@ -319,17 +387,32 @@ export function ManterCatalogos() {
                       </span>
                     </td>
                     <td style={{ ...celula, textAlign: 'right' }}>
-                      {/* Um único botão de alternância (o mesmo alvo do protótipo); o `data-cy` reflete a
-                          ação disponível — `inativar` quando ativo, `reativar` quando inativo. */}
-                      <BotaoIcone
-                        icone={IconePower}
-                        data-cy={i.ativo ? 'inativar' : 'reativar'}
-                        title={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
-                        aria-label={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
-                        disabled={inativar.isPending || reativar.isPending}
-                        onClick={() => (i.ativo ? inativar : reativar).mutate(i.id)}
-                        style={{ color: i.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }}
-                      />
+                      <div style={{ display: 'inline-flex', gap: 6, alignItems: 'center', justifyContent: 'flex-end' }}>
+                        {/* Um único botão de alternância (o mesmo alvo do protótipo); o `data-cy` reflete a
+                            ação disponível — `inativar` quando ativo, `reativar` quando inativo. */}
+                        <BotaoIcone
+                          icone={IconePower}
+                          data-cy={i.ativo ? 'inativar' : 'reativar'}
+                          title={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
+                          aria-label={t(i.ativo ? 'admin.catalogos.inativar' : 'admin.catalogos.reativar')}
+                          disabled={inativar.isPending || reativar.isPending}
+                          onClick={() => (i.ativo ? inativar : reativar).mutate(i.id)}
+                          style={{ color: i.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }}
+                        />
+                        {/* Exclusão física: só materiais e serviços INATIVOS (o backend ainda recusa se houver
+                            vínculo a edital). Some para itens ativos — inativar primeiro. */}
+                        {def.excluivel && !i.ativo && (
+                          <BotaoIcone
+                            icone={IconeLixeira}
+                            data-cy="excluir"
+                            title={t('admin.catalogos.excluir')}
+                            aria-label={t('admin.catalogos.excluir')}
+                            disabled={excluir.isPending}
+                            onClick={() => confirmarExcluir(i)}
+                            style={{ color: 'var(--erro, #c0392b)' }}
+                          />
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

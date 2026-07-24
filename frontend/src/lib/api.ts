@@ -192,7 +192,7 @@ export interface Funil { documentosPendentes: number; editaisPorSituacao: { rasc
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; usuarioNome: string | null; papel: string | null; evento: string; timestamp: string; ip: string | null }
 /** UC020 — item de catálogo base (superset: cada catálogo acrescenta seus campos). */
-export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento' | 'materiais-servicos';
+export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento' | 'materiais-servicos' | 'unidades-medida';
 /** Natureza do item do catálogo de materiais e serviços. */
 export type TipoItemCatalogo = 'material' | 'servico';
 export interface CatalogoItemView {
@@ -205,6 +205,8 @@ export interface CatalogoItemView {
   formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number; obrigatorio?: boolean;
   // Material/Serviço — `numero` (ITM-AAAA/NNN) é gerado pelo backend e read-only na tela
   numero?: string; tipo?: TipoItemCatalogo; especificacoes?: string; unidades?: string[];
+  // Unidade de medida — `simbolo` é a chave natural (descricao reaproveita o campo acima)
+  simbolo?: string;
 }
 /** UC021 — servidor interno exibido no Painel Admin de usuários (sem segredos). */
 export interface UsuarioInternoView {
@@ -439,6 +441,8 @@ export const api = {
   catalogoEditar: (slug: CatalogoSlug, id: string, body: Record<string, unknown>) => send<{ ok: boolean }>(`/catalogos/${slug}/${id}`, 'PATCH', body),
   catalogoInativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/inativar`, 'POST'),
   catalogoReativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/reativar`, 'POST'),
+  // Exclusão física — só materiais e serviços (item inativo e sem vínculo a edital; guardas no backend).
+  materialServicoExcluir: (id: string) => send<void>(`/catalogos/materiais-servicos/${id}`, 'DELETE'),
 
   // UC021 — Gestão de usuários internos/servidores. Todas exigem papel administrador no token.
   cargos: () => get<CargoOpcao[]>('/admin/cargos'),

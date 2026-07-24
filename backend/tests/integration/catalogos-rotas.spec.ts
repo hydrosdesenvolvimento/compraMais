@@ -100,6 +100,30 @@ describe('Rotas de catálogos base (UC020 — HTTP)', () => {
     expect(r.json()).toMatchObject({ codigo: 'CategoriaInvalida' });
   });
 
+  it('Secretaria (smga) mantém os catálogos da tela /admin/catalogos (setores/CNAE, tipos de documento)', async () => {
+    const smga = comoPapel('smga', { userId: 'smga1' });
+    const setor = await app.inject({
+      method: 'POST', url: '/catalogos/setores-cnae', headers: smga,
+      payload: { codigo: '1091102', descricao: 'Fabricação de biscoitos' },
+    });
+    expect(setor.statusCode).toBe(201);
+
+    const tipo = await app.inject({
+      method: 'POST', url: '/catalogos/tipos-documento', headers: smga,
+      payload: { nome: 'Alvará Sanitário', formato: 'pdf', categoria: 'fiscal' },
+    });
+    expect(tipo.statusCode).toBe(201);
+  });
+
+  it('Secretaria (smga) NÃO mantém `secretarias` (tela dedicada, só Administrador) → 403', async () => {
+    const smga = comoPapel('smga', { userId: 'smga2' });
+    const r = await app.inject({
+      method: 'POST', url: '/catalogos/secretarias', headers: smga,
+      payload: { nome: 'Cultura', sigla: 'SEC', responsavel: 'X' },
+    });
+    expect(r.statusCode).toBe(403);
+  });
+
   it('catálogo desconhecido → 404', async () => {
     const r = await app.inject({ method: 'GET', url: '/catalogos/inexistente' });
     expect(r.statusCode).toBe(404);

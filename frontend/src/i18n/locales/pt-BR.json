@@ -653,7 +653,8 @@
       "tabs": {
         "setores": "Setores (CNAE)",
         "tiposDoc": "Tipos de documento",
-        "materiais": "Materiais e serviços"
+        "materiais": "Materiais e serviços",
+        "unidadesMedida": "Unidades de medida"
       },
       "campos": {
         "codigo": "Código CNAE (7 dígitos)",
@@ -667,10 +668,14 @@
         "nomeItem": "Nome do item",
         "tipoItem": "Natureza",
         "unidades": "Unidades de medida",
-        "unidadesDica": "Separe por vírgula. Ex.: un, m, cx",
+        "unidadesDica": "Selecione uma ou mais unidades cadastradas.",
         "especificacoes": "Especificações técnicas",
         "situacao": "Situação",
-        "acoes": "Ações"
+        "acoes": "Ações",
+        "simbolo": "Símbolo",
+        "simboloDica": "Ex.: un, kg, m², L, h, cx",
+        "descricaoUnidade": "Descrição",
+        "unidadesVazio": "Nenhuma unidade cadastrada. Cadastre na aba \"Unidades de medida\"."
       },
       "categorias": {
         "cadastral": "Cadastral",
@@ -696,7 +701,10 @@
       "buscaAriaLabel": "Buscar no catálogo",
       "exportarCsv": "Exportar Excel",
       "exportarPdf": "Exportar PDF",
-      "situacaoAtivo": "ativo"
+      "situacaoAtivo": "ativo",
+      "excluir": "Excluir",
+      "excluido": "Item excluído.",
+      "confirmarExcluir": "Excluir definitivamente \"{{nome}}\"? Esta ação não pode ser desfeita."
     },
     "usuarios": {
       "breadcrumb": "Administração · Usuários",
@@ -906,7 +914,9 @@
     "JustificativaObrigatoria": "Informe a justificativa.",
     "MotivoRecusaObrigatorio": "Informe o motivo da recusa.",
     "CampoNaoEditavel": "Este campo não pode ser editado.",
-    "TransicaoInvalida": "Operação não permitida no estado atual."
+    "TransicaoInvalida": "Operação não permitida no estado atual.",
+    "MaterialVinculadoAEdital": "Item vinculado a um edital — não pode ser excluído.",
+    "MaterialAtivoNaoExcluivel": "Só itens inativos podem ser excluídos. Inative primeiro."
   },
   "contestacao": {
     "semEmpresa": "Nenhuma empresa vinculada à sua conta.",

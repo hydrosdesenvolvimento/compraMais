@@ -135,4 +135,37 @@ describe('Rotas do catálogo de materiais e serviços (UC020 — HTTP)', () => {
     });
     expect(r.statusCode).toBe(403);
   });
+
+  // Exclusão física (DELETE) — só material INATIVO e sem vínculo a edital.
+  it('DELETE de material ATIVO → 409 (precisa inativar antes)', async () => {
+    const criar = await app.inject({ method: 'POST', url: '/catalogos/materiais-servicos', headers: smga, payload: novoItem('Grampeador') });
+    const id = criar.json().id as string;
+    const r = await app.inject({ method: 'DELETE', url: `/catalogos/materiais-servicos/${id}`, headers: smga });
+    expect(r.statusCode).toBe(409);
+    expect(r.json()).toMatchObject({ codigo: 'MaterialAtivoNaoExcluivel' });
+    // continua existindo
+    const lista = await app.inject({ method: 'GET', url: '/catalogos/materiais-servicos?incluirInativos=true' });
+    expect((lista.json() as Array<{ id: string }>).some((i) => i.id === id)).toBe(true);
+  });
+
+  it('DELETE de material INATIVO sem vínculo → 204 e some definitivamente', async () => {
+    const criar = await app.inject({ method: 'POST', url: '/catalogos/materiais-servicos', headers: smga, payload: novoItem('Clipe de papel') });
+    const id = criar.json().id as string;
+    await app.inject({ method: 'POST', url: `/catalogos/materiais-servicos/${id}/inativar`, headers: smga });
+
+    const del = await app.inject({ method: 'DELETE', url: `/catalogos/materiais-servicos/${id}`, headers: smga });
+    expect(del.statusCode).toBe(204);
+
+    const todos = await app.inject({ method: 'GET', url: '/catalogos/materiais-servicos?incluirInativos=true' });
+    expect((todos.json() as Array<{ id: string }>).some((i) => i.id === id)).toBe(false); // exclusão física
+  });
+
+  it('DELETE inexistente → 404; DELETE por papel sem permissão (cpl) → 403', async () => {
+    const naoExiste = await app.inject({ method: 'DELETE', url: '/catalogos/materiais-servicos/nao-existe', headers: smga });
+    expect(naoExiste.statusCode).toBe(404);
+    expect(naoExiste.json()).toMatchObject({ codigo: 'MaterialNaoEncontrado' });
+
+    const semPapel = await app.inject({ method: 'DELETE', url: '/catalogos/materiais-servicos/qualquer', headers: cpl });
+    expect(semPapel.statusCode).toBe(403);
+  });
 });

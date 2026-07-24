@@ -4,7 +4,7 @@ import type { CampoDiff } from './item-catalogo.js';
 type Actor = { userId: string; empresaId?: string };
 
 /** Discriminador do catálogo afetado (para a trilha AD-18 e o AuditConsumer). */
-export type NomeCatalogo = 'secretaria' | 'setor-cnae' | 'tipo-documento' | 'material-servico';
+export type NomeCatalogo = 'secretaria' | 'setor-cnae' | 'tipo-documento' | 'material-servico' | 'unidade-medida';
 
 export class CatalogoItemCriado extends DomainEvent<{ catalogo: NomeCatalogo; itemId: string; chave: string }> {
   readonly eventName = 'CatalogoItemCriado'; readonly eventVersion = 1;
@@ -20,5 +20,9 @@ export class CatalogoItemInativado extends DomainEvent<{ catalogo: NomeCatalogo;
 }
 export class CatalogoItemReativado extends DomainEvent<{ catalogo: NomeCatalogo; itemId: string }> {
   readonly eventName = 'CatalogoItemReativado'; readonly eventVersion = 1;
+  constructor(aggregateId: string, payload: { catalogo: NomeCatalogo; itemId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
+}
+export class CatalogoItemExcluido extends DomainEvent<{ catalogo: NomeCatalogo; itemId: string }> {
+  readonly eventName = 'CatalogoItemExcluido'; readonly eventVersion = 1; // exclusão FÍSICA (só inativo sem vínculo)
   constructor(aggregateId: string, payload: { catalogo: NomeCatalogo; itemId: string }, actor?: Actor) { super(aggregateId, payload, actor); }
 }

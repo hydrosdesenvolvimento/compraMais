@@ -10,6 +10,7 @@ export class CatalogoRepositoryMemory<T extends ItemCatalogo> implements Catalog
 
   async salvar(item: T): Promise<void> { this.map.set(item.id, item); }
   async porId(id: string): Promise<T | null> { return this.map.get(id) ?? null; }
+  async remover(id: string): Promise<void> { this.map.delete(id); }
 
   async porChave(chave: string): Promise<T | null> {
     const alvo = chave.trim().toLowerCase();

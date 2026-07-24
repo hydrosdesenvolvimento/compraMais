@@ -172,6 +172,39 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     });
   });
 
+  it('cadastra os itens do edital JUNTO com a criação (grava edital e depois os itens)', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/014' })]));
+    criarEdital.mockResolvedValue({ editalId: 'novo', situacao: 'rascunho' });
+    renderTela();
+    await screen.findAllByTestId('item-edital');
+
+    fireEvent.click(screen.getByTestId('novo-edital'));
+    await screen.findByTestId('modal-novo-edital');
+
+    fireEvent.change(screen.getByTestId('objeto'), { target: { value: 'Merenda escolar' } });
+    fireEvent.change(screen.getByTestId('secretaria'), { target: { value: 's2' } });
+    fireEvent.change(screen.getByTestId('cnae'), { target: { value: '1091101' } });
+    fireEvent.change(screen.getByTestId('prazo'), { target: { value: '2026-12-31' } });
+
+    // Item cadastrado no MESMO modal (acumulado localmente antes de salvar). Aguarda o catálogo carregar.
+    await screen.findByText('ITM-2026/001 · Cabo de rede CAT6');
+    fireEvent.change(screen.getByTestId('item-catalogo'), { target: { value: 'm1' } });
+    fireEvent.change(screen.getByTestId('item-quantidade'), { target: { value: '30' } });
+    fireEvent.change(screen.getByTestId('item-preco'), { target: { value: '4.90' } });
+    fireEvent.click(screen.getByTestId('adicionar-item'));
+    expect(await screen.findByTestId('item-edital-linha')).toBeInTheDocument();
+    expect(adicionarItemEdital).not.toHaveBeenCalled(); // ainda não persistiu — só acumulou
+
+    // Salvar: cria o edital e então grava o item no edital recém-criado.
+    fireEvent.click(screen.getByTestId('criar'));
+    await waitFor(() => expect(criarEdital).toHaveBeenCalledWith({
+      secretariaId: 's2', objeto: 'Merenda escolar', cnaesAlvo: ['1091101'], prazoVigencia: '2026-12-31',
+    }));
+    await waitFor(() => expect(adicionarItemEdital).toHaveBeenCalledWith('novo', {
+      itemCatalogoId: 'm1', unidade: 'un', quantidade: 30, precoTeto: 4.9,
+    }));
+  });
+
   it('publica um edital em rascunho pela ação da linha', async () => {
     buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e9', numero: 'ED-2026/099', situacao: 'rascunho' })]));
     renderTela();
@@ -195,7 +228,7 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     fireEvent.change(within(modal).getByTestId('item-catalogo'), { target: { value: 'm1' } });
     fireEvent.change(within(modal).getByTestId('item-quantidade'), { target: { value: '500' } });
     fireEvent.change(within(modal).getByTestId('item-preco'), { target: { value: '4.90' } });
-    fireEvent.submit(within(modal).getByTestId('form-item-edital'));
+    fireEvent.click(within(modal).getByTestId('adicionar-item'));
 
     await waitFor(() => expect(adicionarItemEdital).toHaveBeenCalledWith('e5', {
       itemCatalogoId: 'm1', unidade: 'un', quantidade: 500, precoTeto: 4.9,

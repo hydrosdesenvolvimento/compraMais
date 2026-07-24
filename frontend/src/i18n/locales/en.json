@@ -615,7 +615,9 @@
           "quantidade": "Qty",
           "preco": "Ceiling price",
           "acoes": "Actions"
-        }
+        },
+        "novoEditalDica": "Optional: add the edital items now or later, via the \"Items\" action.",
+        "erroCriarComItens": "Could not complete. Check the fields and try saving again."
       }
     },
     "contestacoes": {

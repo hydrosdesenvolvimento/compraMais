@@ -76,3 +76,81 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
     expect(screen.queryByTestId('campo-sigla')).not.toBeInTheDocument();
   });
 });
+
+/**
+ * 4ª aba — Catálogo de Materiais e Serviços. Cobre o que é próprio deste catálogo e não existe nos três
+ * base: campo de unidades como lista, número read-only vindo do backend, busca e filtro por natureza.
+ */
+describe('ManterCatalogos — aba Materiais e Serviços', () => {
+  const itens: CatalogoItemView[] = [
+    { id: 'm1', ativo: true, situacao: 'ativo', numero: 'ITM-2026/001', nome: 'Cabo de rede CAT6', tipo: 'material', unidades: ['un', 'm'], especificacoes: 'U/UTP 4 pares' },
+    { id: 'm2', ativo: true, situacao: 'ativo', numero: 'ITM-2026/002', nome: 'Instalação elétrica', tipo: 'servico', unidades: ['h'] },
+  ];
+
+  beforeEach(() => {
+    catalogoListar.mockReset().mockResolvedValue(itens);
+    catalogoCriar.mockReset().mockResolvedValue({ id: 'novo' });
+    catalogoInativar.mockReset().mockResolvedValue({ situacao: 'inativo' });
+    catalogoReativar.mockReset().mockResolvedValue({ situacao: 'ativo' });
+  });
+
+  async function abrirAba() {
+    renderTela();
+    fireEvent.click(await screen.findByTestId('tab-materiais-servicos'));
+    return screen.findByTestId('campo-nome');
+  }
+
+  it('lista os itens com número, natureza e unidades — o número não é campo do formulário', async () => {
+    await abrirAba();
+
+    expect(await screen.findByText(/ITM-2026\/001 — Cabo de rede CAT6/)).toBeInTheDocument();
+    expect(screen.getAllByTestId('unidades-item')[0]).toHaveTextContent('un, m');
+    // O número é gerado pelo backend: aparece na lista, nunca como input.
+    expect(screen.queryByTestId('campo-numero')).not.toBeInTheDocument();
+  });
+
+  it('envia as unidades como lista (o input é texto separado por vírgula)', async () => {
+    await abrirAba();
+
+    fireEvent.change(screen.getByTestId('campo-nome'), { target: { value: 'Papel A4' } });
+    fireEvent.change(screen.getByTestId('campo-unidades'), { target: { value: ' cx , resma , ' } });
+    fireEvent.change(screen.getByTestId('campo-especificacoes'), { target: { value: '75 g/m²' } });
+    fireEvent.submit(screen.getByTestId('form-catalogo'));
+
+    await waitFor(() => expect(catalogoCriar).toHaveBeenCalledWith('materiais-servicos', {
+      nome: 'Papel A4', tipo: 'material', unidades: ['cx', 'resma'], especificacoes: '75 g/m²',
+    }));
+  });
+
+  it('busca filtra por número, nome ou especificação', async () => {
+    await abrirAba();
+    expect(await screen.findAllByTestId('item-catalogo')).toHaveLength(2);
+
+    fireEvent.change(screen.getByTestId('busca'), { target: { value: 'elétrica' } });
+    await waitFor(() => expect(screen.getAllByTestId('item-catalogo')).toHaveLength(1));
+    expect(screen.getByText(/Instalação elétrica/)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('busca'), { target: { value: 'ITM-2026/001' } });
+    await waitFor(() => expect(screen.getByText(/Cabo de rede CAT6/)).toBeInTheDocument());
+  });
+
+  it('filtro por natureza reduz a lista aos serviços', async () => {
+    await abrirAba();
+    expect(await screen.findAllByTestId('item-catalogo')).toHaveLength(2);
+
+    fireEvent.change(screen.getByTestId('filtro-tipo'), { target: { value: 'servico' } });
+    await waitFor(() => expect(screen.getAllByTestId('item-catalogo')).toHaveLength(1));
+    expect(screen.getByText(/Instalação elétrica/)).toBeInTheDocument();
+  });
+
+  it('busca e exportação só existem neste catálogo (os três base não os declaram)', async () => {
+    await abrirAba();
+    expect(screen.getByTestId('busca')).toBeInTheDocument();
+    expect(screen.getByTestId('exportar-csv')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('tab-secretarias'));
+    await waitFor(() => expect(screen.queryByTestId('busca')).not.toBeInTheDocument());
+    expect(screen.queryByTestId('exportar-csv')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filtro-tipo')).not.toBeInTheDocument();
+  });
+});

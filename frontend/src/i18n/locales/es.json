@@ -632,11 +632,12 @@
     },
     "catalogos": {
       "titulo": "Catálogos base",
-      "subtitulo": "Mantenga secretarías, sectores (CNAE) y tipos de documento. La eliminación es lógica: el ítem inactivado sale de las listas pero conserva sus vínculos.",
+      "subtitulo": "Mantenga secretarías, sectores (CNAE), tipos de documento y el catálogo de materiales y servicios. La exclusión es lógica: el ítem inactivado sale de las listas pero conserva sus vínculos.",
       "tabs": {
         "secretarias": "Secretarías",
         "setores": "Sectores (CNAE)",
-        "tiposDoc": "Tipos de documento"
+        "tiposDoc": "Tipos de documento",
+        "materiais": "Materiales y servicios"
       },
       "campos": {
         "nome": "Nombre",
@@ -648,7 +649,14 @@
         "formato": "Formato aceptado (ej.: pdf)",
         "categoria": "Categoría",
         "exigeValidade": "Exige fecha de vencimiento",
-        "exigeExercicio": "Exige ejercicio (ej.: Balance)"
+        "exigeExercicio": "Exige ejercicio (ej.: Balance)",
+        "numero": "Número",
+        "nomeItem": "Nombre del ítem",
+        "tipoItem": "Naturaleza",
+        "unidades": "Unidades de medida",
+        "unidadesDica": "Separe con comas. Ej.: un, m, caja",
+        "especificacoes": "Especificaciones técnicas",
+        "situacao": "Situación"
       },
       "categorias": {
         "cadastral": "Registral",
@@ -661,7 +669,20 @@
       "situacaoInativo": "inactivo",
       "inativar": "Inactivar",
       "reativar": "Reactivar",
-      "vazio": "Aún no hay ítems registrados."
+      "vazio": "Aún no hay ítems registrados.",
+      "tiposItem": {
+        "material": "Material",
+        "servico": "Servicio"
+      },
+      "filtros": {
+        "tipo": "Naturaleza",
+        "tipoTodos": "Todas las naturalezas"
+      },
+      "buscaPlaceholder": "Buscar por número, nombre o especificación…",
+      "buscaAriaLabel": "Buscar en el catálogo",
+      "exportarCsv": "Exportar Excel",
+      "exportarPdf": "Exportar PDF",
+      "situacaoAtivo": "activo"
     },
     "usuarios": {
       "breadcrumb": "Administración · Usuarios",

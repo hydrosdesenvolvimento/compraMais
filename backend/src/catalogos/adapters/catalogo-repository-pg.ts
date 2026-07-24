@@ -5,6 +5,8 @@ import type { CatalogoRepository, FiltroListagem } from '../application/catalogo
 import { Secretaria } from '../domain/secretaria.js';
 import { SetorCnae } from '../domain/setor-cnae.js';
 import { TipoDocumento, type CategoriaDocumento } from '../domain/tipo-documento.js';
+import { MaterialServico, type TipoItem } from '../domain/material-servico.js';
+import type { NumeradorItens } from '../application/numerador-itens.js';
 
 /** Erro de unicidade do Postgres (índice único violado). */
 const PG_UNIQUE_VIOLATION = '23505';
@@ -120,5 +122,52 @@ export class TipoDocumentoRepositoryPg extends CatalogoPgBase<TipoDocumento> {
       obrigatorio: Boolean(row.obrigatorio),
       situacao: row.situacao as SituacaoCatalogo,
     });
+  }
+}
+
+/**
+ * Catálogo de Materiais e Serviços. Ordena e checa unicidade por `nome` (chave natural); `unidades` é
+ * `jsonb` (lista curta de rótulos, sem entidade própria — mesmo tratamento de `cnaes_alvo` no edital).
+ */
+export class MaterialServicoRepositoryPg extends CatalogoPgBase<MaterialServico> {
+  constructor(pool: Pool) { super(pool, 'materiais_servicos', 'nome'); }
+  protected async upsert(m: MaterialServico): Promise<void> {
+    const e = m.estado();
+    await this.pool.query(
+      `INSERT INTO materiais_servicos (id, numero, nome, tipo, especificacoes, unidades, situacao, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9,$10)
+       ON CONFLICT (id) DO UPDATE SET nome=$3, tipo=$4, especificacoes=$5, unidades=$6::jsonb, situacao=$7, update_date=$9, last_user_update=$10`,
+      [
+        e.meta.id, e.numero, e.nome, e.tipo, e.especificacoes ?? null, JSON.stringify(e.unidades),
+        e.situacao, e.meta.registerDate, e.meta.updateDate, e.meta.lastUserUpdate,
+      ],
+    );
+  }
+  protected mapear(row: Record<string, unknown>): MaterialServico {
+    return MaterialServico.deEstado({
+      meta: meta(row), numero: String(row.numero), nome: String(row.nome), tipo: row.tipo as TipoItem,
+      especificacoes: row.especificacoes == null ? undefined : String(row.especificacoes),
+      unidades: Array.isArray(row.unidades) ? (row.unidades as string[]) : [],
+      situacao: row.situacao as SituacaoCatalogo,
+    });
+  }
+}
+
+/**
+ * Numeração durável dos itens do catálogo. Reserva o sequencial do ano em **um único statement** — o
+ * `ON CONFLICT ... DO UPDATE ... RETURNING` é atômico, então dois POSTs simultâneos nunca recebem o mesmo
+ * número (mesma técnica de `NumeradorEditaisPg`, ver migração 0016).
+ */
+export class NumeradorItensPg implements NumeradorItens {
+  constructor(private readonly pool: Pool) {}
+
+  async proximo(ano: number): Promise<number> {
+    const r = await this.pool.query(
+      `INSERT INTO item_catalogo_numeros (ano, ultimo) VALUES ($1, 1)
+       ON CONFLICT (ano) DO UPDATE SET ultimo = item_catalogo_numeros.ultimo + 1
+       RETURNING ultimo`,
+      [ano],
+    );
+    return Number((r.rows[0] as { ultimo: number }).ultimo);
   }
 }

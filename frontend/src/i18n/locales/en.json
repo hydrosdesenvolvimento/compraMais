@@ -632,11 +632,12 @@
     },
     "catalogos": {
       "titulo": "Base catalogs",
-      "subtitulo": "Maintain departments, sectors (CNAE) and document types. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
+      "subtitulo": "Maintain departments, CNAE sectors, document types and the goods and services catalog. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
       "tabs": {
         "secretarias": "Departments",
         "setores": "Sectors (CNAE)",
-        "tiposDoc": "Document types"
+        "tiposDoc": "Document types",
+        "materiais": "Goods and services"
       },
       "campos": {
         "nome": "Name",
@@ -648,7 +649,14 @@
         "formato": "Accepted format (e.g. pdf)",
         "categoria": "Category",
         "exigeValidade": "Requires expiry date",
-        "exigeExercicio": "Requires fiscal year (e.g. Balance sheet)"
+        "exigeExercicio": "Requires fiscal year (e.g. Balance sheet)",
+        "numero": "Number",
+        "nomeItem": "Item name",
+        "tipoItem": "Nature",
+        "unidades": "Units of measure",
+        "unidadesDica": "Separate with commas. E.g.: ea, m, box",
+        "especificacoes": "Technical specifications",
+        "situacao": "Status"
       },
       "categorias": {
         "cadastral": "Registration",
@@ -661,7 +669,20 @@
       "situacaoInativo": "inactive",
       "inativar": "Deactivate",
       "reativar": "Reactivate",
-      "vazio": "No items registered yet."
+      "vazio": "No items registered yet.",
+      "tiposItem": {
+        "material": "Goods",
+        "servico": "Service"
+      },
+      "filtros": {
+        "tipo": "Nature",
+        "tipoTodos": "All natures"
+      },
+      "buscaPlaceholder": "Search by number, name or specification…",
+      "buscaAriaLabel": "Search the catalog",
+      "exportarCsv": "Export Excel",
+      "exportarPdf": "Export PDF",
+      "situacaoAtivo": "active"
     },
     "usuarios": {
       "breadcrumb": "Administration · Users",

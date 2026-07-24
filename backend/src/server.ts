@@ -101,7 +101,9 @@ import { DashboardAdmin, Transparencia } from './paineis/application/paineis.js'
 import { registrarRotasPaineis } from './paineis/adapters/paineis-controller.js';
 import { ManterCatalogos } from './catalogos/application/manter-catalogos.js';
 import { CatalogoRepositoryMemory } from './catalogos/adapters/catalogo-repository-memory.js';
-import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg } from './catalogos/adapters/catalogo-repository-pg.js';
+import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg, MaterialServicoRepositoryPg, NumeradorItensPg } from './catalogos/adapters/catalogo-repository-pg.js';
+import type { MaterialServico } from './catalogos/domain/material-servico.js';
+import { NumeradorItensMemory, type NumeradorItens } from './catalogos/application/numerador-itens.js';
 import type { Secretaria } from './catalogos/domain/secretaria.js';
 import type { SetorCnae } from './catalogos/domain/setor-cnae.js';
 import { TipoDocumento } from './catalogos/domain/tipo-documento.js';
@@ -273,7 +275,15 @@ export async function buildServer(): Promise<FastifyInstance> {
       await tiposDocRepo.salvar(TipoDocumento.criar({ id: randomUUID(), formato: 'pdf', userName: 'bootstrap', ...td, validadeDias: td.validadeDias ?? undefined }));
     }
   }
-  const manterCatalogos = new ManterCatalogos({ secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo }, bus);
+  // 4º catálogo (materiais e serviços): itens que a Administração compra/contrata, mantidos pela
+  // Secretaria (smga) além do Administrador. A numeração ITM-AAAA/NNN é durável e atômica em Postgres
+  // (`item_catalogo_numeros`, migração 0027); em memória nos testes/sem banco.
+  const materiaisRepo: CatalogoRepository<MaterialServico> = pool ? new MaterialServicoRepositoryPg(pool) : new CatalogoRepositoryMemory<MaterialServico>();
+  const numeradorItens: NumeradorItens = pool ? new NumeradorItensPg(pool) : new NumeradorItensMemory();
+  const manterCatalogos = new ManterCatalogos(
+    { secretarias: secretariasRepo, setores: setoresRepo, tiposDocumento: tiposDocRepo, materiaisServicos: materiaisRepo },
+    bus, undefined, numeradorItens,
+  );
   registrarRotasCatalogos(app, { manter: manterCatalogos });
 
   // Módulo editais — vitrine filtrada por CNAE (002) + gestão/contestação de editais (003)

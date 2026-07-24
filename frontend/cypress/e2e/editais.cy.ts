@@ -1,5 +1,6 @@
 /// <reference types="cypress" />
 // E2E (Cypress) — Gestão de Editais (US1): gestor cria e publica edital individualizado em /admin/editais.
+import { visitarComo } from '../support/sessao';
 
 describe('Gestão de editais (US1)', () => {
   const secretarias = [
@@ -8,10 +9,10 @@ describe('Gestão de editais (US1)', () => {
   ];
 
   it('cria um edital pelo modal "Novo edital"', () => {
-    cy.intercept('GET', '/gestao/editais*', { body: [] }).as('lista');
+    cy.intercept('GET', '/gestao/editais*', { body: { items: [], total: 0 } }).as('lista');
     cy.intercept('GET', '/catalogos/secretarias*', { body: secretarias });
     cy.intercept('POST', '/editais', { statusCode: 201, body: { editalId: 'e1', situacao: 'rascunho' } }).as('criar');
-    cy.visit('/#/admin/editais');
+    visitarComo('smga', '/#/admin/editais');
 
     cy.get('[data-cy=novo-edital]').click();
     cy.get('[data-cy=modal-novo-edital]').should('be.visible');
@@ -25,12 +26,17 @@ describe('Gestão de editais (US1)', () => {
   });
 
   it('lista os editais (QBE) e permite publicar um rascunho', () => {
+    // `GET /gestao/editais` responde o envelope paginado { items, total } (QBE) — um array cru faz o
+    // `.items` da camada de API virar undefined e a lista renderizar vazia.
     cy.intercept('GET', '/gestao/editais*', {
-      body: [{ id: 'e1', numero: 'ED-2026/001', objeto: 'Merenda', secretariaId: 's1', situacao: 'rascunho', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2026-12-31' }],
+      body: {
+        items: [{ id: 'e1', numero: 'ED-2026/001', objeto: 'Merenda', secretariaId: 's1', situacao: 'rascunho', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2026-12-31' }],
+        total: 1,
+      },
     });
     cy.intercept('GET', '/catalogos/secretarias*', { body: secretarias });
     cy.intercept('POST', '/editais/e1/publicar', { statusCode: 200, body: { situacao: 'publicado' } }).as('pub');
-    cy.visit('/#/admin/editais');
+    visitarComo('smga', '/#/admin/editais');
 
     cy.get('[data-cy=item-edital]').should('have.length', 1);
     cy.get('[data-cy=publicar]').click();

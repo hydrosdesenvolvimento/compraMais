@@ -632,11 +632,12 @@
     },
     "catalogos": {
       "titulo": "Catálogos base",
-      "subtitulo": "Mantenha secretarias, setores (CNAE) e tipos de documento. A exclusão é lógica: o item inativado sai das listas mas preserva os vínculos.",
+      "subtitulo": "Mantenha secretarias, setores (CNAE), tipos de documento e o catálogo de materiais e serviços. A exclusão é lógica: o item inativado sai das listas mas preserva os vínculos.",
       "tabs": {
         "secretarias": "Secretarias",
         "setores": "Setores (CNAE)",
-        "tiposDoc": "Tipos de documento"
+        "tiposDoc": "Tipos de documento",
+        "materiais": "Materiais e serviços"
       },
       "campos": {
         "nome": "Nome",
@@ -648,7 +649,14 @@
         "formato": "Formato aceito (ex.: pdf)",
         "categoria": "Categoria",
         "exigeValidade": "Exige data de validade",
-        "exigeExercicio": "Exige exercício (ex.: Balanço)"
+        "exigeExercicio": "Exige exercício (ex.: Balanço)",
+        "numero": "Número",
+        "nomeItem": "Nome do item",
+        "tipoItem": "Natureza",
+        "unidades": "Unidades de medida",
+        "unidadesDica": "Separe por vírgula. Ex.: un, m, cx",
+        "especificacoes": "Especificações técnicas",
+        "situacao": "Situação"
       },
       "categorias": {
         "cadastral": "Cadastral",
@@ -661,7 +669,20 @@
       "situacaoInativo": "inativo",
       "inativar": "Inativar",
       "reativar": "Reativar",
-      "vazio": "Nenhum item cadastrado ainda."
+      "vazio": "Nenhum item cadastrado ainda.",
+      "tiposItem": {
+        "material": "Material",
+        "servico": "Serviço"
+      },
+      "filtros": {
+        "tipo": "Natureza",
+        "tipoTodos": "Todas as naturezas"
+      },
+      "buscaPlaceholder": "Buscar por número, nome ou especificação…",
+      "buscaAriaLabel": "Buscar no catálogo",
+      "exportarCsv": "Exportar Excel",
+      "exportarPdf": "Exportar PDF",
+      "situacaoAtivo": "ativo"
     },
     "usuarios": {
       "breadcrumb": "Administração · Usuários",

@@ -162,7 +162,7 @@ function ModalSecretaria({ item, onFechar, onMudou }: { item?: CatalogoItemView;
 
         <form data-cy="form-secretaria" onSubmit={(e) => { e.preventDefault(); salvar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           <div style={{ padding: 24, overflowY: 'auto', display: 'grid', gap: 18 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="cm-form-grid">
               <label>
                 <span style={rotulo}>{t('admin.secretarias.campos.sigla')}</span>
                 <input className="input" data-cy="campo-sigla" required placeholder={t('admin.secretarias.modal.siglaPlaceholder')} value={form.sigla} onChange={set('sigla')} style={{ width: '100%' }} />

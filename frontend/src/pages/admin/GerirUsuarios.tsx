@@ -207,7 +207,7 @@ function ModalUsuario({ item, onFechar, onMudou }: { item?: UsuarioInternoView; 
 
         <form data-cy="form-usuario" onSubmit={(e) => { e.preventDefault(); salvar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           <div style={{ padding: 24, overflowY: 'auto', display: 'grid', gap: 18 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="cm-form-grid">
               <label>
                 <span style={rotulo}>{t('admin.usuarios.campos.nome')}</span>
                 <input className="input" data-cy="campo-nome" required placeholder={t('admin.usuarios.modal.nomePlaceholder')} value={form.nome} onChange={set('nome')} style={{ width: '100%' }} />
@@ -217,7 +217,7 @@ function ModalUsuario({ item, onFechar, onMudou }: { item?: UsuarioInternoView; 
                 <input className="input" data-cy="campo-email" type="email" required={!editando} disabled={editando} placeholder={t('admin.usuarios.modal.emailPlaceholder')} value={form.email} onChange={set('email')} style={{ width: '100%' }} />
               </label>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="cm-form-grid">
               <label>
                 <span style={rotulo}>{t('admin.usuarios.campos.cargo')}</span>
                 <select className="input" data-cy="campo-cargo" required value={form.cargo} onChange={set('cargo')} style={{ width: '100%' }}>

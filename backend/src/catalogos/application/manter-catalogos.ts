@@ -3,6 +3,8 @@ import type { ItemCatalogo, CampoDiff } from '../domain/item-catalogo.js';
 import { Secretaria } from '../domain/secretaria.js';
 import { SetorCnae } from '../domain/setor-cnae.js';
 import { TipoDocumento } from '../domain/tipo-documento.js';
+import { MaterialServico, formatarNumeroItem, type TipoItem } from '../domain/material-servico.js';
+import { NumeradorItensMemory, type NumeradorItens } from './numerador-itens.js';
 import type { CatalogoRepository, FiltroListagem } from './catalogo-repository.js';
 import {
   CatalogoItemCriado, CatalogoItemEditado, CatalogoItemInativado, CatalogoItemReativado, type NomeCatalogo,
@@ -27,7 +29,9 @@ export class ChaveDuplicada extends Error {
  */
 export interface CatalogoDef<T extends ItemCatalogo, TCriar, TEditar> {
   nome: NomeCatalogo;
-  criar(id: string, input: TCriar, userName: string): T;
+  /** Síncrono na maioria dos catálogos; assíncrono quando a construção depende de I/O (ex.: reservar o
+   *  número sequencial do item de materiais/serviços). O CrudCatalogo aguarda o resultado nos dois casos. */
+  criar(id: string, input: TCriar, userName: string): T | Promise<T>;
   aplicarEdicao(item: T, campos: TEditar, userName: string): CampoDiff[];
 }
 
@@ -39,12 +43,15 @@ export class CrudCatalogo<T extends ItemCatalogo, TCriar, TEditar> {
     private readonly now: () => string = () => new Date().toISOString(),
   ) {}
 
-  async criar(input: TCriar, actor: Actor): Promise<{ id: string }> {
-    const item = this.def.criar(randomUUID(), input, actor.userId);
+  /** Devolve a entidade criada (não só o id): a borda serializa a view completa — o item de materiais e
+   *  serviços precisa expor o `numero` gerado na própria resposta do POST. Quem só usa `{ id }` segue
+   *  funcionando, pois `id` é campo da entidade. */
+  async criar(input: TCriar, actor: Actor): Promise<T> {
+    const item = await this.def.criar(randomUUID(), input, actor.userId);
     await this.exigirChaveLivre(item.chave(), item.id);
     await this.repo.salvar(item);
     await this.publicar(new CatalogoItemCriado(item.id, { catalogo: this.def.nome, itemId: item.id, chave: item.chave() }, actor));
-    return { id: item.id };
+    return item;
   }
 
   async editar(id: string, campos: TEditar, actor: Actor): Promise<void> {
@@ -93,6 +100,8 @@ export class CrudCatalogo<T extends ItemCatalogo, TCriar, TEditar> {
 }
 
 /** Entradas de criação/edição por catálogo. */
+export type CriarMaterialServico = { nome: string; tipo?: TipoItem; especificacoes?: string; unidades?: string[] };
+export type EditarMaterialServico = Partial<CriarMaterialServico>;
 export type CriarSecretaria = { nome: string; sigla: string; responsavel: string; contato?: string };
 export type EditarSecretaria = Partial<CriarSecretaria>;
 export type CriarSetor = { codigo: string; descricao: string; categoria?: string };
@@ -108,15 +117,18 @@ export class ManterCatalogos {
   readonly secretarias: CrudCatalogo<Secretaria, CriarSecretaria, EditarSecretaria>;
   readonly setores: CrudCatalogo<SetorCnae, CriarSetor, EditarSetor>;
   readonly tiposDocumento: CrudCatalogo<TipoDocumento, CriarTipoDoc, EditarTipoDoc>;
+  readonly materiaisServicos: CrudCatalogo<MaterialServico, CriarMaterialServico, EditarMaterialServico>;
 
   constructor(
     repos: {
       secretarias: CatalogoRepository<Secretaria>;
       setores: CatalogoRepository<SetorCnae>;
       tiposDocumento: CatalogoRepository<TipoDocumento>;
+      materiaisServicos: CatalogoRepository<MaterialServico>;
     },
     bus: EventBus,
     now: () => string = () => new Date().toISOString(),
+    numerador: NumeradorItens = new NumeradorItensMemory(),
   ) {
     this.secretarias = new CrudCatalogo<Secretaria, CriarSecretaria, EditarSecretaria>(repos.secretarias, {
       nome: 'secretaria',
@@ -133,6 +145,19 @@ export class ManterCatalogos {
     this.tiposDocumento = new CrudCatalogo<TipoDocumento, CriarTipoDoc, EditarTipoDoc>(repos.tiposDocumento, {
       nome: 'tipo-documento',
       criar: (id, input, userName) => TipoDocumento.criar({ id, ...input, userName }),
+      aplicarEdicao: (item, campos, userName) => item.editar(campos, userName),
+    }, bus, now);
+
+    // Único catálogo cuja construção é assíncrona: o número oficial (ITM-AAAA/NNN) é uma sequência
+    // reservada atomicamente, não um dado do formulário. O ano vem do relógio injetado (`now`), para o
+    // teste poder fixar a data sem depender do calendário da máquina.
+    this.materiaisServicos = new CrudCatalogo<MaterialServico, CriarMaterialServico, EditarMaterialServico>(repos.materiaisServicos, {
+      nome: 'material-servico',
+      criar: async (id, input, userName) => {
+        const ano = new Date(now()).getUTCFullYear();
+        const numero = formatarNumeroItem(ano, await numerador.proximo(ano));
+        return MaterialServico.criar({ id, numero, ...input, userName });
+      },
       aplicarEdicao: (item, campos, userName) => item.editar(campos, userName),
     }, bus, now);
   }

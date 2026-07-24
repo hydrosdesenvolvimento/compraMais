@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import { CREDENCIAIS } from '../support/sessao';
 // E2E (Cypress) — UC015: autenticar e gerir a própria senha. API stubada (cy.intercept) →
 // determinístico, hash routing. Cobre A2 (troca autenticada em "Minha conta") e A1 (esqueci +
 // redefinir com token). As rotas do backend são exercitadas de verdade nos testes de integração.
@@ -12,13 +13,21 @@ const PERFIL = {
   cnaes: [{ codigoSubclasse: '1412601', tipo: 'principal', ativo: true }],
 };
 
+/**
+ * Sessão REAL (AD-20). O token de fachada que existia aqui passava pelas guardas do cliente, mas
+ * qualquer requisição não stubada — `GET /auth/perfil`, disparada após a troca — voltava 401, e o
+ * tratador global de sessão expirada navegava para `/cadastro`, desmontando a confirmação de sucesso
+ * antes da asserção. O sintoma parecia falha da troca de senha; era o token falso.
+ */
 function entrarMinhaConta(): void {
   cy.intercept('GET', `/fornecedores/${FID}`, { statusCode: 200, body: PERFIL }).as('perfil');
-  cy.visit('/#/minha-conta', {
-    onBeforeLoad(win) {
-      win.localStorage.setItem('compramais.token', 'jwt.mock');
-      win.localStorage.setItem('compramais.usuario', JSON.stringify({ userId: 'u1', papel: 'titular', empresaId: FID }));
-    },
+  cy.request('POST', '/auth/login', CREDENCIAIS.titular).then((r) => {
+    cy.visit('/#/minha-conta', {
+      onBeforeLoad(win) {
+        win.localStorage.setItem('compramais.token', r.body.token);
+        win.localStorage.setItem('compramais.usuario', JSON.stringify({ ...r.body.usuario, empresaId: FID }));
+      },
+    });
   });
   cy.wait('@perfil');
 }

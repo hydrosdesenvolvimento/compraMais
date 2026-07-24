@@ -4,7 +4,7 @@ import type { CampoDiff } from './item-catalogo.js';
 type Actor = { userId: string; empresaId?: string };
 
 /** Discriminador do catálogo afetado (para a trilha AD-18 e o AuditConsumer). */
-export type NomeCatalogo = 'secretaria' | 'setor-cnae' | 'tipo-documento';
+export type NomeCatalogo = 'secretaria' | 'setor-cnae' | 'tipo-documento' | 'material-servico';
 
 export class CatalogoItemCriado extends DomainEvent<{ catalogo: NomeCatalogo; itemId: string; chave: string }> {
   readonly eventName = 'CatalogoItemCriado'; readonly eventVersion = 1;

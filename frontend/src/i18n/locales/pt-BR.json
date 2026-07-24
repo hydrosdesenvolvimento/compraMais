@@ -992,7 +992,12 @@
       "tetoTitulo": "Como o teto é aplicado",
       "teto1": "Sua capacidade declarada vira o <b>limite máximo</b> de itens que podem ser alocados à sua empresa.",
       "teto2": "A demanda do edital é dividida entre os fornecedores aptos, respeitando o teto de cada um.",
-      "teto3": "O saldo não atendido vai para o <b>Cadastro de Reserva</b>, acionado em uma 2ª demanda."
+      "teto3": "O saldo não atendido vai para o <b>Cadastro de Reserva</b>, acionado em uma 2ª demanda.",
+      "descricaoItens": "Selecione os itens do edital que sua empresa quer atender e declare, para cada um, a quantidade máxima que consegue entregar — o <b>teto</b> usado no rateio por item.",
+      "semItens": "Este edital ainda não tem itens cadastrados. Volte quando houver itens para declarar capacidade.",
+      "itemDemanda": "Demanda: {{qtd}} {{unidade}}",
+      "tetoItemLabel": "Teto ({{unidade}})",
+      "dicaItens": "Você declara capacidade só nos itens que quer atender. A distribuição roda por item, respeitando o seu teto em cada um."
     },
     "documentos": {
       "passo": "PASSO 2",

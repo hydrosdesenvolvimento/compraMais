@@ -30,12 +30,16 @@ export interface ProvaVida {
   tentativas: number; // total de tentativas de verificação (para a política de fallback manual, D6)
 }
 
+/** Capacidade declarada para UM item do edital (RN005): o teto do fornecedor NAQUELE item. */
+export interface CapacidadeItem { itemId: string; capacidadeTeto: number }
+
 /** Snapshot plano do agregado para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
 export interface CredenciamentoState {
   meta: MetadadosBase;
   fornecedorId: string;
   editalId: string;
-  capacidadeTeto: number; // teto declarado, base do water-filling (RN005)
+  capacidadeTeto: number; // teto declarado AGREGADO (soma dos itens); base do water-filling legado (RN005)
+  itens: CapacidadeItem[]; // capacidade POR item do edital — base do rateio por item; [] em credenciamentos legados
   estado: EstadoCredenciamento;
   passoAtual: number; // 1..TOTAL_PASSOS_CREDENCIAMENTO — passo do wizard em que o fornecedor parou (UC004)
   termo: TermoAceite | null;
@@ -59,21 +63,37 @@ export class Credenciamento extends EntidadeBase {
     private _termo: TermoAceite | null,
     private _provaVida: ProvaVida | null,
     private _distribuidoEm: string | null,
+    private _itens: CapacidadeItem[] = [],
   ) {
     super(meta);
   }
 
+  /**
+   * Passo 1 (Capacidade) — nascimento do agregado (RN005). Bimodal:
+   *  - por ITEM (novo): `itens` com ≥1 `{ itemId, capacidadeTeto>0 }` — o `capacidadeTeto` agregado é a soma;
+   *  - LEGADO (nível-edital): apenas `capacidadeTeto` (teto único, sem itens) — mantido para compat.
+   */
   static iniciar(input: {
-    id: string; fornecedorId: string; editalId: string; capacidadeTeto: number; userName?: string;
+    id: string; fornecedorId: string; editalId: string;
+    itens?: CapacidadeItem[]; capacidadeTeto?: number; userName?: string;
   }): Credenciamento {
-    if (!Number.isInteger(input.capacidadeTeto) || input.capacidadeTeto <= 0) {
-      throw new CapacidadeInvalida(input.capacidadeTeto);
+    const meta = EntidadeBase.metaNova(input.id, input.userName);
+    const itens = (input.itens ?? []).map((i) => ({ itemId: i.itemId, capacidadeTeto: i.capacidadeTeto }));
+    if (itens.length > 0) {
+      const vistos = new Set<string>();
+      for (const it of itens) {
+        if (!it.itemId?.trim()) throw new ItemCredenciamentoInvalido(it.itemId);
+        if (!Number.isInteger(it.capacidadeTeto) || it.capacidadeTeto <= 0) throw new CapacidadeInvalida(it.capacidadeTeto);
+        if (vistos.has(it.itemId)) throw new ItemCredenciamentoDuplicado(it.itemId);
+        vistos.add(it.itemId);
+      }
+      const agregado = itens.reduce((s, i) => s + i.capacidadeTeto, 0);
+      return new Credenciamento(meta, input.fornecedorId, input.editalId, agregado, 'iniciado', 1, null, null, null, itens);
     }
-    // Passo 1 (Capacidade) é o marco de nascimento do agregado (RN005).
-    return new Credenciamento(
-      EntidadeBase.metaNova(input.id, input.userName),
-      input.fornecedorId, input.editalId, input.capacidadeTeto, 'iniciado', 1, null, null, null,
-    );
+    // Legado: teto agregado único (sem itens).
+    const cap = input.capacidadeTeto ?? 0;
+    if (!Number.isInteger(cap) || cap <= 0) throw new CapacidadeInvalida(cap);
+    return new Credenciamento(meta, input.fornecedorId, input.editalId, cap, 'iniciado', 1, null, null, null, []);
   }
 
   /** Reconstrução a partir da persistência (sem regra de criação — aceita qualquer estado do ciclo). */
@@ -82,6 +102,8 @@ export class Credenciamento extends EntidadeBase {
       s.meta, s.fornecedorId, s.editalId, s.capacidadeTeto, s.estado,
       // Linhas anteriores à migration 0024 não têm passo; caem no passo 1 (comportamento anterior).
       s.passoAtual ?? 1, s.termo, s.provaVida ?? null, s.distribuidoEm,
+      // Linhas anteriores à migração de itens não têm `itens`: caem em [] (credenciamento legado nível-edital).
+      (s.itens ?? []).map((i) => ({ ...i })),
     );
   }
 
@@ -89,13 +111,17 @@ export class Credenciamento extends EntidadeBase {
   estado(): CredenciamentoState {
     return {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
-      fornecedorId: this.fornecedorId, editalId: this.editalId, capacidadeTeto: this._capacidadeTeto,
+      fornecedorId: this.fornecedorId, editalId: this.editalId, capacidadeTeto: this.capacidadeTeto,
+      itens: this._itens.map((i) => ({ ...i })),
       estado: this._estado, passoAtual: this._passoAtual, termo: this._termo ? { ...this._termo } : null,
       provaVida: this._provaVida ? { ...this._provaVida } : null, distribuidoEm: this._distribuidoEm,
     };
   }
 
-  get capacidadeTeto(): number { return this._capacidadeTeto; }
+  /** Teto agregado: soma dos tetos dos itens (nível-item) ou o teto único legado (nível-edital). */
+  get capacidadeTeto(): number { return this._itens.length ? this._itens.reduce((s, i) => s + i.capacidadeTeto, 0) : this._capacidadeTeto; }
+  /** Capacidades declaradas por item (RN005). Vazio em credenciamentos legados nível-edital. */
+  get itens(): ReadonlyArray<CapacidadeItem> { return this._itens; }
   get situacao(): EstadoCredenciamento { return this._estado; }
   get passoAtual(): number { return this._passoAtual; }
   get termo(): Readonly<TermoAceite> | null { return this._termo; }
@@ -169,6 +195,12 @@ export class Credenciamento extends EntidadeBase {
   }
 }
 
+export class ItemCredenciamentoInvalido extends Error {
+  constructor(itemId: string) { super(`Invalid item in credenciamento capacities: '${itemId}'.`); this.name = 'ItemCredenciamentoInvalido'; }
+}
+export class ItemCredenciamentoDuplicado extends Error {
+  constructor(itemId: string) { super(`Duplicate item in credenciamento capacities: '${itemId}'.`); this.name = 'ItemCredenciamentoDuplicado'; }
+}
 export class CapacidadeInvalida extends Error {
   constructor(valor: number) { super(`Declared capacity must be a positive integer (received: ${valor}).`); this.name = 'CapacidadeInvalida'; }
 }

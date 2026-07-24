@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   Credenciamento,
   CapacidadeInvalida,
+  ItemCredenciamentoDuplicado,
   TermoIncompleto,
   TransicaoCredenciamentoInvalida,
   CredenciamentoJaDistribuido,
@@ -25,6 +26,27 @@ describe('Credenciamento (domínio — UC004 + prova de vida UC007)', () => {
     expect(c.termo).toBeNull();
     expect(c.provaVida).toBeNull();
     expect(c.passoAtual).toBe(1); // Capacidade é o passo de nascimento
+  });
+
+  it('por item (RN005): capacidadeTeto agregado = soma dos tetos; expõe os itens', () => {
+    const c = Credenciamento.iniciar({ id: 'c1', fornecedorId: 'f1', editalId: 'e1', itens: [
+      { itemId: 'i1', capacidadeTeto: 100 }, { itemId: 'i2', capacidadeTeto: 250 },
+    ] });
+    expect(c.situacao).toBe('iniciado');
+    expect(c.capacidadeTeto).toBe(350); // soma
+    expect(c.itens.map((i) => [i.itemId, i.capacidadeTeto])).toEqual([['i1', 100], ['i2', 250]]);
+  });
+
+  it('por item: teto inválido → CapacidadeInvalida; item duplicado → ItemCredenciamentoDuplicado', () => {
+    expect(() => Credenciamento.iniciar({ id: 'c', fornecedorId: 'f', editalId: 'e', itens: [{ itemId: 'i1', capacidadeTeto: 0 }] })).toThrow(CapacidadeInvalida);
+    expect(() => Credenciamento.iniciar({ id: 'c', fornecedorId: 'f', editalId: 'e', itens: [{ itemId: 'i1', capacidadeTeto: 10 }, { itemId: 'i1', capacidadeTeto: 5 }] })).toThrow(ItemCredenciamentoDuplicado);
+  });
+
+  it('por item: itens sobrevivem ao round-trip estado()/deEstado() (AD-33)', () => {
+    const c = Credenciamento.iniciar({ id: 'c1', fornecedorId: 'f1', editalId: 'e1', itens: [{ itemId: 'i1', capacidadeTeto: 40 }] });
+    const clone = Credenciamento.deEstado(c.estado());
+    expect(clone.itens.map((i) => [i.itemId, i.capacidadeTeto])).toEqual([['i1', 40]]);
+    expect(clone.capacidadeTeto).toBe(40);
   });
 
   it('registra o passo do wizard enquanto "iniciado" (UC004 — "Etapa n/N")', () => {

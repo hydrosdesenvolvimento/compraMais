@@ -17,6 +17,7 @@ const aceitarTermo = vi.fn();
 const cancelarCredenciamento = vi.fn();
 const registrarPassoCredenciamento = vi.fn();
 const credenciamentoNoEdital = vi.fn();
+const editalItensParaCredenciamento = vi.fn();
 const catalogoListar = vi.fn();
 const documentos = vi.fn();
 const enviarDocumento = vi.fn();
@@ -27,11 +28,19 @@ vi.mock('../../lib/api', () => ({
     cancelarCredenciamento: (...a: unknown[]) => cancelarCredenciamento(...a),
     registrarPassoCredenciamento: (...a: unknown[]) => registrarPassoCredenciamento(...a),
     credenciamentoNoEdital: (...a: unknown[]) => credenciamentoNoEdital(...a),
+    editalItensParaCredenciamento: (...a: unknown[]) => editalItensParaCredenciamento(...a),
     catalogoListar: (...a: unknown[]) => catalogoListar(...a),
     documentos: (...a: unknown[]) => documentos(...a),
     enviarDocumento: (...a: unknown[]) => enviarDocumento(...a),
   },
 }));
+
+/** Passo 1 (capacidade por item): seleciona o 1º item do edital e declara o teto. */
+async function declararCapacidade(teto = '500') {
+  const checks = await screen.findAllByTestId('capacidade-item-check');
+  fireEvent.click(checks[0]!);
+  fireEvent.change(screen.getByTestId('capacidade-item-teto'), { target: { value: teto } });
+}
 
 // O feedback de falha vai para o toast + inline. Espionamos o barramento; a tradução de `codigo`→texto
 // já é coberta por `lib/erros.test.ts`, então aqui `textoDoErro` só devolve a mensagem do erro.
@@ -47,6 +56,11 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
     registrarPassoCredenciamento.mockReset().mockResolvedValue({ passoAtual: 2 });
     // Sem credenciamento ativo (204 → undefined): o wizard começa do zero, não retoma.
     credenciamentoNoEdital.mockReset().mockResolvedValue(undefined);
+    // Itens do edital para o passo de capacidade (por item, RN005).
+    editalItensParaCredenciamento.mockReset().mockResolvedValue([
+      { itemId: 'i1', numero: 1, nome: 'Cabo de rede CAT6', descricao: null, unidade: 'un', quantidade: 100 },
+      { itemId: 'i2', numero: 2, nome: 'Fardamento', descricao: null, unidade: 'un', quantidade: 40 },
+    ]);
     // Passo 2 data-driven: catálogo de tipos (RF022) × documentos do fornecedor. Dois tipos que o
     // fornecedor ainda não tem → ambos "Necessário enviar" (renderiza as dropzones `upload-doc`).
     catalogoListar.mockReset().mockResolvedValue([
@@ -68,10 +82,10 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
     render(<Credenciamento />);
 
     // Passo 1: capacidade (teto, RN005)
-    fireEvent.change(await screen.findByTestId('capacidade'), { target: { value: '500' } });
+    await declararCapacidade('500');
     fireEvent.click(screen.getByTestId('avancar'));
     expect((await screen.findAllByTestId('upload-doc')).length).toBeGreaterThan(0);
-    expect(iniciarCredenciamento).toHaveBeenCalledWith('e1', 500);
+    expect(iniciarCredenciamento).toHaveBeenCalledWith('e1', [{ itemId: 'i1', capacidadeTeto: 500 }]);
     // Entrou no Documentos → reporta o passo (Etapa 2/N) para "Meus Credenciamentos".
     expect(registrarPassoCredenciamento).toHaveBeenCalledWith('c1', 2);
 
@@ -90,7 +104,7 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
   it('Passo 2: envia um documento pendente de verdade (upload cifrado, FR-002)', async () => {
     render(<Credenciamento />);
 
-    fireEvent.change(await screen.findByTestId('capacidade'), { target: { value: '500' } });
+    await declararCapacidade('500');
     fireEvent.click(screen.getByTestId('avancar'));
 
     // Escolhe o arquivo do primeiro tipo pendente (Cartão CNPJ — sem validade obrigatória) e envia.
@@ -108,7 +122,7 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
     iniciarCredenciamento.mockRejectedValueOnce(new Error('Você já tem um credenciamento ativo neste edital.'));
     render(<Credenciamento />);
 
-    fireEvent.change(await screen.findByTestId('capacidade'), { target: { value: '200' } });
+    await declararCapacidade('200');
     fireEvent.click(screen.getByTestId('avancar'));
 
     const erro = await screen.findByTestId('erro-credenciamento');
@@ -122,7 +136,7 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
 
   it('bloqueia o envio do Termo até o aceite (checkbox)', async () => {
     render(<Credenciamento />);
-    fireEvent.change(await screen.findByTestId('capacidade'), { target: { value: '500' } });
+    await declararCapacidade('500');
     fireEvent.click(screen.getByTestId('avancar'));
     await screen.findAllByTestId('upload-doc');
     fireEvent.click(screen.getByTestId('avancar'));

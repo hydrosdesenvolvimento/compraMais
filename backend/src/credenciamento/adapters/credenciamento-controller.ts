@@ -77,9 +77,11 @@ export function registrarRotasCredenciamento(app: FastifyInstance, deps: { solic
     const identidade = exigirPapel(req, reply, PERFIS_FORNECEDOR);
     if (!identidade) return reply;
     const { id: editalId } = req.params as { id: string };
-    const { capacidade } = req.body as { capacidade: number };
+    // Novo contrato: `itens: [{ itemId, capacidadeTeto }]` (capacidade por item, RN005).
+    // Legado aceito: `capacidade: number` (teto único nível-edital).
+    const { itens, capacidade } = req.body as { itens?: Array<{ itemId: string; capacidadeTeto: number }>; capacidade?: number };
     try {
-      const out = await deps.solicitar.iniciar(empresaDe(identidade), editalId, capacidade, ator(identidade));
+      const out = await deps.solicitar.iniciar(empresaDe(identidade), editalId, { itens, capacidade }, ator(identidade));
       return reply.code(201).send({ ...out, estado: 'iniciado' });
     } catch (e) {
       return reply.code(erro(e)).send({ codigo: (e as Error).name, mensagem: (e as Error).message });

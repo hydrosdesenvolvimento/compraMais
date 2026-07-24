@@ -992,7 +992,12 @@
       "tetoTitulo": "Cómo se aplica el tope",
       "teto1": "Su capacidad declarada se convierte en el <b>límite máximo</b> de artículos que se pueden asignar a su empresa.",
       "teto2": "La demanda de la convocatoria se divide entre los proveedores aptos, respetando el tope de cada uno.",
-      "teto3": "El saldo no atendido va al <b>Registro de Reserva</b>, activado en una 2ª demanda."
+      "teto3": "El saldo no atendido va al <b>Registro de Reserva</b>, activado en una 2ª demanda.",
+      "descricaoItens": "Seleccione los ítems del edicto que su empresa atenderá y declare, para cada uno, la cantidad máxima que puede entregar — el <b>tope</b> usado en el prorrateo por ítem.",
+      "semItens": "Este edicto aún no tiene ítems registrados. Vuelva cuando haya ítems para declarar capacidad.",
+      "itemDemanda": "Demanda: {{qtd}} {{unidade}}",
+      "tetoItemLabel": "Tope ({{unidade}})",
+      "dicaItens": "Declara capacidad solo en los ítems que quiere atender. La distribución corre por ítem, respetando su tope en cada uno."
     },
     "documentos": {
       "passo": "PASO 2",

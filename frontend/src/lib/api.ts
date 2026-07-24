@@ -159,10 +159,14 @@ export interface CredenciamentoResumoView {
 /** Termo de Aceite (RN016) — rastro do aceite exibido no detalhe read-only. */
 export interface TermoAceiteView { versao: string; finalidade: string; aceitoEm: string }
 /** Detalhe read-only de um credenciamento (ação "Visualizar" — UC004). Sem dados restritos. */
+/** Capacidade declarada para um item do edital (RN005). */
+export interface CapacidadeItemView { itemId: string; capacidadeTeto: number }
+/** Item do edital visível ao fornecedor no passo de capacidade (sem preço-teto interno, RN013). */
+export interface ItemCredenciamentoView { itemId: string; numero: number; nome: string; descricao: string | null; unidade: string; quantidade: number }
 export interface CredenciamentoDetalheView {
   id: string; editalId: string; estado: 'iniciado' | 'aceito' | 'cancelado';
   numeroEdital: string | null; objeto: string | null; secretariaSigla: string | null;
-  capacidadeTeto: number; passoAtual: number; totalPassos: number;
+  capacidadeTeto: number; itens: CapacidadeItemView[]; passoAtual: number; totalPassos: number;
   termo: TermoAceiteView | null; criadoEm: string; atualizadoEm: string;
 }
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
@@ -329,7 +333,10 @@ export const api = {
   removerProcurador: (fid: string, contaId: string) => send<void>(`/fornecedores/${fid}/procuradores/${contaId}`, 'DELETE'),
   contestarCnae: (editalId: string, body: { cnaeContestado: string; justificativa: string }) => send(`/editais/${editalId}/contestacoes-cnae`, 'POST', body),
   // UC004 — Solicitar credenciamento (capacidade = teto, RN005) e concluir por Termo de Aceite (RN016).
-  iniciarCredenciamento: (editalId: string, capacidade: number) => send<{ credenciamentoId: string; estado: string }>(`/editais/${editalId}/credenciamentos`, 'POST', { capacidade }),
+  // Credenciamento por item (RN005): declara um teto por item selecionado do edital.
+  iniciarCredenciamento: (editalId: string, itens: CapacidadeItemView[]) => send<{ credenciamentoId: string; estado: string }>(`/editais/${editalId}/credenciamentos`, 'POST', { itens }),
+  // Itens do edital para o passo de capacidade (fornecedor; sem preço-teto interno).
+  editalItensParaCredenciamento: (editalId: string) => get<ItemCredenciamentoView[]>(`/editais/${editalId}/itens/para-credenciamento`),
   aceitarTermo: (credId: string, body: { versaoTermo: string; finalidade: string }) => send<{ estado: string; status: string }>(`/credenciamentos/${credId}/termo`, 'POST', body),
   cancelarCredenciamento: (credId: string) => send<{ estado: string }>(`/credenciamentos/${credId}/cancelar`, 'POST'),
   // O wizard reporta o passo em que o fornecedor está (UC004) para "Meus Credenciamentos" mostrar

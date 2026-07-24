@@ -3,7 +3,7 @@ import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation, Trans } from 'react-i18next';
 import { Stepper } from '../../design-system/components';
 import { IconeSeta, IconeVoltar, IconeFechar, IconeCheck, IconeUpload, IconeAlerta } from '../../design-system/icons';
-import { api, type DocItem, type CatalogoItemView } from '../../lib/api';
+import { api, type DocItem, type CatalogoItemView, type ItemCredenciamentoView } from '../../lib/api';
 import { TAMANHO_MAX_MB, formatoDe, lerBase64 } from '../../lib/upload';
 import { obterUsuario } from '../../lib/auth';
 import { textoDoErro } from '../../lib/erros';
@@ -28,11 +28,14 @@ const varAzul50 = 'var(--azul-50)';
 const varAzul100 = 'var(--azul-100)';
 
 export function Credenciamento() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const idioma = i18n.language;
   const navigate = useNavigate();
   const { editalId } = useParams({ strict: false }) as { editalId?: string };
   const [step, setStep] = useState(0); // 0..3
-  const [cap, setCap] = useState('');
+  // Capacidade POR ITEM (RN005): itens do edital + teto declarado por item selecionado (itemId → texto).
+  const [itensEdital, setItensEdital] = useState<ItemCredenciamentoView[]>([]);
+  const [capItens, setCapItens] = useState<Record<string, string>>({});
   const [credId, setCredId] = useState<string | null>(null);
   const [aceito, setAceito] = useState(false);
   const [enviando, setEnviando] = useState(false);
@@ -56,7 +59,8 @@ export function Credenciamento() {
         if (atual.estado === 'aceito') {
           setStep(3);
         } else {
-          setCap(String(atual.capacidadeTeto));
+          // Reidrata a seleção de itens declarada (capacidade por item, RN005).
+          setCapItens(Object.fromEntries(atual.itens.map((i) => [i.itemId, String(i.capacidadeTeto)])));
           // passoAtual 1..3 (Capacidade→Termo) → step 0..2; nunca abre no Concluído para um `iniciado`.
           setStep(Math.min(2, Math.max(0, atual.passoAtual - 1)));
           toastBus.emitir({ tom: 'info', texto: t('credenciamento.retomado') });
@@ -66,6 +70,15 @@ export function Credenciamento() {
     })();
     return () => { vivo = false; };
   }, [editalId, t]);
+
+  // Itens do edital para o passo de capacidade (sem preço-teto interno). Best-effort: se falhar, o passo
+  // fica sem itens e o "Continuar" permanece bloqueado (nada a declarar).
+  useEffect(() => {
+    if (!editalId) return;
+    let vivo = true;
+    void api.editalItensParaCredenciamento(editalId).then((its) => { if (vivo) setItensEdital(its); }).catch(() => {});
+    return () => { vivo = false; };
+  }, [editalId]);
 
   // Empresa do token (AD-20): mesma do credenciamento criado no Passo 1. Base dos documentos (Passo 2).
   const fornecedorId = obterUsuario()?.empresaId ?? DEMO_FORNECEDOR_ID;
@@ -85,8 +98,11 @@ export function Credenciamento() {
     ? t('credenciamento.acoes.enviando')
     : step === 2 ? t('credenciamento.acoes.enviar') : t('credenciamento.acoes.continuar');
 
-  const capNum = Number(cap);
-  const capValida = Number.isInteger(capNum) && capNum > 0;
+  // Itens selecionados com teto válido (inteiro > 0) — base do envio e da validação do passo.
+  const itensSelecionados = Object.entries(capItens)
+    .map(([itemId, texto]) => ({ itemId, teto: Number(texto) }))
+    .filter(({ teto }) => Number.isInteger(teto) && teto > 0);
+  const capValida = itensSelecionados.length > 0;
   const podeAvancar = enviando
     ? false
     : step === 0 ? capValida
@@ -119,7 +135,8 @@ export function Credenciamento() {
       if (credId) { setStep(1); reportarPasso(1, credId); return; }
       setEnviando(true);
       try {
-        const r = await api.iniciarCredenciamento(editalId, capNum);
+        const itens = itensSelecionados.map(({ itemId, teto }) => ({ itemId, capacidadeTeto: teto }));
+        const r = await api.iniciarCredenciamento(editalId, itens);
         setCredId(r.credenciamentoId);
         setStep(1);
         reportarPasso(1, r.credenciamentoId); // entrou no Documentos (passo 2)
@@ -194,7 +211,7 @@ export function Credenciamento() {
       {/* Card principal */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '28px 30px 26px' }}>
-          {step === 0 && <PassoCapacidade cap={cap} setCap={setCap} />}
+          {step === 0 && <PassoCapacidade itens={itensEdital} capItens={capItens} setCapItens={setCapItens} idioma={idioma} />}
           {step === 1 && <PassoDocumentos fornecedorId={fornecedorId} />}
           {step === 2 && <PassoTermo aceito={aceito} setAceito={setAceito} />}
           {step === 3 && <PassoSucesso credId={credId} onPainel={() => void navigate({ to: '/inicio' })} />}
@@ -285,79 +302,75 @@ const footerGhostStyle = {
 } as const;
 
 /* ---------- Passo 1: Capacidade produtiva ---------- */
-function PassoCapacidade({ cap, setCap }: { cap: string; setCap: (v: string) => void }) {
+function PassoCapacidade({ itens, capItens, setCapItens, idioma }: {
+  itens: ItemCredenciamentoView[];
+  capItens: Record<string, string>;
+  setCapItens: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  idioma: string;
+}) {
   const { t } = useTranslation();
+  const numero = (n: number) => new Intl.NumberFormat(idioma).format(n);
+  const alternar = (itemId: string) => setCapItens((m) => {
+    const novo = { ...m };
+    if (itemId in novo) delete novo[itemId]; else novo[itemId] = '';
+    return novo;
+  });
+  const definirTeto = (itemId: string, v: string) => setCapItens((m) => ({ ...m, [itemId]: v }));
   return (
     <div>
       <div style={{ font: '600 11px var(--font-body)', letterSpacing: '.1em', color: 'var(--azul-700)', marginBottom: 6 }}>
         {t('credenciamento.capacidade.passo')}
       </div>
-      <h2
-        style={{
-          fontFamily: 'var(--font-display)',
-          fontWeight: 600,
-          fontSize: 22,
-          color: 'var(--azul-900)',
-          margin: '0 0 22px',
-        }}
-      >
+      <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 22, color: 'var(--azul-900)', margin: '0 0 22px' }}>
         {t('credenciamento.capacidade.titulo')}
       </h2>
       <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 30, alignItems: 'start' }}>
         <div>
           <p style={{ fontSize: 14.5, color: 'var(--cinza-500)', lineHeight: 1.6, margin: '0 0 20px' }}>
-            <Trans i18nKey="credenciamento.capacidade.descricao" components={{ b: <strong /> }} />
+            <Trans i18nKey="credenciamento.capacidade.descricaoItens" components={{ b: <strong /> }} />
           </p>
-          <label
-            style={{ font: '600 12.5px var(--font-body)', color: 'var(--cinza-700)', marginBottom: 8, display: 'block' }}
-          >
-            {t('credenciamento.capacidade.label')}
-          </label>
-          <input
-            data-cy="capacidade"
-            value={cap}
-            onChange={(e) => setCap(e.target.value)}
-            type="number"
-            min={1}
-            placeholder={t('credenciamento.capacidade.placeholder')}
-            style={{
-              width: '100%',
-              padding: '14px 16px',
-              border: '1px solid var(--border)',
-              borderRadius: 10,
-              font: '18px var(--font-body)',
-              background: '#fff',
-              outline: 'none',
-              boxSizing: 'border-box',
-            }}
-          />
-          <div
-            style={{
-              display: 'flex',
-              gap: 9,
-              alignItems: 'flex-start',
-              marginTop: 12,
-              fontSize: 12.5,
-              color: 'var(--cinza-500)',
-              lineHeight: 1.5,
-            }}
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="var(--azul-600)"
-              strokeWidth={1.9}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ flexShrink: 0, marginTop: 1 }}
-            >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="16" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12.01" y2="8" />
+
+          {itens.length === 0 ? (
+            <div data-cy="capacidade-sem-itens" style={{ padding: '20px 18px', borderRadius: 10, border: '1px dashed var(--border)', color: 'var(--cinza-500)', fontSize: 13.5 }}>
+              {t('credenciamento.capacidade.semItens')}
+            </div>
+          ) : (
+            <div data-cy="capacidade-itens" style={{ display: 'grid', gap: 10 }}>
+              {itens.map((it) => {
+                const selecionado = it.itemId in capItens;
+                return (
+                  <div key={it.itemId} data-cy="capacidade-item" data-id={it.itemId} data-selecionado={selecionado}
+                    style={{ border: `1px solid ${selecionado ? 'var(--azul-300, #9db8e0)' : 'var(--border)'}`, background: selecionado ? varAzul50 : '#fff', borderRadius: 10, padding: '12px 14px' }}>
+                    <label style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer' }}>
+                      <input type="checkbox" data-cy="capacidade-item-check" checked={selecionado} onChange={() => alternar(it.itemId)} style={{ width: 16, height: 16, accentColor: 'var(--azul-700)', flexShrink: 0 }} />
+                      <span style={{ flex: 1, minWidth: 0 }}>
+                        <span style={{ font: '600 13.5px var(--font-body)', color: 'var(--azul-900)' }}>{it.nome}</span>
+                        <span style={{ display: 'block', fontSize: 12, color: 'var(--cinza-500)' }}>
+                          {t('credenciamento.capacidade.itemDemanda', { qtd: numero(it.quantidade), unidade: it.unidade })}
+                        </span>
+                      </span>
+                    </label>
+                    {selecionado && (
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 10, paddingLeft: 26 }}>
+                        <label style={{ font: '600 12px var(--font-body)', color: 'var(--cinza-700)' }} htmlFor={`teto-${it.itemId}`}>
+                          {t('credenciamento.capacidade.tetoItemLabel', { unidade: it.unidade })}
+                        </label>
+                        <input id={`teto-${it.itemId}`} data-cy="capacidade-item-teto" type="number" min={1} value={capItens[it.itemId] ?? ''}
+                          onChange={(e) => definirTeto(it.itemId, e.target.value)} placeholder={t('credenciamento.capacidade.placeholder')}
+                          style={{ width: 130, padding: '9px 12px', border: '1px solid var(--border)', borderRadius: 8, font: '15px var(--font-body)', background: '#fff', outline: 'none' }} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 9, alignItems: 'flex-start', marginTop: 14, fontSize: 12.5, color: 'var(--cinza-500)', lineHeight: 1.5 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--azul-600)" strokeWidth={1.9} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
-            {t('credenciamento.capacidade.dica')}
+            {t('credenciamento.capacidade.dicaItens')}
           </div>
         </div>
 

@@ -5,6 +5,8 @@ import { exigirPapel } from '../../shared/http/autenticacao.js';
 
 /** Mesmo RBAC da gestão de editais (FR-010 / AD-35): Secretaria/CPL/Administrador gerem os itens. */
 const PERFIS_GESTAO: readonly Papel[] = ['smga', 'cpl', 'administrador'];
+/** Fornecedor: pode LER os itens (sem o preço-teto interno, RN013) para declarar capacidade por item. */
+const PERFIS_FORNECEDOR: readonly Papel[] = ['titular', 'procurador'];
 
 /**
  * Itens do edital (`/editais/:id/itens`) — cadastro a partir do catálogo de materiais e serviços, sem
@@ -16,6 +18,15 @@ export function registrarRotasItensEdital(app: FastifyInstance, deps: { gerir: G
     if (!exigirPapel(req, reply, PERFIS_GESTAO)) return reply;
     const { id } = req.params as { id: string };
     return reply.send(await deps.gerir.listar(id));
+  });
+
+  // Itens visíveis ao FORNECEDOR para o passo de capacidade do credenciamento (RN005). Sem o `precoTeto`
+  // (uso interno da administração, RN013) — só o necessário para declarar quanto atende de cada item.
+  app.get('/editais/:id/itens/para-credenciamento', async (req, reply) => {
+    if (!exigirPapel(req, reply, PERFIS_FORNECEDOR)) return reply;
+    const { id } = req.params as { id: string };
+    const itens = await deps.gerir.listar(id);
+    return reply.send(itens.map((it) => ({ itemId: it.id, numero: it.numero, nome: it.nome, descricao: it.descricao, unidade: it.unidade, quantidade: it.quantidade })));
   });
 
   app.post('/editais/:id/itens', async (req, reply) => {

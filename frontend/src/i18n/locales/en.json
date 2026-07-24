@@ -992,7 +992,12 @@
       "tetoTitulo": "How the ceiling is applied",
       "teto1": "Your declared capacity becomes the <b>maximum limit</b> of items that can be allocated to your company.",
       "teto2": "The notice's demand is divided among the eligible suppliers, respecting each one's ceiling.",
-      "teto3": "The unmet balance goes to the <b>Reserve Registry</b>, triggered in a 2nd demand."
+      "teto3": "The unmet balance goes to the <b>Reserve Registry</b>, triggered in a 2nd demand.",
+      "descricaoItens": "Select the edital items your company will serve and declare, for each one, the maximum quantity you can deliver — the <b>cap</b> used in the per-item allocation.",
+      "semItens": "This edital has no items registered yet. Come back when there are items to declare capacity for.",
+      "itemDemanda": "Demand: {{qtd}} {{unidade}}",
+      "tetoItemLabel": "Cap ({{unidade}})",
+      "dicaItens": "You declare capacity only on the items you want to serve. Distribution runs per item, respecting your cap on each."
     },
     "documentos": {
       "passo": "STEP 2",

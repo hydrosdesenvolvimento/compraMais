@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { Credenciamento } from '../domain/credenciamento.js';
+import { Credenciamento, type CapacidadeItem } from '../domain/credenciamento.js';
 import { CredenciamentoIniciado, TermoAceito, CredenciamentoCancelado } from '../domain/eventos-credenciamento.js';
 import type { ListarEditaisCompativeis } from '../../editais/application/listar-editais-compativeis.js';
 import type { FornecedorRepository } from '../../catalogo/application/fornecedor-repository.js';
@@ -18,8 +18,14 @@ export interface CredenciamentoRepository {
 
 export type Actor = { userId: string; empresaId?: string };
 
+/** Leitura mínima dos itens de um edital — valida que a capacidade declarada aponta itens do edital. */
+export interface ItensDoEditalQuery { idsDoEdital(editalId: string): Promise<string[]>; }
+
 export class EditalNaoAberto extends Error {
   constructor() { super('Edital is not open for credenciamento.'); this.name = 'EditalNaoAberto'; }
+}
+export class ItemForaDoEdital extends Error {
+  constructor(itemId: string) { super(`Item '${itemId}' does not belong to this edital.`); this.name = 'ItemForaDoEdital'; }
 }
 export class CredenciamentoNaoEncontrado extends Error {
   constructor() { super('Credenciamento not found.'); this.name = 'CredenciamentoNaoEncontrado'; }
@@ -43,9 +49,14 @@ export class SolicitarCredenciamento {
     private readonly fornecedores: FornecedorRepository,
     private readonly bus: EventBus,
     private readonly now: () => string = () => new Date().toISOString(),
+    private readonly itensEdital?: ItensDoEditalQuery,
   ) {}
 
-  async iniciar(fornecedorId: string, editalId: string, capacidade: number, actor: Actor): Promise<{ credenciamentoId: string }> {
+  /**
+   * Passo 1 (Capacidade). Bimodal: `itens` (novo — capacidade por item do edital, RN005) ou `capacidade`
+   * (legado — teto único nível-edital). Com itens, valida que cada `itemId` pertence ao edital.
+   */
+  async iniciar(fornecedorId: string, editalId: string, entrada: { itens?: CapacidadeItem[]; capacidade?: number }, actor: Actor): Promise<{ credenciamentoId: string }> {
     // Precondição UC003: compatível por CNAE (lança EditalIncompativel → 403). `detalhar` NÃO checa a
     // situação, então a garantia de "Aberto" fica explícita aqui (RN014).
     const edital = await this.vitrine.detalhar(fornecedorId, editalId);
@@ -54,7 +65,13 @@ export class SolicitarCredenciamento {
     const existente = await this.repo.porFornecedorEEdital(fornecedorId, editalId);
     if (existente && existente.situacao !== 'cancelado') throw new CredenciamentoDuplicado();
 
-    const cred = Credenciamento.iniciar({ id: randomUUID(), fornecedorId, editalId, capacidadeTeto: capacidade, userName: actor.userId });
+    const itens = entrada.itens ?? [];
+    if (itens.length > 0 && this.itensEdital) {
+      const validos = new Set(await this.itensEdital.idsDoEdital(editalId));
+      for (const it of itens) if (!validos.has(it.itemId)) throw new ItemForaDoEdital(it.itemId);
+    }
+
+    const cred = Credenciamento.iniciar({ id: randomUUID(), fornecedorId, editalId, itens: itens.length ? itens : undefined, capacidadeTeto: entrada.capacidade, userName: actor.userId });
     await this.repo.salvar(cred);
     await this.bus.publish(
       new CredenciamentoIniciado(cred.id, { credenciamentoId: cred.id, fornecedorId, editalId, capacidadeTeto: cred.capacidadeTeto }, { userId: actor.userId, empresaId: fornecedorId })

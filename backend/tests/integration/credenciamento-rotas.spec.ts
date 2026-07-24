@@ -292,4 +292,34 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     const det = await app.inject({ method: 'GET', url: `/credenciamentos/${credId}`, headers: outraEmpresa });
     expect(det.statusCode).toBe(404);
   });
+
+  // Credenciamento POR ITEM (RN005): capacidade declarada por item do edital.
+  let seqMat = 0;
+  async function criarEditalComItem(): Promise<{ editalId: string; itemId: string }> {
+    seqMat += 1;
+    const mat = await app.inject({ method: 'POST', url: '/catalogos/materiais-servicos', headers: gestor, payload: { nome: `Material item-cred ${seqMat}`, unidades: ['un'] } });
+    const materialId = mat.json().id as string;
+    const editalId = await criar(['1412601']); // rascunho (itens só entram antes de publicar)
+    const item = await app.inject({ method: 'POST', url: `/editais/${editalId}/itens`, headers: gestor, payload: { itemCatalogoId: materialId, unidade: 'un', quantidade: 100, precoTeto: 10 } });
+    const itemId = item.json().id as string;
+    await app.inject({ method: 'POST', url: `/editais/${editalId}/publicar`, headers: gestor });
+    return { editalId, itemId };
+  }
+
+  it('credencia por item: itens válidos → 201 e capacidade agregada = soma', async () => {
+    const { editalId, itemId } = await criarEditalComItem();
+    const r = await app.inject({ method: 'POST', url: `/editais/${editalId}/credenciamentos`, headers: forn(), payload: { itens: [{ itemId, capacidadeTeto: 60 }] } });
+    expect(r.statusCode).toBe(201);
+    const credId = r.json().credenciamentoId as string;
+    const meu = await app.inject({ method: 'GET', url: `/editais/${editalId}/credenciamentos/meu`, headers: forn() });
+    expect(meu.json()).toMatchObject({ capacidadeTeto: 60, itens: [{ itemId, capacidadeTeto: 60 }] });
+    expect(credId).toBeTruthy();
+  });
+
+  it('credencia com item que não pertence ao edital → 422 ItemForaDoEdital', async () => {
+    const { editalId } = await criarEditalComItem();
+    const r = await app.inject({ method: 'POST', url: `/editais/${editalId}/credenciamentos`, headers: forn(), payload: { itens: [{ itemId: 'nao-existe', capacidadeTeto: 10 }] } });
+    expect(r.statusCode).toBe(422);
+    expect(r.json()).toMatchObject({ codigo: 'ItemForaDoEdital' });
+  });
 });

@@ -1,6 +1,6 @@
 import type { CredenciamentoRepository } from './solicitar-credenciamento.js';
 import type { EditalLookup, SecretariaLookup } from './listar-credenciamentos.js';
-import { TOTAL_PASSOS_CREDENCIAMENTO, type Credenciamento, type EstadoCredenciamento, type StatusProvaVida, type TermoAceite } from '../domain/credenciamento.js';
+import { TOTAL_PASSOS_CREDENCIAMENTO, type Credenciamento, type CapacidadeItem, type EstadoCredenciamento, type StatusProvaVida, type TermoAceite } from '../domain/credenciamento.js';
 
 /**
  * Detalhe de leitura de um credenciamento para a tela "Visualizar" do portal (UC004). Reúne o que o
@@ -16,7 +16,8 @@ export interface CredenciamentoDetalhe {
   numeroEdital: string | null; // ED-AAAA/NNN (null se o edital sumiu)
   objeto: string | null;
   secretariaSigla: string | null; // sigla do catálogo; cai para o id quando não catalogada
-  capacidadeTeto: number; // teto declarado (RN005)
+  capacidadeTeto: number; // teto declarado AGREGADO (soma dos itens; ou teto único legado) — RN005
+  itens: CapacidadeItem[]; // capacidade declarada por item do edital ([] em credenciamentos legados)
   passoAtual: number;
   totalPassos: number;
   provaVidaStatus: StatusProvaVida | null; // veredito da prova de vida facial (UC007); null enquanto não verificada
@@ -65,6 +66,7 @@ export class DetalharCredenciamento {
       objeto: e?.objeto ?? null,
       secretariaSigla: await this.sigla(e?.secretariaId ?? null),
       capacidadeTeto: c.capacidadeTeto,
+      itens: c.itens.map((i) => ({ ...i })),
       passoAtual: c.passoAtual,
       totalPassos: TOTAL_PASSOS_CREDENCIAMENTO,
       provaVidaStatus: c.provaVida?.status ?? null,

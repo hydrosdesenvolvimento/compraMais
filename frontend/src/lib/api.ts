@@ -78,8 +78,8 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 }
 
 // --- Tipos de leitura ---
-export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null; quantitativos: number }
-export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }
+export interface EditalItem { id: string; objeto: string; secretariaId: string; prazoVigencia: string | null }
+export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null }
 /** Página da busca de gestão de editais (`GET /gestao/editais`): itens + total do filtro para o pager. */
 export interface PaginaEditais { items: EditalGestao[]; total: number; page: number; size: number }
 /** Filtros da tela de gestão de editais; todos opcionais (QBE). `texto` casa parcial em número/objeto. */

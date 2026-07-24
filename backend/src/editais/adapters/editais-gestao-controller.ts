@@ -26,7 +26,7 @@ export function registrarRotasGestaoEditais(app: FastifyInstance, deps: { gerir:
   app.post('/editais', async (req, reply) => {
     const id = exigirPapel(req, reply, PERFIS_GESTAO);
     if (!id) return reply;
-    const body = req.body as { secretariaId: string; objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string };
+    const body = req.body as { secretariaId: string; objeto: string; cnaesAlvo: string[]; prazoVigencia: string };
     try {
       const out = await deps.gerir.criar(body, { userId: id.userId });
       return reply.code(201).send({ ...out, situacao: 'rascunho' });

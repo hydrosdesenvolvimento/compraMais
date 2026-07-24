@@ -43,8 +43,8 @@ describe('Inicio — home do fornecedor com dados reais', () => {
 
   it('deriva os KPIs dos dados reais (editais, credenciamentos, documentos aprovados/total)', async () => {
     editaisCompativeis.mockResolvedValue([
-      { id: 'e1', objeto: 'Fardamento escolar', secretariaId: 's1', prazoVigencia: '2099-12-31', quantitativos: 100 },
-      { id: 'e2', objeto: 'Uniformes hospitalares', secretariaId: 's2', prazoVigencia: null, quantitativos: 50 },
+      { id: 'e1', objeto: 'Fardamento escolar', secretariaId: 's1', prazoVigencia: '2099-12-31' },
+      { id: 'e2', objeto: 'Uniformes hospitalares', secretariaId: 's2', prazoVigencia: null },
     ]);
     documentos.mockResolvedValue([
       { id: 'd1', tipo: 'cnpj', situacao: 'vigente', status: 'aprovado', dataValidade: null },

@@ -12,12 +12,9 @@ const POR_PAGINA = 10;
 /**
  * Gestão de Editais (SGMA) — tela única de editais do Painel Admin em `/admin/editais` (FR-001/003/004).
  * Lista todos os editais (todas as secretarias/situações) via QBE sem probe; cria em rascunho (modal
- * "Novo edital"), publica e encerra. Layout fiel a `spec/Prototipo/painel-administrativo.html`: colunas
- * Edital (nº + CNAE), Objeto (+ quantitativo), Secretaria, Prazo, Status e Ações.
- *
- * Onde o mockup pede dado sem lastro no domínio ("placeholder honesto"): o protótipo exibia "Valor
- * estimado" — omitido, pois não existe no domínio e RN013 veda montantes. O `numero` oficial (ED-AAAA/NNN)
- * é gerado no backend ao criar (identificador humano, não montante); por isso o modal de criação não o
+ * "Novo edital"), publica e encerra. Colunas: Edital (nº + CNAE), Objeto, Secretaria, Prazo, Status e
+ * Ações. A quantidade não é mais campo do edital — vive nos itens (gerenciados pela ação "Itens" no
+ * rascunho). O `numero` oficial (ED-AAAA/NNN) é gerado no backend ao criar; o modal de criação não o
  * coleta. "Ver" abre um modal read-only com os dados da própria listagem (sem nova chamada).
  */
 
@@ -83,8 +80,8 @@ export function GerirEditais() {
   }, [secretariasLista]);
 
   const criar = useMutation({
-    mutationFn: (v: { objeto: string; secretariaId: string; cnae: string; quantitativos: number; prazo: string }) =>
-      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), quantitativos: v.quantitativos, prazoVigencia: v.prazo }),
+    mutationFn: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string }) =>
+      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo }),
     // Recém-criado nasce em rascunho: abre direto o gerenciador de itens para o gestor cadastrá-los.
     onSuccess: (res) => { setCriando(false); void invalidar(); setItensId(res.editalId); },
   });
@@ -205,7 +202,6 @@ export function GerirEditais() {
                         </td>
                         <td style={{ ...celula, minWidth: 240 }}>
                           <div style={{ font: '500 14px var(--font-body)', color: 'var(--azul-900)', maxWidth: 320 }}>{e.objeto}</div>
-                          <div style={{ fontSize: 12, color: 'var(--cinza-400)' }}>{t('admin.gerirEditais.unidades', { n: e.quantitativos })}</div>
                         </td>
                         <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-500)', whiteSpace: 'nowrap' }}>{siglaDe(e.secretariaId)}</td>
                         <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-500)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{formatarPrazo(e.prazoVigencia)}</td>
@@ -262,7 +258,6 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
     [t('admin.gerirEditais.campoObjeto'), edital.objeto],
     [t('admin.gerirEditais.campoSecretaria'), sigla],
     [t('admin.gerirEditais.campoCnaes'), edital.cnaesAlvo.map(formatarCnae).join(', ') || '—'],
-    [t('admin.gerirEditais.campoQuantitativos'), t('admin.gerirEditais.unidades', { n: edital.quantitativos })],
     [t('admin.gerirEditais.campoPrazo'), prazo],
     [t('admin.gerirEditais.campoStatus'), rotuloSituacao(edital.situacao)],
   ];
@@ -301,12 +296,12 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
 function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
   secretarias: CatalogoItemView[];
   salvando: boolean;
-  onSalvar: (v: { objeto: string; secretariaId: string; cnae: string; quantitativos: number; prazo: string }) => void;
+  onSalvar: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string }) => void;
   onFechar: () => void;
 }) {
   const { t } = useTranslation();
   const form = useForm({
-    defaultValues: { objeto: '', secretariaId: '', cnae: '', quantitativos: 1, prazo: '' },
+    defaultValues: { objeto: '', secretariaId: '', cnae: '', prazo: '' },
     onSubmit: ({ value }) => onSalvar(value),
   });
   return (
@@ -357,18 +352,12 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
           </div>
           <span style={{ display: 'block', margin: '-6px 0 12px', fontSize: 12, color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.cnaeAjuda')}</span>
 
-          <div className="cm-form-grid">
-            <form.Field name="quantitativos">{(f) => (
-              <Campo label={t('admin.gerirEditais.quantitativosLabel')} htmlFor="edital-quantitativos">
-                <input id="edital-quantitativos" data-cy="quantitativos" className="input" type="number" min={1} value={f.state.value} onChange={(ev) => f.handleChange(Number(ev.target.value))} />
-              </Campo>
-            )}</form.Field>
-            <form.Field name="prazo">{(f) => (
-              <Campo label={t('admin.gerirEditais.prazoLabel')} htmlFor="edital-prazo">
-                <input id="edital-prazo" data-cy="prazo" className="input" type="date" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
-              </Campo>
-            )}</form.Field>
-          </div>
+          {/* A quantidade deixou de ser campo do edital: passou a viver nos itens (gerenciados após criar). */}
+          <form.Field name="prazo">{(f) => (
+            <Campo label={t('admin.gerirEditais.prazoLabel')} htmlFor="edital-prazo">
+              <input id="edital-prazo" data-cy="prazo" className="input" type="date" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
+            </Campo>
+          )}</form.Field>
 
           <div data-cy="nota-soft-delete" style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '4px 0 18px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-700)', fontSize: 13, lineHeight: 1.5 }}>
             <span aria-hidden>ℹ</span>

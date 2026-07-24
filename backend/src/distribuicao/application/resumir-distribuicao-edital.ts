@@ -6,14 +6,13 @@ import type { FornecedorRepository } from '../../catalogo/application/fornecedor
 import type { SecretariaLookup } from '../../credenciamento/application/listar-credenciamentos.js';
 
 /**
- * Leitura mínima do edital para o cabeçalho + a demanda (quantitativos). Uma instância de `Edital`
- * (getters `numero`/`objeto`/`secretariaId`/`situacao`/`quantitativos`, `id` da EntidadeBase) satisfaz
- * este contrato estruturalmente, então o `EditalRepository` real é passado direto no server.
+ * Leitura mínima do edital para o cabeçalho + a demanda. A `demanda` deixou de ser um campo do edital e
+ * passa a ser a **soma das quantidades dos itens** (o server compõe o lookup com o repo de itens).
  */
 export interface EditalResumoDistribuicaoLookup {
   porId(id: string): Promise<{
     id: string; numero: string; objeto: string; secretariaId: string;
-    situacao: string; quantitativos: number;
+    situacao: string; demanda: number;
   } | null>;
 }
 
@@ -85,7 +84,7 @@ export class ResumoDistribuicaoEdital {
           versao: matriz.versao,
           homologada: true,
         }
-      : await this.preview(editalId, e.quantitativos);
+      : await this.preview(editalId, e.demanda);
 
     const rateio: RateioLinha[] = await Promise.all(
       base.alocacoes.map(async (a) => {

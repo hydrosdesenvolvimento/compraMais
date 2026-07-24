@@ -11,7 +11,6 @@ export interface EditalState {
   secretariaId: string;
   objeto: string;
   cnaesAlvo: string[];
-  quantitativos: number;
   prazoVigencia: string | null;
   situacao: SituacaoEdital;
 }
@@ -20,6 +19,10 @@ export interface EditalState {
  * Edital — entidade rica que estende EntidadeBase (AD-33). Invariante RN007/AD-11: UMA secretaria,
  * UMA demanda (inacumulável). Ciclo de vida: rascunho → publicado → encerrado (research D2; o estado
  * legado `aberto`/`distribuido` foi reconciliado — `distribuido` fica reservado ao Épico 5/motor).
+ *
+ * O edital NÃO carrega mais um quantitativo agregado: a quantidade vive nos **itens** do edital
+ * (`ItemEdital.quantidade`). A demanda total (ex.: entrada do Motor de Distribuição) é derivada da
+ * soma das quantidades dos itens fora do agregado.
  */
 export class Edital extends EntidadeBase {
   private constructor(
@@ -28,7 +31,6 @@ export class Edital extends EntidadeBase {
     readonly secretariaId: string,
     private _objeto: string,
     private _cnaesAlvo: string[], // CNAE subclasse 7 dígitos (D2)
-    private _quantitativos: number, // agregado no MVP; Item×Lote diferido ao Épico 5
     private _prazoVigencia: string | null,
     private _situacao: SituacaoEdital,
   ) {
@@ -38,14 +40,14 @@ export class Edital extends EntidadeBase {
   static criar(input: {
     id: string; numero: string; secretariaId: string; objeto: string;
     cnaesAlvo?: string[]; subclassesExigidas?: string[]; // alias legado aceito
-    quantitativos?: number; prazoVigencia?: string | null; userName?: string;
+    prazoVigencia?: string | null; userName?: string;
   }): Edital {
     if (!input.secretariaId) throw new EditalSemSecretaria();
     const cnaes = input.cnaesAlvo ?? input.subclassesExigidas ?? [];
     return new Edital(
       EntidadeBase.metaNova(input.id, input.userName),
       exigirNumeroEdital(input.numero),
-      input.secretariaId, input.objeto, [...cnaes], input.quantitativos ?? 0,
+      input.secretariaId, input.objeto, [...cnaes],
       input.prazoVigencia ?? null, 'rascunho',
     );
   }
@@ -54,7 +56,7 @@ export class Edital extends EntidadeBase {
   static deEstado(s: EditalState): Edital {
     return new Edital(
       s.meta, exigirNumeroEdital(s.numero), s.secretariaId, s.objeto, [...s.cnaesAlvo],
-      s.quantitativos, s.prazoVigencia, s.situacao,
+      s.prazoVigencia, s.situacao,
     );
   }
 
@@ -64,7 +66,7 @@ export class Edital extends EntidadeBase {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
       numero: this.numero,
       secretariaId: this.secretariaId, objeto: this._objeto, cnaesAlvo: [...this._cnaesAlvo],
-      quantitativos: this._quantitativos, prazoVigencia: this._prazoVigencia, situacao: this._situacao,
+      prazoVigencia: this._prazoVigencia, situacao: this._situacao,
     };
   }
 
@@ -72,16 +74,15 @@ export class Edital extends EntidadeBase {
   get cnaesAlvo(): readonly string[] { return this._cnaesAlvo; }
   /** Alias consumido pela vitrine (002, `ListarEditaisCompativeis`) e por `Fornecedor.compativelCom`. */
   get subclassesExigidas(): readonly string[] { return this._cnaesAlvo; }
-  get quantitativos(): number { return this._quantitativos; }
   get prazoVigencia(): string | null { return this._prazoVigencia; }
   get situacao(): SituacaoEdital { return this._situacao; }
 
-  /** Completude obrigatória para publicar (FR-004). */
+  /** Completude obrigatória para publicar (FR-004). A demanda deixou de ser campo do edital (vive nos
+   *  itens), então não entra mais aqui; exigir ≥1 item para publicar é decisão do fluxo item-cêntrico. */
   private validarParaPublicacao(): void {
     const faltas: string[] = [];
     if (!this._objeto?.trim()) faltas.push('objeto');
     if (this._cnaesAlvo.length === 0) faltas.push('cnaesAlvo');
-    if (!(this._quantitativos > 0)) faltas.push('quantitativos');
     if (!this._prazoVigencia) faltas.push('prazoVigencia');
     if (faltas.length) throw new EditalIncompleto(faltas);
   }
@@ -104,7 +105,7 @@ export class Edital extends EntidadeBase {
    * `ampliouPublico` = adicionou CNAE alvo (FR-014 — vitrine reavaliada, prazo mantido).
    */
   editar(
-    campos: Partial<{ objeto: string; cnaesAlvo: string[]; quantitativos: number; prazoVigencia: string | null }>,
+    campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null }>,
     userName: string,
   ): { diff: CampoDiff[]; ampliouPublico: boolean } {
     const diff: CampoDiff[] = [];
@@ -121,10 +122,6 @@ export class Edital extends EntidadeBase {
         diff.push({ campo: 'cnaesAlvo', antes, depois });
         this._cnaesAlvo = depois;
       }
-    }
-    if (campos.quantitativos !== undefined && campos.quantitativos !== this._quantitativos) {
-      diff.push({ campo: 'quantitativos', antes: this._quantitativos, depois: campos.quantitativos });
-      this._quantitativos = campos.quantitativos;
     }
     if (campos.prazoVigencia !== undefined && campos.prazoVigencia !== this._prazoVigencia) {
       diff.push({ campo: 'prazoVigencia', antes: this._prazoVigencia, depois: campos.prazoVigencia });

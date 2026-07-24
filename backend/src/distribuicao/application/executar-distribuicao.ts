@@ -9,9 +9,13 @@ import type { FornecedorRepository } from '../../catalogo/application/fornecedor
 
 type Actor = { userId: string; empresaId?: string };
 
-/** Fonte de leitura mínima do edital para distribuir (guarda de estado + demanda). */
+/**
+ * Fonte de leitura mínima do edital para distribuir: guarda de estado + demanda total. A `demanda`
+ * deixou de ser um campo do edital e passa a ser a **soma das quantidades dos itens** (o edital não tem
+ * mais quantitativo agregado); quem implementa a porta faz essa soma.
+ */
 export interface EditalParaDistribuir {
-  porId(id: string): Promise<{ podeDistribuir: boolean; quantitativos: number } | null>;
+  porId(id: string): Promise<{ podeDistribuir: boolean; demanda: number } | null>;
 }
 
 /** Cota vigente de um fornecedor num edital (projeção de leitura para "Demandas distribuídas"). */
@@ -62,7 +66,7 @@ export class ExecutarDistribuicao {
     const aptos = await montarAptosDoEdital(this.creds, this.fornecedores, editalId);
 
     // Kernel puro (AD-7/AD-24): lança SemAptos se `aptos` vazio, DemandaInvalida se demanda ≤ 0.
-    const resultado = distribuir({ demanda: e.quantitativos, aptos });
+    const resultado = distribuir({ demanda: e.demanda, aptos });
     const versao = (await this.repo.contarDoEdital(editalId)) + 1;
     const registro = montarRegistro({ id: randomUUID(), editalId, versao, geradoEm: this.now(), resultado });
     await this.repo.append(registro); // append-only — jamais sobrescreve versões anteriores (AD-10)

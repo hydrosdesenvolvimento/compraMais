@@ -12,10 +12,10 @@ describe('Busca de editais — QBE (US3 / FR-011)', () => {
     repo = new EditalRepositoryMemory();
     const gerir = new GerirEditais(repo, new InMemoryEventBus());
     const a = { userId: 'g' };
-    const e1 = await gerir.criar({ secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], quantitativos: 5, prazoVigencia: '2099-12-31' }, a);
+    const e1 = await gerir.criar({ secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], prazoVigencia: '2099-12-31' }, a);
     await gerir.publicar(e1.editalId, a); // publicado
-    await gerir.criar({ secretariaId: 's1', objeto: 'limpeza', cnaesAlvo: ['8121400'], quantitativos: 5, prazoVigencia: '2099-12-31' }, a); // rascunho
-    const e3 = await gerir.criar({ secretariaId: 's2', objeto: 'mobiliario', cnaesAlvo: ['3101200'], quantitativos: 5, prazoVigencia: '2099-12-31' }, a);
+    await gerir.criar({ secretariaId: 's1', objeto: 'limpeza', cnaesAlvo: ['8121400'], prazoVigencia: '2099-12-31' }, a); // rascunho
+    const e3 = await gerir.criar({ secretariaId: 's2', objeto: 'mobiliario', cnaesAlvo: ['3101200'], prazoVigencia: '2099-12-31' }, a);
     await gerir.publicar(e3.editalId, a);
     buscar = new BuscarEditais(repo);
   });
@@ -61,11 +61,10 @@ describe('Busca de editais — QBE (US3 / FR-011)', () => {
     expect(p.items).toHaveLength(3);
   });
 
-  // A tela "Operação · Editais" (Painel Admin) consome número, quantitativo e prazo desta busca.
-  it('expõe número oficial, quantitativo e prazo no read model', async () => {
+  // A tela "Operação · Editais" (Painel Admin) consome número e prazo desta busca.
+  it('expõe número oficial e prazo no read model', async () => {
     const [merenda] = await buscar.buscar({ secretariaId: 's1', situacao: 'publicado' });
     expect(merenda.numero).toMatch(/^ED-\d{4}\/\d{3}$/);
-    expect(merenda.quantitativos).toBe(5);
     expect(merenda.prazoVigencia).toBe('2099-12-31');
     expect(merenda.cnaesAlvo).toEqual(['1091101']);
   });

@@ -35,7 +35,7 @@ const MATERIAIS: CatalogoItemView[] = [
 ];
 
 function edital(over: Partial<EditalGestao> & Pick<EditalGestao, 'id' | 'numero'>): EditalGestao {
-  return { objeto: 'Objeto', secretariaId: 's1', situacao: 'publicado', cnaesAlvo: ['1412601'], quantitativos: 10, prazoVigencia: '2099-12-31', ...over };
+  return { objeto: 'Objeto', secretariaId: 's1', situacao: 'publicado', cnaesAlvo: ['1412601'], prazoVigencia: '2099-12-31', ...over };
 }
 
 /** Envelope paginado do contrato `GET /gestao/editais`; `total` default = tamanho da página. */
@@ -159,16 +159,15 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     fireEvent.change(screen.getByTestId('objeto'), { target: { value: 'Merenda escolar' } });
     fireEvent.change(screen.getByTestId('secretaria'), { target: { value: 's2' } });
     fireEvent.change(screen.getByTestId('cnae'), { target: { value: '1091101' } });
-    fireEvent.change(screen.getByTestId('quantitativos'), { target: { value: '100' } });
     fireEvent.change(screen.getByTestId('prazo'), { target: { value: '2026-12-31' } });
     fireEvent.click(screen.getByTestId('criar'));
 
+    // A quantidade não é mais campo do edital (vive nos itens): o payload de criação não a inclui.
     await waitFor(() => expect(criarEdital).toHaveBeenCalledTimes(1));
     expect(criarEdital).toHaveBeenCalledWith({
       secretariaId: 's2',
       objeto: 'Merenda escolar',
       cnaesAlvo: ['1091101'],
-      quantitativos: 100,
       prazoVigencia: '2026-12-31',
     });
   });

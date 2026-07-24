@@ -2,7 +2,7 @@ import type { Edital } from '../domain/edital.js';
 import type { EditalRepository, EditalProbe, PaginacaoReq } from './listar-editais-compativeis.js';
 
 /** Read model de um edital na busca de gestão (número/quantitativo/prazo alimentam a tela "Operação · Editais"). */
-export interface EditalView { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: readonly string[]; quantitativos: number; prazoVigencia: string | null }
+export interface EditalView { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: readonly string[]; prazoVigencia: string | null }
 
 /** Página de resultados: itens da página corrente + total do filtro (pager) + eco de page/size aplicados. */
 export interface PaginaEditais { items: EditalView[]; total: number; page: number; size: number }
@@ -15,7 +15,7 @@ export class BuscarEditais {
 
   async buscar(probe: EditalProbe, page?: PaginacaoReq): Promise<EditalView[]> {
     const editais = await this.repo.buscarPorExemplo(probe, page);
-    // `numero`/`quantitativos`/`prazoVigencia` alimentam a tela "Operação · Editais" (Painel Admin). O número
+    // `numero`/`prazoVigencia` alimentam a tela "Operação · Editais" (Painel Admin). O número
     // oficial (ED-AAAA/NNN) é identificador humano, não montante — RN013 veda valores, não a numeração.
     return editais.map(paraView);
   }
@@ -36,5 +36,5 @@ export class BuscarEditais {
 }
 
 function paraView(e: Edital): EditalView {
-  return { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, cnaesAlvo: e.cnaesAlvo, quantitativos: e.quantitativos, prazoVigencia: e.prazoVigencia };
+  return { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, cnaesAlvo: e.cnaesAlvo, prazoVigencia: e.prazoVigencia };
 }

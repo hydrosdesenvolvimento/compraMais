@@ -5,7 +5,7 @@ import { InMemoryEventBus } from '../../src/shared/events/event-bus.js';
 
 describe('Gestão de editais (US1)', () => {
   let repo: EditalRepositoryMemory; let bus: InMemoryEventBus; let uc: GerirEditais; const actor = { userId: 'gestor1' };
-  const base = { secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], quantitativos: 100, prazoVigencia: '2099-12-31' };
+  const base = { secretariaId: 's1', objeto: 'merenda', cnaesAlvo: ['1091101'], prazoVigencia: '2099-12-31' };
 
   beforeEach(() => { repo = new EditalRepositoryMemory(); bus = new InMemoryEventBus(); uc = new GerirEditais(repo, bus); });
 
@@ -21,7 +21,8 @@ describe('Gestão de editais (US1)', () => {
   });
 
   it('publicar incompleto → erro com o que falta (FR-004)', async () => {
-    const { editalId } = await uc.criar({ ...base, quantitativos: 0 }, actor);
+    // Sem CNAE alvo o edital fica incompleto para publicar (a demanda deixou de ser campo do edital).
+    const { editalId } = await uc.criar({ ...base, cnaesAlvo: [] }, actor);
     await expect(uc.publicar(editalId, actor)).rejects.toThrow(/incomplete/i);
   });
 

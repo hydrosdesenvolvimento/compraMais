@@ -17,8 +17,8 @@ vi.mock('../../lib/api', () => ({
 }));
 
 const EDITAIS: EditalGestao[] = [
-  { id: 'e1', numero: 'ED-2026/001', objeto: 'Confecção de fardamento escolar', secretariaId: 's1', situacao: 'publicado', cnaesAlvo: ['1412601'], quantitativos: 100, prazoVigencia: null },
-  { id: 'e2', numero: 'ED-2026/002', objeto: 'Mobiliário escolar', secretariaId: 's1', situacao: 'publicado', cnaesAlvo: ['3101200'], quantitativos: 50, prazoVigencia: null },
+  { id: 'e1', numero: 'ED-2026/001', objeto: 'Confecção de fardamento escolar', secretariaId: 's1', situacao: 'publicado', cnaesAlvo: ['1412601'], prazoVigencia: null },
+  { id: 'e2', numero: 'ED-2026/002', objeto: 'Mobiliário escolar', secretariaId: 's1', situacao: 'publicado', cnaesAlvo: ['3101200'], prazoVigencia: null },
 ];
 
 const ELEGIVEIS_E1: EditalElegiveisView = {

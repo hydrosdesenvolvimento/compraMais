@@ -22,7 +22,7 @@ export function registrarRotasEditais(app: FastifyInstance, deps: { vitrine: Lis
     // um segundo round-trip. `secretariaId` é resolvido para sigla no front (catálogo de secretarias).
     return reply.send(lista.map((e) => ({
       id: e.id, objeto: e.objeto, secretariaId: e.secretariaId,
-      prazoVigencia: e.prazoVigencia, quantitativos: e.quantitativos,
+      prazoVigencia: e.prazoVigencia,
     })));
   });
 

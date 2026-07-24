@@ -8,13 +8,18 @@ import { comoPapel } from '../helpers/auth.js';
  * rateio/preview/homologação é coberta em unidade (resumir-distribuicao-edital.spec.ts); aqui o
  * wiring/RBAC/shape.
  */
+// A demanda do resumo vem da soma das quantidades dos ITENS (o edital não tem mais quantitativo
+// agregado): cria o edital, um item de catálogo e um item de edital com quantidade 600, e publica.
 async function criarEditalPublicado(app: Awaited<ReturnType<typeof buildServer>>): Promise<string> {
+  const smga = comoPapel('smga', { userId: 'sec1' });
   const criado = await app.inject({
-    method: 'POST', url: '/editais', headers: comoPapel('smga', { userId: 'sec1' }),
-    payload: { secretariaId: 'sec-educacao', objeto: 'Mobiliário escolar', cnaesAlvo: ['1412601'], quantitativos: 600, prazoVigencia: '2099-12-31' },
+    method: 'POST', url: '/editais', headers: smga,
+    payload: { secretariaId: 'sec-educacao', objeto: 'Mobiliário escolar', cnaesAlvo: ['1412601'], prazoVigencia: '2099-12-31' },
   });
   const { editalId } = criado.json() as { editalId: string };
-  await app.inject({ method: 'POST', url: `/editais/${editalId}/publicar`, headers: comoPapel('smga', { userId: 'sec1' }) });
+  const cat = await app.inject({ method: 'POST', url: '/catalogos/materiais-servicos', headers: smga, payload: { nome: 'Mobiliário escolar (item)', tipo: 'material', unidades: ['un'] } });
+  await app.inject({ method: 'POST', url: `/editais/${editalId}/itens`, headers: smga, payload: { itemCatalogoId: cat.json().id, unidade: 'un', quantidade: 600, precoTeto: 250 } });
+  await app.inject({ method: 'POST', url: `/editais/${editalId}/publicar`, headers: smga });
   return editalId;
 }
 

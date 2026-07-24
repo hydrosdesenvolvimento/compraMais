@@ -2,6 +2,8 @@ import { useState, type ComponentProps, type CSSProperties, type ReactNode } fro
 import { Link, useRouterState, useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { limparSessao } from '../lib/auth';
+import type { FonteBusca } from '../lib/busca-global';
+import { BuscaGlobal } from './BuscaGlobal';
 import { LanguageSwitcher } from './LanguageSwitcher';
 import {
   IconeBusca, IconeSino, IconeChevron, IconeMenu,
@@ -34,7 +36,7 @@ function AvatarChip({ usuario, style }: { usuario: UsuarioChip; style?: CSSPrope
  */
 export function AppShell({
   menu, usuario, children, rodapeKey = 'common.shell.footerFornecedor',
-  notificacoes = [], contaHref = '/minha-conta' as MenuLinkTo, alerta, verTodasHref, onNotificacao,
+  notificacoes = [], contaHref = '/minha-conta' as MenuLinkTo, alerta, verTodasHref, onNotificacao, fontesBusca,
 }: {
   menu: ItemMenu[]; usuario: UsuarioChip; children: ReactNode; rodapeKey?: string;
   notificacoes?: Notificacao[]; contaHref?: MenuLinkTo;
@@ -44,6 +46,8 @@ export function AppShell({
   verTodasHref?: string;
   /** Clique numa notificação (ex.: marcar lida). A navegação usa `n.href`. */
   onNotificacao?: (n: Notificacao) => void;
+  /** Fontes da busca global da topbar (editais/documentos/fornecedores). Sem elas, cai no input estático. */
+  fontesBusca?: FonteBusca[];
 }) {
   const { t } = useTranslation();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -96,10 +100,14 @@ export function AppShell({
       <div className="cm-main" data-collapsed={recolhido ? '1' : '0'}>
         <header className="cm-topbar">
           <button className="cm-hamburger" onClick={alternarMenu} aria-label={t('common.shell.openMenu')}><IconeMenu /></button>
-          <div className="cm-search">
-            <IconeBusca width={17} height={17} stroke="var(--cinza-400)" />
-            <input data-cy="busca" placeholder={t('common.shell.search')} aria-label={t('common.shell.searchAria')} />
-          </div>
+          {fontesBusca && fontesBusca.length > 0 ? (
+            <BuscaGlobal fontes={fontesBusca} />
+          ) : (
+            <div className="cm-search">
+              <IconeBusca width={17} height={17} stroke="var(--cinza-400)" />
+              <input data-cy="busca" placeholder={t('common.shell.search')} aria-label={t('common.shell.searchAria')} />
+            </div>
+          )}
           <div style={{ flex: 1 }} />
 
           <LanguageSwitcher />

@@ -37,6 +37,15 @@
       "menu": "MENU",
       "search": "Buscar editais, documentos…",
       "searchAria": "Buscar",
+      "busca": {
+        "carregando": "Buscando…",
+        "vazio": "Nenhum resultado para “{{termo}}”.",
+        "tipo": {
+          "editais": "Editais",
+          "documentos": "Documentos",
+          "fornecedores": "Fornecedores"
+        }
+      },
       "openMenu": "Abrir menu",
       "notificationsAria": "Notificações",
       "notificationsTitle": "Notificações",

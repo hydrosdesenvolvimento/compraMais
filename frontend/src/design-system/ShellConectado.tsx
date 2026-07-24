@@ -10,6 +10,7 @@ import { montarChip } from '../lib/usuario-chip';
 import { menuAdminVisivel, telasPadraoDoPapel } from '../lib/telas-admin';
 import { construirNotificacoesFornecedor } from '../lib/notificacoes-fornecedor';
 import { renderNotificacao } from '../lib/notificacoes-render';
+import { fontesBuscaAdmin, fontesBuscaFornecedor } from '../lib/fontes-busca';
 
 /** Rótulo localizado do papel RBAC (fallback: o próprio código, ou "visitante" quando sem sessão). */
 function rotuloPapel(t: TFunction, papel: string | undefined): string {
@@ -78,9 +79,11 @@ export function ShellFornecedor({ menu }: { menu: ItemMenu[] }) {
     return [...alertas, ...persistidas];
   }, [documentos.data, notif.data, secretarias.data, t, i18n.language]);
 
+  const fontesBusca = useMemo(() => fontesBuscaFornecedor(empresaId, secretariasLista), [empresaId, secretarias.data]);
+
   return (
     <AppShell
-      menu={menuVisivel} usuario={chip} notificacoes={notificacoes}
+      menu={menuVisivel} usuario={chip} notificacoes={notificacoes} fontesBusca={fontesBusca}
       alerta={naoLidas > 0 || notificacoes.some((n) => n.lida === undefined)}
       verTodasHref="/notificacoes"
       onNotificacao={(n) => { if (n.id && n.lida === false) marcarLida.mutate(n.id); }}
@@ -112,8 +115,16 @@ export function ShellAdmin() {
   // (e o demo sem sessão) nunca fiquem sem menu se a consulta ainda não resolveu ou falhou.
   const telas = data?.telas ?? obterTelasAdmin() ?? telasPadraoDoPapel(u?.papel);
   const menu = menuAdminVisivel(telas);
+
+  // Secretarias (catálogo) para resolver a sigla nos resultados de busca de editais.
+  const secretarias = useQuery({ queryKey: ['catalogo', 'secretarias'], queryFn: () => api.catalogoListar('secretarias'), staleTime: 5 * 60_000 });
+  const fontesBusca = useMemo(
+    () => fontesBuscaAdmin(u?.papel, (secretarias.data as CatalogoItemView[] | undefined) ?? []),
+    [u?.papel, secretarias.data],
+  );
+
   return (
-    <AppShell menu={menu} usuario={chip} rodapeKey="common.shell.footerAdmin" notificacoes={[]} contaHref="/admin/dashboard">
+    <AppShell menu={menu} usuario={chip} rodapeKey="common.shell.footerAdmin" notificacoes={[]} contaHref="/admin/dashboard" fontesBusca={fontesBusca}>
       <Outlet />
     </AppShell>
   );

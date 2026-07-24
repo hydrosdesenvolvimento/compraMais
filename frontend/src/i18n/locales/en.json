@@ -37,6 +37,15 @@
       "menu": "MENU",
       "search": "Search tenders, documents…",
       "searchAria": "Search",
+      "busca": {
+        "carregando": "Searching…",
+        "vazio": "No results for “{{termo}}”.",
+        "tipo": {
+          "editais": "Tenders",
+          "documentos": "Documents",
+          "fornecedores": "Suppliers"
+        }
+      },
       "openMenu": "Open menu",
       "notificationsAria": "Notifications",
       "notificationsTitle": "Notifications",

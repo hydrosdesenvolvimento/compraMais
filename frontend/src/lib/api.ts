@@ -224,8 +224,12 @@ export interface CargoOpcao { cargo: string; papel: string }
 /** UC010 — peça do malote SEI (documento aprovado): ordem legal CNPJ→Pessoal→Anexos→Certidões (RN008). */
 export type TipoPecaMalote = 'cnpj' | 'pessoal' | 'anexo' | 'certidao';
 export interface PecaMalote { tipo: TipoPecaMalote; ref: string; tamanhoBytes: number }
+/** Protocolo do malote no SEI (integração — Épico 6); null enquanto não enviado. */
+export interface ProtocoloSeiView { numeroProcesso: string; idProtocolo: string; url?: string }
 /** UC010 — malote listado (QBE, FR-007). */
-export interface MaloteListaView { id: string; fornecedorId: string; editalId: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number }
+export interface MaloteListaView { id: string; fornecedorId: string; editalId: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number; protocoloSei?: ProtocoloSeiView | null }
+/** Integração SEI (pull): resultado da consulta de um processo por número. */
+export interface ProcessoSeiView { numero: string; idProtocolo: string; url?: string; documentos: Array<{ idDocumento: string; titulo?: string; pasta?: string }> }
 /** UC010 — detalhe do malote: status + contagem de peças/fragmentos + flag de peça indivisível acima do limite (FR-009). */
 export interface MaloteDetalheView { id: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number; pecas: number; pecaAcimaLimite: boolean }
 /** UC018: resultado da re-sincronização — status + proveniência `{quando, fonte}` da consulta oficial. */
@@ -422,6 +426,9 @@ export const api = {
   maloteDetalhe: (id: string) => get<MaloteDetalheView>(`/malotes/${id}`),
   maloteGerar: (body: { fornecedorId: string; editalId: string; pecas: PecaMalote[] }) => send<{ maloteId: string; status: string }>('/malotes', 'POST', body),
   maloteExportar: (id: string) => send<{ status: string; jaExportado: boolean }>(`/malotes/${id}/exportar`, 'POST'),
+  // Integração SEI (Épico 6). Push: envia o malote ao SEI (cria o processo). Pull: consulta processo.
+  maloteEnviarSei: (id: string) => send<{ maloteId: string; numeroProcesso: string; idProtocolo: string; url?: string; jaProtocolado: boolean }>(`/malotes/${id}/enviar-sei`, 'POST'),
+  seiConsultarProcesso: (numero: string) => get<ProcessoSeiView>(`/sei/processos/${encodeURIComponent(numero)}`),
 
   // UC020 — Catálogos base. Leitura aberta (dado de referência); escritas exigem papel administrador no token.
   catalogoListar: (slug: CatalogoSlug, incluirInativos = false) =>

@@ -88,6 +88,13 @@ services:
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      # Integracao SEI (Epico 6). DEV: 'mock' por padrao (sem SEI); a senha vem do .env quando 'web'.
+      SEI_PROVIDER: ${SEI_PROVIDER:-mock}
+      SEI_BASE_URL: ${SEI_BASE_URL:-}
+      SEI_USUARIO: ${SEI_USUARIO:-}
+      SEI_SENHA: ${SEI_SENHA:-}
+      SEI_SEL_ORGAO: ${SEI_SEL_ORGAO:-}
+      SEI_ID_TIPO_PROCEDIMENTO: ${SEI_ID_TIPO_PROCEDIMENTO:-}
       # Autenticacao (FR-015 / AD-20). Em DEV o JWT_SECRET vem do .env; em prod via Docker secret.
       JWT_SECRET: ${JWT_SECRET:-dev-secret-inseguro-trocar-em-producao}
       JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-3600}
@@ -213,6 +220,16 @@ services:
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
       SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      # Integracao SEI (Epico 6). Default 'mock' (seguro); mude para 'web' quando a TI provisionar as
+      # credenciais/URL/orgao/tipo. Ao habilitar 'web', criar o secret `sei_senha` e apontar
+      # SEI_SENHA_FILE=/run/secrets/sei_senha (e referenciar o secret na lista `secrets:` do servico).
+      # Vazio por padrao para NAO exigir o secret quando SEI_PROVIDER=mock.
+      SEI_PROVIDER: ${SEI_PROVIDER:-mock}
+      SEI_BASE_URL: ${SEI_BASE_URL:-}
+      SEI_USUARIO: ${SEI_USUARIO:-}
+      SEI_SENHA_FILE: ${SEI_SENHA_FILE:-}
+      SEI_SEL_ORGAO: ${SEI_SEL_ORGAO:-}
+      SEI_ID_TIPO_PROCEDIMENTO: ${SEI_ID_TIPO_PROCEDIMENTO:-}
       # Autenticacao: segredo do JWT via Docker secret (nunca em texto). TTL e Google por env.
       # OBRIGATORIO em prod (AD-20/AD-29): sem ele o backend RECUSA subir. O token e a autorizacao —
       # assinar com o segredo de dev (versionado) deixaria qualquer um forjar um administrador.
@@ -231,6 +248,7 @@ services:
       - db_password
       - jwt_secret
       - pii_encryption_key
+      # sei_senha: adicionar aqui apenas ao habilitar SEI_PROVIDER=web (ver bloco `secrets:` no fim).
     networks:
       - compramais
     deploy:
@@ -319,4 +337,9 @@ secrets:
     #   openssl rand -base64 32 | docker secret create pii_encryption_key -
     # Sem ela o backend nao sobe. ATENCAO: perder/rotacionar esta chave torna os documentos ja
     # gravados indecifraveis — nao ha reencriptacao automatica. Guarde-a com o mesmo cuidado do backup.
+    external: true
+  sei_senha:
+    # Senha do usuario do SEI (integracao — Epico 6). So necessaria quando SEI_PROVIDER=web:
+    #   printf '<senha-do-sei>' | docker secret create sei_senha -
+    # Com SEI_PROVIDER=mock (padrao) a integracao nao lê o secret.
     external: true

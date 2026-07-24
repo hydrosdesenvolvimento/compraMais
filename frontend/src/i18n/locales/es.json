@@ -841,7 +841,7 @@
         "documentos": "{{n}} documento(s)",
         "erroConsulta": "No se pudo consultar. Verifique el número, o el SEI puede estar no disponible.",
         "naoConfigurado": "Integración con el SEI no configurada. Defina SEI_BASE_URL y las credenciales del SEI (usuario, contraseña, órgano y tipo de proceso) para habilitar el envío y la consulta.",
-        "naoConfiguradoDica": "Configure la integración con el SEI (SEI_BASE_URL y credenciales)."
+        "naoConfiguradoTitulo": "Integración con el SEI no configurada"
       }
     },
     "analiseDocumental": {

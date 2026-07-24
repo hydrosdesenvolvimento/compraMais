@@ -43,15 +43,18 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
     seiStatus.mockReset().mockResolvedValue({ configurado: true, provider: 'web' }); // configurado por padrão
   });
 
-  it('quando o SEI não está configurado (SEI_BASE_URL ausente): exibe o aviso e desabilita as ações', async () => {
+  it('quando o SEI não está configurado (SEI_BASE_URL ausente): exibe SOMENTE o aviso de configuração', async () => {
     seiStatus.mockResolvedValue({ configurado: false, provider: 'mock' });
     malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2 }]);
     renderTela();
 
     expect(await screen.findByTestId('sei-nao-configurado')).toBeInTheDocument();
-    expect(screen.getByTestId('consultar-sei')).toBeDisabled();
-    await screen.findAllByTestId('item-malote');
-    expect(screen.getByTestId('enviar-sei')).toBeDisabled();
+    // Nada mais da tela é renderizado: sem ações, filtros, tabela ou itens.
+    expect(screen.queryByTestId('novo-malote')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('consultar-sei')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filtros')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tabela-malotes')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('item-malote')).not.toBeInTheDocument();
   });
 
   it('envia um malote gerado ao SEI (push) e mostra o número do processo protocolado', async () => {

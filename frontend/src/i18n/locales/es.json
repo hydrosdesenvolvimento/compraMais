@@ -649,17 +649,13 @@
     },
     "catalogos": {
       "titulo": "Catálogos base",
-      "subtitulo": "Mantenga secretarías, sectores (CNAE), tipos de documento y el catálogo de materiales y servicios. La exclusión es lógica: el ítem inactivado sale de las listas pero conserva sus vínculos.",
+      "subtitulo": "Mantenga sectores (CNAE), tipos de documento y el catálogo de materiales y servicios. La exclusión es lógica: el ítem inactivado sale de las listas pero conserva sus vínculos.",
       "tabs": {
-        "secretarias": "Secretarías",
         "setores": "Sectores (CNAE)",
         "tiposDoc": "Tipos de documento",
         "materiais": "Materiales y servicios"
       },
       "campos": {
-        "nome": "Nombre",
-        "sigla": "Sigla",
-        "responsavel": "Responsable",
         "codigo": "Código CNAE (7 dígitos)",
         "descricao": "Descripción",
         "nomeTipo": "Nombre del tipo",

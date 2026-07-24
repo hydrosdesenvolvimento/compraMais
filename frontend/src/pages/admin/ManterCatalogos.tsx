@@ -57,20 +57,9 @@ const TIPOS_ITEM = [
   { valor: 'servico', labelKey: 'admin.catalogos.tiposItem.servico' },
 ];
 
+// Nota: as Secretarias NÃO figuram aqui — são mantidas na tela dedicada `/admin/secretarias`
+// (`Secretarias.tsx`); a aba foi retirada desta jornada para não duplicar o mesmo cadastro.
 const CATALOGOS: CatalogoDef[] = [
-  {
-    slug: 'secretarias', tabKey: 'admin.catalogos.tabs.secretarias',
-    campos: [
-      { nome: 'nome', labelKey: 'admin.catalogos.campos.nome', tipo: 'text', largura: 'total' },
-      { nome: 'sigla', labelKey: 'admin.catalogos.campos.sigla', tipo: 'text' },
-      { nome: 'responsavel', labelKey: 'admin.catalogos.campos.responsavel', tipo: 'text' },
-    ],
-    colunas: [
-      { rotuloKey: 'admin.catalogos.campos.sigla', estilo: celulaChave, render: (i) => i.sigla },
-      { rotuloKey: 'admin.catalogos.campos.nome', render: (i) => i.nome },
-      { rotuloKey: 'admin.catalogos.campos.responsavel', render: (i) => i.responsavel },
-    ],
-  },
   {
     slug: 'setores-cnae', tabKey: 'admin.catalogos.tabs.setores',
     campos: [
@@ -160,7 +149,7 @@ function paraEnvio(def: CatalogoDef, valores: Record<string, unknown>): Record<s
 export function ManterCatalogos() {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [slug, setSlug] = useState<CatalogoSlug>('secretarias');
+  const [slug, setSlug] = useState<CatalogoSlug>(CATALOGOS[0].slug);
   const [incluirInativos, setIncluirInativos] = useState(false);
   const [termo, setTermo] = useState('');
   const [filtro, setFiltro] = useState('');

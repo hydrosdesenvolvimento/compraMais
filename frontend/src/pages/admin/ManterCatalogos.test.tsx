@@ -37,21 +37,28 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
     catalogoReativar.mockReset().mockResolvedValue({ situacao: 'ativo' });
   });
 
+  it('não oferece a aba Secretarias (mantida na tela dedicada /admin/secretarias)', async () => {
+    catalogoListar.mockResolvedValue([]);
+    renderTela();
+    await screen.findByTestId('tab-setores-cnae');
+    expect(screen.queryByTestId('tab-secretarias')).not.toBeInTheDocument();
+  });
+
   it('lista os itens e inativar delega ao módulo dono (RN015)', async () => {
+    // Aba default = Setores (CNAE), após a retirada da aba Secretarias.
     catalogoListar.mockResolvedValue([
-      { id: 's1', ativo: true, situacao: 'ativo', sigla: 'SME', nome: 'Educação' },
-      { id: 's2', ativo: false, situacao: 'inativo', sigla: 'SMS', nome: 'Saúde' },
+      { id: 'c1', ativo: true, situacao: 'ativo', codigo: '1091101', descricao: 'Panificação' },
+      { id: 'c2', ativo: false, situacao: 'inativo', codigo: '4711302', descricao: 'Supermercados' },
     ]);
     renderTela();
 
     const itens = await screen.findAllByTestId('item-catalogo');
     expect(itens).toHaveLength(2);
-    // Tabela: sigla e nome em células próprias (não mais concatenados num card).
-    expect(screen.getByText('SME')).toBeInTheDocument();
-    expect(screen.getByText('Educação')).toBeInTheDocument();
+    expect(screen.getByText('1091101')).toBeInTheDocument();
+    expect(screen.getByText('Panificação')).toBeInTheDocument();
     // ativo → botão inativar; inativo → botão reativar
     fireEvent.click(screen.getByTestId('inativar'));
-    await waitFor(() => expect(catalogoInativar).toHaveBeenCalledWith('secretarias', 's1'));
+    await waitFor(() => expect(catalogoInativar).toHaveBeenCalledWith('setores-cnae', 'c1'));
     expect(screen.getByTestId('reativar')).toBeInTheDocument();
   });
 
@@ -60,22 +67,20 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
     renderTela();
 
     expect(await screen.findByTestId('vazio')).toBeInTheDocument();
-    fireEvent.change(screen.getByTestId('campo-sigla'), { target: { value: 'SMF' } });
-    fireEvent.change(screen.getByTestId('campo-nome'), { target: { value: 'Fazenda' } });
-    fireEvent.change(screen.getByTestId('campo-responsavel'), { target: { value: 'Rui' } });
+    fireEvent.change(screen.getByTestId('campo-codigo'), { target: { value: '1091101' } });
+    fireEvent.change(screen.getByTestId('campo-descricao'), { target: { value: 'Panificação' } });
     fireEvent.submit(screen.getByTestId('form-catalogo'));
 
-    await waitFor(() => expect(catalogoCriar).toHaveBeenCalledWith('secretarias', { sigla: 'SMF', nome: 'Fazenda', responsavel: 'Rui' }));
+    await waitFor(() => expect(catalogoCriar).toHaveBeenCalledWith('setores-cnae', { codigo: '1091101', descricao: 'Panificação' }));
   });
 
-  it('troca de catálogo mostra os campos próprios (setores → código/descrição)', async () => {
+  it('troca de catálogo mostra os campos próprios (tipos de documento → formato)', async () => {
     catalogoListar.mockResolvedValue([]);
     renderTela();
 
-    fireEvent.click(await screen.findByTestId('tab-setores-cnae'));
-    expect(await screen.findByTestId('campo-codigo')).toBeInTheDocument();
-    expect(screen.getByTestId('campo-descricao')).toBeInTheDocument();
-    expect(screen.queryByTestId('campo-sigla')).not.toBeInTheDocument();
+    fireEvent.click(await screen.findByTestId('tab-tipos-documento'));
+    expect(await screen.findByTestId('campo-formato')).toBeInTheDocument();
+    expect(screen.queryByTestId('campo-codigo')).not.toBeInTheDocument(); // campo de Setores não aparece
   });
 });
 
@@ -153,7 +158,7 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
     expect(screen.getByTestId('busca')).toBeInTheDocument();
     expect(screen.getByTestId('exportar-csv')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('tab-secretarias'));
+    fireEvent.click(screen.getByTestId('tab-setores-cnae'));
     await waitFor(() => expect(screen.queryByTestId('busca')).not.toBeInTheDocument());
     expect(screen.queryByTestId('exportar-csv')).not.toBeInTheDocument();
     expect(screen.queryByTestId('filtro-tipo')).not.toBeInTheDocument();

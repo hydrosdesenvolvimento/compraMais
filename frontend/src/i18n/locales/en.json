@@ -649,17 +649,13 @@
     },
     "catalogos": {
       "titulo": "Base catalogs",
-      "subtitulo": "Maintain departments, CNAE sectors, document types and the goods and services catalog. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
+      "subtitulo": "Maintain CNAE sectors, document types and the goods and services catalog. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
       "tabs": {
-        "secretarias": "Departments",
         "setores": "Sectors (CNAE)",
         "tiposDoc": "Document types",
         "materiais": "Goods and services"
       },
       "campos": {
-        "nome": "Name",
-        "sigla": "Acronym",
-        "responsavel": "Responsible",
         "codigo": "CNAE code (7 digits)",
         "descricao": "Description",
         "nomeTipo": "Type name",

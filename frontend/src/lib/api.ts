@@ -190,7 +190,9 @@ export interface Funil { documentosPendentes: number; editaisPorSituacao: { rasc
 export interface ContestacaoView { id: string; cnae: string; justificativa: string; situacao: string; motivoResolucao: string | null }
 export interface RegistroAuditoria { id: string; usuario: string | null; usuarioNome: string | null; papel: string | null; evento: string; timestamp: string; ip: string | null }
 /** UC020 — item de catálogo base (superset: cada catálogo acrescenta seus campos). */
-export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento';
+export type CatalogoSlug = 'secretarias' | 'setores-cnae' | 'tipos-documento' | 'materiais-servicos';
+/** Natureza do item do catálogo de materiais e serviços. */
+export type TipoItemCatalogo = 'material' | 'servico';
 export interface CatalogoItemView {
   id: string; ativo: boolean; situacao: 'ativo' | 'inativo';
   // Secretaria
@@ -199,6 +201,8 @@ export interface CatalogoItemView {
   codigo?: string; descricao?: string;
   // Tipo de documento
   formato?: string; categoria?: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number; obrigatorio?: boolean;
+  // Material/Serviço — `numero` (ITM-AAAA/NNN) é gerado pelo backend e read-only na tela
+  numero?: string; tipo?: TipoItemCatalogo; especificacoes?: string; unidades?: string[];
 }
 /** UC021 — servidor interno exibido no Painel Admin de usuários (sem segredos). */
 export interface UsuarioInternoView {
@@ -415,7 +419,7 @@ export const api = {
   // UC020 — Catálogos base. Leitura aberta (dado de referência); escritas exigem papel administrador no token.
   catalogoListar: (slug: CatalogoSlug, incluirInativos = false) =>
     get<CatalogoItemView[]>(`/catalogos/${slug}${incluirInativos ? '?incluirInativos=true' : ''}`),
-  catalogoCriar: (slug: CatalogoSlug, body: Record<string, unknown>) => send<{ id: string }>(`/catalogos/${slug}`, 'POST', body),
+  catalogoCriar: (slug: CatalogoSlug, body: Record<string, unknown>) => send<CatalogoItemView>(`/catalogos/${slug}`, 'POST', body),
   catalogoEditar: (slug: CatalogoSlug, id: string, body: Record<string, unknown>) => send<{ ok: boolean }>(`/catalogos/${slug}/${id}`, 'PATCH', body),
   catalogoInativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/inativar`, 'POST'),
   catalogoReativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/reativar`, 'POST'),

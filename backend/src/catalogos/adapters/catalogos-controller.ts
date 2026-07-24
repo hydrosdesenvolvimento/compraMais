@@ -23,14 +23,19 @@ interface CrudLike {
  * Política de escrita **por catálogo**. A leitura é aberta em todos (dado de referência): anônimo → 401
  * nas escritas, papel errado → 403; o GET não passa por guard algum, de propósito.
  *
- * Os três catálogos base seguem exclusivos do Administrador (UC020). O de **materiais e serviços** é
- * mantido também pela Secretaria (`smga`): a tela "Catálogos" já é dela por padrão
- * (`VISIBILIDADE_PADRAO.smga` em `permissoes/domain/tela-admin.ts`), então um único perfil de escrita
- * global deixaria o público default da tela sem poder escrever nada.
+ * A tela "Catálogos" (`/admin/catalogos`) é da Secretaria por padrão
+ * (`VISIBILIDADE_PADRAO.smga` em `permissoes/domain/tela-admin.ts`); portanto TODOS os catálogos que
+ * ela exibe — setores/CNAE, tipos de documento, materiais e serviços e unidades de medida — são mantidos
+ * pela Secretaria (`smga`) além do Administrador. `secretarias` NÃO figura nessa tela (é gerido na tela
+ * dedicada `/admin/secretarias`) e permanece exclusivo do Administrador via `PERFIS_ESCRITA_PADRAO`.
  */
 const PERFIS_ESCRITA_PADRAO: readonly Papel[] = ['administrador'];
+const ADMIN_E_SMGA: readonly Papel[] = ['administrador', 'smga'];
 const PERFIS_ESCRITA: Record<string, readonly Papel[]> = {
-  'materiais-servicos': ['administrador', 'smga'],
+  'setores-cnae': ADMIN_E_SMGA,
+  'tipos-documento': ADMIN_E_SMGA,
+  'materiais-servicos': ADMIN_E_SMGA,
+  'unidades-medida': ADMIN_E_SMGA,
 };
 
 /**
@@ -44,6 +49,7 @@ export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: Ma
     'setores-cnae': deps.manter.setores,
     'tipos-documento': deps.manter.tiposDocumento,
     'materiais-servicos': deps.manter.materiaisServicos,
+    'unidades-medida': deps.manter.unidadesMedida,
   };
 
   /** Perfis autorizados a escrever no catálogo desta requisição. */

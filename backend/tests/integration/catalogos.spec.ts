@@ -4,7 +4,8 @@ import { CatalogoRepositoryMemory } from '../../src/catalogos/adapters/catalogo-
 import type { Secretaria } from '../../src/catalogos/domain/secretaria.js';
 import type { SetorCnae } from '../../src/catalogos/domain/setor-cnae.js';
 import type { TipoDocumento } from '../../src/catalogos/domain/tipo-documento.js';
-import { EmailInvalido } from '../../src/catalogos/domain/item-catalogo.js';
+import type { UnidadeMedida } from '../../src/catalogos/domain/unidade-medida.js';
+import { EmailInvalido, CampoObrigatorio } from '../../src/catalogos/domain/item-catalogo.js';
 import { InMemoryEventBus } from '../../src/shared/events/event-bus.js';
 
 /**
@@ -27,7 +28,34 @@ describe('ManterCatalogos (UC020)', () => {
       secretarias: new CatalogoRepositoryMemory<Secretaria>(),
       setores: new CatalogoRepositoryMemory<SetorCnae>(),
       tiposDocumento: new CatalogoRepositoryMemory<TipoDocumento>(),
+      unidadesMedida: new CatalogoRepositoryMemory<UnidadeMedida>(),
     }, bus);
+  });
+
+  it('unidade de medida: cria com símbolo + descrição e lista', async () => {
+    const { id } = await manter.unidadesMedida.criar({ simbolo: 'kg', descricao: 'Quilograma' }, actor);
+    const lista = await manter.unidadesMedida.listar();
+    expect(lista.map((u) => u.id)).toContain(id);
+    expect(eventos).toContain('CatalogoItemCriado');
+  });
+
+  it('unidade de medida: bloqueia símbolo duplicado (case-insensitive) — RN015', async () => {
+    await manter.unidadesMedida.criar({ simbolo: 'un', descricao: 'Unidade' }, actor);
+    await expect(manter.unidadesMedida.criar({ simbolo: 'UN', descricao: 'Unidade (dup)' }, actor))
+      .rejects.toThrow(ChaveDuplicada);
+  });
+
+  it('unidade de medida: símbolo e descrição são obrigatórios', async () => {
+    await expect(manter.unidadesMedida.criar({ simbolo: '  ', descricao: 'Sem símbolo' }, actor)).rejects.toThrow(CampoObrigatorio);
+    await expect(manter.unidadesMedida.criar({ simbolo: 'l', descricao: '' }, actor)).rejects.toThrow(CampoObrigatorio);
+  });
+
+  it('unidade de medida: inativar remove da lista padrão; reativar recoloca', async () => {
+    const { id } = await manter.unidadesMedida.criar({ simbolo: 'm²', descricao: 'Metro quadrado' }, actor);
+    await manter.unidadesMedida.inativar(id, actor);
+    expect((await manter.unidadesMedida.listar()).map((u) => u.id)).not.toContain(id);
+    await manter.unidadesMedida.reativar(id, actor);
+    expect((await manter.unidadesMedida.listar()).map((u) => u.id)).toContain(id);
   });
 
   it('cria uma secretaria ativa e emite CatalogoItemCriado', async () => {

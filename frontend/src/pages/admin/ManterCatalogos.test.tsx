@@ -74,6 +74,20 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
     await waitFor(() => expect(catalogoCriar).toHaveBeenCalledWith('setores-cnae', { codigo: '1091101', descricao: 'Panificação' }));
   });
 
+  it('aba Unidades de medida: cria enviando símbolo + descrição ao catálogo unidades-medida', async () => {
+    catalogoListar.mockResolvedValue([]);
+    renderTela();
+
+    fireEvent.click(await screen.findByTestId('tab-unidades-medida'));
+    fireEvent.change(await screen.findByTestId('campo-simbolo'), { target: { value: 'kg' } });
+    fireEvent.change(screen.getByTestId('campo-descricao'), { target: { value: 'Quilograma' } });
+    fireEvent.submit(screen.getByTestId('form-catalogo'));
+
+    await waitFor(() => expect(catalogoCriar).toHaveBeenCalledWith('unidades-medida', { simbolo: 'kg', descricao: 'Quilograma' }));
+    // Sem número/busca/exportação: é um catálogo base como Setores/Tipos.
+    expect(screen.queryByTestId('busca')).not.toBeInTheDocument();
+  });
+
   it('troca de catálogo mostra os campos próprios (tipos de documento → formato)', async () => {
     catalogoListar.mockResolvedValue([]);
     renderTela();

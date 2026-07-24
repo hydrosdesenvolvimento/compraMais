@@ -4,6 +4,7 @@ import { Secretaria } from '../domain/secretaria.js';
 import { SetorCnae } from '../domain/setor-cnae.js';
 import { TipoDocumento } from '../domain/tipo-documento.js';
 import { MaterialServico, formatarNumeroItem, type TipoItem } from '../domain/material-servico.js';
+import { UnidadeMedida } from '../domain/unidade-medida.js';
 import { NumeradorItensMemory, type NumeradorItens } from './numerador-itens.js';
 import type { CatalogoRepository, FiltroListagem } from './catalogo-repository.js';
 import {
@@ -108,6 +109,8 @@ export type CriarSetor = { codigo: string; descricao: string; categoria?: string
 export type EditarSetor = Partial<CriarSetor>;
 export type CriarTipoDoc = { nome: string; formato: string; categoria: string; exigeValidade?: boolean; exigeExercicio?: boolean; validadeDias?: number; obrigatorio?: boolean };
 export type EditarTipoDoc = Partial<CriarTipoDoc>;
+export type CriarUnidadeMedida = { simbolo: string; descricao: string };
+export type EditarUnidadeMedida = Partial<CriarUnidadeMedida>;
 
 /**
  * Fachada da jornada única de catálogos (UC020: "uma jornada, três catálogos"). Compõe um `CrudCatalogo`
@@ -118,6 +121,7 @@ export class ManterCatalogos {
   readonly setores: CrudCatalogo<SetorCnae, CriarSetor, EditarSetor>;
   readonly tiposDocumento: CrudCatalogo<TipoDocumento, CriarTipoDoc, EditarTipoDoc>;
   readonly materiaisServicos: CrudCatalogo<MaterialServico, CriarMaterialServico, EditarMaterialServico>;
+  readonly unidadesMedida: CrudCatalogo<UnidadeMedida, CriarUnidadeMedida, EditarUnidadeMedida>;
 
   constructor(
     repos: {
@@ -125,6 +129,7 @@ export class ManterCatalogos {
       setores: CatalogoRepository<SetorCnae>;
       tiposDocumento: CatalogoRepository<TipoDocumento>;
       materiaisServicos: CatalogoRepository<MaterialServico>;
+      unidadesMedida: CatalogoRepository<UnidadeMedida>;
     },
     bus: EventBus,
     now: () => string = () => new Date().toISOString(),
@@ -158,6 +163,12 @@ export class ManterCatalogos {
         const numero = formatarNumeroItem(ano, await numerador.proximo(ano));
         return MaterialServico.criar({ id, numero, ...input, userName });
       },
+      aplicarEdicao: (item, campos, userName) => item.editar(campos, userName),
+    }, bus, now);
+
+    this.unidadesMedida = new CrudCatalogo<UnidadeMedida, CriarUnidadeMedida, EditarUnidadeMedida>(repos.unidadesMedida, {
+      nome: 'unidade-medida',
+      criar: (id, input, userName) => UnidadeMedida.criar({ id, ...input, userName }),
       aplicarEdicao: (item, campos, userName) => item.editar(campos, userName),
     }, bus, now);
   }

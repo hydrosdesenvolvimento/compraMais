@@ -653,7 +653,8 @@
       "tabs": {
         "setores": "Setores (CNAE)",
         "tiposDoc": "Tipos de documento",
-        "materiais": "Materiais e serviços"
+        "materiais": "Materiais e serviços",
+        "unidadesMedida": "Unidades de medida"
       },
       "campos": {
         "codigo": "Código CNAE (7 dígitos)",
@@ -670,7 +671,10 @@
         "unidadesDica": "Separe por vírgula. Ex.: un, m, cx",
         "especificacoes": "Especificações técnicas",
         "situacao": "Situação",
-        "acoes": "Ações"
+        "acoes": "Ações",
+        "simbolo": "Símbolo",
+        "simboloDica": "Ex.: un, kg, m², L, h, cx",
+        "descricaoUnidade": "Descrição"
       },
       "categorias": {
         "cadastral": "Cadastral",

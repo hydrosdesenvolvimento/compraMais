@@ -429,6 +429,8 @@ export const api = {
   // Integração SEI (Épico 6). Push: envia o malote ao SEI (cria o processo). Pull: consulta processo.
   maloteEnviarSei: (id: string) => send<{ maloteId: string; numeroProcesso: string; idProtocolo: string; url?: string; jaProtocolado: boolean }>(`/malotes/${id}/enviar-sei`, 'POST'),
   seiConsultarProcesso: (numero: string) => get<ProcessoSeiView>(`/sei/processos/${encodeURIComponent(numero)}`),
+  // Status da integração SEI: `configurado=false` quando SEI_BASE_URL/credenciais não estão setados.
+  seiStatus: () => get<{ configurado: boolean; provider: 'web' | 'mock' }>('/sei/status'),
 
   // UC020 — Catálogos base. Leitura aberta (dado de referência); escritas exigem papel administrador no token.
   catalogoListar: (slug: CatalogoSlug, incluirInativos = false) =>

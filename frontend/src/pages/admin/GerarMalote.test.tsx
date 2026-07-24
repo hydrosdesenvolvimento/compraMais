@@ -12,6 +12,7 @@ const maloteGerar = vi.fn<(...a: unknown[]) => Promise<{ maloteId: string; statu
 const maloteExportar = vi.fn<(...a: unknown[]) => Promise<{ status: string; jaExportado: boolean }>>();
 const maloteEnviarSei = vi.fn<(id: string) => Promise<unknown>>();
 const seiConsultarProcesso = vi.fn<(numero: string) => Promise<unknown>>();
+const seiStatus = vi.fn<() => Promise<{ configurado: boolean; provider: string }>>();
 vi.mock('../../lib/api', () => ({
   api: {
     malotesListar: () => malotesListar(),
@@ -19,6 +20,7 @@ vi.mock('../../lib/api', () => ({
     maloteExportar: (id: string) => maloteExportar(id),
     maloteEnviarSei: (id: string) => maloteEnviarSei(id),
     seiConsultarProcesso: (numero: string) => seiConsultarProcesso(numero),
+    seiStatus: () => seiStatus(),
   },
 }));
 
@@ -38,6 +40,21 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
     maloteExportar.mockReset().mockResolvedValue({ status: 'exportado', jaExportado: false });
     maloteEnviarSei.mockReset().mockResolvedValue({ maloteId: 'm1', numeroProcesso: '4004.017444.00012/2026-02', idProtocolo: '23351546', jaProtocolado: false });
     seiConsultarProcesso.mockReset().mockResolvedValue({ numero: '4004.017444.00012/2026-02', idProtocolo: '23351546', documentos: [{ idDocumento: '999001', titulo: 'Despacho 1' }] });
+    seiStatus.mockReset().mockResolvedValue({ configurado: true, provider: 'web' }); // configurado por padrão
+  });
+
+  it('quando o SEI não está configurado (SEI_BASE_URL ausente): exibe SOMENTE o aviso de configuração', async () => {
+    seiStatus.mockResolvedValue({ configurado: false, provider: 'mock' });
+    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2 }]);
+    renderTela();
+
+    expect(await screen.findByTestId('sei-nao-configurado')).toBeInTheDocument();
+    // Nada mais da tela é renderizado: sem ações, filtros, tabela ou itens.
+    expect(screen.queryByTestId('novo-malote')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('consultar-sei')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('filtros')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tabela-malotes')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('item-malote')).not.toBeInTheDocument();
   });
 
   it('envia um malote gerado ao SEI (push) e mostra o número do processo protocolado', async () => {

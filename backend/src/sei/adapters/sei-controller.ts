@@ -6,8 +6,14 @@ import { exigirPapel } from '../../shared/http/autenticacao.js';
 // RBAC: consulta ao SEI é operação de gestão (CPL/SMGA/Administrador). Leitura, mas não pública.
 const PERFIS_SEI: readonly Papel[] = ['cpl', 'smga', 'administrador'];
 
-/** Pull do SEI (integração — Épico 6): consulta de processo por número (leitura). */
-export function registrarRotasSei(app: FastifyInstance, deps: { consultar: ConsultarProcessoSei }): void {
+/** Pull do SEI (integração — Épico 6): consulta de processo por número (leitura) + status da config. */
+export function registrarRotasSei(app: FastifyInstance, deps: { consultar: ConsultarProcessoSei; status: { configurado: boolean; provider: 'web' | 'mock' } }): void {
+  // Status da integração: a UI (ex.: /admin/malote) avisa quando o SEI não está configurado.
+  app.get('/sei/status', async (req, reply) => {
+    if (!exigirPapel(req, reply, PERFIS_SEI)) return reply;
+    return reply.send(deps.status);
+  });
+
   app.get('/sei/processos/:numero', async (req, reply) => {
     if (!exigirPapel(req, reply, PERFIS_SEI)) return reply;
     const { numero } = req.params as { numero: string };

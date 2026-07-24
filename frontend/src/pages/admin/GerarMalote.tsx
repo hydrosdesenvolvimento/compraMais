@@ -58,6 +58,10 @@ export function GerarMalote() {
   });
   const invalidar = () => qc.invalidateQueries({ queryKey: ['malotes'] });
 
+  // Status da integração SEI: se SEI_BASE_URL/credenciais não estão setados, a tela avisa e desabilita
+  // as ações de SEI. Default `true` enquanto carrega, para não piscar o aviso nem esconder as ações.
+  const { data: seiStatus } = useQuery({ queryKey: ['sei-status'], queryFn: () => api.seiStatus(), retry: false, staleTime: 60000 });
+
   const exportar = useMutation({
     mutationFn: (id: string) => api.maloteExportar(id),
     onSuccess: (r, id) => { setExportInfo((m) => ({ ...m, [id]: r.jaExportado ? 'jaExportado' : 'exportado' })); void invalidar(); },
@@ -75,6 +79,23 @@ export function GerarMalote() {
     t('admin.malote.campos.fragmentos'),
     t('admin.malote.campos.acoes'),
   ];
+
+  // SEI não configurado (SEI_BASE_URL/credenciais ausentes): a tela exibe SOMENTE o aviso de configuração,
+  // sem lista, filtros ou ações — o painel do malote depende da integração e não deve operar sem ela.
+  if (seiStatus && !seiStatus.configurado) {
+    return (
+      <div className="stack" data-cy="admin-malote">
+        <h1 className="page-title">{t('admin.malote.titulo')}</h1>
+        <div data-cy="sei-nao-configurado" role="status" className="card" style={{ display: 'flex', gap: 14, alignItems: 'flex-start', padding: '20px 22px', background: 'var(--atencao-bg, #FEF3C7)', border: '1px solid #F1D08A', color: '#8A5410' }}>
+          <span aria-hidden style={{ display: 'inline-flex', flexShrink: 0, marginTop: 1 }}><IconeAlerta width={22} height={22} /></span>
+          <div style={{ display: 'grid', gap: 4 }}>
+            <div style={{ font: '700 15px var(--font-body)' }}>{t('admin.malote.sei.naoConfiguradoTitulo')}</div>
+            <div style={{ fontSize: 13.5, lineHeight: 1.5 }}>{t('admin.malote.sei.naoConfigurado')}</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="stack" data-cy="admin-malote">

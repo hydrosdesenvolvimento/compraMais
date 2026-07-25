@@ -1,3 +1,4 @@
+import type { Usuario } from './usuario.js';
 import type { UsuarioRepository } from './usuario-repository.js';
 import type { PiiCipher } from '../crypto/pii-cipher.js';
 
@@ -20,6 +21,12 @@ export interface PerfilProprio {
   nome: string;
   /** Data URL da foto (decifrada) ou `null` quando o usuário não tem foto. */
   avatar: string | null;
+  // Dados do módulo Usuários (UC021) — read-only na "Minha conta" do servidor (nulos para fornecedor).
+  papel: string;
+  cargo: string | null;
+  secretaria: string | null;
+  ativo: boolean;
+  registerDate: string;
 }
 
 /**
@@ -37,7 +44,16 @@ export class GerirPerfilProprio {
   async obter(usuarioId: string): Promise<PerfilProprio> {
     const u = await this.usuarios.porId(usuarioId);
     if (!u) throw new UsuarioNaoEncontrado();
-    return { userId: u.id, email: u.email, nome: u.nome, avatar: u.avatar ? this.cipher.decrypt(u.avatar) : null };
+    return this.paraView(u);
+  }
+
+  /** Projeção do perfil próprio (dados da sessão + foto decifrada). Reusada por `obter`/`atualizar`. */
+  private paraView(u: Usuario): PerfilProprio {
+    return {
+      userId: u.id, email: u.email, nome: u.nome,
+      avatar: u.avatar ? this.cipher.decrypt(u.avatar) : null,
+      papel: u.papel, cargo: u.cargo, secretaria: u.secretaria, ativo: u.ativo, registerDate: u.registerDate,
+    };
   }
 
   /**
@@ -58,7 +74,7 @@ export class GerirPerfilProprio {
     }
 
     await this.usuarios.salvar(u);
-    return { userId: u.id, email: u.email, nome: u.nome, avatar: u.avatar ? this.cipher.decrypt(u.avatar) : null };
+    return this.paraView(u);
   }
 }
 

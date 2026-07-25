@@ -124,7 +124,7 @@ export function ShellAdmin() {
   );
 
   return (
-    <AppShell menu={menu} usuario={chip} rodapeKey="common.shell.footerAdmin" notificacoes={[]} contaHref="/admin/dashboard" fontesBusca={fontesBusca}>
+    <AppShell menu={menu} usuario={chip} rodapeKey="common.shell.footerAdmin" notificacoes={[]} contaHref="/admin/minha-conta" fontesBusca={fontesBusca}>
       <Outlet />
     </AppShell>
   );

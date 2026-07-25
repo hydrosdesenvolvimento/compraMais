@@ -296,7 +296,11 @@ export interface SolicitacaoTitularView {
 }
 /** RF018 — perfil do PRÓPRIO usuário autenticado (cartão "Responsável" da "Minha conta"). O `nome` é o
  *  nome de exibição completo (a UI o divide em nome + sobrenome); `avatar` é o data URL da foto ou null. */
-export interface PerfilProprioView { userId: string; email: string; nome: string; avatar: string | null }
+export interface PerfilProprioView {
+  userId: string; email: string; nome: string; avatar: string | null;
+  // Dados do módulo Usuários (UC021) — read-only na "Minha conta" do servidor; nulos para fornecedor.
+  papel: string; cargo: string | null; secretaria: string | null; ativo: boolean; registerDate: string;
+}
 /** UC018 passo 1: perfil do fornecedor exibido na "Minha conta" (dados oficiais read-only + contato). */
 export interface FornecedorPerfil {
   id: string; cnpj: string; razaoSocial: string; porte: string;

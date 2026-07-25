@@ -1281,6 +1281,21 @@
       "cancelado": "Cancelado"
     }
   },
+  "minhaContaAdmin": {
+    "titulo": "Mi cuenta",
+    "subtitulo": "Sus datos de servidor, provenientes del módulo Usuarios.",
+    "dadosLabel": "Datos del usuario",
+    "segurancaLabel": "Seguridad",
+    "nome": "Nombre completo",
+    "email": "Correo electrónico",
+    "cargo": "Cargo / Función",
+    "perfil": "Perfil de acceso",
+    "secretaria": "Secretaría / Unidad",
+    "situacao": "Situación",
+    "dataCadastro": "Fecha de registro",
+    "ativo": "Activo",
+    "inativo": "Inactivo"
+  },
   "minhaConta": {
     "titulo": "Mi cuenta",
     "subtitulo": "Datos oficiales de la empresa obtenidos de la Receita Federal (API del CNPJ). Solo se pueden editar el Nombre Comercial, la Dirección y el Teléfono.",

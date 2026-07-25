@@ -992,6 +992,7 @@
       "eyebrow": "Gestão",
       "titulo": "Relatórios",
       "subtitulo": "Gere relatórios dos processos em PDF e exporte os dados brutos em CSV ou JSON, com filtro por período e secretaria.",
+      "seletor": "Relatório",
       "carregando": "Gerando relatório…",
       "erroCarregar": "Não foi possível carregar o relatório.",
       "semDados": "Nenhum dado para o filtro selecionado.",

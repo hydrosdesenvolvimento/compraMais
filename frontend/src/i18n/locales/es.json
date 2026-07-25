@@ -992,6 +992,7 @@
       "eyebrow": "Gestión",
       "titulo": "Informes",
       "subtitulo": "Genere informes de los procesos en PDF y exporte los datos brutos en CSV o JSON, con filtro por período y secretaría.",
+      "seletor": "Informe",
       "carregando": "Generando informe…",
       "erroCarregar": "No se pudo cargar el informe.",
       "semDados": "No hay datos para el filtro seleccionado.",

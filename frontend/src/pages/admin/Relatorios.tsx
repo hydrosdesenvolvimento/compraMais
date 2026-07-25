@@ -84,28 +84,13 @@ export function Relatorios() {
         <p className="page-sub">{t('admin.relatorios.subtitulo')}</p>
       </div>
 
-      {/* Seletor de relatório */}
-      <div data-cy="seletor-relatorio" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {TIPOS_RELATORIO.map((tp) => {
-          const ativo = tp === tipo;
-          return (
-            <button
-              key={tp}
-              data-cy={`tipo-${tp}`}
-              onClick={() => setTipo(tp)}
-              aria-pressed={ativo}
-              title={descricaoTipo(t, tp)}
-              style={{
-                padding: '10px 16px', borderRadius: 10, cursor: 'pointer', fontSize: 13.5, fontWeight: 600,
-                border: `1px solid ${ativo ? 'var(--azul-800)' : 'var(--border)'}`,
-                background: ativo ? 'var(--azul-800)' : '#fff', color: ativo ? '#fff' : 'var(--cinza-700)',
-              }}
-            >
-              {rotuloTipo(t, tp)}
-            </button>
-          );
-        })}
-      </div>
+      {/* Seletor de relatório (combobox) */}
+      <label data-cy="seletor-relatorio" style={{ display: 'grid', gap: 4, maxWidth: 420 }}>
+        <span style={statLabel}>{t('admin.relatorios.seletor')}</span>
+        <select data-cy="tipo-relatorio" className="input" value={tipo} onChange={(e) => setTipo(e.target.value as TipoRelatorio)} aria-label={t('admin.relatorios.seletor')}>
+          {TIPOS_RELATORIO.map((tp) => <option key={tp} value={tp}>{rotuloTipo(t, tp)}</option>)}
+        </select>
+      </label>
       <p className="page-sub" data-cy="descricao-relatorio" style={{ marginTop: -6 }}>{descricaoTipo(t, tipo)}</p>
 
       {/* Filtros: período + secretaria */}

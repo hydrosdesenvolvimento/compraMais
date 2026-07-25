@@ -127,9 +127,20 @@ export async function gerarRelatorioPdf(
 
   // Cabeçalho ------------------------------------------------------------------
   const y = margem;
+  let logoDesenhado = false;
   if (logo) {
-    try { doc.addImage(logo, 'PNG', margem, y, 132, 34); } catch { /* imagem inválida: segue textual */ }
-  } else {
+    try {
+      // Preserva a proporção natural do logo dentro de uma caixa (evita deformação): escala pela
+      // menor razão entre a largura e a altura máximas.
+      const props = doc.getImageProperties(logo);
+      const maxLarg = 170, maxAlt = 42;
+      const escala = Math.min(maxLarg / props.width, maxAlt / props.height);
+      const larg = props.width * escala, alt = props.height * escala;
+      doc.addImage(logo, props.fileType || 'PNG', margem, y, larg, alt);
+      logoDesenhado = true;
+    } catch { /* imagem inválida: cai no cabeçalho textual */ }
+  }
+  if (!logoDesenhado) {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(15); doc.setTextColor(11, 74, 139);
     doc.text(textos.marca, margem, y + 22);
   }

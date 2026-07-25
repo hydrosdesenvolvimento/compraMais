@@ -992,6 +992,7 @@
       "eyebrow": "Management",
       "titulo": "Reports",
       "subtitulo": "Generate process reports as PDF and export the raw data as CSV or JSON, filtered by period and department.",
+      "seletor": "Report",
       "carregando": "Generating report…",
       "erroCarregar": "Could not load the report.",
       "semDados": "No data for the selected filter.",

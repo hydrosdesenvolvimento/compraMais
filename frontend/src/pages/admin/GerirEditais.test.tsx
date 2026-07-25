@@ -87,6 +87,13 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     await waitFor(() => expect(despublicarEdital).toHaveBeenCalledWith('e1'));
   });
 
+  it('mostra a contagem de itens do edital na lista', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/014', qtdItens: 5 })]));
+    renderTela();
+    await screen.findByTestId('item-edital');
+    expect(screen.getByTestId('qtd-itens')).toHaveTextContent('5');
+  });
+
   it('edital em rascunho oferece Editar (não Despublicar); o modal salva a edição', async () => {
     buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/014', objeto: 'Fardamento', situacao: 'rascunho', cnaesAlvo: ['1412601'] })]));
     renderTela();

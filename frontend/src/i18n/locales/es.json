@@ -620,6 +620,8 @@
       "colStatus": "Estado",
       "colAcoes": "Acciones",
       "cnaePrefixo": "CNAE {{cnae}}",
+      "itensContagem_one": "{{count}} ítem",
+      "itensContagem_other": "{{count}} ítems",
       "semPrazo": "—",
       "status": {
         "rascunho": "Borrador",
@@ -869,9 +871,12 @@
         "fornecedor": "Proveedor",
         "edital": "Convocatoria",
         "status": "Estado",
+        "documentos": "Documentos",
+        "tamanho": "Tamaño",
         "fragmentos": "Fragmentos",
         "acoes": "Acciones"
       },
+      "limiteSei": "Límite del SEI: {{mb}} MB",
       "modal": {
         "subtitulo": "El orden legal (CNPJ → Personal → Anexos → Certificados) y la fragmentación por el límite del SEI se aplican automáticamente en la generación.",
         "fechar": "Cerrar",
@@ -885,6 +890,8 @@
         "pecas": "Piezas (documentos aprobados)",
         "ref": "Referencia",
         "tamanho": "Tamaño (bytes)",
+        "tamanhoEstimado": "Tamaño estimado",
+        "limiteSei": "Límite SEI",
         "adicionarPeca": "Agregar pieza",
         "semPecas": "Ninguna pieza agregada.",
         "enviar": "Generar valija",
@@ -912,6 +919,7 @@
       },
       "lista": {
         "fragmentos": "{{n}} fragmento(s)",
+        "documentos": "{{n}} documento(s)",
         "acimaLimite": "Pieza por encima del límite — tratar manualmente",
         "exportar": "Exportar",
         "exportado": "Exportada.",

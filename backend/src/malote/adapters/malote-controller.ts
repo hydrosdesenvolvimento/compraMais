@@ -8,6 +8,11 @@ import { exigirPapel } from '../../shared/http/autenticacao.js';
 // RBAC (FR-006): montagem/consulta do malote é da CPL + Administrador (+ SMGA). Demais → 403; anônimo → 401.
 const PERFIS_MALOTE: readonly Papel[] = ['cpl', 'administrador', 'smga'];
 
+/** Tamanho estimado do malote = soma dos bytes das peças (documentos) — exibido na tela e no modal. */
+function tamanhoTotal(m: { pecas: readonly Peca[] }): number {
+  return m.pecas.reduce((s, p) => s + p.tamanhoBytes, 0);
+}
+
 /** Controller do malote SEI (Épico 6). RBAC CPL/Administrador (FR-006). Geração assíncrona (FR-002). */
 export function registrarRotasMalote(app: FastifyInstance, deps: { gerar: GerarMalote; enviarSei: EnviarMaloteSei }): void {
   app.post('/malotes', async (req, reply) => {
@@ -24,7 +29,7 @@ export function registrarRotasMalote(app: FastifyInstance, deps: { gerar: GerarM
     const { id } = req.params as { id: string };
     const m = (await deps.gerar.consultar({})).find((x) => x.id === id);
     if (!m) return reply.code(404).send({ codigo: 'MaloteNaoEncontrado', mensagem: 'Malote not found.' });
-    return reply.send({ id: m.id, status: m.status, fragmentos: m.fragmentos.length, pecas: m.pecas.length, pecaAcimaLimite: m.temPecaAcimaLimite, protocoloSei: m.protocoloSei });
+    return reply.send({ id: m.id, status: m.status, fragmentos: m.fragmentos.length, pecas: m.pecas.length, tamanhoBytes: tamanhoTotal(m), limiteBytes: m.limiteBytes, pecaAcimaLimite: m.temPecaAcimaLimite, protocoloSei: m.protocoloSei });
   });
 
   // Busca por instância parcial (QBE — FR-007)
@@ -33,7 +38,7 @@ export function registrarRotasMalote(app: FastifyInstance, deps: { gerar: GerarM
     const { fornecedorId, editalId, status } = req.query as { fornecedorId?: string; editalId?: string; status?: StatusMalote };
     const probe: MaloteProbe = { fornecedorId, editalId, status };
     const ms = await deps.gerar.consultar(probe);
-    return reply.send(ms.map((m) => ({ id: m.id, fornecedorId: m.fornecedorId, editalId: m.editalId, status: m.status, fragmentos: m.fragmentos.length, protocoloSei: m.protocoloSei })));
+    return reply.send(ms.map((m) => ({ id: m.id, fornecedorId: m.fornecedorId, editalId: m.editalId, status: m.status, fragmentos: m.fragmentos.length, pecas: m.pecas.length, tamanhoBytes: tamanhoTotal(m), protocoloSei: m.protocoloSei })));
   });
 
   app.post('/malotes/:id/exportar', async (req, reply) => {

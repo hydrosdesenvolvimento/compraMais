@@ -12,7 +12,7 @@ const maloteGerar = vi.fn<(...a: unknown[]) => Promise<{ maloteId: string; statu
 const maloteExportar = vi.fn<(...a: unknown[]) => Promise<{ status: string; jaExportado: boolean }>>();
 const maloteEnviarSei = vi.fn<(id: string) => Promise<unknown>>();
 const seiConsultarProcesso = vi.fn<(numero: string) => Promise<unknown>>();
-const seiStatus = vi.fn<() => Promise<{ configurado: boolean; provider: string }>>();
+const seiStatus = vi.fn<() => Promise<{ configurado: boolean; provider: string; limiteMb: number }>>();
 vi.mock('../../lib/api', () => ({
   api: {
     malotesListar: () => malotesListar(),
@@ -40,12 +40,12 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
     maloteExportar.mockReset().mockResolvedValue({ status: 'exportado', jaExportado: false });
     maloteEnviarSei.mockReset().mockResolvedValue({ maloteId: 'm1', numeroProcesso: '4004.017444.00012/2026-02', idProtocolo: '23351546', jaProtocolado: false });
     seiConsultarProcesso.mockReset().mockResolvedValue({ numero: '4004.017444.00012/2026-02', idProtocolo: '23351546', documentos: [{ idDocumento: '999001', titulo: 'Despacho 1' }] });
-    seiStatus.mockReset().mockResolvedValue({ configurado: true, provider: 'web' }); // configurado por padrão
+    seiStatus.mockReset().mockResolvedValue({ configurado: true, provider: 'web', limiteMb: 30 }); // configurado por padrão
   });
 
   it('quando o SEI não está configurado (SEI_BASE_URL ausente): exibe SOMENTE o aviso de configuração', async () => {
-    seiStatus.mockResolvedValue({ configurado: false, provider: 'mock' });
-    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2 }]);
+    seiStatus.mockResolvedValue({ configurado: false, provider: 'mock', limiteMb: 30 });
+    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2, pecas: 2, tamanhoBytes: 8800000 }]);
     renderTela();
 
     expect(await screen.findByTestId('sei-nao-configurado')).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
   });
 
   it('envia um malote gerado ao SEI (push) e mostra o número do processo protocolado', async () => {
-    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2 }]);
+    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2, pecas: 2, tamanhoBytes: 8800000 }]);
     renderTela();
     await screen.findAllByTestId('item-malote');
 
@@ -68,7 +68,7 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
   });
 
   it('não oferece "Enviar ao SEI" para malote já protocolado (mostra o processo)', async () => {
-    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'exportado', fragmentos: 2, protocoloSei: { numeroProcesso: '4004.017444.00099/2026-11', idProtocolo: 'x' } }]);
+    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'exportado', fragmentos: 2, pecas: 2, tamanhoBytes: 8800000, protocoloSei: { numeroProcesso: '4004.017444.00099/2026-11', idProtocolo: 'x' } }]);
     renderTela();
     await screen.findAllByTestId('item-malote');
     expect(screen.queryByTestId('enviar-sei')).not.toBeInTheDocument();
@@ -87,8 +87,8 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
 
   it('lista malotes numa tabela com status; exporta um gerado delegando ao módulo dono (FR-004)', async () => {
     malotesListar.mockResolvedValue([
-      { id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2 },
-      { id: 'm2', fornecedorId: 'f2', editalId: 'e1', status: 'pendente', fragmentos: 0 },
+      { id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2, pecas: 2, tamanhoBytes: 8800000 },
+      { id: 'm2', fornecedorId: 'f2', editalId: 'e1', status: 'pendente', fragmentos: 0, pecas: 0, tamanhoBytes: 0 },
     ]);
     renderTela();
 
@@ -157,5 +157,27 @@ describe('GerarMalote — Painel Admin do malote SEI (UC010)', () => {
     fireEvent.click(screen.getByTestId('remover-peca'));
     expect(screen.queryByTestId('item-peca')).not.toBeInTheDocument();
     expect(screen.getByTestId('sem-pecas')).toBeInTheDocument();
+  });
+
+  it('a lista mostra documentos, tamanho estimado e o limite do SEI (RN008)', async () => {
+    malotesListar.mockResolvedValue([{ id: 'm1', fornecedorId: 'f1', editalId: 'e1', status: 'gerado', fragmentos: 2, pecas: 4, tamanhoBytes: 8_800_000 }]);
+    renderTela();
+    await screen.findAllByTestId('item-malote');
+    expect(screen.getByTestId('limite-sei')).toHaveTextContent('30 MB');
+    expect(screen.getByTestId('malote-documentos')).toHaveTextContent('4');
+    expect(screen.getByTestId('malote-tamanho')).toHaveTextContent('MB'); // tamanho formatado (~8,4 MB)
+  });
+
+  it('o modal mostra o resumo (documentos/tamanho/limite) e reage às peças', async () => {
+    renderTela();
+    await screen.findByTestId('vazio');
+    fireEvent.click(screen.getByTestId('novo-malote'));
+    await screen.findByTestId('modal-malote');
+    const resumo = screen.getByTestId('resumo-malote');
+    expect(resumo).toHaveTextContent('30 MB'); // limite do SEI
+    fireEvent.change(screen.getByTestId('peca-ref'), { target: { value: 'doc1' } });
+    fireEvent.change(screen.getByTestId('peca-tamanho'), { target: { value: String(2 * 1024 * 1024) } });
+    fireEvent.click(screen.getByTestId('add-peca'));
+    expect(screen.getByTestId('resumo-malote')).toHaveTextContent('2 MB'); // tamanho estimado atualizado
   });
 });

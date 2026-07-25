@@ -21,6 +21,10 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    // Hosts aceitos pelo dev server (Vite bloqueia Host desconhecido, anti-DNS-rebinding): `localhost`
+    // e o nome do serviço compose `frontend` — usado pelo E2E no container (`http://frontend:5173`).
+    // Só afeta o servidor de DEV; em produção quem serve é o nginx.
+    allowedHosts: ['localhost', 'frontend'],
     // Em dev, o Vite encaminha os prefixos de API ao backend (em prod, o nginx faz o mesmo).
     proxy,
   },

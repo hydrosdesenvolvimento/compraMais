@@ -7,7 +7,7 @@ import { exigirPapel } from '../../shared/http/autenticacao.js';
 const PERFIS_SEI: readonly Papel[] = ['cpl', 'smga', 'administrador'];
 
 /** Pull do SEI (integração — Épico 6): consulta de processo por número (leitura) + status da config. */
-export function registrarRotasSei(app: FastifyInstance, deps: { consultar: ConsultarProcessoSei; status: { configurado: boolean; provider: 'web' | 'mock' } }): void {
+export function registrarRotasSei(app: FastifyInstance, deps: { consultar: ConsultarProcessoSei; status: { configurado: boolean; provider: 'web' | 'mock'; limiteMb: number } }): void {
   // Status da integração: a UI (ex.: /admin/malote) avisa quando o SEI não está configurado.
   app.get('/sei/status', async (req, reply) => {
     if (!exigirPapel(req, reply, PERFIS_SEI)) return reply;

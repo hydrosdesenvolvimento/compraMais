@@ -20,6 +20,21 @@ import { IconeDownload, IconeFiltro, IconeSync, IconeFechar, IconeAlerta, IconeU
  */
 const TIPOS: TipoPecaMalote[] = ['cnpj', 'pessoal', 'anexo', 'certidao'];
 const PECA_VAZIA = { tipo: 'cnpj' as TipoPecaMalote, ref: '', tamanho: '' };
+
+/** Formata bytes como MB no idioma ativo (ex.: "8,4 MB"). */
+function formatarMB(bytes: number, lang = 'pt-BR'): string {
+  return `${(bytes / (1024 * 1024)).toLocaleString(lang, { maximumFractionDigits: 1 })} MB`;
+}
+
+/** Métrica do resumo do malote (rótulo + valor); `destaque` colore quando estoura o limite do SEI. */
+function ResumoItem({ rotulo, valor, destaque }: { rotulo: string; valor: string; destaque?: boolean }) {
+  return (
+    <div>
+      <div style={{ fontSize: 11.5, color: 'var(--cinza-500)', marginBottom: 3 }}>{rotulo}</div>
+      <div style={{ font: '700 18px var(--font-body)', color: destaque ? 'var(--erro)' : 'var(--azul-900)', fontVariantNumeric: 'tabular-nums' }}>{valor}</div>
+    </div>
+  );
+}
 const FILTRO_VAZIO = { fornecedorId: '', editalId: '', status: '' };
 type MaloteStatus = MaloteListaView['status'];
 
@@ -41,7 +56,7 @@ const CORES_STATUS: Record<MaloteStatus, CSSProperties> = {
 const iconeAcao: CSSProperties = { width: 40, height: 40, border: '1px solid var(--border)', borderRadius: 9, background: '#fff', color: 'var(--azul-700)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '0 12px' };
 
 export function GerarMalote() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [modalAberto, setModalAberto] = useState(false);
   const [consultaAberta, setConsultaAberta] = useState(false); // modal de consulta ao SEI (pull)
@@ -76,6 +91,8 @@ export function GerarMalote() {
     t('admin.malote.campos.fornecedor'),
     t('admin.malote.campos.edital'),
     t('admin.malote.campos.status'),
+    t('admin.malote.campos.documentos'),
+    t('admin.malote.campos.tamanho'),
     t('admin.malote.campos.fragmentos'),
     t('admin.malote.campos.acoes'),
   ];
@@ -103,6 +120,7 @@ export function GerarMalote() {
         <div>
           <h1 className="page-title">{t('admin.malote.titulo')}</h1>
           <p className="page-sub">{t('admin.malote.subtitulo')}</p>
+          {seiStatus && <p data-cy="limite-sei" className="page-sub" style={{ marginTop: 2, fontSize: 12.5, color: 'var(--cinza-500)' }}>{t('admin.malote.limiteSei', { mb: seiStatus.limiteMb })}</p>}
         </div>
         <div style={{ display: 'inline-flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
           <Botao data-cy="consultar-sei" variante="secundario" onClick={() => setConsultaAberta(true)}>{t('admin.malote.sei.consultarTitulo')}</Botao>
@@ -159,6 +177,12 @@ export function GerarMalote() {
                       <td style={celula}>
                         <span data-cy="status" style={{ ...pill, ...CORES_STATUS[m.status] }}>{t(`admin.malote.status.${m.status}`)}</span>
                       </td>
+                      <td data-cy="malote-documentos" style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-700)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+                        {t('admin.malote.lista.documentos', { n: m.pecas })}
+                      </td>
+                      <td data-cy="malote-tamanho" style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-700)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+                        {formatarMB(m.tamanhoBytes, i18n.language)}
+                      </td>
                       <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-700)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
                         {t('admin.malote.lista.fragmentos', { n: m.fragmentos })}
                       </td>
@@ -197,7 +221,7 @@ export function GerarMalote() {
         </div>
       )}
 
-      {modalAberto && <ModalGerarMalote onFechar={() => setModalAberto(false)} onGerado={() => void invalidar()} />}
+      {modalAberto && <ModalGerarMalote onFechar={() => setModalAberto(false)} onGerado={() => void invalidar()} limiteMb={seiStatus?.limiteMb ?? 30} />}
       {consultaAberta && <ModalConsultarSei onFechar={() => setConsultaAberta(false)} />}
     </div>
   );
@@ -255,8 +279,8 @@ const rotulo: CSSProperties = { font: '600 13px var(--font-body)', color: 'var(-
  * domínio do backend (RN008); o editor só monta a lista bruta. Bloqueia o envio até fornecedor, edital e
  * ao menos uma peça válida.
  */
-function ModalGerarMalote({ onFechar, onGerado }: { onFechar: () => void; onGerado: () => void }) {
-  const { t } = useTranslation();
+function ModalGerarMalote({ onFechar, onGerado, limiteMb }: { onFechar: () => void; onGerado: () => void; limiteMb: number }) {
+  const { t, i18n } = useTranslation();
   const [form, setForm] = useState({ fornecedorId: '', editalId: '' });
   const [pecas, setPecas] = useState<PecaMalote[]>([]);
   const [peca, setPeca] = useState(PECA_VAZIA);
@@ -282,6 +306,8 @@ function ModalGerarMalote({ onFechar, onGerado }: { onFechar: () => void; onGera
 
   const podeGerar = !!form.fornecedorId && !!form.editalId && pecas.length > 0 && !gerar.isPending;
   const titulo = t('admin.malote.gerar.titulo');
+  const totalBytes = pecas.reduce((s, p) => s + p.tamanhoBytes, 0);
+  const acimaLimite = totalBytes > limiteMb * 1024 * 1024;
 
   return (
     <div style={overlay} onClick={onFechar} data-cy="modal-overlay">
@@ -331,6 +357,13 @@ function ModalGerarMalote({ onFechar, onGerado }: { onFechar: () => void; onGera
                   ))}
                 </ul>
               )}
+            </div>
+
+            {/* Resumo do malote (protótipo): documentos, tamanho estimado e limite do SEI. */}
+            <div data-cy="resumo-malote" style={{ display: 'flex', gap: 24, flexWrap: 'wrap', padding: '14px 16px', borderRadius: 10, border: '1px solid var(--border)', background: '#fff' }}>
+              <ResumoItem rotulo={t('admin.malote.campos.documentos')} valor={String(pecas.length)} />
+              <ResumoItem rotulo={t('admin.malote.gerar.tamanhoEstimado')} valor={formatarMB(totalBytes, i18n.language)} destaque={acimaLimite} />
+              <ResumoItem rotulo={t('admin.malote.gerar.limiteSei')} valor={`${limiteMb} MB`} />
             </div>
 
             <div data-cy="aviso-limite" style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '12px 14px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-900)', fontSize: 13 }}>

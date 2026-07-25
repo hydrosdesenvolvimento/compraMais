@@ -79,7 +79,7 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 
 // --- Tipos de leitura ---
 export interface EditalItem { id: string; numero: string; objeto: string; secretariaId: string; prazoVigencia: string | null }
-export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null }
+export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null; qtdItens?: number }
 /** Página da busca de gestão de editais (`GET /gestao/editais`): itens + total do filtro para o pager. */
 export interface PaginaEditais { items: EditalGestao[]; total: number; page: number; size: number }
 /** Filtros da tela de gestão de editais; todos opcionais (QBE). `texto` casa parcial em número/objeto. */
@@ -268,11 +268,11 @@ export interface PecaMalote { tipo: TipoPecaMalote; ref: string; tamanhoBytes: n
 /** Protocolo do malote no SEI (integração — Épico 6); null enquanto não enviado. */
 export interface ProtocoloSeiView { numeroProcesso: string; idProtocolo: string; url?: string }
 /** UC010 — malote listado (QBE, FR-007). */
-export interface MaloteListaView { id: string; fornecedorId: string; editalId: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number; protocoloSei?: ProtocoloSeiView | null }
+export interface MaloteListaView { id: string; fornecedorId: string; editalId: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number; pecas: number; tamanhoBytes: number; protocoloSei?: ProtocoloSeiView | null }
 /** Integração SEI (pull): resultado da consulta de um processo por número. */
 export interface ProcessoSeiView { numero: string; idProtocolo: string; url?: string; documentos: Array<{ idDocumento: string; titulo?: string; pasta?: string }> }
 /** UC010 — detalhe do malote: status + contagem de peças/fragmentos + flag de peça indivisível acima do limite (FR-009). */
-export interface MaloteDetalheView { id: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number; pecas: number; pecaAcimaLimite: boolean }
+export interface MaloteDetalheView { id: string; status: 'pendente' | 'gerado' | 'exportado'; fragmentos: number; pecas: number; tamanhoBytes: number; limiteBytes: number; pecaAcimaLimite: boolean }
 /** UC018: resultado da re-sincronização — status + proveniência `{quando, fonte}` da consulta oficial. */
 export interface SincronizacaoResultado { status: 'sucesso' | 'revisao' | 'erro'; quando?: string; fonte?: string }
 export interface EnderecoView { logradouro: string; numero: string; complemento?: string; bairro: string; cidade: string; uf: string; cep: string }
@@ -480,7 +480,7 @@ export const api = {
   maloteEnviarSei: (id: string) => send<{ maloteId: string; numeroProcesso: string; idProtocolo: string; url?: string; jaProtocolado: boolean }>(`/malotes/${id}/enviar-sei`, 'POST'),
   seiConsultarProcesso: (numero: string) => get<ProcessoSeiView>(`/sei/processos/${encodeURIComponent(numero)}`),
   // Status da integração SEI: `configurado=false` quando SEI_BASE_URL/credenciais não estão setados.
-  seiStatus: () => get<{ configurado: boolean; provider: 'web' | 'mock' }>('/sei/status'),
+  seiStatus: () => get<{ configurado: boolean; provider: 'web' | 'mock'; limiteMb: number }>('/sei/status'),
 
   // UC020 — Catálogos base. Leitura aberta (dado de referência); escritas exigem papel administrador no token.
   catalogoListar: (slug: CatalogoSlug, incluirInativos = false) =>

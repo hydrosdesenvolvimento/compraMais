@@ -92,7 +92,7 @@ services:
       FACE_MATCH_THRESHOLD: ${FACE_MATCH_THRESHOLD:-0.35}
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
-      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-30}
       # Integracao SEI (Epico 6). DEV: 'mock' por padrao (sem SEI); a senha vem do .env quando 'web'.
       SEI_PROVIDER: ${SEI_PROVIDER:-mock}
       SEI_BASE_URL: ${SEI_BASE_URL:-}
@@ -224,7 +224,7 @@ services:
       FACE_MATCH_THRESHOLD: ${FACE_MATCH_THRESHOLD:-0.35}
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
-      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-30}
       # Integracao SEI (Epico 6). Default 'mock' (seguro); mude para 'web' quando a TI provisionar as
       # credenciais/URL/orgao/tipo. Ao habilitar 'web', criar o secret `sei_senha` e apontar
       # SEI_SENHA_FILE=/run/secrets/sei_senha (e referenciar o secret na lista `secrets:` do servico).

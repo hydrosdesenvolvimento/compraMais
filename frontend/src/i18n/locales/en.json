@@ -620,6 +620,8 @@
       "colStatus": "Status",
       "colAcoes": "Actions",
       "cnaePrefixo": "CNAE {{cnae}}",
+      "itensContagem_one": "{{count}} item",
+      "itensContagem_other": "{{count}} items",
       "semPrazo": "—",
       "status": {
         "rascunho": "Draft",
@@ -869,9 +871,12 @@
         "fornecedor": "Supplier",
         "edital": "Notice",
         "status": "Status",
+        "documentos": "Documents",
+        "tamanho": "Size",
         "fragmentos": "Fragments",
         "acoes": "Actions"
       },
+      "limiteSei": "SEI limit: {{mb}} MB",
       "modal": {
         "subtitulo": "The legal order (Company ID → Personal → Attachments → Certificates) and fragmentation by the SEI limit are applied automatically on generation.",
         "fechar": "Close",
@@ -885,6 +890,8 @@
         "pecas": "Pieces (approved documents)",
         "ref": "Reference",
         "tamanho": "Size (bytes)",
+        "tamanhoEstimado": "Estimated size",
+        "limiteSei": "SEI limit",
         "adicionarPeca": "Add piece",
         "semPecas": "No pieces added.",
         "enviar": "Generate package",
@@ -912,6 +919,7 @@
       },
       "lista": {
         "fragmentos": "{{n}} fragment(s)",
+        "documentos": "{{n}} document(s)",
         "acimaLimite": "Piece above the limit — handle manually",
         "exportar": "Export",
         "exportado": "Exported.",

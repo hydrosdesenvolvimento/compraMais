@@ -101,7 +101,7 @@ import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
 import { registrarRotasAuditoria } from './auditoria/adapters/auditoria-controller.js';
 import { ResolvedorAtoresUsuario } from './auditoria/adapters/resolvedor-atores-usuario.js';
-import { GerarMalote, type MaloteRepository } from './malote/application/gerar-malote.js';
+import { GerarMalote, limiteSeiBytes, type MaloteRepository } from './malote/application/gerar-malote.js';
 import { MaloteRepositoryMemory } from './malote/adapters/malote-repository-memory.js';
 import { MaloteRepositoryPg } from './malote/adapters/malote-repository-pg.js';
 import { registrarRotasMalote } from './malote/adapters/malote-controller.js';
@@ -341,7 +341,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   const credRepo: CredenciamentoRepository = pool ? new CredenciamentoRepositoryPg(pool) : new CredenciamentoRepositoryMemory();
   const credenciamentosDoEdital = { contarDoEdital: async (editalId: string) => (await credRepo.listarPorEdital(editalId)).length };
   const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo, undefined, numeradorEditais, credenciamentosDoEdital);
-  const buscarEditais = new BuscarEditais(editaisRepo);
+  const buscarEditais = new BuscarEditais(editaisRepo, async (editalId) => (await itensEditalRepo.listarDoEdital(editalId)).length);
   registrarRotasGestaoEditais(app, { gerir: gerirEditais, buscar: buscarEditais });
 
   // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). O lookup do catálogo é o
@@ -536,7 +536,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   // credenciais/órgão/tipo). Sem isso, a UI de malote avisa que falta configuração.
   registrarRotasSei(app, {
     consultar: new ConsultarProcessoSei(seiGateway),
-    status: { configurado: config.sei.provider === 'web', provider: config.sei.provider },
+    status: { configurado: config.sei.provider === 'web', provider: config.sei.provider, limiteMb: Math.round(limiteSeiBytes() / (1024 * 1024)) },
   });
   // Recuperação no boot: reprocessa jobs pendentes/órfãos que sobreviveram a um restart (durabilidade FR-002).
   if (filaMalote instanceof FilaMalotePg) await filaMalote.recuperar();

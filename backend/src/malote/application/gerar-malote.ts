@@ -19,10 +19,10 @@ export class MaloteNaoEncontrado extends Error {
   constructor() { super('Malote not found.'); this.name = 'MaloteNaoEncontrado'; }
 }
 
-/** Limite global do SEI municipal (FR-003): `SEI_MALOTE_LIMITE_MB` (default 10 MB), em bytes. */
+/** Limite global do SEI municipal (FR-003): `SEI_MALOTE_LIMITE_MB` (default 30 MB), em bytes. */
 export function limiteSeiBytes(): number {
-  const mb = Number(process.env.SEI_MALOTE_LIMITE_MB ?? 10);
-  return (Number.isFinite(mb) && mb > 0 ? mb : 10) * 1024 * 1024;
+  const mb = Number(process.env.SEI_MALOTE_LIMITE_MB ?? 30);
+  return (Number.isFinite(mb) && mb > 0 ? mb : 30) * 1024 * 1024;
 }
 
 /** Geração assíncrona DURÁVEL (fila + retry, FR-002) + exportação idempotente do malote SEI (Épico 6, AD-21). */

@@ -94,6 +94,7 @@ function subclasse(codigo: number | undefined): string {
 
 function mapearPorte(porte: string | undefined): string {
   const p = (porte ?? '').toUpperCase();
+  if (p.includes('MICROEMPREENDEDOR') || p === 'MEI') return 'MEI';
   if (p.includes('MICRO')) return 'ME';
   if (p.includes('PEQUENO')) return 'EPP';
   return porte && porte.trim() ? porte : 'DEMAIS';

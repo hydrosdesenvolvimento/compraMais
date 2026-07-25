@@ -79,6 +79,12 @@
       "dpo": "Data Protection Officer",
       "leitura": "Read-only"
     },
+    "porte": {
+      "MEI": "MEI — Individual Micro-entrepreneur",
+      "ME": "ME — Micro-enterprise",
+      "EPP": "EPP — Small Business",
+      "DEMAIS": "Other sizes"
+    },
     "toast": {
       "fechar": "Close"
     },
@@ -132,6 +138,7 @@
       "razaoSocial": "LEGAL NAME",
       "porte": "SIZE",
       "situacao": "STATUS",
+      "mei": "This company is an MEI (Individual Micro-entrepreneur)",
       "address": "ADDRESS",
       "cepPlaceholder": "00000-000",
       "cepSearching": "Looking up address…",
@@ -481,6 +488,7 @@
         "tituloEditar": "Edit supplier",
         "subtituloVerEditar": "Official data is read-only; edit the contact details.",
         "razaoPlaceholder": "Company legal name",
+        "portePlaceholder": "Select the company size",
         "avisoHistorico": "Records are never permanently deleted — deletion converts to Inactive or Blocked, preserving history.",
         "cancelar": "Cancel",
         "salvar": "Save",
@@ -612,6 +620,8 @@
       "colStatus": "Status",
       "colAcoes": "Actions",
       "cnaePrefixo": "CNAE {{cnae}}",
+      "itensContagem_one": "{{count}} item",
+      "itensContagem_other": "{{count}} items",
       "semPrazo": "—",
       "status": {
         "rascunho": "Draft",
@@ -861,9 +871,12 @@
         "fornecedor": "Supplier",
         "edital": "Notice",
         "status": "Status",
+        "documentos": "Documents",
+        "tamanho": "Size",
         "fragmentos": "Fragments",
         "acoes": "Actions"
       },
+      "limiteSei": "SEI limit: {{mb}} MB",
       "modal": {
         "subtitulo": "The legal order (Company ID → Personal → Attachments → Certificates) and fragmentation by the SEI limit are applied automatically on generation.",
         "fechar": "Close",
@@ -877,6 +890,8 @@
         "pecas": "Pieces (approved documents)",
         "ref": "Reference",
         "tamanho": "Size (bytes)",
+        "tamanhoEstimado": "Estimated size",
+        "limiteSei": "SEI limit",
         "adicionarPeca": "Add piece",
         "semPecas": "No pieces added.",
         "enviar": "Generate package",
@@ -904,6 +919,7 @@
       },
       "lista": {
         "fragmentos": "{{n}} fragment(s)",
+        "documentos": "{{n}} document(s)",
         "acimaLimite": "Piece above the limit — handle manually",
         "exportar": "Export",
         "exportado": "Exported.",
@@ -1164,13 +1180,19 @@
   },
   "transparencia": {
     "carregando": "Loading…",
-    "tituloPagina": "Distributed demands",
-    "subtituloPagina": "Distribution is equal among eligible suppliers and always limited to your declared capacity (cap). See the public aggregates of the Compra Mais program below.",
-    "kpiEditaisVigentes": "Active tenders",
-    "kpiSecretarias": "Departments served",
-    "kpiSegmentos": "Segments (CNAE) served",
-    "painelSecretarias": "Departments served",
-    "painelSegmentos": "Segments (CNAE) served"
+    "tituloPagina": "Transparency Portal",
+    "subtituloPagina": "Consolidated public data of the Compra Mais program — municipal procurement geared to the local economy.",
+    "investimentoTitulo": "Investment in the local economy",
+    "investimentoSub": "Funds distributed to local MEIs, ME and EPPs",
+    "kpiFornecedoresAtivos": "Active suppliers",
+    "kpiEditais": "Ongoing tenders",
+    "kpiMei": "Participating MEIs",
+    "painelInvestimento": "Investment by department",
+    "painelParticipacao": "Participation by company size",
+    "painelSegmentos": "Sectors (CNAE) served",
+    "semInvestimento": "No distributed amounts yet.",
+    "fornecedoresContagem_one": "{{count}} supplier",
+    "fornecedoresContagem_other": "{{count}} suppliers"
   },
   "editais": {
     "vitrine": {
@@ -1266,6 +1288,21 @@
       "aceito": "Term accepted",
       "cancelado": "Canceled"
     }
+  },
+  "minhaContaAdmin": {
+    "titulo": "My account",
+    "subtitulo": "Your staff details, sourced from the Users module.",
+    "dadosLabel": "User details",
+    "segurancaLabel": "Security",
+    "nome": "Full name",
+    "email": "E-mail",
+    "cargo": "Role / Position",
+    "perfil": "Access profile",
+    "secretaria": "Department / Unit",
+    "situacao": "Status",
+    "dataCadastro": "Registration date",
+    "ativo": "Active",
+    "inativo": "Inactive"
   },
   "minhaConta": {
     "titulo": "My account",

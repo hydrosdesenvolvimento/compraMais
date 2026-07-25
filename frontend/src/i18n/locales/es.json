@@ -79,6 +79,12 @@
       "dpo": "Encargado (DPO)",
       "leitura": "Solo lectura"
     },
+    "porte": {
+      "MEI": "MEI — Microemprendedor Individual",
+      "ME": "ME — Microempresa",
+      "EPP": "EPP — Empresa de Pequeño Porte",
+      "DEMAIS": "Otros tamaños"
+    },
     "toast": {
       "fechar": "Cerrar"
     },
@@ -132,6 +138,7 @@
       "razaoSocial": "RAZÓN SOCIAL",
       "porte": "TAMAÑO",
       "situacao": "SITUACIÓN",
+      "mei": "Esta empresa es MEI (Microemprendedor Individual)",
       "address": "DIRECCIÓN",
       "cepPlaceholder": "00000-000",
       "cepSearching": "Buscando dirección…",
@@ -481,6 +488,7 @@
         "tituloEditar": "Editar proveedor",
         "subtituloVerEditar": "Los datos oficiales son de solo lectura; edite los datos de contacto.",
         "razaoPlaceholder": "Razón social de la empresa",
+        "portePlaceholder": "Seleccione el tamaño",
         "avisoHistorico": "Los registros nunca se eliminan de forma definitiva — la eliminación los convierte en Inactivo o Bloqueado, preservando el historial.",
         "cancelar": "Cancelar",
         "salvar": "Guardar",
@@ -612,6 +620,8 @@
       "colStatus": "Estado",
       "colAcoes": "Acciones",
       "cnaePrefixo": "CNAE {{cnae}}",
+      "itensContagem_one": "{{count}} ítem",
+      "itensContagem_other": "{{count}} ítems",
       "semPrazo": "—",
       "status": {
         "rascunho": "Borrador",
@@ -861,9 +871,12 @@
         "fornecedor": "Proveedor",
         "edital": "Convocatoria",
         "status": "Estado",
+        "documentos": "Documentos",
+        "tamanho": "Tamaño",
         "fragmentos": "Fragmentos",
         "acoes": "Acciones"
       },
+      "limiteSei": "Límite del SEI: {{mb}} MB",
       "modal": {
         "subtitulo": "El orden legal (CNPJ → Personal → Anexos → Certificados) y la fragmentación por el límite del SEI se aplican automáticamente en la generación.",
         "fechar": "Cerrar",
@@ -877,6 +890,8 @@
         "pecas": "Piezas (documentos aprobados)",
         "ref": "Referencia",
         "tamanho": "Tamaño (bytes)",
+        "tamanhoEstimado": "Tamaño estimado",
+        "limiteSei": "Límite SEI",
         "adicionarPeca": "Agregar pieza",
         "semPecas": "Ninguna pieza agregada.",
         "enviar": "Generar valija",
@@ -904,6 +919,7 @@
       },
       "lista": {
         "fragmentos": "{{n}} fragmento(s)",
+        "documentos": "{{n}} documento(s)",
         "acimaLimite": "Pieza por encima del límite — tratar manualmente",
         "exportar": "Exportar",
         "exportado": "Exportada.",
@@ -1164,13 +1180,19 @@
   },
   "transparencia": {
     "carregando": "Cargando…",
-    "tituloPagina": "Demandas distribuidas",
-    "subtituloPagina": "El reparto es igualitario entre los proveedores aptos y siempre limitado a su capacidad declarada (tope). Vea a continuación los agregados públicos del programa Compra Mais.",
-    "kpiEditaisVigentes": "Licitaciones vigentes",
-    "kpiSecretarias": "Secretarías atendidas",
-    "kpiSegmentos": "Segmentos (CNAE) atendidos",
-    "painelSecretarias": "Secretarías atendidas",
-    "painelSegmentos": "Segmentos (CNAE) atendidos"
+    "tituloPagina": "Portal de Transparencia",
+    "subtituloPagina": "Datos públicos consolidados del programa Compra Mais — compras municipales orientadas a la economía local.",
+    "investimentoTitulo": "Inversión en la economía local",
+    "investimentoSub": "Recursos distribuidos a MEIs, ME y EPPs locales",
+    "kpiFornecedoresAtivos": "Proveedores activos",
+    "kpiEditais": "Licitaciones en curso",
+    "kpiMei": "MEIs participantes",
+    "painelInvestimento": "Inversión por secretaría",
+    "painelParticipacao": "Participación por tamaño",
+    "painelSegmentos": "Sectores (CNAE) atendidos",
+    "semInvestimento": "Aún no hay montos distribuidos.",
+    "fornecedoresContagem_one": "{{count}} proveedor",
+    "fornecedoresContagem_other": "{{count}} proveedores"
   },
   "editais": {
     "vitrine": {
@@ -1266,6 +1288,21 @@
       "aceito": "Término aceptado",
       "cancelado": "Cancelado"
     }
+  },
+  "minhaContaAdmin": {
+    "titulo": "Mi cuenta",
+    "subtitulo": "Sus datos de servidor, provenientes del módulo Usuarios.",
+    "dadosLabel": "Datos del usuario",
+    "segurancaLabel": "Seguridad",
+    "nome": "Nombre completo",
+    "email": "Correo electrónico",
+    "cargo": "Cargo / Función",
+    "perfil": "Perfil de acceso",
+    "secretaria": "Secretaría / Unidad",
+    "situacao": "Situación",
+    "dataCadastro": "Fecha de registro",
+    "ativo": "Activo",
+    "inativo": "Inactivo"
   },
   "minhaConta": {
     "titulo": "Mi cuenta",

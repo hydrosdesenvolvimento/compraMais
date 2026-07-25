@@ -219,6 +219,7 @@ export function GerirEditais() {
                         </td>
                         <td style={{ ...celula, minWidth: 240 }}>
                           <div style={{ font: '500 14px var(--font-body)', color: 'var(--azul-900)', maxWidth: 320 }}>{e.objeto}</div>
+                          {e.qtdItens !== undefined && <div data-cy="qtd-itens" style={{ fontSize: 12, color: 'var(--cinza-400)', marginTop: 2 }}>{t('admin.gerirEditais.itensContagem', { count: e.qtdItens })}</div>}
                         </td>
                         <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-500)', whiteSpace: 'nowrap' }}>{siglaDe(e.secretariaId)}</td>
                         <td style={{ ...celula, fontSize: 13.5, color: 'var(--cinza-500)', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>{formatarPrazo(e.prazoVigencia)}</td>

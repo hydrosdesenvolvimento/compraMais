@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type EnderecoView } from '../../lib/api';
+import { PORTES, rotuloPorte } from '../../lib/portes';
 import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeFechar, IconeInfo } from '../../design-system/icons';
 
@@ -69,7 +70,7 @@ function CorpoCriar({ onFechar, onMudou }: { onFechar: () => void; onMudou: () =
     onSuccess: () => { void qc.invalidateQueries({ queryKey: ['fornecedores-admin'] }); onMudou(); onFechar(); },
   });
 
-  const set = (campo: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm({ ...form, [campo]: e.target.value });
+  const set = (campo: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, [campo]: e.target.value });
 
   return (
     <form data-cy="form-criar" onSubmit={(e) => { e.preventDefault(); criar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -85,7 +86,10 @@ function CorpoCriar({ onFechar, onMudou }: { onFechar: () => void; onMudou: () =
         <div className="cm-form-grid">
           <label>
             <span style={rotulo}>{t('admin.fornecedores.campos.porte')}</span>
-            <input className="input" data-cy="campo-porte" required placeholder="MEI / ME / EPP" value={form.porte} onChange={set('porte')} style={{ width: '100%' }} />
+            <select className="input" data-cy="campo-porte" required value={form.porte} onChange={set('porte')} style={{ width: '100%' }}>
+              <option value="" disabled>{t('admin.fornecedores.modal.portePlaceholder')}</option>
+              {PORTES.map((p) => <option key={p} value={p}>{rotuloPorte(t, p)}</option>)}
+            </select>
           </label>
           <label>
             <span style={rotulo}>{t('admin.fornecedores.campos.cnaePrincipal')}</span>

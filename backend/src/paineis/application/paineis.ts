@@ -19,10 +19,20 @@ export interface FunilAdmin {
   valorEstimado: number; // Σ do valor estimado dos editais em andamento, em reais
   editaisEmAndamento: EditalEmAndamento[]; // editais publicados (demandas ativas)
 }
+/** Valor distribuído a fornecedores de uma secretaria (BI público, RN007). `secretaria` = sigla/nome já resolvido. */
+export interface InvestimentoSecretaria { secretaria: string; valor: number }
+/** Contagem de fornecedores ativos por porte (participação — BI público, RN007). */
+export interface ParticipacaoPorte { porte: string; fornecedores: number }
 export interface TransparenciaPublica {
   editaisVigentes: number;
   secretarias: string[];
   segmentos: string[]; // CNAEs alvo dos editais publicados
+  // BI público (RN007)
+  fornecedoresAtivos: number;
+  meiPercentual: number; // % dos fornecedores ativos que são MEI
+  investimentoTotal: number; // Σ do valor distribuído (cota × preço) às empresas locais, em reais
+  investimentoPorSecretaria: InvestimentoSecretaria[];
+  participacaoPorPorte: ParticipacaoPorte[];
 }
 
 /** Fontes de leitura (portas) — reusam 002/003/004 sem expor dados restritos. */
@@ -33,6 +43,8 @@ export interface PaineisFonte {
   editaisPublicados(): Promise<Array<{ secretariaId: string; cnaesAlvo: readonly string[] }>>;
   contarFornecedores(): Promise<{ ativos: number; mei: number }>;
   editaisEmAndamento(): Promise<EditalEmAndamento[]>;
+  participacaoPorPorte(): Promise<ParticipacaoPorte[]>;
+  investimentoDistribuido(): Promise<{ total: number; porSecretaria: InvestimentoSecretaria[] }>;
 }
 
 /** Dashboard administrativo — funil de pendentes + visão geral (US1 / FR-001). */
@@ -63,9 +75,24 @@ export class DashboardAdmin {
 export class Transparencia {
   constructor(private readonly fonte: PaineisFonte) {}
   async publico(): Promise<TransparenciaPublica> {
-    const publicados = await this.fonte.editaisPublicados();
+    const [publicados, fornecedores, participacaoPorPorte, investimento] = await Promise.all([
+      this.fonte.editaisPublicados(),
+      this.fonte.contarFornecedores(),
+      this.fonte.participacaoPorPorte(),
+      this.fonte.investimentoDistribuido(),
+    ]);
     const secretarias = [...new Set(publicados.map((e) => e.secretariaId))];
     const segmentos = [...new Set(publicados.flatMap((e) => [...e.cnaesAlvo]))];
-    return { editaisVigentes: publicados.length, secretarias, segmentos };
+    const meiPercentual = fornecedores.ativos > 0 ? Math.round((fornecedores.mei / fornecedores.ativos) * 100) : 0;
+    return {
+      editaisVigentes: publicados.length,
+      secretarias,
+      segmentos,
+      fornecedoresAtivos: fornecedores.ativos,
+      meiPercentual,
+      investimentoTotal: investimento.total,
+      investimentoPorSecretaria: investimento.porSecretaria,
+      participacaoPorPorte,
+    };
   }
 }

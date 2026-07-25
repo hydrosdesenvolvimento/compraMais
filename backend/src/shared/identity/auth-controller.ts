@@ -97,7 +97,10 @@ export function registrarRotasAuth(app: FastifyInstance, deps: {
 
   // RF018 — perfil do PRÓPRIO usuário (tela "Minha conta"). Diferente de /auth/me (que só decodifica o
   // token), estas rotas tocam o repositório: leem/gravam nome e foto que mudam sem reemitir o JWT.
-  const PERFIL = { type: 'object', properties: { userId: { type: 'string' }, email: { type: 'string' }, nome: { type: 'string' }, avatar: { type: ['string', 'null'] } } } as const;
+  const PERFIL = { type: 'object', properties: {
+    userId: { type: 'string' }, email: { type: 'string' }, nome: { type: 'string' }, avatar: { type: ['string', 'null'] },
+    papel: { type: 'string' }, cargo: { type: ['string', 'null'] }, secretaria: { type: ['string', 'null'] }, ativo: { type: 'boolean' }, registerDate: { type: 'string' },
+  } } as const;
 
   app.get('/auth/perfil', {
     schema: {

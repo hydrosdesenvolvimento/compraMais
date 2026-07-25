@@ -11,6 +11,7 @@ import { menuAdminVisivel, telasPadraoDoPapel } from '../lib/telas-admin';
 import { construirNotificacoesFornecedor } from '../lib/notificacoes-fornecedor';
 import { renderNotificacao } from '../lib/notificacoes-render';
 import { fontesBuscaAdmin, fontesBuscaFornecedor } from '../lib/fontes-busca';
+import { construirNotificacoesAdmin } from '../lib/notificacoes-admin';
 
 /** Rótulo localizado do papel RBAC (fallback: o próprio código, ou "visitante" quando sem sessão). */
 function rotuloPapel(t: TFunction, papel: string | undefined): string {
@@ -123,8 +124,14 @@ export function ShellAdmin() {
     [u?.papel, secretarias.data],
   );
 
+  // Notificações operacionais do sino: alertas ao vivo derivados do painel (bloqueios, fila de análise,
+  // editais a vencer). Só consulta com papel que acessa o dashboard (evita 403 de papéis sem painel).
+  const podePainel = ['cpl', 'administrador', 'smga'].includes(u?.papel ?? '');
+  const dashboard = useQuery({ queryKey: ['admin-dashboard'], queryFn: api.dashboardAdmin, enabled: podePainel, staleTime: 60_000 });
+  const notificacoes = useMemo<Notificacao[]>(() => (dashboard.data ? construirNotificacoesAdmin(dashboard.data, t) : []), [dashboard.data, t]);
+
   return (
-    <AppShell menu={menu} usuario={chip} rodapeKey="common.shell.footerAdmin" notificacoes={[]} contaHref="/admin/dashboard" fontesBusca={fontesBusca}>
+    <AppShell menu={menu} usuario={chip} rodapeKey="common.shell.footerAdmin" notificacoes={notificacoes} alerta={notificacoes.length > 0} verTodasHref="/admin/dashboard" contaHref="/admin/dashboard" fontesBusca={fontesBusca}>
       <Outlet />
     </AppShell>
   );

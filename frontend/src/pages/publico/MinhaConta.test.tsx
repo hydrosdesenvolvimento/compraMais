@@ -21,6 +21,8 @@ vi.mock('../../lib/api', () => ({
 }));
 
 const FORNECEDOR = { razaoSocial: 'Confecções Vale do Acre Ltda', cnpj: '11.222.333/0001-81', porte: 'ME', situacao: 'ativa' as const, nomeFantasia: 'Vale do Acre' };
+/** Campos do módulo Usuários no perfil próprio — nulos para fornecedor (titular). */
+const PERFIL_EXTRA = { papel: 'titular', cargo: null, secretaria: null, ativo: true, registerDate: '2025-01-10T00:00:00Z' };
 
 function renderTela() {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -33,8 +35,8 @@ function renderTela() {
 
 describe('Minha conta — Dados do responsável (RF018)', () => {
   beforeEach(() => {
-    perfilProprio.mockReset().mockResolvedValue({ userId: 'u1', email: 'ana@acre.com', nome: 'Ana Maria Souza', avatar: null });
-    atualizarPerfilProprio.mockReset().mockImplementation(async (p) => ({ userId: 'u1', email: 'ana@acre.com', nome: p.nome ?? 'Ana Maria Souza', avatar: p.avatar === undefined ? null : p.avatar }));
+    perfilProprio.mockReset().mockResolvedValue({ userId: 'u1', email: 'ana@acre.com', nome: 'Ana Maria Souza', avatar: null, ...PERFIL_EXTRA });
+    atualizarPerfilProprio.mockReset().mockImplementation(async (p) => ({ userId: 'u1', email: 'ana@acre.com', nome: p.nome ?? 'Ana Maria Souza', avatar: p.avatar === undefined ? null : p.avatar, ...PERFIL_EXTRA }));
   });
 
   it('divide o nome completo em nome (1ª palavra) + sobrenome (resto)', async () => {
@@ -67,7 +69,7 @@ describe('Minha conta — Dados do responsável (RF018)', () => {
   });
 
   it('mostra as iniciais quando não há foto e a imagem quando há', async () => {
-    perfilProprio.mockResolvedValue({ userId: 'u1', email: 'ana@acre.com', nome: 'Ana Souza', avatar: 'data:image/png;base64,AAAA' });
+    perfilProprio.mockResolvedValue({ userId: 'u1', email: 'ana@acre.com', nome: 'Ana Souza', avatar: 'data:image/png;base64,AAAA', ...PERFIL_EXTRA });
     renderTela();
     const img = await screen.findByTestId('avatar-foto') as HTMLImageElement;
     expect(img.src).toContain('data:image/png;base64,AAAA');
@@ -94,7 +96,7 @@ describe('Minha conta — Dados do responsável (RF018)', () => {
   });
 
   it('remove a foto quando há avatar', async () => {
-    perfilProprio.mockResolvedValue({ userId: 'u1', email: 'ana@acre.com', nome: 'Ana Souza', avatar: 'data:image/png;base64,AAAA' });
+    perfilProprio.mockResolvedValue({ userId: 'u1', email: 'ana@acre.com', nome: 'Ana Souza', avatar: 'data:image/png;base64,AAAA', ...PERFIL_EXTRA });
     renderTela();
     fireEvent.click(await screen.findByTestId('remover-foto'));
     await waitFor(() => expect(atualizarPerfilProprio).toHaveBeenCalledWith({ avatar: null }));

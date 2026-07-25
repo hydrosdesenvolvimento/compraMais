@@ -79,6 +79,12 @@
       "dpo": "Encarregado (DPO)",
       "leitura": "Somente leitura"
     },
+    "porte": {
+      "MEI": "MEI — Microempreendedor Individual",
+      "ME": "ME — Microempresa",
+      "EPP": "EPP — Empresa de Pequeno Porte",
+      "DEMAIS": "Demais portes"
+    },
     "toast": {
       "fechar": "Fechar"
     },
@@ -132,6 +138,7 @@
       "razaoSocial": "RAZÃO SOCIAL",
       "porte": "PORTE",
       "situacao": "SITUAÇÃO",
+      "mei": "Esta empresa é MEI (Microempreendedor Individual)",
       "address": "ENDEREÇO",
       "cepPlaceholder": "00000-000",
       "cepSearching": "Buscando endereço…",
@@ -472,7 +479,7 @@
       "acao": {
         "ver": "Ver detalhes",
         "editar": "Editar contato",
-        "bloquearIndisponivel": "Bloqueio por inadimplência é feito no módulo de credenciamento (RN002)."
+        "bloquearIndisponivel": "Bloqueio por inadimplência."
       },
       "modal": {
         "tituloCriar": "Novo fornecedor",
@@ -481,6 +488,7 @@
         "tituloEditar": "Editar fornecedor",
         "subtituloVerEditar": "Dados oficiais são somente leitura; edite os dados de contato.",
         "razaoPlaceholder": "Razão social da empresa",
+        "portePlaceholder": "Selecione o porte",
         "avisoHistorico": "Registros nunca são apagados definitivamente — a exclusão converte para Inativo ou Bloqueado, preservando o histórico.",
         "cancelar": "Cancelar",
         "salvar": "Salvar",
@@ -612,6 +620,8 @@
       "colStatus": "Status",
       "colAcoes": "Ações",
       "cnaePrefixo": "CNAE {{cnae}}",
+      "itensContagem_one": "{{count}} item",
+      "itensContagem_other": "{{count}} itens",
       "semPrazo": "—",
       "status": {
         "rascunho": "Rascunho",
@@ -861,9 +871,12 @@
         "fornecedor": "Fornecedor",
         "edital": "Edital",
         "status": "Status",
+        "documentos": "Documentos",
+        "tamanho": "Tamanho",
         "fragmentos": "Fragmentos",
         "acoes": "Ações"
       },
+      "limiteSei": "Limite do SEI: {{mb}} MB",
       "modal": {
         "subtitulo": "A ordem legal (CNPJ → Pessoal → Anexos → Certidões) e a fragmentação pelo limite do SEI são aplicadas automaticamente na geração.",
         "fechar": "Fechar",
@@ -877,6 +890,8 @@
         "pecas": "Peças (documentos aprovados)",
         "ref": "Referência",
         "tamanho": "Tamanho (bytes)",
+        "tamanhoEstimado": "Tamanho estimado",
+        "limiteSei": "Limite SEI",
         "adicionarPeca": "Adicionar peça",
         "semPecas": "Nenhuma peça adicionada.",
         "enviar": "Gerar malote",
@@ -904,6 +919,7 @@
       },
       "lista": {
         "fragmentos": "{{n}} fragmento(s)",
+        "documentos": "{{n}} documento(s)",
         "acimaLimite": "Peça acima do limite — tratar manualmente",
         "exportar": "Exportar",
         "exportado": "Exportado.",
@@ -1164,13 +1180,19 @@
   },
   "transparencia": {
     "carregando": "Carregando…",
-    "tituloPagina": "Demandas distribuídas",
-    "subtituloPagina": "O rateio é igualitário entre os fornecedores aptos e sempre limitado à sua capacidade declarada (teto). Veja abaixo os agregados públicos do programa Compra Mais.",
-    "kpiEditaisVigentes": "Editais vigentes",
-    "kpiSecretarias": "Secretarias atendidas",
-    "kpiSegmentos": "Segmentos (CNAE) atendidos",
-    "painelSecretarias": "Secretarias atendidas",
-    "painelSegmentos": "Segmentos (CNAE) atendidos"
+    "tituloPagina": "Portal da Transparência",
+    "subtituloPagina": "Dados públicos consolidados do programa Compra Mais — compras municipalizadas voltadas à economia local.",
+    "investimentoTitulo": "Investimento na economia local",
+    "investimentoSub": "Recursos distribuídos a MEIs, ME e EPPs locais",
+    "kpiFornecedoresAtivos": "Fornecedores ativos",
+    "kpiEditais": "Editais em andamento",
+    "kpiMei": "MEIs participantes",
+    "painelInvestimento": "Investimento por secretaria",
+    "painelParticipacao": "Participação por porte",
+    "painelSegmentos": "Setores (CNAE) atendidos",
+    "semInvestimento": "Ainda não há valores distribuídos.",
+    "fornecedoresContagem_one": "{{count}} fornecedor",
+    "fornecedoresContagem_other": "{{count}} fornecedores"
   },
   "editais": {
     "vitrine": {
@@ -1266,6 +1288,21 @@
       "aceito": "Termo aceito",
       "cancelado": "Cancelado"
     }
+  },
+  "minhaContaAdmin": {
+    "titulo": "Minha conta",
+    "subtitulo": "Seus dados de servidor, provenientes do módulo Usuários.",
+    "dadosLabel": "Dados do usuário",
+    "segurancaLabel": "Segurança",
+    "nome": "Nome completo",
+    "email": "E-mail",
+    "cargo": "Cargo / Função",
+    "perfil": "Perfil de acesso",
+    "secretaria": "Secretaria / Unidade",
+    "situacao": "Situação",
+    "dataCadastro": "Data de cadastro",
+    "ativo": "Ativo",
+    "inativo": "Inativo"
   },
   "minhaConta": {
     "titulo": "Minha conta",

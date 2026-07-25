@@ -101,7 +101,7 @@ import { ConsultarTrilha } from './auditoria/application/consultar-trilha.js';
 import { ExportarTrilha } from './auditoria/application/exportar-trilha.js';
 import { registrarRotasAuditoria } from './auditoria/adapters/auditoria-controller.js';
 import { ResolvedorAtoresUsuario } from './auditoria/adapters/resolvedor-atores-usuario.js';
-import { GerarMalote, type MaloteRepository } from './malote/application/gerar-malote.js';
+import { GerarMalote, limiteSeiBytes, type MaloteRepository } from './malote/application/gerar-malote.js';
 import { MaloteRepositoryMemory } from './malote/adapters/malote-repository-memory.js';
 import { MaloteRepositoryPg } from './malote/adapters/malote-repository-pg.js';
 import { registrarRotasMalote } from './malote/adapters/malote-controller.js';
@@ -341,7 +341,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   const credRepo: CredenciamentoRepository = pool ? new CredenciamentoRepositoryPg(pool) : new CredenciamentoRepositoryMemory();
   const credenciamentosDoEdital = { contarDoEdital: async (editalId: string) => (await credRepo.listarPorEdital(editalId)).length };
   const gerirEditais = new GerirEditais(editaisRepo, bus, undefined, contestacaoRepo, undefined, numeradorEditais, credenciamentosDoEdital);
-  const buscarEditais = new BuscarEditais(editaisRepo);
+  const buscarEditais = new BuscarEditais(editaisRepo, async (editalId) => (await itensEditalRepo.listarDoEdital(editalId)).length);
   registrarRotasGestaoEditais(app, { gerir: gerirEditais, buscar: buscarEditais });
 
   // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). O lookup do catálogo é o
@@ -536,7 +536,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   // credenciais/órgão/tipo). Sem isso, a UI de malote avisa que falta configuração.
   registrarRotasSei(app, {
     consultar: new ConsultarProcessoSei(seiGateway),
-    status: { configurado: config.sei.provider === 'web', provider: config.sei.provider },
+    status: { configurado: config.sei.provider === 'web', provider: config.sei.provider, limiteMb: Math.round(limiteSeiBytes() / (1024 * 1024)) },
   });
   // Recuperação no boot: reprocessa jobs pendentes/órfãos que sobreviveram a um restart (durabilidade FR-002).
   if (filaMalote instanceof FilaMalotePg) await filaMalote.recuperar();
@@ -582,6 +582,39 @@ export async function buildServer(): Promise<FastifyInstance> {
           valorEstimado: itens.reduce((s, it) => s + it.precoTeto * it.quantidade, 0),
         };
       }));
+    },
+    // Participação (BI público RN007): contagem de fornecedores ativos por porte, do maior ao menor.
+    participacaoPorPorte: async () => {
+      const ativos = (await fornecedores.listar()).filter((f) => f.situacao === 'ativa');
+      const contagem = new Map<string, number>();
+      for (const f of ativos) { const p = f.porte.trim().toUpperCase() || 'DEMAIS'; contagem.set(p, (contagem.get(p) ?? 0) + 1); }
+      return [...contagem.entries()].map(([porte, qtd]) => ({ porte, fornecedores: qtd })).sort((a, b) => b.fornecedores - a.fornecedores);
+    },
+    // Investimento na economia local (BI público RN007): valor DISTRIBUÍDO às empresas — Σ(cota × preço do
+    // item) da matriz vigente de cada edital com distribuição — agrupado por secretaria (sigla resolvida).
+    investimentoDistribuido: async () => {
+      const editais = [
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })),
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'encerrado' })),
+      ];
+      const porSecretariaId = new Map<string, number>();
+      let total = 0;
+      for (const e of editais) {
+        const matriz = await distribuicaoRepo.ultimaDoEdital(e.id);
+        if (!matriz) continue;
+        const preco = new Map((await itensEditalRepo.listarDoEdital(e.id)).map((it) => [it.id, it.precoTeto]));
+        let valor = 0;
+        for (const item of matriz.itens) for (const a of item.alocacoes) valor += a.cota * (preco.get(item.itemId) ?? 0);
+        if (valor <= 0) continue;
+        total += valor;
+        porSecretariaId.set(e.secretariaId, (porSecretariaId.get(e.secretariaId) ?? 0) + valor);
+      }
+      const porSecretaria = await Promise.all([...porSecretariaId.entries()].map(async ([id, valor]) => {
+        const s = await secretariasRepo.porId(id);
+        return { secretaria: s?.sigla ?? s?.nome ?? id, valor };
+      }));
+      porSecretaria.sort((a, b) => b.valor - a.valor);
+      return { total, porSecretaria };
     },
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });

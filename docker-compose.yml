@@ -92,7 +92,7 @@ services:
       FACE_MATCH_THRESHOLD: ${FACE_MATCH_THRESHOLD:-0.35}
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
-      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-30}
       # Integracao SEI (Epico 6). DEV: 'mock' por padrao (sem SEI); a senha vem do .env quando 'web'.
       SEI_PROVIDER: ${SEI_PROVIDER:-mock}
       SEI_BASE_URL: ${SEI_BASE_URL:-}
@@ -200,6 +200,35 @@ services:
       - compramais
 
   # ----------------------------------------------------------------------- #
+  # E2E Cypress (DEC-STR-34: suite roda no CONTAINER, nunca no host).        #
+  # Imagem `cypress/included` traz Cypress + navegador. Aponta ao `frontend` #
+  # do dev stack (Vite :5173), que faz proxy da API ao `backend`.           #
+  #                                                                          #
+  # Uso (com o dev stack no ar e semeado):                                   #
+  #   docker compose --profile dev up -d                                     #
+  #   docker compose --profile e2e run --rm frontend-e2e                     #
+  #   # um spec:                                                             #
+  #   docker compose --profile e2e run --rm frontend-e2e --spec cypress/e2e/dashboard.cy.ts
+  # ----------------------------------------------------------------------- #
+  # Pré-requisito: o dev stack já no ar e semeado (`docker compose --profile dev up -d`). Sem `depends_on`
+  # (aqueles serviços vivem no profile `dev`, não no `e2e`); o serviço só entra na rede `compramais` e
+  # alcança `http://frontend:5173`.
+  frontend-e2e:
+    profiles: ["e2e"]
+    image: cypress/included:14.0.0
+    working_dir: /e2e
+    environment:
+      CYPRESS_BASE_URL: http://frontend:5173
+    volumes:
+      - ./frontend/cypress:/e2e/cypress
+      - ./frontend/cypress.config.ts:/e2e/cypress.config.ts
+      # node_modules do frontend (contém o pacote `cypress` usado pelo config `defineConfig`).
+      # O tsconfig dos specs é `cypress/tsconfig.json` (achado pelo ts-loader a partir do dir dos specs).
+      - frontend_node_modules:/e2e/node_modules
+    networks:
+      - compramais
+
+  # ----------------------------------------------------------------------- #
   # Backend Fastify (PROD): imagem do GHCR + deploy Swarm                   #
   # Sem build em producao (PRJ-DEC-06): apenas pull da imagem publicada.    #
   # ----------------------------------------------------------------------- #
@@ -224,7 +253,7 @@ services:
       FACE_MATCH_THRESHOLD: ${FACE_MATCH_THRESHOLD:-0.35}
       # Config de dominio documentada (AD-12 / FR-003); defaults preservam o comportamento atual.
       INADIMPLENCIA_POLICY: ${INADIMPLENCIA_POLICY:-fail-open}
-      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-10}
+      SEI_MALOTE_LIMITE_MB: ${SEI_MALOTE_LIMITE_MB:-30}
       # Integracao SEI (Epico 6). Default 'mock' (seguro); mude para 'web' quando a TI provisionar as
       # credenciais/URL/orgao/tipo. Ao habilitar 'web', criar o secret `sei_senha` e apontar
       # SEI_SENHA_FILE=/run/secrets/sei_senha (e referenciar o secret na lista `secrets:` do servico).

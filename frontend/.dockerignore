@@ -1,6 +1,9 @@
 node_modules
 dist
 coverage
+# Testes E2E (Cypress) não entram na imagem de produção; seus artefatos de runtime
+# (downloads/screenshots/videos, gerados como root pelo container) quebrariam o build context.
+cypress
 .env
 .env.*
 !.env.example

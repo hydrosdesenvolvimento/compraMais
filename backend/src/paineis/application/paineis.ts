@@ -85,12 +85,14 @@ export class DashboardAdmin {
 export class Transparencia {
   constructor(private readonly fonte: PaineisFonte) {}
   async publico(): Promise<TransparenciaPublica> {
-    const [publicados, fornecedores, participacaoPorPorte, investimento, descricoes] = await Promise.all([
+    const [publicados, fornecedores, participacaoPorPorte, investimento, descricoes, credenciados, editaisPublicos] = await Promise.all([
       this.fonte.editaisPublicados(),
       this.fonte.contarFornecedores(),
       this.fonte.participacaoPorPorte(),
       this.fonte.investimentoDistribuido(),
       this.fonte.descricoesCnae(),
+      this.fonte.contarCredenciados(),
+      this.fonte.editaisPublicos(),
     ]);
     const secretarias = [...new Set(publicados.map((e) => e.secretariaId))];
     const segmentos: SegmentoCnae[] = [...new Set(publicados.flatMap((e) => [...e.cnaesAlvo]))]

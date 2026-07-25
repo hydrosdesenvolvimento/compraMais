@@ -616,6 +616,20 @@ export async function buildServer(): Promise<FastifyInstance> {
       porSecretaria.sort((a, b) => b.valor - a.valor);
       return { total, porSecretaria };
     },
+    // Empresas credenciadas (status credenciado/apto) — número exibido na landing pública.
+    contarCredenciados: async () => (await fornecedores.listar()).filter((f) => f.status === 'credenciado' || f.status === 'apto').length,
+    // Editais publicados para a landing: número, objeto, secretaria (sigla) e valor estimado Σ(precoTeto×qtd).
+    editaisPublicos: async () => {
+      const publicados = await editaisRepo.buscarPorExemplo({ situacao: 'publicado' });
+      return Promise.all(publicados.map(async (e) => {
+        const [itens, s] = await Promise.all([itensEditalRepo.listarDoEdital(e.id), secretariasRepo.porId(e.secretariaId)]);
+        return {
+          numero: e.numero, objeto: e.objeto,
+          secretaria: s?.sigla ?? s?.nome ?? e.secretariaId,
+          valorEstimado: itens.reduce((sum, it) => sum + it.precoTeto * it.quantidade, 0),
+        };
+      }));
+    },
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
 

@@ -23,16 +23,20 @@ export interface FunilAdmin {
 export interface InvestimentoSecretaria { secretaria: string; valor: number }
 /** Contagem de fornecedores ativos por porte (participação — BI público, RN007). */
 export interface ParticipacaoPorte { porte: string; fornecedores: number }
+/** Edital publicado exibido na landing pública (sem dado restrito). `secretaria` = sigla/nome resolvido. */
+export interface EditalPublico { numero: string; objeto: string; secretaria: string; valorEstimado: number }
 export interface TransparenciaPublica {
   editaisVigentes: number;
   secretarias: string[];
   segmentos: string[]; // CNAEs alvo dos editais publicados
   // BI público (RN007)
   fornecedoresAtivos: number;
+  empresasCredenciadas: number; // fornecedores credenciados/aptos
   meiPercentual: number; // % dos fornecedores ativos que são MEI
   investimentoTotal: number; // Σ do valor distribuído (cota × preço) às empresas locais, em reais
   investimentoPorSecretaria: InvestimentoSecretaria[];
   participacaoPorPorte: ParticipacaoPorte[];
+  editaisPublicos: EditalPublico[]; // editais em andamento (para a landing pública)
 }
 
 /** Fontes de leitura (portas) — reusam 002/003/004 sem expor dados restritos. */
@@ -45,6 +49,8 @@ export interface PaineisFonte {
   editaisEmAndamento(): Promise<EditalEmAndamento[]>;
   participacaoPorPorte(): Promise<ParticipacaoPorte[]>;
   investimentoDistribuido(): Promise<{ total: number; porSecretaria: InvestimentoSecretaria[] }>;
+  contarCredenciados(): Promise<number>;
+  editaisPublicos(): Promise<EditalPublico[]>;
 }
 
 /** Dashboard administrativo — funil de pendentes + visão geral (US1 / FR-001). */
@@ -75,11 +81,13 @@ export class DashboardAdmin {
 export class Transparencia {
   constructor(private readonly fonte: PaineisFonte) {}
   async publico(): Promise<TransparenciaPublica> {
-    const [publicados, fornecedores, participacaoPorPorte, investimento] = await Promise.all([
+    const [publicados, fornecedores, participacaoPorPorte, investimento, credenciados, editaisPublicos] = await Promise.all([
       this.fonte.editaisPublicados(),
       this.fonte.contarFornecedores(),
       this.fonte.participacaoPorPorte(),
       this.fonte.investimentoDistribuido(),
+      this.fonte.contarCredenciados(),
+      this.fonte.editaisPublicos(),
     ]);
     const secretarias = [...new Set(publicados.map((e) => e.secretariaId))];
     const segmentos = [...new Set(publicados.flatMap((e) => [...e.cnaesAlvo]))];
@@ -89,10 +97,12 @@ export class Transparencia {
       secretarias,
       segmentos,
       fornecedoresAtivos: fornecedores.ativos,
+      empresasCredenciadas: credenciados,
       meiPercentual,
       investimentoTotal: investimento.total,
       investimentoPorSecretaria: investimento.porSecretaria,
       participacaoPorPorte,
+      editaisPublicos,
     };
   }
 }

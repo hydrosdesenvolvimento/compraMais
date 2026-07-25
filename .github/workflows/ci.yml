@@ -112,5 +112,5 @@ jobs:
             exit 0
           fi
           echo "Disparando webhook de redeploy do Portainer…"
-          curl -fsSL -X POST "$HOOK"
+          curl -fsSL -X POST --insecure "$HOOK"
           echo "Webhook disparado."

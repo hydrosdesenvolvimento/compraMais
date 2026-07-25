@@ -31,7 +31,8 @@
       "setoresIndustriais": "Setores Industriais",
       "tiposArquivos": "Tipos de Arquivos",
       "perfis": "Telas por perfil",
-      "contestacao": "Contestações"
+      "contestacao": "Contestações",
+      "relatorios": "Relatórios"
     },
     "shell": {
       "menu": "MENU",
@@ -985,6 +986,131 @@
         "aviso": "A justificativa é obrigatória e fica registrada na auditoria (RN003).",
         "cancelar": "Cancelar",
         "confirmar": "Confirmar reprovação"
+      }
+    },
+    "relatorios": {
+      "eyebrow": "Gestão",
+      "titulo": "Relatórios",
+      "subtitulo": "Gere relatórios dos processos em PDF e exporte os dados brutos em CSV ou JSON, com filtro por período e secretaria.",
+      "seletor": "Relatório",
+      "carregando": "Gerando relatório…",
+      "erroCarregar": "Não foi possível carregar o relatório.",
+      "semDados": "Nenhum dado para o filtro selecionado.",
+      "gerandoPdf": "Gerando PDF…",
+      "erroPdf": "Não foi possível gerar o PDF.",
+      "filtros": {
+        "de": "De",
+        "ate": "Até",
+        "todas": "Todas as secretarias",
+        "limpar": "Limpar filtros"
+      },
+      "exportar": {
+        "pdf": "Baixar PDF",
+        "csv": "Exportar CSV",
+        "json": "Exportar JSON"
+      },
+      "pdf": {
+        "emissao": "Emitido em",
+        "periodo": "Período",
+        "secretaria": "Secretaria",
+        "pagina": "Página {{a}} de {{b}}"
+      },
+      "tipos": {
+        "editais": {
+          "titulo": "Editais por secretaria e situação",
+          "descricao": "Editais cadastrados, com secretaria, situação, itens e valor estimado."
+        },
+        "distribuicoes": {
+          "titulo": "Distribuições e investimento",
+          "descricao": "Matrizes de distribuição por edital: demanda, distribuído, déficit e valor distribuído por secretaria."
+        },
+        "cotas": {
+          "titulo": "Rateio de cotas por fornecedor",
+          "descricao": "Cotas e valores atribuídos a cada fornecedor por edital."
+        },
+        "credenciados": {
+          "titulo": "Fornecedores credenciados",
+          "descricao": "Fornecedores credenciados/aptos, por porte e situação cadastral."
+        },
+        "participacao": {
+          "titulo": "Participação por porte",
+          "descricao": "Distribuição dos fornecedores ativos por porte, com percentual e participação MEI."
+        },
+        "bloqueios": {
+          "titulo": "Bloqueios ativos",
+          "descricao": "Fornecedores com bloqueios ativos (débito, penalidade, inidoneidade)."
+        }
+      },
+      "colunas": {
+        "numero": "Nº do edital",
+        "objeto": "Objeto",
+        "secretaria": "Secretaria",
+        "situacao": "Situação",
+        "itens": "Itens",
+        "valorEstimado": "Valor estimado",
+        "prazoVigencia": "Vigência",
+        "criadoEm": "Criado em",
+        "demandaTotal": "Demanda",
+        "distribuido": "Distribuído",
+        "deficit": "Déficit",
+        "fornecedores": "Fornecedores",
+        "valorDistribuido": "Valor distribuído",
+        "geradoEm": "Gerado em",
+        "fornecedor": "Fornecedor",
+        "cnpj": "CNPJ",
+        "cota": "Cota",
+        "valor": "Valor",
+        "razaoSocial": "Razão social",
+        "porte": "Porte",
+        "situacaoCadastral": "Situação cadastral",
+        "status": "Status",
+        "cnaePrincipal": "CNAE principal",
+        "tipo": "Tipo",
+        "dataTermino": "Término",
+        "motivo": "Motivo",
+        "percentual": "Percentual"
+      },
+      "valores": {
+        "rascunho": "Rascunho",
+        "publicado": "Publicado",
+        "encerrado": "Encerrado",
+        "ativo": "Ativo",
+        "liberado": "Liberado",
+        "credenciado": "Credenciado",
+        "apto": "Apto",
+        "requerente": "Requerente",
+        "pendente_analise": "Pendente de análise",
+        "em_correcao": "Em correção",
+        "ativa": "Ativa",
+        "baixada": "Baixada",
+        "inapta": "Inapta",
+        "suspensa": "Suspensa",
+        "debito": "Débito",
+        "penalidade": "Penalidade",
+        "inidoneidade": "Inidoneidade"
+      },
+      "totais": {
+        "editais": "Editais",
+        "valorEstimado": "Valor estimado",
+        "rascunhos": "Rascunhos",
+        "publicados": "Publicados",
+        "encerrados": "Encerrados",
+        "distribuicoes": "Distribuições",
+        "valorDistribuido": "Valor distribuído",
+        "distribuido": "Distribuído",
+        "deficit": "Déficit",
+        "registros": "Registros",
+        "fornecedores": "Fornecedores",
+        "cota": "Cota total",
+        "valor": "Valor total",
+        "credenciados": "Credenciados",
+        "ME": "ME",
+        "MEI": "MEI",
+        "EPP": "EPP",
+        "DEMAIS": "Demais",
+        "ativos": "Ativos",
+        "meiPercentual": "% MEI",
+        "percentual": "Percentual"
       }
     }
   },

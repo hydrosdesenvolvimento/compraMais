@@ -33,6 +33,7 @@ export const TELAS_ADMIN = [
   'setoresIndustriais',
   'tiposArquivos',
   'auditoria',
+  'relatorios',
   'perfis',
 ] as const;
 
@@ -81,11 +82,11 @@ export function telasObrigatorias(papel: string): readonly TelaAdminKey[] {
  * - auditor: Auditoria; dpo: LGPD; leitura: Painel (visão macro, somente leitura)
  */
 export const VISIBILIDADE_PADRAO: Record<PapelConfiguravel, TelaAdminKey[]> = {
-  administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'perfis'],
+  administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'relatorios', 'perfis'],
   cpl: ['gestaoEditais', 'credenciamento', 'analiseDocumental'],
   smga: [
     'painel', 'fornecedores', 'credenciamento', 'analiseDocumental', 'distribuicao',
-    'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'lgpd',
+    'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'lgpd', 'relatorios',
   ],
   auditor: ['auditoria'],
   dpo: ['lgpd'],

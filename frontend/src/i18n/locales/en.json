@@ -31,7 +31,8 @@
       "setoresIndustriais": "Industrial Sectors",
       "tiposArquivos": "File Types",
       "perfis": "Screens by role",
-      "contestacao": "Disputes"
+      "contestacao": "Disputes",
+      "relatorios": "Reports"
     },
     "shell": {
       "menu": "MENU",
@@ -985,6 +986,131 @@
         "aviso": "The justification is mandatory and is recorded in the audit trail (RN003).",
         "cancelar": "Cancel",
         "confirmar": "Confirm rejection"
+      }
+    },
+    "relatorios": {
+      "eyebrow": "Management",
+      "titulo": "Reports",
+      "subtitulo": "Generate process reports as PDF and export the raw data as CSV or JSON, filtered by period and department.",
+      "seletor": "Report",
+      "carregando": "Generating report…",
+      "erroCarregar": "Could not load the report.",
+      "semDados": "No data for the selected filter.",
+      "gerandoPdf": "Generating PDF…",
+      "erroPdf": "Could not generate the PDF.",
+      "filtros": {
+        "de": "From",
+        "ate": "To",
+        "todas": "All departments",
+        "limpar": "Clear filters"
+      },
+      "exportar": {
+        "pdf": "Download PDF",
+        "csv": "Export CSV",
+        "json": "Export JSON"
+      },
+      "pdf": {
+        "emissao": "Issued on",
+        "periodo": "Period",
+        "secretaria": "Department",
+        "pagina": "Page {{a}} of {{b}}"
+      },
+      "tipos": {
+        "editais": {
+          "titulo": "Notices by department and status",
+          "descricao": "Registered notices, with department, status, items and estimated value."
+        },
+        "distribuicoes": {
+          "titulo": "Distributions and investment",
+          "descricao": "Distribution matrices per notice: demand, distributed, deficit and distributed value by department."
+        },
+        "cotas": {
+          "titulo": "Quota allocation by supplier",
+          "descricao": "Quotas and values allocated to each supplier per notice."
+        },
+        "credenciados": {
+          "titulo": "Accredited suppliers",
+          "descricao": "Accredited/eligible suppliers, by size and registration status."
+        },
+        "participacao": {
+          "titulo": "Participation by size",
+          "descricao": "Distribution of active suppliers by size, with percentage and MEI share."
+        },
+        "bloqueios": {
+          "titulo": "Active blocks",
+          "descricao": "Suppliers with active blocks (debt, penalty, disqualification)."
+        }
+      },
+      "colunas": {
+        "numero": "Notice no.",
+        "objeto": "Object",
+        "secretaria": "Department",
+        "situacao": "Status",
+        "itens": "Items",
+        "valorEstimado": "Estimated value",
+        "prazoVigencia": "Validity",
+        "criadoEm": "Created on",
+        "demandaTotal": "Demand",
+        "distribuido": "Distributed",
+        "deficit": "Deficit",
+        "fornecedores": "Suppliers",
+        "valorDistribuido": "Distributed value",
+        "geradoEm": "Generated on",
+        "fornecedor": "Supplier",
+        "cnpj": "Tax ID",
+        "cota": "Quota",
+        "valor": "Value",
+        "razaoSocial": "Legal name",
+        "porte": "Size",
+        "situacaoCadastral": "Registration status",
+        "status": "Status",
+        "cnaePrincipal": "Primary CNAE",
+        "tipo": "Type",
+        "dataTermino": "End date",
+        "motivo": "Reason",
+        "percentual": "Percentage"
+      },
+      "valores": {
+        "rascunho": "Draft",
+        "publicado": "Published",
+        "encerrado": "Closed",
+        "ativo": "Active",
+        "liberado": "Released",
+        "credenciado": "Accredited",
+        "apto": "Eligible",
+        "requerente": "Applicant",
+        "pendente_analise": "Pending review",
+        "em_correcao": "Under correction",
+        "ativa": "Active",
+        "baixada": "Closed",
+        "inapta": "Unfit",
+        "suspensa": "Suspended",
+        "debito": "Debt",
+        "penalidade": "Penalty",
+        "inidoneidade": "Disqualification"
+      },
+      "totais": {
+        "editais": "Notices",
+        "valorEstimado": "Estimated value",
+        "rascunhos": "Drafts",
+        "publicados": "Published",
+        "encerrados": "Closed",
+        "distribuicoes": "Distributions",
+        "valorDistribuido": "Distributed value",
+        "distribuido": "Distributed",
+        "deficit": "Deficit",
+        "registros": "Records",
+        "fornecedores": "Suppliers",
+        "cota": "Total quota",
+        "valor": "Total value",
+        "credenciados": "Accredited",
+        "ME": "ME",
+        "MEI": "MEI",
+        "EPP": "EPP",
+        "DEMAIS": "Others",
+        "ativos": "Active",
+        "meiPercentual": "MEI %",
+        "percentual": "Percentage"
       }
     }
   },

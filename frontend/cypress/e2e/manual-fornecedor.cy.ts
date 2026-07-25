@@ -11,8 +11,16 @@
  */
 import { CREDENCIAIS } from '../support/sessao';
 
-const VIEW: [number, number] = [1600, 1000];
-const shot = (nome: string) => cy.screenshot(nome, { capture: 'fullPage', overwrite: true });
+const VIEW: [number, number] = [1280, 900];
+// O display do container limita a captura a 1280px de largura, e o fullPage do Cypress só captura a
+// largura do viewport — o layout (sidebar + conteúdo) é mais largo e sairia cortado à direita. Aplicar
+// `zoom` reduzido dá mais largura CSS ao layout (1280/zoom), que passa a caber inteiro no quadro.
+const ZOOM = '0.72';
+function shot(nome: string) {
+  cy.document().then((d) => { (d.documentElement.style as CSSStyleDeclaration & { zoom: string }).zoom = ZOOM; });
+  cy.wait(250);
+  cy.screenshot(nome, { capture: 'fullPage', overwrite: true });
+}
 
 let token = '';
 let usuario: Record<string, unknown> = {};

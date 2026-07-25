@@ -1281,6 +1281,21 @@
       "cancelado": "Canceled"
     }
   },
+  "minhaContaAdmin": {
+    "titulo": "My account",
+    "subtitulo": "Your staff details, sourced from the Users module.",
+    "dadosLabel": "User details",
+    "segurancaLabel": "Security",
+    "nome": "Full name",
+    "email": "E-mail",
+    "cargo": "Role / Position",
+    "perfil": "Access profile",
+    "secretaria": "Department / Unit",
+    "situacao": "Status",
+    "dataCadastro": "Registration date",
+    "ativo": "Active",
+    "inativo": "Inactive"
+  },
   "minhaConta": {
     "titulo": "My account",
     "subtitulo": "Official company data obtained from the Federal Revenue Service (CNPJ API). Only Trade Name, Address and Phone can be edited.",

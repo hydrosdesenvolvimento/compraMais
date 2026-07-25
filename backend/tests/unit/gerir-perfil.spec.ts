@@ -32,6 +32,15 @@ describe('GerirPerfilProprio', () => {
     expect(p).toMatchObject({ userId: 'u1', email: 'a@b.com', nome: 'Fulano de Tal', avatar: null });
   });
 
+  it('projeta os dados do módulo Usuários (papel, situação e data de cadastro) para a "Minha conta"', async () => {
+    const p = await perfil.obter('u1');
+    expect(p.papel).toBe('titular');
+    expect(p.ativo).toBe(true);
+    expect(typeof p.registerDate).toBe('string');
+    expect(p).toHaveProperty('cargo'); // null para conta sem cargo (fornecedor); sigla/valor para servidor
+    expect(p).toHaveProperty('secretaria');
+  });
+
   it('edita o nome de exibição', async () => {
     const p = await perfil.atualizar('u1', { nome: 'Novo Nome' });
     expect(p.nome).toBe('Novo Nome');

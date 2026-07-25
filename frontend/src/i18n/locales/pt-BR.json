@@ -1281,6 +1281,21 @@
       "cancelado": "Cancelado"
     }
   },
+  "minhaContaAdmin": {
+    "titulo": "Minha conta",
+    "subtitulo": "Seus dados de servidor, provenientes do módulo Usuários.",
+    "dadosLabel": "Dados do usuário",
+    "segurancaLabel": "Segurança",
+    "nome": "Nome completo",
+    "email": "E-mail",
+    "cargo": "Cargo / Função",
+    "perfil": "Perfil de acesso",
+    "secretaria": "Secretaria / Unidade",
+    "situacao": "Situação",
+    "dataCadastro": "Data de cadastro",
+    "ativo": "Ativo",
+    "inativo": "Inativo"
+  },
   "minhaConta": {
     "titulo": "Minha conta",
     "subtitulo": "Dados oficiais da empresa obtidos pela Receita Federal (API do CNPJ). Apenas Nome Fantasia, Endereço e Telefone podem ser editados.",

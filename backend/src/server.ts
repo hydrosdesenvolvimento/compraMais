@@ -120,6 +120,8 @@ import { SolicitacaoRepositoryPg } from './titular/adapters/solicitacao-reposito
 import { registrarRotasTitular } from './titular/adapters/titular-controller.js';
 import { DashboardAdmin, Transparencia } from './paineis/application/paineis.js';
 import { registrarRotasPaineis } from './paineis/adapters/paineis-controller.js';
+import { registrarRotasRelatorios } from './relatorios/adapters/relatorios-controller.js';
+import { GerarRelatorio, type RelatoriosFonte, type LinhaCota, type LinhaBloqueio } from './relatorios/application/relatorios.js';
 import { ManterCatalogos } from './catalogos/application/manter-catalogos.js';
 import { CatalogoRepositoryMemory } from './catalogos/adapters/catalogo-repository-memory.js';
 import { SecretariaRepositoryPg, SetorCnaeRepositoryPg, TipoDocumentoRepositoryPg, MaterialServicoRepositoryPg, UnidadeMedidaRepositoryPg, NumeradorItensPg } from './catalogos/adapters/catalogo-repository-pg.js';
@@ -634,6 +636,107 @@ export async function buildServer(): Promise<FastifyInstance> {
     },
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
+
+  // Relatórios gerenciais dos processos (perfil SMGA). Projeções SOMENTE-LEITURA que compõem os
+  // repositórios já instanciados (como o paineisFonte). Linhas já resolvidas (sigla da secretaria, nome
+  // do fornecedor); o caso de uso aplica os filtros de período/secretaria e devolve { colunas, linhas, totais }.
+  const relatoriosFonte: RelatoriosFonte = {
+    editais: async () => {
+      const eds = [
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'rascunho' })),
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })),
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'encerrado' })),
+      ];
+      return Promise.all(eds.map(async (e) => {
+        const [itens, s] = await Promise.all([itensEditalRepo.listarDoEdital(e.id), secretariasRepo.porId(e.secretariaId)]);
+        return {
+          numero: e.numero, objeto: e.objeto,
+          secretariaId: e.secretariaId, secretaria: s?.sigla ?? s?.nome ?? e.secretariaId,
+          situacao: e.situacao, itens: itens.length,
+          valorEstimado: itens.reduce((sum, it) => sum + it.precoTeto * it.quantidade, 0),
+          prazoVigencia: e.prazoVigencia, criadoEm: e.registerDate,
+        };
+      }));
+    },
+    // Distribuições vigentes (última matriz por edital publicado/encerrado) — totais + investimento (Σ cota×preço).
+    distribuicoes: async () => {
+      const eds = [
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })),
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'encerrado' })),
+      ];
+      const linhas = await Promise.all(eds.map(async (e) => {
+        const matriz = await distribuicaoRepo.ultimaDoEdital(e.id);
+        if (!matriz) return null;
+        const [itens, s] = await Promise.all([itensEditalRepo.listarDoEdital(e.id), secretariasRepo.porId(e.secretariaId)]);
+        const preco = new Map(itens.map((it) => [it.id, it.precoTeto]));
+        let valorDistribuido = 0;
+        for (const item of matriz.itens) for (const a of item.alocacoes) valorDistribuido += a.cota * (preco.get(item.itemId) ?? 0);
+        return {
+          editalId: e.id, numero: e.numero, objeto: e.objeto,
+          secretariaId: e.secretariaId, secretaria: s?.sigla ?? s?.nome ?? e.secretariaId,
+          demandaTotal: matriz.demandaTotal, distribuido: matriz.quantidadeDistribuida, deficit: matriz.deficitQuantidade,
+          fornecedores: matriz.alocacoes.filter((a) => a.cota > 0).length,
+          valorDistribuido, geradoEm: matriz.geradoEm,
+        };
+      }));
+      return linhas.filter((l): l is NonNullable<typeof l> => l !== null);
+    },
+    // Rateio por fornecedor: uma linha por (fornecedor, edital) — soma das cotas dos itens e valor (cota×preço).
+    cotas: async () => {
+      const eds = [
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })),
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'encerrado' })),
+      ];
+      const nomes = new Map((await fornecedores.listar()).map((f) => [f.id, { fornecedor: f.razaoSocial, cnpj: f.cnpj.valor }]));
+      const linhas: LinhaCota[] = [];
+      for (const e of eds) {
+        const matriz = await distribuicaoRepo.ultimaDoEdital(e.id);
+        if (!matriz) continue;
+        const [itens, s] = await Promise.all([itensEditalRepo.listarDoEdital(e.id), secretariasRepo.porId(e.secretariaId)]);
+        const preco = new Map(itens.map((it) => [it.id, it.precoTeto]));
+        const agregado = new Map<string, { cota: number; valor: number }>();
+        for (const item of matriz.itens) for (const a of item.alocacoes) {
+          const at = agregado.get(a.fornecedorId) ?? { cota: 0, valor: 0 };
+          at.cota += a.cota; at.valor += a.cota * (preco.get(item.itemId) ?? 0);
+          agregado.set(a.fornecedorId, at);
+        }
+        for (const [fornecedorId, { cota, valor }] of agregado) {
+          if (cota <= 0) continue;
+          const n = nomes.get(fornecedorId);
+          linhas.push({
+            fornecedorId, fornecedor: n?.fornecedor ?? fornecedorId, cnpj: n?.cnpj ?? '',
+            editalId: e.id, numero: e.numero,
+            secretariaId: e.secretariaId, secretaria: s?.sigla ?? s?.nome ?? e.secretariaId,
+            cota, valor, geradoEm: matriz.geradoEm,
+          });
+        }
+      }
+      return linhas;
+    },
+    fornecedores: async () => (await fornecedores.listar()).map((f) => ({
+      fornecedorId: f.id, razaoSocial: f.razaoSocial, cnpj: f.cnpj.valor, porte: f.porte,
+      situacaoCadastral: f.situacao, status: f.status,
+      cnaePrincipal: (f.cnaes.find((c) => c.tipo === 'principal') ?? f.cnaes[0])?.codigoSubclasse ?? '',
+      criadoEm: f.registerDate,
+    })),
+    // Bloqueios ATIVOS (o repo expõe ativosDe por fornecedor): varre os fornecedores e coleta os ativos.
+    bloqueiosAtivos: async () => {
+      const todos = await fornecedores.listar();
+      const nomes = new Map(todos.map((f) => [f.id, { fornecedor: f.razaoSocial, cnpj: f.cnpj.valor }]));
+      const linhas: LinhaBloqueio[] = [];
+      for (const f of todos) {
+        for (const b of await bloqueios.ativosDe(f.id)) {
+          const n = nomes.get(b.fornecedorId);
+          linhas.push({
+            fornecedorId: b.fornecedorId, fornecedor: n?.fornecedor ?? b.fornecedorId, cnpj: n?.cnpj ?? '',
+            tipo: b.tipo, situacao: b.situacao, dataTermino: b.dataTermino, motivo: b.motivo, criadoEm: b.registerDate,
+          });
+        }
+      }
+      return linhas;
+    },
+  };
+  registrarRotasRelatorios(app, { gerar: new GerarRelatorio(relatoriosFonte) });
 
   // Administração de telas por perfil (§15/AD-35): governa quais TELAS do Painel Admin cada papel enxerga.
   // O Administrador é superusuário (vê tudo); os demais papéis internos seguem o override persistido ou o

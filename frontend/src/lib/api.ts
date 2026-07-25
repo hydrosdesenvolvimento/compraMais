@@ -328,6 +328,23 @@ export interface FiltroFornecedoresView {
   pagina?: number; tamanho?: number;
 }
 
+// Relatórios gerenciais (perfil SMGA). O backend responde dado estruturado (chaves de coluna estáveis +
+// tipo); a rotulação/PDF/CSV é do frontend (PRJ-DEC-12).
+export type TipoRelatorio = 'editais' | 'distribuicoes' | 'cotas' | 'credenciados' | 'participacao' | 'bloqueios';
+export type TipoColunaRelatorio = 'texto' | 'numero' | 'moeda' | 'data';
+export interface ColunaRelatorio { chave: string; tipo: TipoColunaRelatorio }
+export interface RelatorioView {
+  tipo: TipoRelatorio;
+  geradoEm: string;
+  periodo: { de: string | null; ate: string | null };
+  secretariaId: string | null;
+  suportaSecretaria: boolean;
+  colunas: ColunaRelatorio[];
+  linhas: Record<string, unknown>[];
+  totais: Record<string, number>;
+}
+export interface FiltroRelatorioReq { de?: string; ate?: string; secretaria?: string }
+
 export const api = {
   // Portal do fornecedor
   fornecedor: (fid: string) => get<FornecedorPerfil>(`/fornecedores/${fid}`),
@@ -468,6 +485,16 @@ export const api = {
   auditoria: (params: URLSearchParams) => get<RegistroAuditoria[]>(`/auditoria?${params.toString()}`),
   // UC012: exportação da trilha via fetch (carrega o Bearer — a rota é protegida por RBAC).
   auditoriaExportar: (params: URLSearchParams) => baixarArquivo(`/auditoria/exportar?${params.toString()}`),
+
+  // Relatórios gerenciais dos processos (perfil SMGA). Dado estruturado filtrável por período/secretaria.
+  relatorio: (tipo: TipoRelatorio, f: FiltroRelatorioReq = {}) => {
+    const q = new URLSearchParams();
+    if (f.de) q.set('de', f.de);
+    if (f.ate) q.set('ate', f.ate);
+    if (f.secretaria) q.set('secretaria', f.secretaria);
+    const qs = q.toString();
+    return get<RelatorioView>(`/admin/relatorios/${tipo}${qs ? `?${qs}` : ''}`);
+  },
 
   // UC017 — Atendimento LGPD pelo Encarregado (DPO) / Administrador. CPL não atende (RNF007 → 403 no backend).
   solicitacoesLgpd: (status?: 'pendente' | 'atendida' | 'recusada') =>

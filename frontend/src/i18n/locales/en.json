@@ -1189,6 +1189,7 @@
     "kpiMei": "Participating MEIs",
     "painelInvestimento": "Investment by department",
     "painelParticipacao": "Participation by company size",
+    "cnae": "CNAE {{codigo}}",
     "painelSegmentos": "Sectors (CNAE) served",
     "semInvestimento": "No distributed amounts yet.",
     "fornecedoresContagem_one": "{{count}} supplier",

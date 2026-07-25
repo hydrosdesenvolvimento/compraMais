@@ -616,6 +616,8 @@ export async function buildServer(): Promise<FastifyInstance> {
       porSecretaria.sort((a, b) => b.valor - a.valor);
       return { total, porSecretaria };
     },
+    // Descrições dos CNAEs (catálogo Setores Industriais) para rotular os segmentos na transparência.
+    descricoesCnae: async () => Object.fromEntries((await setoresRepo.listar()).map((s) => [s.codigo, s.descricao])),
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
 

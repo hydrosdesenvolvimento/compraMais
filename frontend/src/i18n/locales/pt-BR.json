@@ -1209,6 +1209,7 @@
     "kpiMei": "MEIs participantes",
     "painelInvestimento": "Investimento por secretaria",
     "painelParticipacao": "Participação por porte",
+    "cnae": "CNAE {{codigo}}",
     "painelSegmentos": "Setores (CNAE) atendidos",
     "semInvestimento": "Ainda não há valores distribuídos.",
     "fornecedoresContagem_one": "{{count}} fornecedor",

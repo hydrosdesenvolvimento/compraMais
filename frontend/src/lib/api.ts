@@ -182,10 +182,12 @@ export interface AnaliseDocItem { id: string; tipo: string; status: 'pendente' |
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
 export interface InvestimentoSecretariaView { secretaria: string; valor: number }
 export interface ParticipacaoPorteView { porte: string; fornecedores: number }
+/** Setor/CNAE atendido: código (7 dígitos) + descrição do catálogo (null quando não catalogado). */
+export interface SegmentoCnaeView { codigo: string; descricao: string | null }
 export interface Transparencia {
   editaisVigentes: number;
   secretarias: string[];
-  segmentos: string[];
+  segmentos: SegmentoCnaeView[];
   fornecedoresAtivos: number;
   meiPercentual: number;
   investimentoTotal: number;

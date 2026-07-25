@@ -17,6 +17,8 @@ const fonte: PaineisFonte = {
   participacaoPorPorte: async () => [{ porte: 'ME', fornecedores: 3 }, { porte: 'MEI', fornecedores: 2 }],
   investimentoDistribuido: async () => ({ total: 84000, porSecretaria: [{ secretaria: 'SEME', valor: 84000 }] }),
   descricoesCnae: async () => ({ '1091101': 'Fabricação de produtos de panificação', '3101200': 'Fabricação de móveis com predominância de madeira' }),
+  contarCredenciados: async () => 4,
+  editaisPublicos: async () => [{ numero: 'ED-2026/001', objeto: 'Fardamento', secretaria: 'SEME', valorEstimado: 116400 }],
 };
 
 describe('Painéis (Épico 9)', () => {

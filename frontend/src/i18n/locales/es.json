@@ -1164,13 +1164,19 @@
   },
   "transparencia": {
     "carregando": "Cargando…",
-    "tituloPagina": "Demandas distribuidas",
-    "subtituloPagina": "El reparto es igualitario entre los proveedores aptos y siempre limitado a su capacidad declarada (tope). Vea a continuación los agregados públicos del programa Compra Mais.",
-    "kpiEditaisVigentes": "Licitaciones vigentes",
-    "kpiSecretarias": "Secretarías atendidas",
-    "kpiSegmentos": "Segmentos (CNAE) atendidos",
-    "painelSecretarias": "Secretarías atendidas",
-    "painelSegmentos": "Segmentos (CNAE) atendidos"
+    "tituloPagina": "Portal de Transparencia",
+    "subtituloPagina": "Datos públicos consolidados del programa Compra Mais — compras municipales orientadas a la economía local.",
+    "investimentoTitulo": "Inversión en la economía local",
+    "investimentoSub": "Recursos distribuidos a MEIs, ME y EPPs locales",
+    "kpiFornecedoresAtivos": "Proveedores activos",
+    "kpiEditais": "Licitaciones en curso",
+    "kpiMei": "MEIs participantes",
+    "painelInvestimento": "Inversión por secretaría",
+    "painelParticipacao": "Participación por tamaño",
+    "painelSegmentos": "Sectores (CNAE) atendidos",
+    "semInvestimento": "Aún no hay montos distribuidos.",
+    "fornecedoresContagem_one": "{{count}} proveedor",
+    "fornecedoresContagem_other": "{{count}} proveedores"
   },
   "editais": {
     "vitrine": {

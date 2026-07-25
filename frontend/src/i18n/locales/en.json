@@ -1164,13 +1164,19 @@
   },
   "transparencia": {
     "carregando": "Loading…",
-    "tituloPagina": "Distributed demands",
-    "subtituloPagina": "Distribution is equal among eligible suppliers and always limited to your declared capacity (cap). See the public aggregates of the Compra Mais program below.",
-    "kpiEditaisVigentes": "Active tenders",
-    "kpiSecretarias": "Departments served",
-    "kpiSegmentos": "Segments (CNAE) served",
-    "painelSecretarias": "Departments served",
-    "painelSegmentos": "Segments (CNAE) served"
+    "tituloPagina": "Transparency Portal",
+    "subtituloPagina": "Consolidated public data of the Compra Mais program — municipal procurement geared to the local economy.",
+    "investimentoTitulo": "Investment in the local economy",
+    "investimentoSub": "Funds distributed to local MEIs, ME and EPPs",
+    "kpiFornecedoresAtivos": "Active suppliers",
+    "kpiEditais": "Ongoing tenders",
+    "kpiMei": "Participating MEIs",
+    "painelInvestimento": "Investment by department",
+    "painelParticipacao": "Participation by company size",
+    "painelSegmentos": "Sectors (CNAE) served",
+    "semInvestimento": "No distributed amounts yet.",
+    "fornecedoresContagem_one": "{{count}} supplier",
+    "fornecedoresContagem_other": "{{count}} suppliers"
   },
   "editais": {
     "vitrine": {

@@ -4,6 +4,7 @@ import { criarPool } from './pool.js';
 import { aplicarMigracoes } from './migracoes.js';
 import { Usuario } from '../identity/usuario.js';
 import { UsuarioRepositoryPg } from '../identity/usuario-repository-pg.js';
+import type { UsuarioRepository } from '../identity/usuario-repository.js';
 import type { Papel } from '../identity/identity-provider.js';
 import { GerirDocumentos } from '../../credenciamento/application/gerir-documentos.js';
 import { DocumentoRepositoryPg, ObjectStoragePg } from '../../credenciamento/adapters/documentos-pg.js';
@@ -168,6 +169,41 @@ async function seedFilaAnalise(pool: Pool, piiKey: Buffer): Promise<void> {
   console.log(`[seed] análise documental: ${criados} fornecedor(es) semeado(s).`);
 }
 
+/**
+ * Semeia os usuários internos de demo (idempotente). Cria os ausentes e **reativa** os que existem mas
+ * estão inativos — conserta o drift de dev em que um servidor desligado (RN015) ficava sem login
+ * ("Credenciais inválidas") para sempre, já que o seed antigo pulava qualquer usuário existente.
+ */
+export async function semearUsuariosInternos(repo: UsuarioRepository): Promise<{ criados: number; reativados: number; falhas: number }> {
+  let criados = 0;
+  let reativados = 0;
+  let falhas = 0;
+  for (const s of USUARIOS_SEED) {
+    try {
+      const existente = await repo.porEmail(s.email);
+      if (existente) {
+        if (!existente.ativo) {
+          existente.reativar();
+          await repo.salvar(existente);
+          reativados++;
+          console.log(`[seed] reactivated: ${s.email}`);
+        } else {
+          console.log(`[seed] already exists: ${s.email}`);
+        }
+        continue;
+      }
+      const u = Usuario.criarLocal({ id: randomUUID(), email: s.email, senha: s.senha, nome: s.nome, papel: s.papel, fornecedorId: s.fornecedorId, cargo: s.cargo ?? null, login: s.login ?? null, secretaria: s.secretaria ?? null });
+      await repo.salvar(u);
+      criados++;
+      console.log(`[seed] created: ${s.email} (${s.papel})`);
+    } catch (e) {
+      falhas++;
+      console.error(`[seed] FAILURE for ${s.email}: ${(e as Error).message}`);
+    }
+  }
+  return { criados, reativados, falhas };
+}
+
 async function seed(): Promise<void> {
   if (!temPostgresConfigurado()) {
     console.error('[seed] Postgres not configured (set POSTGRES_HOST or DATABASE_URL). Aborting.');
@@ -179,25 +215,8 @@ async function seed(): Promise<void> {
     const novas = await aplicarMigracoes(pool, (m) => console.log(`[seed] ${m}`));
     if (novas.length) console.log(`[seed] ${novas.length} migration(s) applied.`);
 
-    const repo = new UsuarioRepositoryPg(pool);
-    let criados = 0;
-    let falhas = 0;
-    for (const s of USUARIOS_SEED) {
-      try {
-        if (await repo.porEmail(s.email)) {
-          console.log(`[seed] already exists: ${s.email}`);
-          continue;
-        }
-        const u = Usuario.criarLocal({ id: randomUUID(), email: s.email, senha: s.senha, nome: s.nome, papel: s.papel, fornecedorId: s.fornecedorId, cargo: s.cargo ?? null, login: s.login ?? null, secretaria: s.secretaria ?? null });
-        await repo.salvar(u);
-        criados++;
-        console.log(`[seed] created: ${s.email} (${s.papel})`);
-      } catch (e) {
-        falhas++;
-        console.error(`[seed] FAILURE for ${s.email}: ${(e as Error).message}`);
-      }
-    }
-    console.log(`[seed] completed — ${criados} new, ${falhas} failure(s) of ${USUARIOS_SEED.length}.`);
+    const { criados, reativados, falhas } = await semearUsuariosInternos(new UsuarioRepositoryPg(pool));
+    console.log(`[seed] completed — ${criados} new, ${reativados} reactivated, ${falhas} failure(s) of ${USUARIOS_SEED.length}.`);
     if (falhas) process.exitCode = 1; // visível em CI sem abortar os demais
 
     await seedTiposDocumento(pool);
@@ -209,4 +228,6 @@ async function seed(): Promise<void> {
   }
 }
 
-seed().catch((e) => { console.error('[seed] failure:', e); process.exit(1); });
+// Só executa quando chamado como script (`tsx seed.ts`); importar o módulo (ex.: testes) não dispara o seed.
+const isMain = import.meta.url === `file://${process.argv[1]}`;
+if (isMain) seed().catch((e) => { console.error('[seed] failure:', e); process.exit(1); });

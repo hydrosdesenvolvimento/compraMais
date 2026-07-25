@@ -42,6 +42,7 @@ import { CredenciamentoEmEdital } from './pages/admin/CredenciamentoEmEdital';
 import { DistribuicaoInteligente } from './pages/admin/DistribuicaoInteligente';
 import { CadastroReserva } from './pages/admin/CadastroReserva';
 import { Desistencias } from './pages/admin/Desistencias';
+import { Relatorios } from './pages/admin/Relatorios';
 import { exigirTelaAdmin, exigirTitular } from './lib/guardas';
 
 const DEMO_FORNECEDOR_ID = 'demo-fornecedor';
@@ -111,6 +112,7 @@ const rAdminDesistencias = createRoute({ getParentRoute: () => adminLayout, path
 const rAdminSecretarias = createRoute({ getParentRoute: () => adminLayout, path: '/admin/secretarias', beforeLoad: () => exigirTelaAdmin('secretarias'), component: Secretarias });
 const rAdminSetores = createRoute({ getParentRoute: () => adminLayout, path: '/admin/setores-industriais', beforeLoad: () => exigirTelaAdmin('setoresIndustriais'), component: SetoresIndustriais });
 const rAdminTiposArquivos = createRoute({ getParentRoute: () => adminLayout, path: '/admin/tipos-arquivos', beforeLoad: () => exigirTelaAdmin('tiposArquivos'), component: TiposArquivos });
+const rAdminRelatorios = createRoute({ getParentRoute: () => adminLayout, path: '/admin/relatorios', beforeLoad: () => exigirTelaAdmin('relatorios'), component: Relatorios });
 // "Minha conta" do servidor: auto-própria (qualquer papel autenticado vê a SUA conta), sem exigirTelaAdmin.
 const rAdminConta = createRoute({ getParentRoute: () => adminLayout, path: '/admin/minha-conta', beforeLoad: () => { if (!estaAutenticado()) throw redirect({ to: '/cadastro' }); }, component: MinhaContaAdmin });
 
@@ -125,7 +127,7 @@ const routeTree = rootRoute.addChildren([
     rAdminIndex, rAdminDash, rAdminCoval, rAdminEditais, rAdminContest, rAdminMalote, rAdminCatalogos,
     rAdminUsuarios, rAdminLgpd, rAdminAudit, rAdminPerfis,
     rAdminFornecedores, rAdminCredenciamento, rAdminAnaliseDoc, rAdminDistribuicao,
-    rAdminCadastroReserva, rAdminDesistencias, rAdminSecretarias, rAdminSetores, rAdminTiposArquivos, rAdminConta,
+    rAdminCadastroReserva, rAdminDesistencias, rAdminSecretarias, rAdminSetores, rAdminTiposArquivos, rAdminRelatorios, rAdminConta,
   ]),
   naoEncontrada,
 ]);

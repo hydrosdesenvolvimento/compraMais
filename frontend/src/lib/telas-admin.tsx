@@ -17,7 +17,7 @@ export type TelaAdminKey =
   | 'painel' | 'fornecedores' | 'gestaoEditais' | 'credenciamento'
   | 'analiseDocumental' | 'distribuicao' | 'cadastroReserva' | 'desistencias'
   | 'malote' | 'contestacoes' | 'catalogos' | 'secretarias' | 'setoresIndustriais'
-  | 'tiposArquivos' | 'usuarios' | 'lgpd' | 'auditoria' | 'perfis'
+  | 'tiposArquivos' | 'usuarios' | 'lgpd' | 'auditoria' | 'relatorios' | 'perfis'
   | 'covalidacao';
 
 const ico = { width: 20, height: 20 };
@@ -46,6 +46,7 @@ export const TELAS_ADMIN: Array<{ key: TelaAdminKey; item: ItemMenu }> = [
   { key: 'setoresIndustriais', item: { rotuloKey: 'common.nav.setoresIndustriais', href: '/admin/setores-industriais', cy: 'nav-setores-industriais', icone: <IconeFiltro {...ico} /> } },
   { key: 'tiposArquivos', item: { rotuloKey: 'common.nav.tiposArquivos', href: '/admin/tipos-arquivos', cy: 'nav-tipos-arquivos', icone: <IconeDocumentos {...ico} /> } },
   { key: 'auditoria', item: { rotuloKey: 'common.nav.auditoria', href: '/admin/auditoria', cy: 'nav-auditoria', icone: <IconeDocumentos {...ico} /> } },
+  { key: 'relatorios', item: { rotuloKey: 'common.nav.relatorios', href: '/admin/relatorios', cy: 'nav-relatorios', icone: <IconeEditais {...ico} /> } },
   { key: 'perfis', item: { rotuloKey: 'common.nav.perfis', href: '/admin/perfis', cy: 'nav-perfis', icone: <IconeCadeado {...ico} /> } },
 ];
 
@@ -73,11 +74,11 @@ export function menuAdminVisivel(visiveis: readonly string[]): ItemMenu[] {
  */
 const TODAS = TELAS_ADMIN.map((t) => t.key);
 const PADRAO_POR_PAPEL: Record<string, TelaAdminKey[]> = {
-  administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'perfis'],
+  administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'relatorios', 'perfis'],
   cpl: ['gestaoEditais', 'credenciamento', 'analiseDocumental'],
   smga: [
     'painel', 'fornecedores', 'credenciamento', 'analiseDocumental', 'distribuicao',
-    'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'lgpd',
+    'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'lgpd', 'relatorios',
   ],
   auditor: ['auditoria'],
   dpo: ['lgpd'],

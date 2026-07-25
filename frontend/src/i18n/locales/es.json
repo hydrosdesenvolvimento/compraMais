@@ -31,7 +31,8 @@
       "setoresIndustriais": "Sectores Industriales",
       "tiposArquivos": "Tipos de Archivo",
       "perfis": "Pantallas por perfil",
-      "contestacao": "Impugnaciones"
+      "contestacao": "Impugnaciones",
+      "relatorios": "Informes"
     },
     "shell": {
       "menu": "MENÚ",
@@ -985,6 +986,130 @@
         "aviso": "La justificación es obligatoria y queda registrada en la auditoría (RN003).",
         "cancelar": "Cancelar",
         "confirmar": "Confirmar rechazo"
+      }
+    },
+    "relatorios": {
+      "eyebrow": "Gestión",
+      "titulo": "Informes",
+      "subtitulo": "Genere informes de los procesos en PDF y exporte los datos brutos en CSV o JSON, con filtro por período y secretaría.",
+      "carregando": "Generando informe…",
+      "erroCarregar": "No se pudo cargar el informe.",
+      "semDados": "No hay datos para el filtro seleccionado.",
+      "gerandoPdf": "Generando PDF…",
+      "erroPdf": "No se pudo generar el PDF.",
+      "filtros": {
+        "de": "Desde",
+        "ate": "Hasta",
+        "todas": "Todas las secretarías",
+        "limpar": "Limpiar filtros"
+      },
+      "exportar": {
+        "pdf": "Descargar PDF",
+        "csv": "Exportar CSV",
+        "json": "Exportar JSON"
+      },
+      "pdf": {
+        "emissao": "Emitido el",
+        "periodo": "Período",
+        "secretaria": "Secretaría",
+        "pagina": "Página {{a}} de {{b}}"
+      },
+      "tipos": {
+        "editais": {
+          "titulo": "Convocatorias por secretaría y situación",
+          "descricao": "Convocatorias registradas, con secretaría, situación, ítems y valor estimado."
+        },
+        "distribuicoes": {
+          "titulo": "Distribuciones e inversión",
+          "descricao": "Matrices de distribución por convocatoria: demanda, distribuido, déficit y valor distribuido por secretaría."
+        },
+        "cotas": {
+          "titulo": "Reparto de cuotas por proveedor",
+          "descricao": "Cuotas y valores asignados a cada proveedor por convocatoria."
+        },
+        "credenciados": {
+          "titulo": "Proveedores acreditados",
+          "descricao": "Proveedores acreditados/aptos, por tamaño y situación registral."
+        },
+        "participacao": {
+          "titulo": "Participación por tamaño",
+          "descricao": "Distribución de los proveedores activos por tamaño, con porcentaje y participación MEI."
+        },
+        "bloqueios": {
+          "titulo": "Bloqueos activos",
+          "descricao": "Proveedores con bloqueos activos (deuda, penalidad, inhabilitación)."
+        }
+      },
+      "colunas": {
+        "numero": "N.º de convocatoria",
+        "objeto": "Objeto",
+        "secretaria": "Secretaría",
+        "situacao": "Situación",
+        "itens": "Ítems",
+        "valorEstimado": "Valor estimado",
+        "prazoVigencia": "Vigencia",
+        "criadoEm": "Creado el",
+        "demandaTotal": "Demanda",
+        "distribuido": "Distribuido",
+        "deficit": "Déficit",
+        "fornecedores": "Proveedores",
+        "valorDistribuido": "Valor distribuido",
+        "geradoEm": "Generado el",
+        "fornecedor": "Proveedor",
+        "cnpj": "CNPJ",
+        "cota": "Cuota",
+        "valor": "Valor",
+        "razaoSocial": "Razón social",
+        "porte": "Tamaño",
+        "situacaoCadastral": "Situación registral",
+        "status": "Estado",
+        "cnaePrincipal": "CNAE principal",
+        "tipo": "Tipo",
+        "dataTermino": "Término",
+        "motivo": "Motivo",
+        "percentual": "Porcentaje"
+      },
+      "valores": {
+        "rascunho": "Borrador",
+        "publicado": "Publicado",
+        "encerrado": "Cerrado",
+        "ativo": "Activo",
+        "liberado": "Liberado",
+        "credenciado": "Acreditado",
+        "apto": "Apto",
+        "requerente": "Solicitante",
+        "pendente_analise": "Pendiente de análisis",
+        "em_correcao": "En corrección",
+        "ativa": "Activa",
+        "baixada": "Baja",
+        "inapta": "No apta",
+        "suspensa": "Suspendida",
+        "debito": "Deuda",
+        "penalidade": "Penalidad",
+        "inidoneidade": "Inhabilitación"
+      },
+      "totais": {
+        "editais": "Convocatorias",
+        "valorEstimado": "Valor estimado",
+        "rascunhos": "Borradores",
+        "publicados": "Publicadas",
+        "encerrados": "Cerradas",
+        "distribuicoes": "Distribuciones",
+        "valorDistribuido": "Valor distribuido",
+        "distribuido": "Distribuido",
+        "deficit": "Déficit",
+        "registros": "Registros",
+        "fornecedores": "Proveedores",
+        "cota": "Cuota total",
+        "valor": "Valor total",
+        "credenciados": "Acreditados",
+        "ME": "ME",
+        "MEI": "MEI",
+        "EPP": "EPP",
+        "DEMAIS": "Otros",
+        "ativos": "Activos",
+        "meiPercentual": "% MEI",
+        "percentual": "Porcentaje"
       }
     }
   },

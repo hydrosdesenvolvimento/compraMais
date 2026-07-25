@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compra Mais · Prefeitura de Rio Branco</title>
+  <meta name="description" content="Compras públicas simples, transparentes e 100% digitais — Prefeitura de Rio Branco / AC. Portal da Transparência, editais abertos e cadastro de fornecedores." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-app-base="http://localhost:5173">
+  <!-- Navegação -->
+  <header class="nav">
+    <a class="brand" href="#topo" aria-label="Compra Mais — início">
+      <img class="brand-logo" src="logo.png" alt="Compra Mais" width="774" height="504" />
+      <span class="brand-name">Compra Mais</span>
+    </a>
+    <nav class="nav-links" aria-label="Seções">
+      <a href="#transparencia">Transparência</a>
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#editais">Editais</a>
+      <a href="#contato">Contato</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="btn btn-ghost" data-app-link="/#/cadastro">Já tenho conta</a>
+      <a class="btn btn-primary" data-app-link="/#/cadastro">Entrar no sistema</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="topo">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow">Governo Digital · Prefeitura de Rio Branco / AC</span>
+        <h1>Compras públicas <span class="hl">simples</span>, <span class="hl">transparentes</span> e <span class="hl">100% digitais</span>.</h1>
+        <p class="lead">Do cadastro à entrega, todo o processo acontece online — com validação automática, distribuição justa e dados abertos ao cidadão.</p>
+        <div class="hero-buttons">
+          <a class="btn btn-primary btn-lg" data-app-link="/#/cadastro">Entrar no sistema</a>
+          <a class="btn btn-outline btn-lg" data-app-link="/#/cadastro">Cadastrar empresa</a>
+        </div>
+        <div class="hero-stats" role="group" aria-label="Indicadores públicos">
+          <div class="hstat"><b data-fill="investimentoTotalCompacto">—</b><span>investidos localmente</span></div>
+          <div class="hstat"><b data-fill="fornecedoresAtivos">—</b><span>fornecedores ativos</span></div>
+          <div class="hstat"><b data-fill="meiPercentual">—</b><span>são MEIs locais</span></div>
+        </div>
+      </div>
+
+      <!-- Painel público ao vivo -->
+      <aside class="painel" aria-label="Painel público ao vivo">
+        <div class="painel-head">
+          <span>Painel público · 2026</span>
+          <span class="live"><i></i> ao vivo</span>
+        </div>
+        <div class="painel-grid">
+          <div><b data-fill="editaisVigentes">—</b><span>editais abertos</span></div>
+          <div><b data-fill="empresasCredenciadas">—</b><span>empresas credenciadas</span></div>
+        </div>
+        <div class="painel-sub">Investimento por secretaria</div>
+        <ul class="painel-bars" data-fill="investimentoPorSecretariaMini" aria-live="polite"></ul>
+        <div class="painel-foot"><i></i> Credenciamento aprovado — sem fila, sem papel</div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- Portal da Transparência -->
+  <section class="section transparencia" id="transparencia">
+    <div class="container">
+      <span class="section-eyebrow">Portal da Transparência</span>
+      <h2>Os números do Compra Mais, abertos ao cidadão</h2>
+      <p class="section-sub">Dados consolidados do exercício 2026 — atualizados a partir do sistema e disponíveis para toda a população de Rio Branco.</p>
+
+      <div class="metric-grid">
+        <div class="metric metric-lg"><span class="metric-label">Investimento na economia local</span><b class="metric-valor" data-fill="investimentoTotal">—</b></div>
+        <div class="metric"><span class="metric-label">Fornecedores ativos</span><b class="metric-valor" data-fill="fornecedoresAtivos">—</b></div>
+        <div class="metric"><span class="metric-label">Editais em andamento</span><b class="metric-valor" data-fill="editaisVigentes">—</b></div>
+        <div class="metric"><span class="metric-label">Empresas credenciadas</span><b class="metric-valor" data-fill="empresasCredenciadas">—</b></div>
+        <div class="metric metric-amber"><span class="metric-label">Participação de MEIs</span><b class="metric-valor" data-fill="meiPercentual">—</b></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><h3>Investimento por secretaria</h3><span class="tag" data-fill="investimentoTotalTag">—</span></div>
+          <ul class="bars" data-fill="investimentoPorSecretaria" aria-live="polite"></ul>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Participação por porte</h3><span class="tag"><b data-fill="fornecedoresAtivosTag">—</b> empresas</span></div>
+          <ul class="bars bars-amber" data-fill="participacaoPorPorte" aria-live="polite"></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Editais públicos -->
+  <section class="section" id="editais">
+    <div class="container">
+      <div class="section-head-row">
+        <div>
+          <span class="section-eyebrow">Editais públicos</span>
+          <h2>Oportunidades abertas e em execução</h2>
+        </div>
+        <a class="link-arrow" data-app-link="/#/editais">Ver todos os editais →</a>
+      </div>
+      <div class="table-wrap card">
+        <table class="editais">
+          <thead>
+            <tr><th>Edital</th><th>Objeto</th><th>Secretaria</th><th class="right">Valor estimado</th></tr>
+          </thead>
+          <tbody data-fill="editaisPublicos"><tr><td colspan="4" class="muted">Carregando editais…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Como funciona -->
+  <section class="section como" id="como-funciona">
+    <div class="container">
+      <span class="section-eyebrow">Como funciona</span>
+      <h2>Participar é simples e 100% digital</h2>
+      <p class="section-sub">Do cadastro à entrega, todo o processo acontece online — com validação automática e distribuição justa.</p>
+      <ol class="passos">
+        <li><span class="num">1</span><h3>Cadastre sua empresa</h3><p>Informe o CNPJ — os dados são puxados da Receita Federal e checados contra dívida ativa.</p></li>
+        <li><span class="num">2</span><h3>Envie os documentos</h3><p>Suba apenas o que falta — documentos válidos são reaproveitados entre editais, sem reenvio.</p></li>
+        <li><span class="num">3</span><h3>Credencie-se</h3><p>Veja apenas os editais compatíveis com o seu ramo (CNAE) e adira com poucos cliques.</p></li>
+        <li><span class="num">4</span><h3>Forneça e receba</h3><p>A distribuição de cotas é calculada de forma justa, respeitando a capacidade declarada de cada empresa.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container cta-inner">
+      <span class="section-eyebrow light">Faça parte</span>
+      <h2>Sua empresa a serviço da cidade de Rio Branco</h2>
+      <p>Junte-se aos fornecedores locais que já participam das compras públicas municipais. Cadastro gratuito, transparente e sem burocracia.</p>
+      <div class="hero-buttons">
+        <a class="btn btn-amber btn-lg" data-app-link="/#/cadastro">Cadastrar empresa</a>
+        <a class="btn btn-outline-light btn-lg" data-app-link="/#/cadastro">Entrar no sistema</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" id="contato">
+    <div class="container footer-grid">
+      <div>
+        <a class="brand"><img class="brand-logo" src="logo.png" alt="Compra Mais" width="774" height="504" /><span class="brand-name">Compra Mais</span></a>
+        <p class="footer-desc">Sistema Digital de Compras Públicas da Prefeitura de Rio Branco. Tecnologia, gestão e transparência a serviço do cidadão.</p>
+      </div>
+      <div>
+        <h4>Navegação</h4>
+        <a href="#transparencia">Portal da Transparência</a>
+        <a href="#como-funciona">Como funciona</a>
+        <a href="#editais">Editais públicos</a>
+        <a data-app-link="/#/cadastro">Entrar no sistema</a>
+      </div>
+      <div>
+        <h4>Contato</h4>
+        <p>R. Rui Barbosa, 285 — Centro<br />Rio Branco — AC · 69900-120</p>
+        <p>compramais@riobranco.ac.gov.br<br />(68) 3211-0000</p>
+      </div>
+      <div>
+        <h4>Institucional</h4>
+        <p>Lei nº 14.133/2021<br />Lei Municipal 2.027<br />SMGA / CPL</p>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Prefeitura de Rio Branco. Todos os direitos reservados.</div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

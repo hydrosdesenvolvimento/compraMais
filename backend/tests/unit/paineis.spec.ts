@@ -61,4 +61,10 @@ describe('Painéis (Épico 9)', () => {
     expect(t.investimentoPorSecretaria).toEqual([{ secretaria: 'SEME', valor: 84000 }]);
     expect(t.participacaoPorPorte).toEqual([{ porte: 'ME', fornecedores: 3 }, { porte: 'MEI', fornecedores: 2 }]);
   });
+
+  it('transparência inclui empresas credenciadas e a lista de editais públicos (landing)', async () => {
+    const t = await new Transparencia(fonte).publico();
+    expect(t.empresasCredenciadas).toBe(4);
+    expect(t.editaisPublicos).toEqual([{ numero: 'ED-2026/001', objeto: 'Fardamento', secretaria: 'SEME', valorEstimado: 116400 }]);
+  });
 });

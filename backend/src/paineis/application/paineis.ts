@@ -23,6 +23,8 @@ export interface FunilAdmin {
 export interface InvestimentoSecretaria { secretaria: string; valor: number }
 /** Contagem de fornecedores ativos por porte (participação — BI público, RN007). */
 export interface ParticipacaoPorte { porte: string; fornecedores: number }
+/** Edital publicado exibido na landing pública (sem dado restrito). `secretaria` = sigla/nome resolvido. */
+export interface EditalPublico { numero: string; objeto: string; secretaria: string; valorEstimado: number }
 /** Setor/CNAE atendido: código (7 dígitos) + descrição do catálogo (null quando não catalogado). */
 export interface SegmentoCnae { codigo: string; descricao: string | null }
 export interface TransparenciaPublica {
@@ -31,10 +33,12 @@ export interface TransparenciaPublica {
   segmentos: SegmentoCnae[]; // CNAEs alvo dos editais publicados, com descrição do catálogo
   // BI público (RN007)
   fornecedoresAtivos: number;
+  empresasCredenciadas: number; // fornecedores credenciados/aptos
   meiPercentual: number; // % dos fornecedores ativos que são MEI
   investimentoTotal: number; // Σ do valor distribuído (cota × preço) às empresas locais, em reais
   investimentoPorSecretaria: InvestimentoSecretaria[];
   participacaoPorPorte: ParticipacaoPorte[];
+  editaisPublicos: EditalPublico[]; // editais em andamento (para a landing pública)
 }
 
 /** Fontes de leitura (portas) — reusam 002/003/004 sem expor dados restritos. */
@@ -47,6 +51,8 @@ export interface PaineisFonte {
   editaisEmAndamento(): Promise<EditalEmAndamento[]>;
   participacaoPorPorte(): Promise<ParticipacaoPorte[]>;
   investimentoDistribuido(): Promise<{ total: number; porSecretaria: InvestimentoSecretaria[] }>;
+  contarCredenciados(): Promise<number>;
+  editaisPublicos(): Promise<EditalPublico[]>;
   /** Mapa código-CNAE → descrição do catálogo (Setores Industriais), para rotular os segmentos. */
   descricoesCnae(): Promise<Record<string, string>>;
 }
@@ -95,10 +101,12 @@ export class Transparencia {
       secretarias,
       segmentos,
       fornecedoresAtivos: fornecedores.ativos,
+      empresasCredenciadas: credenciados,
       meiPercentual,
       investimentoTotal: investimento.total,
       investimentoPorSecretaria: investimento.porSecretaria,
       participacaoPorPorte,
+      editaisPublicos,
     };
   }
 }

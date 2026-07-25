@@ -74,6 +74,7 @@ export function AuthPanel() {
   const [verSenhaCad, setVerSenhaCad] = useState(false);
   const [consentido, setConsentido] = useState(false);
   const [manter, setManter] = useState(true);
+  const [mei, setMei] = useState(false); // autodeclaração MEI (a Receita subclassifica MEI como ME)
 
   const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
 
@@ -107,6 +108,7 @@ export function AuthPanel() {
         titular: { identificador: v.email },
         senha: v.senha,
         nome: dados?.razaoSocial,
+        porteDeclarado: mei ? 'MEI' : undefined,
       });
       return login(v.email, v.senha);
     },
@@ -163,9 +165,13 @@ export function AuthPanel() {
             <div style={{ marginTop: 18, display: 'grid', gap: 13, animation: 'cmfade .35s' }}>
               <div><Rotulo>{t('auth.signup.razaoSocial')}</Rotulo><Leitura><input data-cy="razao-social" readOnly value={dados.razaoSocial} style={{ all: 'unset', width: '100%', font: '14px var(--font-body)', color: 'var(--text-title)' }} /></Leitura></div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 13 }}>
-                <div><Rotulo>{t('auth.signup.porte')}</Rotulo><Leitura>{dados.porte}</Leitura></div>
+                <div><Rotulo>{t('auth.signup.porte')}</Rotulo><Leitura data-cy="porte-valor">{mei ? 'MEI' : dados.porte}</Leitura></div>
                 <div><Rotulo>{t('auth.signup.situacao')}</Rotulo><Leitura>{dados.situacaoCadastral}</Leitura></div>
               </div>
+              <label style={{ display: 'flex', gap: 9, alignItems: 'flex-start', cursor: 'pointer', font: '13px var(--font-body)', color: 'var(--text-title)' }}>
+                <input type="checkbox" data-cy="declarar-mei" checked={mei} onChange={(e) => setMei(e.target.checked)} style={{ marginTop: 2 }} />
+                <span>{t('auth.signup.mei')}</span>
+              </label>
 
               {(dados.endereco || cepMut.data) && (
                 <div>

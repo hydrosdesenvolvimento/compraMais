@@ -2,6 +2,24 @@ import { Cnpj } from './cnpj.js';
 import { EntidadeBase, type MetadadosBase } from '../../shared/domain/entidade-base.js';
 
 export type Porte = string;
+/**
+ * Portes canônicos do enquadramento da empresa. O tipo `Porte` segue `string` (não enum) para não
+ * rejeitar valores legados ou da Receita; `normalizarPorte` traz o valor a esta forma quando reconhece.
+ */
+export const PORTES = ['MEI', 'ME', 'EPP', 'DEMAIS'] as const;
+/**
+ * Normaliza o porte para a forma canônica (maiúsculas, sem espaços) mapeando os sinônimos da
+ * Receita/BrasilAPI: "MICROEMPREENDEDOR INDIVIDUAL"→MEI, "MICROEMPRESA"→ME, "…PEQUENO PORTE"→EPP.
+ * Valor não reconhecido é mantido (apenas em maiúsculas) — preserva o autocadastro via Receita.
+ */
+export function normalizarPorte(bruto: string): string {
+  const p = (bruto ?? '').trim().toUpperCase();
+  if (!p) return p;
+  if (p === 'MEI' || p.includes('MICROEMPREENDEDOR')) return 'MEI';
+  if (p === 'ME' || p.includes('MICRO')) return 'ME';
+  if (p === 'EPP' || p.includes('PEQUENO')) return 'EPP';
+  return p;
+}
 export type SituacaoCadastral = 'ativa' | 'baixada' | 'inapta' | 'suspensa';
 export type TipoCnae = 'principal' | 'secundario';
 export type OrigemDados = 'oficial' | 'manual';
@@ -91,7 +109,7 @@ export class Fornecedor extends EntidadeBase {
     if (input.situacao !== 'ativa') throw new SituacaoNaoApta(input.situacao);
     return new Fornecedor(
       EntidadeBase.metaNova(input.id, input.userName),
-      input.cnpj, input.razaoSocial, input.porte,
+      input.cnpj, input.razaoSocial, normalizarPorte(input.porte),
       input.cnaes, input.situacao, input.origem, input.contato,
       'requerente', input.sincronizadoEm ?? null,
     );

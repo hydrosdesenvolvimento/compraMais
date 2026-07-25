@@ -80,6 +80,20 @@ describe('CadastrarFornecedor (UC001 — integração, adaptadores em memória)'
     expect(login.emails).toContain('raimundo@padaria.com'); // conta de login criada (passo 4)
   });
 
+  it('autodeclaração de MEI tem precedência sobre o porte da Receita (que subclassifica MEI como ME)', async () => {
+    const { uc } = novo(receitaFake('verificado')); // Receita devolve porte 'ME'
+    const { fornecedorId } = await uc.executar({ ...input, porteDeclarado: 'MEI' });
+    const f = await repo.porId(fornecedorId);
+    expect(f?.porte).toBe('MEI'); // sobrescreve só o porte; os demais dados seguem oficiais
+    expect(f?.razaoSocial).toBe('Padaria X');
+  });
+
+  it('sem declaração, o porte segue o oficial da Receita', async () => {
+    const { uc } = novo(receitaFake('verificado'));
+    const { fornecedorId } = await uc.executar(input);
+    expect((await repo.porId(fornecedorId))?.porte).toBe('ME');
+  });
+
   it('persiste endereço estruturado e o timestamp de sincronização (RF018/RF019)', async () => {
     const { uc } = novo(receitaFake('verificado'));
     const { fornecedorId } = await uc.executar(input);

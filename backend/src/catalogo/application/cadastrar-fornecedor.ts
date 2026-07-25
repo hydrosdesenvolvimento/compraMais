@@ -21,6 +21,12 @@ export interface RegistroLogin {
 
 export interface CadastrarInput {
   cnpjRaw: string;
+  /**
+   * Autodeclaração de porte pelo titular (ex.: MEI). Tem precedência sobre o porte da Receita, que
+   * subclassifica o MEI como ME e não distingue o enquadramento tributário. Só afeta o porte; os
+   * demais dados (razão social, CNAEs, situação) seguem os oficiais.
+   */
+  porteDeclarado?: string;
   manual?: { razaoSocial: string; porte: string; cnaes: Cnae[]; situacao?: SituacaoCadastral };
   contato: { nomeFantasia?: string; endereco?: Endereco; telefone?: string };
   consentimento: { finalidade: string; versaoTermo: string };
@@ -78,6 +84,9 @@ export class CadastrarFornecedor {
     } else {
       throw new ReceitaIndisponivelSemManual();
     }
+
+    // Autodeclaração de porte (MEI): sobrescreve só o porte; a normalização canônica é feita no domínio.
+    if (input.porteDeclarado?.trim()) dados = { ...dados, porte: input.porteDeclarado.trim() };
 
     // Endereço estruturado geolocalizável (RF019): o informado pelo titular tem precedência sobre o oficial.
     const endereco = input.contato.endereco ?? enderecoOficial;

@@ -103,6 +103,8 @@ export interface CadastroFornecedorInput {
   titular: { identificador: string };
   senha: string;
   nome?: string;
+  /** Autodeclaração de porte (ex.: MEI) — precede o porte da Receita no backend. */
+  porteDeclarado?: string;
   manual?: { razaoSocial: string; porte: string; cnaes: Array<{ codigoSubclasse: string; tipo: string; ativo: boolean }> };
 }
 

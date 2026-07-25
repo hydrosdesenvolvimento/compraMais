@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Fornecedor, SituacaoNaoApta, TransicaoStatusInvalida } from '../../src/catalogo/domain/fornecedor.js';
+import { Fornecedor, SituacaoNaoApta, TransicaoStatusInvalida, normalizarPorte } from '../../src/catalogo/domain/fornecedor.js';
 import { Cnpj } from '../../src/catalogo/domain/cnpj.js';
 
 const base = {
@@ -21,6 +21,20 @@ describe('Fornecedor (domínio)', () => {
 
   it('rejeita cadastro de situação não apta (FR-005)', () => {
     expect(() => Fornecedor.cadastrar({ ...base, situacao: 'inapta' })).toThrow(SituacaoNaoApta);
+  });
+
+  it('normaliza o porte para a forma canônica ao cadastrar (MEI/ME/EPP)', () => {
+    expect(Fornecedor.cadastrar({ ...base, porte: 'mei' }).porte).toBe('MEI');
+    expect(Fornecedor.cadastrar({ ...base, porte: 'Microempreendedor Individual' }).porte).toBe('MEI');
+    expect(Fornecedor.cadastrar({ ...base, porte: 'Microempresa' }).porte).toBe('ME');
+    expect(Fornecedor.cadastrar({ ...base, porte: 'Empresa de Pequeno Porte' }).porte).toBe('EPP');
+  });
+
+  it('normalizarPorte preserva valores fora do vocabulário (apenas em maiúsculas)', () => {
+    expect(normalizarPorte('MEI')).toBe('MEI');
+    expect(normalizarPorte('  epp ')).toBe('EPP');
+    expect(normalizarPorte('grande')).toBe('GRANDE');
+    expect(normalizarPorte('')).toBe('');
   });
 
   it('compatibilidade por subclasse exata (D2)', () => {

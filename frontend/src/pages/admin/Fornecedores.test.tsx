@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, configure, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, configure, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Fornecedores } from './Fornecedores';
 import type { PaginaFornecedoresView, FornecedorPerfil, SincronizacaoResultado } from '../../lib/api';
@@ -91,6 +91,25 @@ describe('Fornecedores — Painel Admin (Gestão de Fornecedores)', () => {
     fireEvent.submit(screen.getByTestId('form-criar'));
 
     await waitFor(() => expect(criar).toHaveBeenCalledWith(expect.objectContaining({ cnpj: '11.222.333/0001-81', razaoSocial: 'Malharia Maria Ltda', porte: 'ME', cnaePrincipal: '1412-6/01' })));
+  });
+
+  it('o porte é um select com a opção MEI e cadastra como MEI', async () => {
+    renderTela();
+    await screen.findAllByTestId('item-fornecedor');
+    fireEvent.click(screen.getByTestId('novo-fornecedor'));
+    await screen.findByTestId('modal-fornecedor');
+
+    const porte = screen.getByTestId('campo-porte');
+    expect(porte.tagName).toBe('SELECT');
+    expect(within(porte).getByRole('option', { name: /MEI/ })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByTestId('campo-cnpj'), { target: { value: '11.222.333/0001-81' } });
+    fireEvent.change(screen.getByTestId('campo-razao-social'), { target: { value: 'Costura MEI' } });
+    fireEvent.change(porte, { target: { value: 'MEI' } });
+    fireEvent.change(screen.getByTestId('campo-cnae-principal'), { target: { value: '1412-6/01' } });
+    fireEvent.submit(screen.getByTestId('form-criar'));
+
+    await waitFor(() => expect(criar).toHaveBeenCalledWith(expect.objectContaining({ porte: 'MEI' })));
   });
 
   it('ver detalhes abre o modal em leitura (contato desabilitado)', async () => {

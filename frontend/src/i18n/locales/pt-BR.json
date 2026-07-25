@@ -479,7 +479,7 @@
       "acao": {
         "ver": "Ver detalhes",
         "editar": "Editar contato",
-        "bloquearIndisponivel": "Bloqueio por inadimplência é feito no módulo de credenciamento (RN002)."
+        "bloquearIndisponivel": "Bloqueio por inadimplência."
       },
       "modal": {
         "tituloCriar": "Novo fornecedor",
@@ -1172,13 +1172,19 @@
   },
   "transparencia": {
     "carregando": "Carregando…",
-    "tituloPagina": "Demandas distribuídas",
-    "subtituloPagina": "O rateio é igualitário entre os fornecedores aptos e sempre limitado à sua capacidade declarada (teto). Veja abaixo os agregados públicos do programa Compra Mais.",
-    "kpiEditaisVigentes": "Editais vigentes",
-    "kpiSecretarias": "Secretarias atendidas",
-    "kpiSegmentos": "Segmentos (CNAE) atendidos",
-    "painelSecretarias": "Secretarias atendidas",
-    "painelSegmentos": "Segmentos (CNAE) atendidos"
+    "tituloPagina": "Portal da Transparência",
+    "subtituloPagina": "Dados públicos consolidados do programa Compra Mais — compras municipalizadas voltadas à economia local.",
+    "investimentoTitulo": "Investimento na economia local",
+    "investimentoSub": "Recursos distribuídos a MEIs, ME e EPPs locais",
+    "kpiFornecedoresAtivos": "Fornecedores ativos",
+    "kpiEditais": "Editais em andamento",
+    "kpiMei": "MEIs participantes",
+    "painelInvestimento": "Investimento por secretaria",
+    "painelParticipacao": "Participação por porte",
+    "painelSegmentos": "Setores (CNAE) atendidos",
+    "semInvestimento": "Ainda não há valores distribuídos.",
+    "fornecedoresContagem_one": "{{count}} fornecedor",
+    "fornecedoresContagem_other": "{{count}} fornecedores"
   },
   "editais": {
     "vitrine": {

@@ -583,6 +583,39 @@ export async function buildServer(): Promise<FastifyInstance> {
         };
       }));
     },
+    // Participação (BI público RN007): contagem de fornecedores ativos por porte, do maior ao menor.
+    participacaoPorPorte: async () => {
+      const ativos = (await fornecedores.listar()).filter((f) => f.situacao === 'ativa');
+      const contagem = new Map<string, number>();
+      for (const f of ativos) { const p = f.porte.trim().toUpperCase() || 'DEMAIS'; contagem.set(p, (contagem.get(p) ?? 0) + 1); }
+      return [...contagem.entries()].map(([porte, qtd]) => ({ porte, fornecedores: qtd })).sort((a, b) => b.fornecedores - a.fornecedores);
+    },
+    // Investimento na economia local (BI público RN007): valor DISTRIBUÍDO às empresas — Σ(cota × preço do
+    // item) da matriz vigente de cada edital com distribuição — agrupado por secretaria (sigla resolvida).
+    investimentoDistribuido: async () => {
+      const editais = [
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'publicado' })),
+        ...(await editaisRepo.buscarPorExemplo({ situacao: 'encerrado' })),
+      ];
+      const porSecretariaId = new Map<string, number>();
+      let total = 0;
+      for (const e of editais) {
+        const matriz = await distribuicaoRepo.ultimaDoEdital(e.id);
+        if (!matriz) continue;
+        const preco = new Map((await itensEditalRepo.listarDoEdital(e.id)).map((it) => [it.id, it.precoTeto]));
+        let valor = 0;
+        for (const item of matriz.itens) for (const a of item.alocacoes) valor += a.cota * (preco.get(item.itemId) ?? 0);
+        if (valor <= 0) continue;
+        total += valor;
+        porSecretariaId.set(e.secretariaId, (porSecretariaId.get(e.secretariaId) ?? 0) + valor);
+      }
+      const porSecretaria = await Promise.all([...porSecretariaId.entries()].map(async ([id, valor]) => {
+        const s = await secretariasRepo.porId(id);
+        return { secretaria: s?.sigla ?? s?.nome ?? id, valor };
+      }));
+      porSecretaria.sort((a, b) => b.valor - a.valor);
+      return { total, porSecretaria };
+    },
   };
   registrarRotasPaineis(app, { dashboard: new DashboardAdmin(paineisFonte), transparencia: new Transparencia(paineisFonte) });
 

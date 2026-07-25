@@ -48,6 +48,11 @@ describe('Painéis (Épico 9) — rotas', () => {
     expect(t).toHaveProperty('editaisVigentes');
     expect(t).toHaveProperty('secretarias');
     expect(t).toHaveProperty('segmentos');
+    expect(t).toHaveProperty('fornecedoresAtivos');
+    expect(t).toHaveProperty('meiPercentual');
+    expect(t).toHaveProperty('investimentoTotal');
+    expect(Array.isArray(t.investimentoPorSecretaria)).toBe(true);
+    expect(Array.isArray(t.participacaoPorPorte)).toBe(true);
     await app.close();
   });
 });

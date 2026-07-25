@@ -180,7 +180,18 @@ export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'a
 /** Item da fila global da tela "Análise Documental" (covalidação) — inclui empresa e CNPJ resolvidos. */
 export interface AnaliseDocItem { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string; fornecedorId: string; empresa: string; cnpj: string | null }
 export interface Pendencia { tipo: string; motivo: string | null; proximoPasso: string; referenciaId?: string }
-export interface Transparencia { editaisVigentes: number; secretarias: string[]; segmentos: string[] }
+export interface InvestimentoSecretariaView { secretaria: string; valor: number }
+export interface ParticipacaoPorteView { porte: string; fornecedores: number }
+export interface Transparencia {
+  editaisVigentes: number;
+  secretarias: string[];
+  segmentos: string[];
+  fornecedoresAtivos: number;
+  meiPercentual: number;
+  investimentoTotal: number;
+  investimentoPorSecretaria: InvestimentoSecretariaView[];
+  participacaoPorPorte: ParticipacaoPorteView[];
+}
 /**
  * UC008 — uma demanda distribuída ao fornecedor. `titular` recebeu cota no rateio (total/aptos/cota
  * presentes); `reserva` é apto mas ficou fora da matriz vigente (Cadastro de Reserva / 2ª demanda) e

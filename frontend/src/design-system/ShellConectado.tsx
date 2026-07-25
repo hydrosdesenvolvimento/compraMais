@@ -131,7 +131,7 @@ export function ShellAdmin() {
   const notificacoes = useMemo<Notificacao[]>(() => (dashboard.data ? construirNotificacoesAdmin(dashboard.data, t) : []), [dashboard.data, t]);
 
   return (
-    <AppShell menu={menu} usuario={chip} rodapeKey="common.shell.footerAdmin" notificacoes={notificacoes} alerta={notificacoes.length > 0} verTodasHref="/admin/dashboard" contaHref="/admin/dashboard" fontesBusca={fontesBusca}>
+    <AppShell menu={menu} usuario={chip} rodapeKey="common.shell.footerAdmin" notificacoes={notificacoes} alerta={notificacoes.length > 0} verTodasHref="/admin/dashboard" contaHref="/admin/minha-conta" fontesBusca={fontesBusca}>
       <Outlet />
     </AppShell>
   );

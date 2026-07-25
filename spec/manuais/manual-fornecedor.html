@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual do Fornecedor — Compra Mais</title>
+<style>
+  :root { --azul-900:#0a2f5c; --azul-800:#0b4a8b; --azul-700:#0f5aa6; --ink:#1f2937; --muted:#5b6b82;
+          --line:#e3e9f2; --bg:#f6f8fc; --card:#fff; --amber:#f2b705; --code-bg:#f3f6fb; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+         -webkit-font-smoothing:antialiased; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+  .doc { background:var(--card); border:1px solid var(--line); border-radius:16px;
+         box-shadow:0 10px 30px rgba(11,74,139,.06); padding: 44px 52px; }
+  h1,h2,h3,h4 { color:var(--azul-900); line-height:1.25; scroll-margin-top: 16px; }
+  h1 { font-size: 2rem; margin:.2em 0 .4em; }
+  h2 { font-size: 1.5rem; margin:1.8em 0 .5em; padding-bottom:.3em; border-bottom:2px solid var(--line); }
+  h3 { font-size: 1.2rem; margin:1.5em 0 .4em; }
+  h4 { font-size: 1.02rem; margin:1.2em 0 .3em; color:var(--azul-800); }
+  p { margin: .7em 0; }
+  a { color: var(--azul-700); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  blockquote { margin:1em 0; padding:12px 18px; background:#fff8e6; border-left:4px solid var(--amber);
+               border-radius:8px; color:#5b4a10; }
+  blockquote p { margin:.3em 0; }
+  ul,ol { padding-left: 1.4em; }
+  li { margin:.28em 0; }
+  code { background:var(--code-bg); padding:.12em .4em; border-radius:6px; font-size:.9em;
+         font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  pre code { background:none; padding:0; }
+  table { border-collapse: collapse; width:100%; margin:1.1em 0; font-size:.95rem; display:block; overflow-x:auto; }
+  th,td { border:1px solid var(--line); padding:9px 13px; text-align:left; vertical-align:top; }
+  thead th { background:#eef2f8; color:var(--azul-900); }
+  tbody tr:nth-child(even) { background:#f8fafd; }
+  img { max-width:100%; height:auto; display:block; margin:14px 0; border:1px solid var(--line);
+        border-radius:10px; box-shadow:0 6px 18px rgba(11,74,139,.08); }
+  hr { border:none; border-top:1px solid var(--line); margin:2.4em 0; }
+  .mermaid { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; margin:16px 0;
+             text-align:center; overflow-x:auto; }
+  .doc-nota { font-size:.82rem; color:var(--muted); margin:0 0 8px; }
+  @media (max-width:640px){ .doc{ padding:26px 18px; } .wrap{ padding:20px 10px 60px; } }
+  @media print {
+    body{ background:#fff; } .doc{ box-shadow:none; border:none; border-radius:0; padding:0; }
+    .doc-nota{ display:none; } a{ color:inherit; text-decoration:none; }
+    h2{ break-after:avoid; } img,.mermaid,table{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="doc-nota">Documento gerado a partir do Markdown do repositório (spec/manuais). Os diagramas usam Mermaid.</p>
+    <article class="doc">
+<h1 id="manual-do-fornecedor--compra-mais">Manual do Fornecedor — Compra Mais</h1>
+<p><strong>Programa Compra Mais · Prefeitura de Rio Branco</strong>
+Guia completo para a empresa participar das compras públicas municipais — do autocadastro ao fornecimento.</p>
+<blockquote>
+<p>Este manual foi escrito para qualquer pessoa, sem exigir conhecimento técnico. Cada etapa traz
+orientação passo a passo e telas reais do sistema. As imagens são do ambiente de demonstração; os
+dados (empresa, editais, valores) são apenas exemplos.</p>
+</blockquote>
+<hr>
+<h2 id="sumário">Sumário</h2>
+<ol>
+<li><a href="#1-o-que-é-o-compra-mais">O que é o Compra Mais</a></li>
+<li><a href="#2-visão-geral-da-jornada">Visão geral da jornada</a></li>
+<li><a href="#3-etapa-1--autocadastro-da-empresa">Etapa 1 — Autocadastro da empresa</a></li>
+<li><a href="#4-etapa-2--acessar-a-plataforma-login">Etapa 2 — Acessar a plataforma (login)</a></li>
+<li><a href="#5-etapa-3--a-tela-início-seu-painel">Etapa 3 — A tela Início (seu painel)</a></li>
+<li><a href="#6-etapa-4--encontrar-editais-compatíveis">Etapa 4 — Encontrar editais compatíveis</a></li>
+<li><a href="#7-etapa-5--credenciar-se-em-um-edital">Etapa 5 — Credenciar-se em um edital</a></li>
+<li><a href="#8-etapa-6--manter-seus-documentos-em-dia">Etapa 6 — Manter seus documentos em dia</a></li>
+<li><a href="#9-etapa-7--acompanhar-seus-credenciamentos">Etapa 7 — Acompanhar seus credenciamentos</a></li>
+<li><a href="#10-etapa-8--o-fornecimento-demandas-distribuídas">Etapa 8 — O fornecimento (demandas distribuídas)</a></li>
+<li><a href="#11-notificações">Notificações</a></li>
+<li><a href="#12-minha-conta-procuradores-e-privacidade">Minha conta, procuradores e privacidade</a></li>
+<li><a href="#13-transparência">Transparência</a></li>
+<li><a href="#14-glossário">Glossário</a></li>
+<li><a href="#15-perguntas-frequentes">Perguntas frequentes</a></li>
+</ol>
+<hr>
+<h2 id="1-o-que-é-o-compra-mais">1. O que é o Compra Mais</h2>
+<p>O <strong>Compra Mais</strong> é a plataforma digital de compras públicas da Prefeitura de Rio Branco. Ele conecta
+as <strong>empresas locais</strong> (micro e pequenas empresas, MEIs e demais fornecedores) às <strong>demandas das
+secretarias</strong> — de fardamento escolar a materiais e serviços.</p>
+<p>A lógica é simples e justa:</p>
+<ul>
+<li>Cada <strong>edital</strong> representa <strong>uma demanda</strong> de uma secretaria (por exemplo, &quot;1.000 conjuntos de
+fardamento escolar&quot;).</li>
+<li>Toda empresa <strong>compatível</strong> (pelo ramo de atividade — o <strong>CNAE</strong>) e <strong>regular</strong> (documentos em dia)
+pode se <strong>credenciar</strong>.</li>
+<li>A quantidade do edital é <strong>dividida de forma igualitária</strong> entre as empresas aptas, respeitando a
+<strong>capacidade</strong> que cada uma declara. Isso é o <strong>rateio</strong> — não há &quot;leilão&quot; nem menor preço: quem está
+apto participa do fornecimento.</li>
+</ul>
+<blockquote>
+<p><strong>Em uma frase:</strong> cadastre a empresa → encontre editais do seu ramo → credencie-se → mantenha os
+documentos válidos → receba sua cota de fornecimento.</p>
+</blockquote>
+<hr>
+<h2 id="2-visão-geral-da-jornada">2. Visão geral da jornada</h2>
+<pre class="mermaid">flowchart TD
+    A["1 · Autocadastro&lt;br/&gt;(CNPJ + e-mail + senha)"] --&gt; B["2 · Login"]
+    B --&gt; C["3 · Início&lt;br/&gt;(painel com alertas)"]
+    C --&gt; D["4 · Vitrine de Editais&lt;br/&gt;(compatíveis com seu CNAE)"]
+    D --&gt; E["5 · Credenciamento&lt;br/&gt;capacidade → documentos → prova de vida → termo"]
+    E --&gt; F["6 · Documentos&lt;br/&gt;(manter válidos)"]
+    F --&gt; G["7 · Meus Credenciamentos&lt;br/&gt;(acompanhar análise)"]
+    G --&gt; H{"Aprovado&lt;br/&gt;e apto?"}
+    H -- sim --&gt; I["8 · Demandas Distribuídas&lt;br/&gt;(sua cota = fornecimento)"]
+    H -- não --&gt; F
+    I --&gt; J["Fornece à Prefeitura"]</pre>
+<p>Cada etapa tem uma entrada no <strong>menu lateral</strong> do portal: <strong>Início, Editais, Meus credenciamentos,
+Documentos, Demandas distribuídas, Contestações, Procuradores, Privacidade.</strong></p>
+<hr>
+<h2 id="3-etapa-1--autocadastro-da-empresa">3. Etapa 1 — Autocadastro da empresa</h2>
+<p>O cadastro é <strong>gratuito</strong> e feito pela própria empresa (autocadastro). Você vai precisar do <strong>CNPJ</strong> e
+de um <strong>e-mail</strong> e <strong>senha</strong> para acessar depois.</p>
+<h3 id="passo-11--abrir-a-tela-de-acesso">Passo 1.1 — Abrir a tela de acesso</h3>
+<p>Ao entrar no endereço da plataforma, você verá a tela de acesso. Ela tem duas abas: <strong>Entrar</strong> (para
+quem já tem conta) e <strong>Criar conta</strong> (para o primeiro acesso).</p>
+<p><img src="imagens/01-login.png" alt="Tela de acesso do Compra Mais"></p>
+<h3 id="passo-12--escolher-criar-conta">Passo 1.2 — Escolher &quot;Criar conta&quot;</h3>
+<p>Clique na aba <strong>Criar conta</strong>. O formulário de autocadastro será exibido.</p>
+<p><img src="imagens/02-cadastro-criar-conta.png" alt="Aba Criar conta"></p>
+<h3 id="passo-13--informar-o-cnpj-e-consultar">Passo 1.3 — Informar o CNPJ e consultar</h3>
+<p>Digite o <strong>CNPJ</strong> da empresa e clique em <strong>Consultar</strong>. O sistema busca os dados oficiais na Receita
+Federal e <strong>preenche automaticamente</strong>:</p>
+<ul>
+<li><strong>Razão social</strong>, <strong>porte</strong> (ME, EPP, MEI…) e <strong>situação cadastral</strong>;</li>
+<li>o <strong>quadro de sócios (QSA)</strong>;</li>
+<li>o <strong>endereço</strong> da empresa (que você pode ajustar — número, complemento — ou atualizar por CEP).</li>
+</ul>
+<p><img src="imagens/03-cadastro-dados-empresa.png" alt="Dados da empresa preenchidos pela consulta ao CNPJ"></p>
+<blockquote>
+<p><strong>Sou MEI.</strong> Se a empresa é MEI, marque a opção <strong>Declarar MEI</strong>. A Receita costuma classificar o MEI
+como &quot;ME&quot;; a sua declaração tem precedência e o porte passa a constar como <strong>MEI</strong>.</p>
+<p><strong>A Receita está indisponível?</strong> Você pode <strong>preencher os dados manualmente</strong> e continuar o cadastro.</p>
+</blockquote>
+<h3 id="passo-14--definir-e-mail-senha-e-concluir">Passo 1.4 — Definir e-mail, senha e concluir</h3>
+<p>Informe o <strong>e-mail</strong> e a <strong>senha</strong> de acesso, marque o <strong>consentimento</strong> (obrigatório — trata do uso dos
+seus dados conforme a LGPD) e clique em <strong>Criar conta</strong>. Pronto: a conta é criada, você é autenticado e
+entra direto no portal.</p>
+<pre class="mermaid">flowchart LR
+    A[CNPJ] --&gt;|Consultar| B[Dados oficiais&lt;br/&gt;Razão social · QSA · endereço]
+    B --&gt; C[E-mail + senha]
+    C --&gt; D[Consentimento LGPD]
+    D --&gt;|Criar conta| E[Conta criada&lt;br/&gt;+ login automático]</pre>
+<blockquote>
+<p><strong>Guarde seu e-mail e senha.</strong> Serão eles que você usará para entrar nas próximas vezes.</p>
+</blockquote>
+<hr>
+<h2 id="4-etapa-2--acessar-a-plataforma-login">4. Etapa 2 — Acessar a plataforma (login)</h2>
+<p>Nas próximas vezes, use a aba <strong>Entrar</strong>: informe o <strong>e-mail</strong> e a <strong>senha</strong> cadastrados e clique em
+<strong>Entrar</strong>. Se esquecer a senha, use <strong>Esqueci minha senha</strong> para redefini-la por e-mail.</p>
+<p><img src="imagens/01-login.png" alt="Tela de acesso — aba Entrar"></p>
+<hr>
+<h2 id="5-etapa-3--a-tela-início-seu-painel">5. Etapa 3 — A tela Início (seu painel)</h2>
+<p>Logo após entrar, você chega ao <strong>Início</strong> — um painel que resume a situação da sua empresa e destaca o
+que precisa de atenção.</p>
+<p><img src="imagens/04-inicio.png" alt="Painel inicial do fornecedor"></p>
+<p>O que você encontra aqui:</p>
+<ul>
+<li><strong>Saudação e status</strong> da empresa (ex.: <em>Status: Credenciado</em>).</li>
+<li><strong>Alertas de documentos</strong>: documentos <strong>vencidos</strong> (em vermelho) e os que <strong>vencem em breve</strong> (em
+amarelo). Editais que exigem um documento vencido ficam <strong>bloqueados até a regularização</strong> — por isso
+vale manter tudo em dia.</li>
+<li><strong>Indicadores rápidos</strong>: <em>Editais compatíveis abertos</em>, <em>Credenciamentos em andamento</em>, <em>Documentos
+aprovados</em> e <em>Demanda distribuída</em>.</li>
+<li><strong>Atalhos</strong>: lista de <strong>editais abertos compatíveis</strong> (com botão <strong>Iniciar</strong>) e seus <strong>credenciamentos
+em andamento</strong>.</li>
+</ul>
+<blockquote>
+<p><strong>Dica:</strong> o topo da tela tem uma <strong>busca global</strong> (&quot;Buscar editais, documentos…&quot;), um <strong>seletor de
+idioma</strong> (Português, English, Español) e o <strong>sino de notificações</strong>.</p>
+</blockquote>
+<hr>
+<h2 id="6-etapa-4--encontrar-editais-compatíveis">6. Etapa 4 — Encontrar editais compatíveis</h2>
+<p>No menu, clique em <strong>Editais</strong>. Você verá a <strong>Vitrine de Editais</strong> — a lista de oportunidades <strong>do seu
+ramo de atividade</strong>.</p>
+<p><img src="imagens/05-editais-vitrine.png" alt="Vitrine de editais compatíveis"></p>
+<p>Pontos importantes:</p>
+<ul>
+<li>A vitrine mostra <strong>apenas editais compatíveis com os CNAEs da sua empresa</strong>. Uma faixa informa, por
+exemplo, <em>&quot;Filtrando por CNAE 8550301&quot;</em>. Editais de outros segmentos <strong>não aparecem</strong> aqui.</li>
+<li><strong>1 edital = 1 demanda.</strong> Cada linha traz o <strong>objeto</strong> (o que será adquirido), a <strong>secretaria</strong>
+demandante e o <strong>prazo</strong> (ex.: <em>encerra em 159 dias</em>).</li>
+<li>Use a <strong>busca</strong> (&quot;Buscar por objeto ou secretaria…&quot;) e o filtro <strong>Todas as secretarias</strong> para
+encontrar mais rápido.</li>
+<li>Para participar, clique no edital (ou em <strong>Iniciar</strong>) e siga para o <strong>credenciamento</strong>.</li>
+</ul>
+<blockquote>
+<p><strong>Minha empresa atua no ramo, mas o edital não aparece?</strong> Pode ser divergência de CNAE. Nesses casos
+existe a <strong>Contestação de CNAE</strong> (menu <strong>Contestações</strong>), onde você solicita a revisão do
+enquadramento.</p>
+</blockquote>
+<hr>
+<h2 id="7-etapa-5--credenciar-se-em-um-edital">7. Etapa 5 — Credenciar-se em um edital</h2>
+<p>O <strong>credenciamento</strong> é um <strong>assistente guiado em 4 passos</strong>, sempre visível no topo da tela:
+<strong>Capacidade → Documentos → Termo de Aceite → Concluído</strong>.</p>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; Capacidade
+    Capacidade --&gt; Documentos: declarou o teto
+    Documentos --&gt; ProvaDeVida: documentos válidos
+    ProvaDeVida --&gt; Termo: prova de vida aprovada
+    Termo --&gt; Concluido: aceitou o termo
+    Concluido --&gt; [*]: Pendente de Análise
+    note right of ProvaDeVida
+      Verificação facial (UC007):
+      exigida antes de assinar o termo
+    end note</pre>
+<h3 id="passo-51--declarar-a-capacidade">Passo 5.1 — Declarar a capacidade</h3>
+<p>Selecione <strong>os itens do edital</strong> que a sua empresa quer atender e, para cada um, informe a <strong>quantidade
+máxima</strong> que consegue entregar — o seu <strong>teto</strong>.</p>
+<p><img src="imagens/06a-credenciamento-passo1-capacidade.png" alt="Passo 1 — Declaração de capacidade produtiva"></p>
+<p>Como o teto é usado (o painel lateral explica):</p>
+<ol>
+<li>A sua capacidade declarada vira o <strong>limite máximo</strong> de itens que podem ser alocados à sua empresa.</li>
+<li>A demanda do edital é <strong>dividida entre os fornecedores aptos</strong>, respeitando o teto de cada um.</li>
+<li>O saldo não atendido vai para o <strong>Cadastro de Reserva</strong>, acionado em uma 2ª demanda.</li>
+</ol>
+<blockquote>
+<p>Você declara capacidade <strong>apenas nos itens que quer atender</strong>. A distribuição roda <strong>por item</strong>,
+respeitando o seu teto em cada um.</p>
+</blockquote>
+<h3 id="passo-52--documentos-exigidos">Passo 5.2 — Documentos exigidos</h3>
+<p>O sistema mostra a <strong>lista de documentos</strong> exigidos e o status de cada um. O melhor: <strong>documentos
+válidos enviados em editais anteriores são reaproveitados automaticamente</strong> — você só anexa o que falta
+ou o que está vencido.</p>
+<p><img src="imagens/06b-credenciamento-passo2-documentos.png" alt="Passo 2 — Documentos exigidos"></p>
+<p>Os status possíveis:</p>
+<ul>
+<li>✅ <strong>Importado de edital anterior</strong> — já enviado e válido, nada a fazer.</li>
+<li>⚠️ <strong>Vencido — atualizar</strong> — envie a versão atualizada.</li>
+<li>➕ <strong>Necessário enviar</strong> — documento obrigatório ainda não enviado.</li>
+</ul>
+<p>Para enviar um pendente, use <strong>Selecionar arquivo</strong> (PDF, JPG ou PNG, até 10 MB) e informe a <strong>validade
+do documento</strong>. Depois clique em <strong>Continuar</strong>.</p>
+<h3 id="passo-53--prova-de-vida-verificação-facial">Passo 5.3 — Prova de vida (verificação facial)</h3>
+<p>Antes de assinar o Termo, o sistema pede a <strong>prova de vida</strong> (verificação facial) do responsável — uma
+checagem de segurança que confirma que é uma pessoa real concluindo o credenciamento. <strong>O Termo só pode
+ser aceito após a prova de vida ser aprovada.</strong></p>
+<h3 id="passo-54--termo-de-aceite">Passo 5.4 — Termo de Aceite</h3>
+<p>No último passo, você assina o <strong>Termo de Aceite</strong>. Ele declara que as informações e documentos são
+verdadeiros e que você concorda com as condições do edital (Lei Complementar 123 e regras do Compra
+Mais). Marque <strong>&quot;Li e aceito o Termo de Aceite do credenciamento&quot;</strong> e clique em <strong>Enviar
+credenciamento</strong>.</p>
+<p><img src="imagens/06c-credenciamento-passo3-termo.png" alt="Passo 3 — Termo de Aceite"></p>
+<p>O aceite é registrado na <strong>trilha de auditoria</strong> com <strong>finalidade, versão e data</strong>.</p>
+<h3 id="passo-55--concluído-pendente-de-análise">Passo 5.5 — Concluído: Pendente de Análise</h3>
+<p>Ao enviar, seu credenciamento fica <strong>Pendente de Análise</strong>. A partir daí a equipe da Prefeitura
+analisa os documentos. Você acompanha tudo em <strong>Meus credenciamentos</strong> e recebe <strong>notificações</strong> sobre o
+resultado.</p>
+<hr>
+<h2 id="8-etapa-6--manter-seus-documentos-em-dia">8. Etapa 6 — Manter seus documentos em dia</h2>
+<p>A tela <strong>Documentos</strong> reúne todos os documentos da sua empresa, com <strong>validade</strong> e <strong>status</strong>. Como os
+documentos são <strong>reaproveitados</strong> entre editais, mantê-los válidos aqui adianta (ou destrava) qualquer
+credenciamento futuro.</p>
+<p><img src="imagens/09-documentos.png" alt="Meus documentos"></p>
+<blockquote>
+<p><strong>Por que isso importa?</strong> Um documento <strong>vencido</strong> pode <strong>bloquear</strong> editais que o exigem. O <strong>Início</strong>
+e as <strong>notificações</strong> avisam quando algo vence — atualize antes do prazo para não perder oportunidades.</p>
+</blockquote>
+<hr>
+<h2 id="9-etapa-7--acompanhar-seus-credenciamentos">9. Etapa 7 — Acompanhar seus credenciamentos</h2>
+<p>Em <strong>Meus credenciamentos</strong> você vê todos os editais em que se credenciou e o <strong>estágio</strong> de cada um
+(iniciado, pendente de análise, aprovado, em correção…).</p>
+<p><img src="imagens/07-meus-credenciamentos.png" alt="Meus credenciamentos"></p>
+<p>Clique em um item para ver o <strong>detalhe</strong>: o edital, a capacidade declarada, os documentos vinculados e o
+histórico. Se algo for <strong>reprovado</strong>, aqui você vê o <strong>motivo</strong> e reenvia a correção.</p>
+<p><img src="imagens/08-credenciamento-detalhe.png" alt="Detalhe de um credenciamento"></p>
+<pre class="mermaid">flowchart LR
+    A[Iniciado] --&gt; B[Pendente de Análise]
+    B --&gt; C{Análise da Prefeitura}
+    C --&gt;|Aprovado| D[Apto ao rateio]
+    C --&gt;|Reprovado| E[Em correção]
+    E --&gt;|Reenvio| B</pre>
+<hr>
+<h2 id="10-etapa-8--o-fornecimento-demandas-distribuídas">10. Etapa 8 — O fornecimento (demandas distribuídas)</h2>
+<p>Quando um edital em que você está <strong>apto</strong> tem sua distribuição realizada, a sua <strong>cota</strong> aparece em
+<strong>Demandas distribuídas</strong> — é o <strong>fornecimento</strong> propriamente dito.</p>
+<p><img src="imagens/10-demandas.png" alt="Demandas distribuídas"></p>
+<ul>
+<li>Enquanto não houver distribuição, a tela mostra: <em>&quot;Nenhuma demanda distribuída ainda. Assim que uma
+distribuição for realizada em um edital em que você é apto, ela aparece aqui.&quot;</em></li>
+<li><strong>O rateio é igualitário</strong> entre os fornecedores aptos e <strong>sempre limitado à sua capacidade
+declarada (teto)</strong>.</li>
+</ul>
+<p>Como a Prefeitura divide a demanda (rateio equitativo):</p>
+<pre class="mermaid">flowchart TD
+    A[Demanda do edital&lt;br/&gt;ex.: 1.000 un] --&gt; B[Fornecedores APTOS no item]
+    B --&gt; C[Divisão igualitária&lt;br/&gt;entre todos os aptos]
+    C --&gt; D{Cabe no teto&lt;br/&gt;de cada um?}
+    D -- sim --&gt; E[Cota confirmada&lt;br/&gt;para cada fornecedor]
+    D -- excede --&gt; F[Limita ao teto&lt;br/&gt;e redistribui o excedente]
+    F --&gt; C
+    E --&gt; G[Saldo não atendido&lt;br/&gt;→ Cadastro de Reserva]</pre>
+<p>Quando você recebe uma cota, também recebe uma <strong>notificação</strong>. A partir daí, o fornecimento segue as
+orientações da secretaria demandante (entrega, prazos e comprovações).</p>
+<hr>
+<h2 id="11-notificações">11. Notificações</h2>
+<p>O <strong>sino</strong> no topo e a página <strong>Notificações</strong> avisam sobre o que importa: <strong>resultado do
+credenciamento</strong>, <strong>documento a vencer</strong>, <strong>novo edital compatível</strong> e <strong>cota recebida em uma
+distribuição</strong>.</p>
+<p><img src="imagens/11-notificacoes.png" alt="Notificações"></p>
+<blockquote>
+<p>Notificações <strong>não lidas</strong> aparecem destacadas e no contador do sino. Clique para abrir o item
+relacionado (o edital, o documento ou o credenciamento).</p>
+</blockquote>
+<hr>
+<h2 id="12-minha-conta-procuradores-e-privacidade">12. Minha conta, procuradores e privacidade</h2>
+<h3 id="minha-conta">Minha conta</h3>
+<p>Em <strong>Minha conta</strong> você revisa e ajusta os dados de acesso e do responsável, e <strong>troca a senha</strong>.</p>
+<p><img src="imagens/12-minha-conta.png" alt="Minha conta"></p>
+<h3 id="procuradores">Procuradores</h3>
+<p>O <strong>titular</strong> da empresa pode cadastrar <strong>procuradores</strong> — pessoas autorizadas a operar em nome da
+empresa no portal. (Somente o titular gerencia procuradores.)</p>
+<h3 id="privacidade-lgpd">Privacidade (LGPD)</h3>
+<p>Em <strong>Privacidade</strong>, o titular exerce seus <strong>direitos previstos na LGPD</strong> — como solicitar acesso,
+correção ou exclusão de dados pessoais. O consentimento aceito no cadastro fica registrado e pode ser
+consultado aqui.</p>
+<hr>
+<h2 id="13-transparência">13. Transparência</h2>
+<p>A área de <strong>Transparência</strong> apresenta, de forma pública, os números do programa: <strong>investimento na
+economia local</strong>, <strong>empresas participantes</strong>, <strong>participação por porte (MEI/ME)</strong> e <strong>editais</strong>. É a
+prestação de contas do Compra Mais à sociedade.</p>
+<p><img src="imagens/13-transparencia.png" alt="Transparência"></p>
+<hr>
+<h2 id="14-glossário">14. Glossário</h2>
+<table>
+<thead>
+<tr>
+<th>Termo</th>
+<th>O que significa</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>CNAE</strong></td>
+<td>Código que identifica o <strong>ramo de atividade</strong> da empresa. Define quais editais são compatíveis com você.</td>
+</tr>
+<tr>
+<td><strong>Edital</strong></td>
+<td>Uma <strong>demanda</strong> de compra de uma secretaria. No Compra Mais, <strong>1 edital = 1 demanda</strong>.</td>
+</tr>
+<tr>
+<td><strong>Credenciamento</strong></td>
+<td>O processo de <strong>se habilitar</strong> em um edital (capacidade + documentos + prova de vida + termo).</td>
+</tr>
+<tr>
+<td><strong>Capacidade / Teto</strong></td>
+<td>A <strong>quantidade máxima</strong> que você declara conseguir entregar de um item. Limita a sua cota no rateio.</td>
+</tr>
+<tr>
+<td><strong>Rateio / Distribuição</strong></td>
+<td>A divisão <strong>igualitária</strong> da demanda entre os fornecedores aptos, respeitando o teto de cada um.</td>
+</tr>
+<tr>
+<td><strong>Apto</strong></td>
+<td>Fornecedor com credenciamento <strong>aprovado</strong>, que entra no rateio.</td>
+</tr>
+<tr>
+<td><strong>Cota</strong></td>
+<td>A <strong>quantidade</strong> que coube à sua empresa em uma distribuição — o seu fornecimento.</td>
+</tr>
+<tr>
+<td><strong>Cadastro de Reserva</strong></td>
+<td>Fila que recebe o <strong>saldo não atendido</strong> e os retardatários, acionada em uma 2ª demanda.</td>
+</tr>
+<tr>
+<td><strong>Prova de vida</strong></td>
+<td>Verificação <strong>facial</strong> do responsável, exigida antes de assinar o Termo.</td>
+</tr>
+<tr>
+<td><strong>Termo de Aceite</strong></td>
+<td>Declaração final que <strong>conclui</strong> o credenciamento e é registrada na auditoria.</td>
+</tr>
+<tr>
+<td><strong>Titular / Procurador</strong></td>
+<td>O <strong>titular</strong> representa a empresa; <strong>procuradores</strong> são autorizados por ele a operar no portal.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="15-perguntas-frequentes">15. Perguntas frequentes</h2>
+<p><strong>Preciso pagar para me cadastrar?</strong>
+Não. O cadastro e a participação no Compra Mais são gratuitos.</p>
+<p><strong>Meu edital sumiu da vitrine. Por quê?</strong>
+A vitrine mostra só editais <strong>compatíveis com o seu CNAE</strong> e <strong>abertos</strong>. Se um documento obrigatório
+venceu, editais que o exigem ficam <strong>bloqueados</strong> até você regularizar — verifique os alertas no
+<strong>Início</strong> e na tela <strong>Documentos</strong>.</p>
+<p><strong>Não consegui concluir o credenciamento no Termo.</strong>
+O <strong>Termo de Aceite</strong> só é liberado após a <strong>prova de vida</strong> ser aprovada e os documentos obrigatórios
+estarem válidos. Confira os passos anteriores do assistente.</p>
+<p><strong>Enviei um documento em outro edital. Preciso enviar de novo?</strong>
+Não. Documentos <strong>válidos</strong> são <strong>reaproveitados automaticamente</strong>. Você só anexa o que falta ou o que
+venceu.</p>
+<p><strong>Como sei que recebi uma cota de fornecimento?</strong>
+Você recebe uma <strong>notificação</strong> e a cota aparece em <strong>Demandas distribuídas</strong>.</p>
+<p><strong>Esqueci minha senha.</strong>
+Na tela de acesso, use <strong>Esqueci minha senha</strong> para redefini-la por e-mail.</p>
+<hr>
+<blockquote>
+<p><strong>Precisa de ajuda?</strong> Use os canais de atendimento da Prefeitura de Rio Branco indicados no rodapé da
+plataforma. Este manual acompanha a <strong>Versão 2.0</strong> do Compra Mais.</p>
+</blockquote>
+
+    </article>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'default', flowchart: { htmlLabels: true } });
+  </script>
+</body>
+</html>

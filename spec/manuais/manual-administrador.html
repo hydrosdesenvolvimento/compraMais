@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual do Administrador — Compra Mais</title>
+<style>
+  :root { --azul-900:#0a2f5c; --azul-800:#0b4a8b; --azul-700:#0f5aa6; --ink:#1f2937; --muted:#5b6b82;
+          --line:#e3e9f2; --bg:#f6f8fc; --card:#fff; --amber:#f2b705; --code-bg:#f3f6fb; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+         -webkit-font-smoothing:antialiased; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+  .doc { background:var(--card); border:1px solid var(--line); border-radius:16px;
+         box-shadow:0 10px 30px rgba(11,74,139,.06); padding: 44px 52px; }
+  h1,h2,h3,h4 { color:var(--azul-900); line-height:1.25; scroll-margin-top: 16px; }
+  h1 { font-size: 2rem; margin:.2em 0 .4em; }
+  h2 { font-size: 1.5rem; margin:1.8em 0 .5em; padding-bottom:.3em; border-bottom:2px solid var(--line); }
+  h3 { font-size: 1.2rem; margin:1.5em 0 .4em; }
+  h4 { font-size: 1.02rem; margin:1.2em 0 .3em; color:var(--azul-800); }
+  p { margin: .7em 0; }
+  a { color: var(--azul-700); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  blockquote { margin:1em 0; padding:12px 18px; background:#fff8e6; border-left:4px solid var(--amber);
+               border-radius:8px; color:#5b4a10; }
+  blockquote p { margin:.3em 0; }
+  ul,ol { padding-left: 1.4em; }
+  li { margin:.28em 0; }
+  code { background:var(--code-bg); padding:.12em .4em; border-radius:6px; font-size:.9em;
+         font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  pre code { background:none; padding:0; }
+  table { border-collapse: collapse; width:100%; margin:1.1em 0; font-size:.95rem; display:block; overflow-x:auto; }
+  th,td { border:1px solid var(--line); padding:9px 13px; text-align:left; vertical-align:top; }
+  thead th { background:#eef2f8; color:var(--azul-900); }
+  tbody tr:nth-child(even) { background:#f8fafd; }
+  img { max-width:100%; height:auto; display:block; margin:14px 0; border:1px solid var(--line);
+        border-radius:10px; box-shadow:0 6px 18px rgba(11,74,139,.08); }
+  hr { border:none; border-top:1px solid var(--line); margin:2.4em 0; }
+  .mermaid { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; margin:16px 0;
+             text-align:center; overflow-x:auto; }
+  .doc-nota { font-size:.82rem; color:var(--muted); margin:0 0 8px; }
+  @media (max-width:640px){ .doc{ padding:26px 18px; } .wrap{ padding:20px 10px 60px; } }
+  @media print {
+    body{ background:#fff; } .doc{ box-shadow:none; border:none; border-radius:0; padding:0; }
+    .doc-nota{ display:none; } a{ color:inherit; text-decoration:none; }
+    h2{ break-after:avoid; } img,.mermaid,table{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="doc-nota">Documento gerado a partir do Markdown do repositório (spec/manuais). Os diagramas usam Mermaid.</p>
+    <article class="doc">
+<h1 id="manual-do-administrador--compra-mais">Manual do Administrador — Compra Mais</h1>
+<p><strong>Programa Compra Mais · Prefeitura de Rio Branco</strong>
+Guia do <strong>Painel Administrativo</strong> para a equipe interna — da gestão de editais ao fornecimento, incluindo
+configuração da plataforma, governança e auditoria.</p>
+<blockquote>
+<p>As telas deste manual são reais, capturadas do sistema em funcionamento (ambiente de demonstração). Os
+dados (empresas, editais, valores) são apenas exemplos. Cada seção indica <strong>qual perfil</strong> acessa a tela.</p>
+</blockquote>
+<hr>
+<h2 id="sumário">Sumário</h2>
+<ol>
+<li><a href="#1-o-painel-administrativo-e-os-perfis">O Painel Administrativo e os perfis</a></li>
+<li><a href="#2-acesso-à-plataforma">Acesso à plataforma</a></li>
+<li><a href="#3-dashboard--visão-geral">Dashboard — visão geral</a></li>
+<li><a href="#4-o-fluxo-operacional">O fluxo operacional</a></li>
+<li><a href="#5-gestão-de-editais">Gestão de Editais</a></li>
+<li><a href="#6-credenciamento-em-edital">Credenciamento em Edital</a></li>
+<li><a href="#7-análise-documental">Análise Documental</a></li>
+<li><a href="#8-distribuição-inteligente">Distribuição Inteligente</a></li>
+<li><a href="#9-cadastro-de-reserva">Cadastro de Reserva</a></li>
+<li><a href="#10-desistências">Desistências</a></li>
+<li><a href="#11-malote-sei">Malote SEI</a></li>
+<li><a href="#12-fornecedores">Fornecedores</a></li>
+<li><a href="#13-contestações-de-cnae">Contestações de CNAE</a></li>
+<li><a href="#14-atendimento-lgpd">Atendimento LGPD</a></li>
+<li><a href="#15-relatórios">Relatórios</a></li>
+<li><a href="#16-catálogos">Catálogos</a></li>
+<li><a href="#17-secretarias">Secretarias</a></li>
+<li><a href="#18-setores-industriais-cnae">Setores Industriais (CNAE)</a></li>
+<li><a href="#19-tipos-de-arquivos">Tipos de Arquivos</a></li>
+<li><a href="#20-usuários-internos">Usuários internos</a></li>
+<li><a href="#21-administração-de-telas-por-perfil">Administração de Telas por Perfil</a></li>
+<li><a href="#22-auditoria">Auditoria</a></li>
+<li><a href="#23-glossário-e-boas-práticas">Glossário e boas práticas</a></li>
+</ol>
+<hr>
+<h2 id="1-o-painel-administrativo-e-os-perfis">1. O Painel Administrativo e os perfis</h2>
+<p>O <strong>Painel Administrativo</strong> é a área interna do Compra Mais, usada pela equipe da Prefeitura para
+conduzir todo o ciclo das compras municipalizadas — <strong>do edital ao fornecimento</strong> — e para <strong>administrar
+a plataforma</strong> (usuários, catálogos, permissões, auditoria).</p>
+<p>O acesso é <strong>por papel (perfil)</strong>. Cada papel enxerga apenas as <strong>telas</strong> pertinentes à sua função. Os
+papéis internos são:</p>
+<table>
+<thead>
+<tr>
+<th>Perfil</th>
+<th>Papel no processo</th>
+<th>Telas típicas</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Administrador</strong></td>
+<td>Superusuário da plataforma</td>
+<td>Usuários, Secretarias, Setores, Tipos de Arquivos, Auditoria, <strong>Telas por perfil</strong>, Malote, Relatórios</td>
+</tr>
+<tr>
+<td><strong>Secretaria / Gestor (SMGA)</strong></td>
+<td>Operação das compras</td>
+<td>Dashboard, Fornecedores, Credenciamento, Análise Documental, Distribuição, Reserva, Desistências, Malote, Catálogos, Editais, Contestações, LGPD, Relatórios</td>
+</tr>
+<tr>
+<td><strong>Analista CPL</strong></td>
+<td>Fluxo de editais e habilitação</td>
+<td>Gestão de Editais, Credenciamento, Análise Documental</td>
+</tr>
+<tr>
+<td><strong>Auditor</strong></td>
+<td>Fiscalização</td>
+<td>Auditoria</td>
+</tr>
+<tr>
+<td><strong>Encarregado (DPO)</strong></td>
+<td>Privacidade / LGPD</td>
+<td>Atendimento LGPD</td>
+</tr>
+<tr>
+<td><strong>Somente leitura</strong></td>
+<td>Consulta</td>
+<td>Painel (visão macro)</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p><strong>Quem enxerga o quê é configurável</strong> pelo Administrador, na tela <strong>Telas por Perfil</strong> (seção 21). O
+Administrador nunca perde o acesso a essa tela (proteção anti‑lockout).</p>
+</blockquote>
+<pre class="mermaid">flowchart LR
+    subgraph Operação
+      SMGA[Secretaria / Gestor]
+      CPL[Analista CPL]
+    end
+    subgraph Administração
+      ADM[Administrador]
+    end
+    subgraph Governança
+      AUD[Auditor]
+      DPO[Encarregado LGPD]
+    end
+    SMGA --&gt; Editais & Credenciamento & Distribuição & Malote
+    CPL --&gt; Editais & Credenciamento
+    ADM --&gt; Usuários & Catálogos & Telas & Auditoria
+    DPO --&gt; LGPD
+    AUD --&gt; Auditoria</pre>
+<hr>
+<h2 id="2-acesso-à-plataforma">2. Acesso à plataforma</h2>
+<p>Os usuários internos entram com <strong>e-mail e senha institucionais</strong>. Após o login, cada perfil é levado à
+sua <strong>tela inicial</strong> (a primeira tela visível ao papel).</p>
+<p><img src="imagens-admin/00-login.png" alt="Tela de acesso"></p>
+<blockquote>
+<p>Esqueceu a senha? Use <strong>Esqueci minha senha</strong> para redefini-la por e-mail. A gestão de contas internas
+é feita pelo Administrador em <strong>Usuários</strong> (seção 20).</p>
+</blockquote>
+<hr>
+<h2 id="3-dashboard--visão-geral">3. Dashboard — visão geral</h2>
+<p><em>(perfil SMGA / Gestor)</em></p>
+<p>O <strong>Dashboard</strong> (menu <strong>Painel</strong>) resume a operação das compras municipalizadas.</p>
+<p><img src="imagens-admin/01-dashboard.png" alt="Dashboard — visão geral"></p>
+<ul>
+<li><strong>Indicadores</strong>: <em>Total de demandas</em> (e quantas abertas), <em>Fornecedores ativos</em> (e % MEI), <em>Valor
+estimado</em> em editais em andamento e <em>Documentos pendentes</em> aguardando análise.</li>
+<li><strong>Editais em andamento</strong>: lista com número, objeto, secretaria e nº de credenciados.</li>
+<li><strong>Alertas</strong>: destaques como <em>editais próximos do vencimento</em>.</li>
+</ul>
+<p>Use-o como ponto de partida do dia: ele aponta o que exige ação (análises pendentes, editais a vencer).</p>
+<hr>
+<h2 id="4-o-fluxo-operacional">4. O fluxo operacional</h2>
+<p>Do cadastro da demanda ao fornecimento, o caminho é:</p>
+<pre class="mermaid">flowchart TD
+    A["Gestão de Editais&lt;br/&gt;criar → itens → publicar"] --&gt; B["Fornecedores se credenciam&lt;br/&gt;(portal do fornecedor)"]
+    B --&gt; C["Análise Documental&lt;br/&gt;covalidar documentos"]
+    C --&gt; D{"Fornecedor apto?"}
+    D -- sim --&gt; E["Distribuição Inteligente&lt;br/&gt;rateio por item + homologação"]
+    D -- não --&gt; C
+    E --&gt; F["Malote SEI&lt;br/&gt;formaliza o processo"]
+    E --&gt; G["Saldo não coberto&lt;br/&gt;→ Cadastro de Reserva"]
+    F --&gt; H["Fornecimento"]</pre>
+<p>As próximas seções detalham cada etapa.</p>
+<hr>
+<h2 id="5-gestão-de-editais">5. Gestão de Editais</h2>
+<p><em>(perfis SMGA e CPL)</em></p>
+<p>Aqui você <strong>cria e administra os editais</strong> (as demandas). Um edital nasce em <strong>rascunho</strong>, recebe
+<strong>itens</strong> (do catálogo de materiais/serviços, com unidade, quantidade e preço-teto) e, quando pronto, é
+<strong>publicado</strong> — passando a aparecer na vitrine dos fornecedores compatíveis.</p>
+<p><img src="imagens-admin/03-editais.png" alt="Gestão de Editais"></p>
+<p>Passo a passo para publicar um edital:</p>
+<pre class="mermaid">flowchart LR
+    A["Novo edital&lt;br/&gt;secretaria + objeto + CNAEs + vigência"] --&gt; B["Adicionar itens&lt;br/&gt;unidade · quantidade · preço-teto"]
+    B --&gt; C["Publicar"]
+    C --&gt; D["Aparece na vitrine&lt;br/&gt;dos fornecedores compatíveis"]
+    D --&gt; E["Encerrar&lt;br/&gt;(quando concluído)"]</pre>
+<ul>
+<li><strong>CNAEs-alvo</strong> definem quais empresas verão o edital (compatibilidade por ramo).</li>
+<li><strong>Itens</strong> só são editáveis enquanto o edital está em <strong>rascunho</strong>.</li>
+<li><strong>Vigência</strong> (prazo) controla o encerramento; o edital pode ser <strong>despublicado</strong>/ <strong>encerrado</strong>.</li>
+</ul>
+<hr>
+<h2 id="6-credenciamento-em-edital">6. Credenciamento em Edital</h2>
+<p><em>(perfis SMGA e CPL)</em></p>
+<p>Mostra, por edital, os <strong>fornecedores elegíveis</strong> (compatíveis por CNAE e regulares) e o andamento das
+solicitações de credenciamento. É a visão administrativa do que o fornecedor faz no portal.</p>
+<p><img src="imagens-admin/04-credenciamento.png" alt="Credenciamento em Edital"></p>
+<blockquote>
+<p>A <strong>regra de compatibilidade</strong> (CNAE) e a <strong>regularidade</strong> (documentos) determinam quem pode se
+credenciar. Divergências de CNAE são tratadas em <strong>Contestações</strong> (seção 13).</p>
+</blockquote>
+<hr>
+<h2 id="7-análise-documental">7. Análise Documental</h2>
+<p><em>(perfis SMGA e CPL)</em></p>
+<p>A <strong>fila de análise</strong> reúne os documentos enviados pelos fornecedores que aguardam validação
+(<strong>covalidação</strong>). O analista <strong>aprova</strong> ou <strong>reprova</strong> cada documento, com motivo. Documentos aprovados
+são <strong>reaproveitados</strong> entre editais; reprovados voltam ao fornecedor para correção.</p>
+<p><img src="imagens-admin/05-analise-documental.png" alt="Análise Documental"></p>
+<pre class="mermaid">stateDiagram-v2
+    [*] --&gt; Pendente
+    Pendente --&gt; Aprovado: covalidação ok
+    Pendente --&gt; Reprovado: com motivo
+    Reprovado --&gt; Pendente: fornecedor reenvia
+    Aprovado --&gt; [*]</pre>
+<hr>
+<h2 id="8-distribuição-inteligente">8. Distribuição Inteligente</h2>
+<p><em>(perfil SMGA)</em></p>
+<p>O coração do programa: o <strong>rateio equitativo</strong> da demanda entre os fornecedores <strong>aptos</strong>. Selecione um
+edital publicado para ver e <strong>homologar</strong> o rateio.</p>
+<p><img src="imagens-admin/06-distribuicao.png" alt="Distribuição Inteligente — lista de editais"></p>
+<p>Ao abrir um edital, o <strong>detalhe do rateio</strong> mostra os totais, o rateio <strong>por item</strong> e eventual
+<strong>déficit</strong> (quando a capacidade declarada não cobre a demanda):</p>
+<p><img src="imagens-admin/06b-distribuicao-detalhe.png" alt="Detalhe do rateio (modal)"></p>
+<ul>
+<li><strong>Total da demanda</strong>, <strong>Distribuído</strong> e <strong>Habilitados</strong> (fornecedores aptos).</li>
+<li><strong>Resultado da distribuição por item</strong>: quanto coube a cada fornecedor, respeitando o <strong>teto</strong> que ele
+declarou.</li>
+<li><strong>Déficit de abastecimento</strong>: saldo não coberto — vai para o <strong>Cadastro de Reserva</strong>.</li>
+<li><strong>Homologar</strong> congela a matriz (append-only, versionada) — <em>&quot;Distribuição homologada · versão N&quot;</em>.</li>
+</ul>
+<p>O motor é <strong>determinístico e reprodutível</strong>: a mesma entrada gera o mesmo rateio (com registro de hash e
+regra de desempate para auditoria).</p>
+<pre class="mermaid">flowchart TD
+    A[Demanda do item] --&gt; B[Divisão igualitária&lt;br/&gt;entre os aptos]
+    B --&gt; C{Cabe no teto&lt;br/&gt;de cada um?}
+    C -- sim --&gt; D[Cota confirmada]
+    C -- excede --&gt; E[Limita ao teto e&lt;br/&gt;redistribui o excedente]
+    E --&gt; B
+    D --&gt; F[Homologação&lt;br/&gt;matriz congelada + versão]
+    A --&gt; G[Saldo não coberto&lt;br/&gt;→ Cadastro de Reserva]</pre>
+<hr>
+<h2 id="9-cadastro-de-reserva">9. Cadastro de Reserva</h2>
+<p><em>(perfil SMGA)</em></p>
+<p>Fila cronológica com o <strong>saldo não atendido</strong> e os <strong>retardatários</strong> (quem se credenciou após a
+distribuição). É acionada em uma <strong>2ª demanda</strong>, preservando a ordem de chegada.</p>
+<p><img src="imagens-admin/07-cadastro-reserva.png" alt="Cadastro de Reserva"></p>
+<hr>
+<h2 id="10-desistências">10. Desistências</h2>
+<p><em>(perfil SMGA)</em></p>
+<p>Registra e acompanha <strong>desistências</strong> de fornecedores em editais/cotas, liberando saldo para
+redistribuição conforme as regras do programa.</p>
+<p><img src="imagens-admin/08-desistencias.png" alt="Desistências"></p>
+<hr>
+<h2 id="11-malote-sei">11. Malote SEI</h2>
+<p><em>(perfis SMGA e Administrador)</em></p>
+<p>Gera o <strong>malote</strong> (conjunto de peças documentais) e o integra ao <strong>SEI</strong> (Sistema Eletrônico de
+Informações), formalizando o processo administrativo. Suporta <strong>exportação idempotente</strong> e o
+<strong>envio/consulta</strong> de processos no SEI.</p>
+<p><img src="imagens-admin/09-malote.png" alt="Malote SEI"></p>
+<blockquote>
+<p>A integração real com o SEI depende de configuração (URL, usuário, órgão). Sem ela, opera em modo
+seguro (<em>mock</em>) até a habilitação pela TI.</p>
+</blockquote>
+<hr>
+<h2 id="12-fornecedores">12. Fornecedores</h2>
+<p><em>(perfil SMGA)</em></p>
+<p>Diretório das <strong>empresas cadastradas</strong>, com CNPJ, razão social, <strong>porte</strong> (ME/MEI/EPP), <strong>situação
+cadastral</strong> e <strong>status de credenciamento</strong>. Permite busca, filtros e a consulta detalhada de cada
+fornecedor.</p>
+<p><img src="imagens-admin/02-fornecedores.png" alt="Fornecedores"></p>
+<hr>
+<h2 id="13-contestações-de-cnae">13. Contestações de CNAE</h2>
+<p><em>(perfil SMGA)</em></p>
+<p>Quando um fornecedor entende que <strong>deveria</strong> ser compatível com um edital, ele abre uma <strong>contestação de
+CNAE</strong>. Aqui o gestor <strong>acata</strong> (ajustando os CNAEs-alvo) ou <strong>recusa</strong> (com justificativa).</p>
+<p><img src="imagens-admin/11-contestacoes.png" alt="Contestações de CNAE"></p>
+<hr>
+<h2 id="14-atendimento-lgpd">14. Atendimento LGPD</h2>
+<p><em>(perfil Encarregado/DPO e Administrador)</em></p>
+<p>Central de <strong>direitos do titular</strong> (LGPD): solicitações de <strong>acesso, correção ou exclusão</strong> de dados
+pessoais. O Encarregado <strong>atende</strong>, <strong>recusa</strong> (com motivo) ou <strong>descarta</strong> após a retenção legal.</p>
+<p><img src="imagens-admin/12-lgpd.png" alt="Atendimento LGPD"></p>
+<blockquote>
+<p>A exclusão só é permitida após o <strong>prazo de retenção legal</strong> da categoria de dado; antes disso o
+sistema bloqueia o descarte.</p>
+</blockquote>
+<hr>
+<h2 id="15-relatórios">15. Relatórios</h2>
+<p><em>(perfil SMGA)</em></p>
+<p>Central de <strong>relatórios gerenciais dos processos</strong>. Escolha o relatório no <strong>seletor</strong>, filtre por
+<strong>período</strong> e <strong>secretaria</strong>, e <strong>exporte</strong> em <strong>PDF</strong> (com cabeçalho: logo, título, emissão e período),
+<strong>CSV</strong> ou <strong>JSON</strong>.</p>
+<p><img src="imagens-admin/13-relatorios.png" alt="Relatórios"></p>
+<p>Relatórios disponíveis: <strong>Editais por secretaria e situação</strong>, <strong>Distribuições e investimento</strong>, <strong>Rateio
+de cotas por fornecedor</strong>, <strong>Fornecedores credenciados por porte</strong>, <strong>Participação por porte (MEI/ME)</strong> e
+<strong>Bloqueios ativos</strong>.</p>
+<hr>
+<h2 id="16-catálogos">16. Catálogos</h2>
+<p><em>(perfis SMGA e Administrador)</em></p>
+<p>Mantém os <strong>dados de referência</strong> usados em todo o sistema: <strong>materiais e serviços</strong> (base dos itens de
+edital), unidades de medida e correlatos. Mudanças aqui refletem nos formulários de edital.</p>
+<p><img src="imagens-admin/10-catalogos.png" alt="Catálogos"></p>
+<hr>
+<h2 id="17-secretarias">17. Secretarias</h2>
+<p><em>(perfil Administrador)</em></p>
+<p>Cadastro das <strong>secretarias demandantes</strong> (sigla, nome, responsável, contato). Cada edital pertence a uma
+secretaria; os relatórios e o rateio agrupam por ela.</p>
+<p><img src="imagens-admin/14-secretarias.png" alt="Secretarias"></p>
+<hr>
+<h2 id="18-setores-industriais-cnae">18. Setores Industriais (CNAE)</h2>
+<p><em>(perfil Administrador)</em></p>
+<p>Catálogo de <strong>CNAEs</strong> atendidos (código + descrição). É a base da <strong>compatibilidade</strong> entre editais e
+empresas e da rotulação dos segmentos na Transparência.</p>
+<p><img src="imagens-admin/16-setores-industriais.png" alt="Setores Industriais (CNAE)"></p>
+<hr>
+<h2 id="19-tipos-de-arquivos">19. Tipos de Arquivos</h2>
+<p><em>(perfil Administrador)</em></p>
+<p>Define os <strong>tipos de documento</strong> exigidos no credenciamento (ex.: Cartão CNPJ, FGTS, CNDT), se são
+<strong>obrigatórios</strong> e se <strong>exigem validade</strong>. É o que gera a lista de documentos que o fornecedor precisa
+enviar.</p>
+<p><img src="imagens-admin/17-tipos-arquivos.png" alt="Tipos de Arquivos"></p>
+<hr>
+<h2 id="20-usuários-internos">20. Usuários internos</h2>
+<p><em>(perfil Administrador)</em></p>
+<p>Cria e administra as <strong>contas da equipe</strong> (nome, e-mail, <strong>papel</strong>, secretaria/cargo). É aqui que se
+concede ou revoga o acesso de um analista, gestor, auditor ou DPO.</p>
+<p><img src="imagens-admin/15-usuarios.png" alt="Usuários internos"></p>
+<hr>
+<h2 id="21-administração-de-telas-por-perfil">21. Administração de Telas por Perfil</h2>
+<p><em>(perfil Administrador)</em></p>
+<p>Controla <strong>quais telas</strong> do Painel cada <strong>papel</strong> enxerga — uma matriz <strong>perfil × tela</strong>. Marque/desmarque
+para ajustar o acesso. As permissões do próprio Administrador também são editáveis, mas ele <strong>nunca perde
+o acesso a esta tela</strong> (proteção anti-lockout).</p>
+<p><img src="imagens-admin/19-perfis.png" alt="Administração de Telas por Perfil"></p>
+<blockquote>
+<p>Esta é a <strong>fonte de verdade</strong> do que cada perfil vê no menu e pode abrir. O controle real dos <strong>dados</strong>
+é sempre reforçado no servidor (RBAC): ocultar uma tela e negar o acesso ao dado andam juntos.</p>
+</blockquote>
+<hr>
+<h2 id="22-auditoria">22. Auditoria</h2>
+<p><em>(perfis Administrador e Auditor)</em></p>
+<p><strong>Trilha append-only</strong> de tudo o que acontece no sistema: quem fez, o quê e quando. É imutável (nada é
+apagado) e serve à fiscalização e à prestação de contas. Permite <strong>filtrar</strong> por evento/período e
+<strong>exportar</strong> (CSV/JSON).</p>
+<p><img src="imagens-admin/18-auditoria.png" alt="Auditoria"></p>
+<blockquote>
+<p>Ações sensíveis — publicação de edital, homologação de distribuição, aceite de termo, covalidação de
+documento, atendimento LGPD — ficam registradas com ator, data e finalidade.</p>
+</blockquote>
+<hr>
+<h2 id="23-glossário-e-boas-práticas">23. Glossário e boas práticas</h2>
+<table>
+<thead>
+<tr>
+<th>Termo</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Edital</strong></td>
+<td>Uma <strong>demanda</strong> de compra de uma secretaria (1 edital = 1 demanda).</td>
+</tr>
+<tr>
+<td><strong>CNAE</strong></td>
+<td>Ramo de atividade; define a compatibilidade entre editais e empresas.</td>
+</tr>
+<tr>
+<td><strong>Covalidação</strong></td>
+<td>Análise/validação de um documento enviado pelo fornecedor.</td>
+</tr>
+<tr>
+<td><strong>Apto</strong></td>
+<td>Fornecedor com credenciamento aprovado, que entra no rateio.</td>
+</tr>
+<tr>
+<td><strong>Rateio / Distribuição</strong></td>
+<td>Divisão <strong>igualitária</strong> da demanda entre os aptos, limitada ao <strong>teto</strong> de cada um.</td>
+</tr>
+<tr>
+<td><strong>Homologar</strong></td>
+<td>Congelar a matriz de distribuição (versão imutável, auditável).</td>
+</tr>
+<tr>
+<td><strong>Déficit</strong></td>
+<td>Saldo da demanda não coberto pela capacidade declarada.</td>
+</tr>
+<tr>
+<td><strong>Cadastro de Reserva</strong></td>
+<td>Fila que recebe o saldo não atendido e retardatários (2ª demanda).</td>
+</tr>
+<tr>
+<td><strong>Malote / SEI</strong></td>
+<td>Conjunto de peças formalizado no Sistema Eletrônico de Informações.</td>
+</tr>
+<tr>
+<td><strong>RBAC / Telas por perfil</strong></td>
+<td>Controle de quais telas e dados cada papel acessa.</td>
+</tr>
+<tr>
+<td><strong>Trilha de auditoria</strong></td>
+<td>Registro imutável (append-only) de todas as ações.</td>
+</tr>
+</tbody></table>
+<p><strong>Boas práticas do dia a dia</strong></p>
+<ol>
+<li>Comece pelo <strong>Dashboard</strong> — ele aponta análises pendentes e editais a vencer.</li>
+<li>Antes de <strong>distribuir</strong>, garanta que a <strong>Análise Documental</strong> está em dia (só aptos entram no rateio).</li>
+<li><strong>Homologue</strong> a distribuição apenas quando o rateio estiver correto — a matriz vira versão imutável.</li>
+<li>Mantenha os <strong>Catálogos</strong>, <strong>Tipos de Arquivos</strong> e <strong>Setores (CNAE)</strong> atualizados: eles alimentam os
+editais e a compatibilidade.</li>
+<li>Conceda acesso pelo <strong>menor privilégio</strong> necessário em <strong>Usuários</strong> e <strong>Telas por Perfil</strong>.</li>
+<li>Em dúvidas de conformidade, consulte a <strong>Auditoria</strong> — nada se perde.</li>
+</ol>
+<hr>
+<blockquote>
+<p><strong>Precisa de ajuda?</strong> Use os canais de suporte da Prefeitura de Rio Branco. Este manual acompanha a
+<strong>Versão 2.0</strong> do Compra Mais. Para o guia da empresa fornecedora, veja o
+<a href="manual-fornecedor.html">Manual do Fornecedor</a>.</p>
+</blockquote>
+
+    </article>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'default', flowchart: { htmlLabels: true } });
+  </script>
+</body>
+</html>

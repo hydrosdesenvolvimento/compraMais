@@ -87,7 +87,7 @@ describe('Manual do Fornecedor — captura de telas', () => {
       cy.request({ method: 'GET', url: '/editais', headers: auth }).then((r) => {
         const compat = r.body as Array<{ id: string }>;
         const edital = compat.find((e) => !jaIniciados.has(e.id)) ?? compat[0];
-        expect(edital, 'há edital compatível na vitrine').to.exist;
+        expect(edital, 'há edital compatível na vitrine').to.not.equal(undefined);
         entrar(`/#/credenciamento/${edital.id}`);
 
       // Passo 1 — seleciona o item e declara o teto de capacidade (RN005)

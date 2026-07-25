@@ -252,6 +252,26 @@
     "distribuicao": {
       "eyebrow": "Operations · Distribution",
       "titulo": "Smart Distribution",
+      "subtitulo": "Pick a published tender to view and approve the allocation.",
+      "filtros": {
+        "texto": "Search by number or subject",
+        "secretaria": "Department",
+        "todas": "All departments"
+      },
+      "mostrando": "{{n}} of {{total}} tenders",
+      "lista": {
+        "edital": "Tender",
+        "objeto": "Subject",
+        "secretaria": "Department",
+        "itens": "Items",
+        "acoes": "Actions"
+      },
+      "itensContagem_one": "{{count}} item",
+      "itensContagem_other": "{{count}} items",
+      "verDistribuicao": "View distribution",
+      "semResultados": "No tenders for the current filters.",
+      "modalTitulo": "Tender distribution",
+      "fechar": "Close",
       "seletorLabel": "Notice",
       "carregando": "Loading distribution…",
       "erroCarregar": "Could not load the distribution.",
@@ -1189,6 +1209,7 @@
     "kpiMei": "Participating MEIs",
     "painelInvestimento": "Investment by department",
     "painelParticipacao": "Participation by company size",
+    "cnae": "CNAE {{codigo}}",
     "painelSegmentos": "Sectors (CNAE) served",
     "semInvestimento": "No distributed amounts yet.",
     "fornecedoresContagem_one": "{{count}} supplier",

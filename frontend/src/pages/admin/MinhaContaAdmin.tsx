@@ -46,14 +46,16 @@ export function MinhaContaAdmin() {
               titulo={p?.nome ?? '—'}
               subtitulo={p ? `${papelLabel(p.papel)}${p.secretaria ? ` · ${p.secretaria}` : ''}` : ''}
             />
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '14px 18px', marginTop: 22 }}>
-              <CampoOficial rotulo={t('minhaContaAdmin.nome')} valor={p?.nome ?? '—'} />
-              <CampoOficial rotulo={t('minhaContaAdmin.email')} valor={p?.email ?? '—'} />
-              <CampoOficial rotulo={t('minhaContaAdmin.cargo')} valor={cargoLabel(p?.cargo ?? null)} />
-              <CampoOficial rotulo={t('minhaContaAdmin.perfil')} valor={p ? papelLabel(p.papel) : '—'} />
-              <CampoOficial rotulo={t('minhaContaAdmin.secretaria')} valor={p?.secretaria || '—'} />
-              <CampoOficial rotulo={t('minhaContaAdmin.situacao')} valor={p ? t(p.ativo ? 'minhaContaAdmin.ativo' : 'minhaContaAdmin.inativo') : '—'} />
-              <CampoOficial rotulo={t('minhaContaAdmin.dataCadastro')} valor={p ? fmtData(p.registerDate) : '—'} />
+            {/* Campos dimensionados pelo conteúdo esperado (flex-wrap): nome/e-mail largos; cargo/perfil/
+                secretaria médios; situação/data estreitos. Empilham no mobile. */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 18px', marginTop: 22 }}>
+              <CampoOficial size="lg" rotulo={t('minhaContaAdmin.nome')} valor={p?.nome ?? '—'} />
+              <CampoOficial size="lg" rotulo={t('minhaContaAdmin.email')} valor={p?.email ?? '—'} />
+              <CampoOficial size="md" rotulo={t('minhaContaAdmin.cargo')} valor={cargoLabel(p?.cargo ?? null)} />
+              <CampoOficial size="md" rotulo={t('minhaContaAdmin.perfil')} valor={p ? papelLabel(p.papel) : '—'} />
+              <CampoOficial size="md" rotulo={t('minhaContaAdmin.secretaria')} valor={p?.secretaria || '—'} />
+              <CampoOficial size="sm" rotulo={t('minhaContaAdmin.situacao')} valor={p ? t(p.ativo ? 'minhaContaAdmin.ativo' : 'minhaContaAdmin.inativo') : '—'} />
+              <CampoOficial size="sm" rotulo={t('minhaContaAdmin.dataCadastro')} valor={p ? fmtData(p.registerDate) : '—'} />
             </div>
           </>
         )}

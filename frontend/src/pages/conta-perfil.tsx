@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Botao } from '../design-system/components';
@@ -41,12 +41,24 @@ export function SecaoLabel({ children, cor = 'var(--azul-700)', icone }: { child
   );
 }
 
-/** Campo somente-leitura no estilo do mockup (fundo azul tint). */
-export function CampoOficial({ rotulo, valor }: { rotulo: string; valor: string }) {
+/**
+ * Largura do campo por conteúdo esperado (item de um container flex): `sm` para valores curtos
+ * (situação, data, CPF), `md` para médios (cargo, perfil, secretaria), `lg` para longos (nome, e-mail).
+ * O `flex-basis` define a largura preferida e o `grow` reparte o espaço extra (lg cresce mais); o
+ * `maxWidth` impede que campos curtos estiquem demais. `flex-wrap` no pai garante o empilhamento no mobile.
+ */
+const TAMANHO_CAMPO: Record<'sm' | 'md' | 'lg', CSSProperties> = {
+  sm: { flex: '1 1 130px', maxWidth: 200 },
+  md: { flex: '1 1 200px', maxWidth: 320 },
+  lg: { flex: '3 1 280px' },
+};
+
+/** Campo somente-leitura no estilo do mockup (fundo azul tint). `size` dimensiona pelo conteúdo esperado. */
+export function CampoOficial({ rotulo, valor, size }: { rotulo: string; valor: string; size?: 'sm' | 'md' | 'lg' }) {
   return (
-    <div>
+    <div style={size ? TAMANHO_CAMPO[size] : undefined}>
       <div style={{ font: '600 11.5px var(--font-body)', color: 'var(--cinza-500)', marginBottom: 5 }}>{rotulo}</div>
-      <div style={{ padding: '11px 14px', background: 'var(--azul-50)', border: '1px solid var(--azul-100)', borderRadius: 9, fontSize: 14, color: 'var(--azul-900)' }}>{valor}</div>
+      <div style={{ padding: '11px 14px', background: 'var(--azul-50)', border: '1px solid var(--azul-100)', borderRadius: 9, fontSize: 14, color: 'var(--azul-900)', overflowWrap: 'anywhere' }}>{valor}</div>
     </div>
   );
 }

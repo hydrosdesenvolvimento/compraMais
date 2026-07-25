@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, configure } from '@testing-library/react';
+import { render, screen, configure, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Transparencia } from './Transparencia';
 import type { Transparencia as TransparenciaView } from '../../lib/api';
@@ -12,7 +12,10 @@ vi.mock('../../lib/api', () => ({ api: { transparencia: () => transparencia() } 
 const BI: TransparenciaView = {
   editaisVigentes: 12,
   secretarias: ['s1'],
-  segmentos: ['1412601', '3101200'],
+  segmentos: [
+    { codigo: '1412601', descricao: 'Confecção de peças do vestuário' },
+    { codigo: '0000001', descricao: null },
+  ],
   fornecedoresAtivos: 87,
   meiPercentual: 42,
   investimentoTotal: 2_840_000,
@@ -45,6 +48,18 @@ describe('Transparência — BI público (RN007)', () => {
     expect(screen.getAllByTestId('investimento-secretaria')).toHaveLength(2);
     expect(screen.getAllByTestId('participacao-porte')).toHaveLength(3);
     expect(screen.getByText('SEME')).toBeInTheDocument();
+  });
+
+  it('setores (CNAE) atendidos: mostra a descrição e o código formatado; só o código quando não catalogado', async () => {
+    renderTela();
+    const segmentos = await screen.findAllByTestId('segmento');
+    expect(segmentos).toHaveLength(2);
+    // Com descrição: descrição + "CNAE 1412-6/01".
+    expect(segmentos[0]).toHaveTextContent('Confecção de peças do vestuário');
+    expect(segmentos[0]).toHaveTextContent('CNAE 1412-6/01');
+    // Sem descrição no catálogo: exibe só o código formatado, sem a linha "CNAE ...".
+    expect(segmentos[1]).toHaveTextContent('0000-0/01');
+    expect(within(segmentos[1]!).queryByTestId('segmento-codigo')).not.toBeInTheDocument();
   });
 
   it('estado vazio de investimento quando não há distribuições', async () => {

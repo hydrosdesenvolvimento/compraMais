@@ -16,6 +16,7 @@ const fonte: PaineisFonte = {
   ],
   participacaoPorPorte: async () => [{ porte: 'ME', fornecedores: 3 }, { porte: 'MEI', fornecedores: 2 }],
   investimentoDistribuido: async () => ({ total: 84000, porSecretaria: [{ secretaria: 'SEME', valor: 84000 }] }),
+  descricoesCnae: async () => ({ '1091101': 'Fabricação de produtos de panificação', '3101200': 'Fabricação de móveis com predominância de madeira' }),
 };
 
 describe('Painéis (Épico 9)', () => {
@@ -35,11 +36,21 @@ describe('Painéis (Épico 9)', () => {
     expect(f.editaisEmAndamento[0]).toMatchObject({ numero: 'ED-2026/001', credenciados: 4 });
   });
 
-  it('transparência dedupe secretarias e segmentos (FR-003)', async () => {
+  it('transparência dedupe secretarias e resolve os segmentos com descrição do CNAE (FR-003)', async () => {
     const t = await new Transparencia(fonte).publico();
     expect(t.editaisVigentes).toBe(2);
     expect(t.secretarias).toEqual(['s1']);
-    expect(t.segmentos.sort()).toEqual(['1091101', '3101200']);
+    const segs = [...t.segmentos].sort((a, b) => a.codigo.localeCompare(b.codigo));
+    expect(segs).toEqual([
+      { codigo: '1091101', descricao: 'Fabricação de produtos de panificação' },
+      { codigo: '3101200', descricao: 'Fabricação de móveis com predominância de madeira' },
+    ]);
+  });
+
+  it('segmento sem correspondência no catálogo fica com descrição null', async () => {
+    const semDescr: PaineisFonte = { ...fonte, editaisPublicados: async () => [{ secretariaId: 's1', cnaesAlvo: ['0000001'] }], descricoesCnae: async () => ({}) };
+    const t = await new Transparencia(semDescr).publico();
+    expect(t.segmentos).toEqual([{ codigo: '0000001', descricao: null }]);
   });
 
   it('transparência agrega o BI público: investimento, participação por porte e % MEI (RN007)', async () => {
@@ -49,5 +60,11 @@ describe('Painéis (Épico 9)', () => {
     expect(t.investimentoTotal).toBe(84000);
     expect(t.investimentoPorSecretaria).toEqual([{ secretaria: 'SEME', valor: 84000 }]);
     expect(t.participacaoPorPorte).toEqual([{ porte: 'ME', fornecedores: 3 }, { porte: 'MEI', fornecedores: 2 }]);
+  });
+
+  it('transparência inclui empresas credenciadas e a lista de editais públicos (landing)', async () => {
+    const t = await new Transparencia(fonte).publico();
+    expect(t.empresasCredenciadas).toBe(4);
+    expect(t.editaisPublicos).toEqual([{ numero: 'ED-2026/001', objeto: 'Fardamento', secretaria: 'SEME', valorEstimado: 116400 }]);
   });
 });

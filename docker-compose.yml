@@ -145,6 +145,23 @@ services:
       - compramais
 
   # ----------------------------------------------------------------------- #
+  # Landing pública (PORTAL): site estático (nginx) na pasta ./portal. É a    #
+  # porta de entrada do cidadão — consome GET /transparencia (proxy ao        #
+  # backend) e faz deep-link ao app. Container PRÓPRIO, separado do frontend. #
+  #   http://localhost:${PORTAL_PORT:-8090}                                   #
+  # ----------------------------------------------------------------------- #
+  portal:
+    profiles: ["dev"]
+    build:
+      context: ./portal
+    ports:
+      - "${PORTAL_PORT:-8090}:80"
+    depends_on:
+      - backend
+    networks:
+      - compramais
+
+  # ----------------------------------------------------------------------- #
   # Reconhecimento facial (DEV): serviço Python isolado (UC007 — prova de   #
   # vida). Fronteira de ML fora do backend TS (Ports & Adapters). Modelos    #
   # SCRFD+ArcFace embutidos na build → runtime offline. Só usado quando      #

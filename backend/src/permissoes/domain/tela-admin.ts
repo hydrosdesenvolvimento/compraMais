@@ -75,18 +75,19 @@ export function telasObrigatorias(papel: string): readonly TelaAdminKey[] {
 
 /**
  * Matriz PADRÃO (semente lógica) — usada quando o Administrador ainda não customizou um papel:
- * - administrador: Malote, Secretarias, Usuários, Setores Industriais, Tipos de Arquivos, Auditoria, Telas por perfil
+ * - administrador: Malote, Secretarias, Usuários, Setores Industriais, Tipos de Arquivos, Auditoria, LGPD, Telas por perfil
  * - smga (Secretaria/Gestor) — operação: fornecedores, credenciamento, análise documental,
- *   distribuição, cadastro de reserva, desistências, malote, contestações, gestão de editais, catálogos, LGPD
+ *   distribuição, cadastro de reserva, desistências, malote, contestações, gestão de editais, catálogos
+ *   (LGPD NÃO: o atendimento LGPD é do Encarregado/DPO e do Administrador — RNF007; o endpoint nega os demais)
  * - cpl: gestão de editais, credenciamento, análise documental (fluxo novo)
  * - auditor: Auditoria; dpo: LGPD; leitura: Painel (visão macro, somente leitura)
  */
 export const VISIBILIDADE_PADRAO: Record<PapelConfiguravel, TelaAdminKey[]> = {
-  administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'relatorios', 'perfis'],
+  administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'lgpd', 'relatorios', 'perfis'],
   cpl: ['gestaoEditais', 'credenciamento', 'analiseDocumental'],
   smga: [
     'painel', 'fornecedores', 'credenciamento', 'analiseDocumental', 'distribuicao',
-    'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'lgpd', 'relatorios',
+    'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'relatorios',
   ],
   auditor: ['auditoria'],
   dpo: ['lgpd'],

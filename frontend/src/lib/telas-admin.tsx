@@ -74,11 +74,11 @@ export function menuAdminVisivel(visiveis: readonly string[]): ItemMenu[] {
  */
 const TODAS = TELAS_ADMIN.map((t) => t.key);
 const PADRAO_POR_PAPEL: Record<string, TelaAdminKey[]> = {
-  administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'relatorios', 'perfis'],
+  administrador: ['malote', 'secretarias', 'usuarios', 'setoresIndustriais', 'tiposArquivos', 'auditoria', 'lgpd', 'relatorios', 'perfis'],
   cpl: ['gestaoEditais', 'credenciamento', 'analiseDocumental'],
   smga: [
     'painel', 'fornecedores', 'credenciamento', 'analiseDocumental', 'distribuicao',
-    'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'lgpd', 'relatorios',
+    'cadastroReserva', 'malote', 'desistencias', 'catalogos', 'gestaoEditais', 'contestacoes', 'relatorios',
   ],
   auditor: ['auditoria'],
   dpo: ['lgpd'],

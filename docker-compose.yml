@@ -154,6 +154,9 @@ services:
     profiles: ["dev"]
     build:
       context: ./portal
+    environment:
+      # Base da aplicação (Vite dev server) usada nos CTAs da landing.
+      APP_BASE_URL: ${PORTAL_APP_BASE:-http://localhost:5173}
     ports:
       - "${PORTAL_PORT:-8090}:80"
     depends_on:

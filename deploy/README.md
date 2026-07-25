@@ -18,13 +18,14 @@ testa, constrói e publica as imagens; o Portainer/Swarm apenas puxa e implanta.
 
 ## Imagens publicadas
 
-O CI publica três imagens (tags: `sha-<commit>`, nome do branch, `latest` no
+O CI publica quatro imagens (tags: `sha-<commit>`, nome do branch, `latest` no
 branch default, e `vX.Y.Z`/`X.Y` em tags semânticas):
 
 ```
 ghcr.io/hydrosdesenvolvimento/compramais/backend
 ghcr.io/hydrosdesenvolvimento/compramais/frontend
 ghcr.io/hydrosdesenvolvimento/compramais/face-service
+ghcr.io/hydrosdesenvolvimento/compramais/portal
 ```
 
 ## Pré-requisitos (uma vez por cluster)
@@ -181,9 +182,10 @@ réplicas sem downtime e reverte sozinho se a nova versão não estabilizar.
 ## Verificação pós-deploy
 
 ```bash
-docker stack services compramais           # réplicas 2/2 (backend, frontend), 1/1 (db, face)
+docker stack services compramais           # backend/frontend/portal/face + db (1/1)
 docker service logs compramais_backend --since 5m
-curl -fsS http://<host>/health             # backend via proxy do frontend → { ok: true }
+curl -fsS http://<host>/health                              # backend via proxy do frontend → { ok: true }
+curl -fsS http://<host>:${PORTAL_PUBLIC_PORT:-8090}/transparencia   # portal → proxy p/ backend (JSON)
 ```
 
 ## Rollback manual
@@ -196,8 +198,10 @@ docker service rollback compramais_frontend
 
 ## Notas
 
-- **TLS/domínio:** o `frontend` publica HTTP na `FRONTEND_PUBLIC_PORT`. Coloque um
-  proxy reverso com TLS (Traefik/Nginx/Caddy) à frente — fora do escopo deste stack.
+- **TLS/domínio:** o `frontend` publica HTTP na `FRONTEND_PUBLIC_PORT` e o `portal`
+  (landing) na `PORTAL_PUBLIC_PORT`. Coloque um proxy reverso com TLS
+  (Traefik/Nginx/Caddy) à frente, roteando os domínios/rotas para cada porta — fora
+  do escopo deste stack. Os CTAs da landing apontam para `PORTAL_APP_BASE` (URL do app).
 - **Banco gerenciado:** para usar um Postgres externo, remova o serviço `db`,
   aponte `POSTGRES_HOST`/`POSTGRES_PORT` e mantenha `db_password` como secret.
 - **SEI:** default `mock`. A tela `/admin/malote` exibe o aviso de configuração

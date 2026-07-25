@@ -149,6 +149,27 @@ services:
       <<: *deploy-stateless
 
   # ----------------------------------------------------------------------- #
+  # Portal (landing pública) — nginx estático (imagem do GHCR). Serve a       #
+  # landing e faz proxy de GET /transparencia ao backend (host `backend`, na  #
+  # mesma rede). CTAs deep-link para a aplicação em APP_BASE_URL. Publica em   #
+  # porta própria (routing mesh); domínio/TLS ficam no proxy à frente.        #
+  # ----------------------------------------------------------------------- #
+  portal:
+    image: ghcr.io/${GHCR_REPOSITORY:-hydrosdesenvolvimento/compramais}/portal:${IMAGE_TAG:-latest}
+    environment:
+      # Base pública da aplicação para os CTAs da landing (deep-links → app).
+      APP_BASE_URL: ${PORTAL_APP_BASE:-https://compramais.example}
+    ports:
+    - target: 80
+      published: ${PORTAL_PUBLIC_PORT:-8090}
+      protocol: tcp
+      mode: ingress
+    networks:
+    - compramais
+    deploy:
+      <<: *deploy-stateless
+
+  # ----------------------------------------------------------------------- #
   # Reconhecimento facial (UC007) — imagem do GHCR (modelos embutidos na       #
   # build, runtime offline). Pesado (ML): 1 réplica por padrão; escale                                   #
   # conforme CPU. Só é exigido quando FACE_PROVIDER=insightface no backend.    #

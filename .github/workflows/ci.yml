@@ -48,10 +48,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # face-service e referenciado pelo stack de prod (deploy/compramais-stack.yml);
-        # publicar aqui garante que a imagem exista no GHCR. E build pesado (modelos de
-        # ML na build), mas o cache gha (mode=max) reaproveita as camadas entre execucoes.
-        service: [backend, frontend, face-service]
+        # face-service e portal sao referenciados pelo stack de prod (deploy/compramais-stack.yml);
+        # publicar aqui garante que as imagens existam no GHCR. O face-service e build pesado (modelos
+        # de ML na build), mas o cache gha (mode=max) reaproveita as camadas entre execucoes; o portal
+        # e um site estatico (nginx), build trivial.
+        service: [backend, frontend, face-service, portal]
     steps:
       - name: Checkout
         uses: actions/checkout@v4

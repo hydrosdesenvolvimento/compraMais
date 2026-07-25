@@ -252,6 +252,26 @@
     "distribuicao": {
       "eyebrow": "Operación · Distribución",
       "titulo": "Distribución Inteligente",
+      "subtitulo": "Seleccione una convocatoria publicada para ver y homologar el reparto.",
+      "filtros": {
+        "texto": "Buscar por número u objeto",
+        "secretaria": "Secretaría",
+        "todas": "Todas las secretarías"
+      },
+      "mostrando": "{{n}} de {{total}} convocatorias",
+      "lista": {
+        "edital": "Convocatoria",
+        "objeto": "Objeto",
+        "secretaria": "Secretaría",
+        "itens": "Ítems",
+        "acoes": "Acciones"
+      },
+      "itensContagem_one": "{{count}} ítem",
+      "itensContagem_other": "{{count}} ítems",
+      "verDistribuicao": "Ver distribución",
+      "semResultados": "Ninguna convocatoria para los filtros actuales.",
+      "modalTitulo": "Distribución de la convocatoria",
+      "fechar": "Cerrar",
       "seletorLabel": "Convocatoria",
       "carregando": "Cargando distribución…",
       "erroCarregar": "No se pudo cargar la distribución.",
@@ -1189,6 +1209,7 @@
     "kpiMei": "MEIs participantes",
     "painelInvestimento": "Inversión por secretaría",
     "painelParticipacao": "Participación por tamaño",
+    "cnae": "CNAE {{codigo}}",
     "painelSegmentos": "Sectores (CNAE) atendidos",
     "semInvestimento": "Aún no hay montos distribuidos.",
     "fornecedoresContagem_one": "{{count}} proveedor",

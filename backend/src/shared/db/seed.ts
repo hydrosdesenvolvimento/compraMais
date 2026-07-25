@@ -9,7 +9,8 @@ import type { Papel } from '../identity/identity-provider.js';
 import { GerirDocumentos } from '../../credenciamento/application/gerir-documentos.js';
 import { DocumentoRepositoryPg, ObjectStoragePg } from '../../credenciamento/adapters/documentos-pg.js';
 import { CatalogoTiposDocumentoRepo } from '../../credenciamento/adapters/catalogo-tipos-documento.js';
-import { TipoDocumentoRepositoryPg } from '../../catalogos/adapters/catalogo-repository-pg.js';
+import { TipoDocumentoRepositoryPg, SetorCnaeRepositoryPg } from '../../catalogos/adapters/catalogo-repository-pg.js';
+import { SetorCnae } from '../../catalogos/domain/setor-cnae.js';
 import { seedTiposDocumento } from './seed-tipos-documento.js';
 import { PiiCipherAesGcm } from '../crypto/pii-cipher-aes.js';
 import { Documento, type FormatoDoc } from '../../credenciamento/domain/documento.js';
@@ -204,6 +205,26 @@ export async function semearUsuariosInternos(repo: UsuarioRepository): Promise<{
   return { criados, reativados, falhas };
 }
 
+/**
+ * Setores (CNAE) de demonstração — descrições REAIS dos CNAEs usados pelos editais/fornecedores demo,
+ * para o Portal da Transparência exibir a descrição de cada segmento (não só o código). Idempotente
+ * por código; não sobrescreve entradas existentes do catálogo.
+ */
+async function seedSetoresCnae(pool: Pool): Promise<void> {
+  const repo = new SetorCnaeRepositoryPg(pool);
+  const SETORES = [
+    { codigo: '1412601', descricao: 'Confecção de peças do vestuário, exceto roupas íntimas' },
+    { codigo: '1311100', descricao: 'Preparação e fiação de fibras de algodão' },
+    { codigo: '3101200', descricao: 'Fabricação de móveis com predominância de madeira' },
+  ];
+  const existentes = new Set((await repo.listar({ incluirInativos: true })).map((s) => s.codigo));
+  for (const s of SETORES) {
+    if (existentes.has(s.codigo)) { console.log(`[seed] setor CNAE já existe: ${s.codigo}`); continue; }
+    await repo.salvar(SetorCnae.criar({ id: randomUUID(), codigo: s.codigo, descricao: s.descricao }));
+    console.log(`[seed] setor CNAE criado: ${s.codigo}`);
+  }
+}
+
 async function seed(): Promise<void> {
   if (!temPostgresConfigurado()) {
     console.error('[seed] Postgres not configured (set POSTGRES_HOST or DATABASE_URL). Aborting.');
@@ -220,6 +241,7 @@ async function seed(): Promise<void> {
     if (falhas) process.exitCode = 1; // visível em CI sem abortar os demais
 
     await seedTiposDocumento(pool);
+    await seedSetoresCnae(pool);
     await seedFornecedorDemo(pool); // antes dos documentos — o Fornecedor demo precisa existir (Home do fornecedor)
     await seedDocumentos(pool, config.crypto.piiKey);
     await seedFilaAnalise(pool, config.crypto.piiKey);

@@ -252,6 +252,26 @@
     "distribuicao": {
       "eyebrow": "Operação · Distribuição",
       "titulo": "Distribuição Inteligente",
+      "subtitulo": "Selecione um edital publicado para ver e homologar o rateio.",
+      "filtros": {
+        "texto": "Buscar por número ou objeto",
+        "secretaria": "Secretaria",
+        "todas": "Todas as secretarias"
+      },
+      "mostrando": "{{n}} de {{total}} editais",
+      "lista": {
+        "edital": "Edital",
+        "objeto": "Objeto",
+        "secretaria": "Secretaria",
+        "itens": "Itens",
+        "acoes": "Ações"
+      },
+      "itensContagem_one": "{{count}} item",
+      "itensContagem_other": "{{count}} itens",
+      "verDistribuicao": "Ver distribuição",
+      "semResultados": "Nenhum edital para os filtros atuais.",
+      "modalTitulo": "Distribuição do edital",
+      "fechar": "Fechar",
       "seletorLabel": "Edital",
       "carregando": "Carregando distribuição…",
       "erroCarregar": "Não foi possível carregar a distribuição.",
@@ -1189,6 +1209,7 @@
     "kpiMei": "MEIs participantes",
     "painelInvestimento": "Investimento por secretaria",
     "painelParticipacao": "Participação por porte",
+    "cnae": "CNAE {{codigo}}",
     "painelSegmentos": "Setores (CNAE) atendidos",
     "semInvestimento": "Ainda não há valores distribuídos.",
     "fornecedoresContagem_one": "{{count}} fornecedor",

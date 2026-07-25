@@ -4,6 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { IconeDemandas, IconeEditais, IconePredio, IconeUsuario, IconeCredenciamentos } from '../../design-system/icons';
 
+/** Máscara Receita da subclasse CNAE de 7 dígitos (ex.: 1412601 → 1412-6/01); mantém o valor se não bater. */
+function formatarCnae(codigo: string): string {
+  const d = (codigo ?? '').replace(/\D/g, '');
+  return d.length === 7 ? `${d.slice(0, 4)}-${d.slice(4, 5)}/${d.slice(5, 7)}` : codigo;
+}
+
 /**
  * Portal público de Transparência (Épico 9 / US2 · RN007). BI aberto ao cidadão (sem login, §VI):
  * investimento na economia local (valor distribuído às empresas), fornecedores ativos, editais em
@@ -104,7 +110,10 @@ export function Transparencia() {
           <div style={panelBody}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
               {data.segmentos.map((s) => (
-                <span key={s} data-cy="segmento" style={{ font: '600 12.5px var(--font-body)', color: 'var(--azul-800)', background: 'var(--azul-100)', padding: '7px 14px', borderRadius: 999 }}>{s}</span>
+                <span key={s.codigo} data-cy="segmento" style={{ display: 'inline-flex', flexDirection: 'column', gap: 2, background: 'var(--azul-50)', border: '1px solid var(--azul-100)', borderRadius: 12, padding: '8px 14px', maxWidth: 340 }}>
+                  <span style={{ font: '600 13px var(--font-body)', color: 'var(--azul-900)' }}>{s.descricao ?? formatarCnae(s.codigo)}</span>
+                  {s.descricao && <span data-cy="segmento-codigo" style={{ fontSize: 11.5, color: 'var(--cinza-500)', fontVariantNumeric: 'tabular-nums' }}>{t('transparencia.cnae', { codigo: formatarCnae(s.codigo) })}</span>}
+                </span>
               ))}
             </div>
           </div>

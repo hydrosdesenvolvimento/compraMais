@@ -79,7 +79,7 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 
 // --- Tipos de leitura ---
 export interface EditalItem { id: string; numero: string; objeto: string; secretariaId: string; prazoVigencia: string | null }
-export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null; qtdItens?: number }
+export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null; exigeProvaDeVida?: boolean; qtdItens?: number }
 /** Página da busca de gestão de editais (`GET /gestao/editais`): itens + total do filtro para o pager. */
 export interface PaginaEditais { items: EditalGestao[]; total: number; page: number; size: number }
 /** Filtros da tela de gestão de editais; todos opcionais (QBE). `texto` casa parcial em número/objeto. */
@@ -174,6 +174,7 @@ export interface CredenciamentoDetalheView {
   id: string; editalId: string; estado: 'iniciado' | 'aceito' | 'cancelado';
   numeroEdital: string | null; objeto: string | null; secretariaSigla: string | null;
   capacidadeTeto: number; itens: CapacidadeItemView[]; passoAtual: number; totalPassos: number;
+  provaVidaStatus: 'aprovada' | 'reprovada' | 'manual' | null; // veredito da prova de vida (UC007)
   termo: TermoAceiteView | null; criadoEm: string; atualizadoEm: string;
 }
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
@@ -201,7 +202,7 @@ export interface Transparencia {
  */
 /** Notificação persistida do fornecedor (event-sourced). Dado estruturado; o texto é localizado no front. */
 export type TipoNotificacao = 'credenciado' | 'em_correcao' | 'distribuicao' | 'edital_compativel';
-export interface NotificacaoView { id: string; tipo: TipoNotificacao; payload: Record<string, unknown>; referencia: string | null; criadoEm: string; lida: boolean }
+export interface NotificacaoView { id: string; tipo: TipoNotificacao; payload: Record<string, unknown>; referencia: string | null; criadoEm: string; lida: boolean; oculta: boolean }
 export interface PaginaNotificacoesView { itens: NotificacaoView[]; total: number; naoLidas: number }
 
 /** Cota/teto do fornecedor em UM item do edital (Fase 3). */
@@ -353,9 +354,11 @@ export const api = {
   // UC008 — Demandas distribuídas: o rateio que o Motor atribuiu ao fornecedor (empresa vem do token).
   demandasDistribuidas: () => get<DemandaDistribuidaView[]>('/distribuicao/minhas'),
   // Notificações persistidas do fornecedor (histórico + lidas/não-lidas).
-  notificacoes: (page = 1, size = 20) => get<PaginaNotificacoesView>(`/notificacoes?page=${page}&size=${size}`),
+  notificacoes: (page = 1, size = 20, incluirOcultas = false) => get<PaginaNotificacoesView>(`/notificacoes?page=${page}&size=${size}${incluirOcultas ? '&incluirOcultas=true' : ''}`),
   marcarNotificacaoLida: (id: string) => send<void>(`/notificacoes/${id}/ler`, 'POST'),
   marcarNotificacoesLidas: () => send<{ atualizadas: number }>('/notificacoes/ler-todas', 'POST'),
+  ocultarNotificacao: (id: string) => send<void>(`/notificacoes/${id}/ocultar`, 'POST'),
+  reexibirNotificacao: (id: string) => send<void>(`/notificacoes/${id}/reexibir`, 'POST'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   // FR-007 — envio de documento comprobatório. `conteudo` são os bytes do arquivo em base64 (o
   // backend cifra em repouso — AD-19). `formato` ∈ pdf|jpg|png; `dataValidade` opcional (ISO).
@@ -398,7 +401,7 @@ export const api = {
   // Credenciamento por item (RN005): declara um teto por item selecionado do edital.
   iniciarCredenciamento: (editalId: string, itens: CapacidadeItemView[]) => send<{ credenciamentoId: string; estado: string }>(`/editais/${editalId}/credenciamentos`, 'POST', { itens }),
   // Itens do edital para o passo de capacidade (fornecedor; sem preço-teto interno).
-  editalItensParaCredenciamento: (editalId: string) => get<ItemCredenciamentoView[]>(`/editais/${editalId}/itens/para-credenciamento`),
+  editalItensParaCredenciamento: (editalId: string) => get<{ exigeProvaDeVida: boolean; itens: ItemCredenciamentoView[] }>(`/editais/${editalId}/itens/para-credenciamento`),
   aceitarTermo: (credId: string, body: { versaoTermo: string; finalidade: string }) => send<{ estado: string; status: string }>(`/credenciamentos/${credId}/termo`, 'POST', body),
   cancelarCredenciamento: (credId: string) => send<{ estado: string }>(`/credenciamentos/${credId}/cancelar`, 'POST'),
   // O wizard reporta o passo em que o fornecedor está (UC004) para "Meus Credenciamentos" mostrar
@@ -413,6 +416,14 @@ export const api = {
   // não há. O wizard consulta na entrada para reidratar o passo salvo em vez de recriar (evita o 409
   // CredenciamentoDuplicado ao reentrar num edital já iniciado).
   credenciamentoNoEdital: (editalId: string) => get<CredenciamentoDetalheView | undefined>(`/editais/${editalId}/credenciamentos/meu`),
+  // UC007 — prova de vida: envia a captura ao vivo (data URL/base64) e recebe o veredito. 409 quando a
+  // referência ainda não foi aprovada pela CPL; 422 (codigo=motivo) quando a captura não tem rosto etc.
+  provaDeVida: (credId: string, imagem: string) =>
+    send<{ status: 'aprovada' | 'reprovada' | 'manual'; score: number }>(`/credenciamentos/${credId}/prova-de-vida`, 'POST', { imagem }),
+  // UC007 — cadastro da foto de referência do responsável (onboarding/Minha Conta). A foto vira um
+  // documento "Foto do Responsável" que a CPL analisa; devolve o id do documento gerado.
+  enrolarFotoResponsavel: (fid: string, imagem: string) =>
+    send<{ documentoId: string; status: string }>(`/fornecedores/${fid}/biometria`, 'POST', { imagem }),
 
   // Painel admin
   dashboardAdmin: () => get<Funil>('/admin/dashboard'),
@@ -468,7 +479,7 @@ export const api = {
   criarEdital: (body: unknown) => send<{ editalId: string; numero: string; situacao: string }>('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   despublicarEdital: (id: string) => send<{ situacao: string }>(`/editais/${id}/despublicar`, 'POST'),
-  editarEdital: (id: string, body: { objeto?: string; cnaesAlvo?: string[]; prazoVigencia?: string | null }) => send<{ ok: boolean }>(`/editais/${id}`, 'PATCH', body),
+  editarEdital: (id: string, body: { objeto?: string; cnaesAlvo?: string[]; prazoVigencia?: string | null; exigeProvaDeVida?: boolean }) => send<{ ok: boolean }>(`/editais/${id}`, 'PATCH', body),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),
   // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). Só editáveis em rascunho.
   editalItens: (id: string) => get<ItemEditalView[]>(`/editais/${id}/itens`),

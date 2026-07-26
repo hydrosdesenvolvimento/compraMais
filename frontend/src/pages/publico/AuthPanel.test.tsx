@@ -7,6 +7,8 @@ configure({ testIdAttribute: 'data-cy' });
 
 vi.mock('@tanstack/react-router', () => ({ useNavigate: () => vi.fn() }));
 vi.mock('../../lib/auth', () => ({ salvarSessao: vi.fn() }));
+// A foto de reconhecimento (UC007) é enviada após o auto-login; mockamos o envio (não-fatal).
+vi.mock('../../lib/api', () => ({ api: { enrolarFotoResponsavel: vi.fn().mockResolvedValue({ documentoId: 'd1', status: 'pendente' }) } }));
 
 const consultarCnpj = vi.fn();
 const cadastrarFornecedor = vi.fn();
@@ -36,6 +38,15 @@ function renderTela() {
   return render(<QueryClientProvider client={qc}><AuthPanel /></QueryClientProvider>);
 }
 
+/** Consente o tratamento biométrico (LGPD) e captura a foto obrigatória pelo fallback de upload. */
+async function capturarFotoResponsavel() {
+  fireEvent.click(screen.getByTestId('foto-cadastro-consentimento-check'));
+  const input = await screen.findByTestId('foto-cadastro-arquivo');
+  await waitFor(() => expect(input).not.toBeDisabled());
+  fireEvent.change(input, { target: { files: [new File(['rosto'], 'rosto.jpg', { type: 'image/jpeg' })] } });
+  await waitFor(() => expect(screen.getByTestId('foto-cadastro-ok')).toBeInTheDocument());
+}
+
 describe('AuthPanel — autocadastro com declaração de MEI', () => {
   beforeEach(() => {
     consultarCnpj.mockReset().mockResolvedValue(DADOS_CNPJ);
@@ -59,6 +70,7 @@ describe('AuthPanel — autocadastro com declaração de MEI', () => {
     fireEvent.change(screen.getByTestId('email-cadastro'), { target: { value: 'maria@costura.com' } });
     fireEvent.change(screen.getByTestId('senha-cadastro'), { target: { value: 'segredo12' } });
     fireEvent.click(screen.getByTestId('consentimento'));
+    await capturarFotoResponsavel();
     fireEvent.click(screen.getByTestId('criar-conta'));
 
     await waitFor(() => expect(cadastrarFornecedor).toHaveBeenCalledWith(expect.objectContaining({ porteDeclarado: 'MEI' })));
@@ -73,6 +85,7 @@ describe('AuthPanel — autocadastro com declaração de MEI', () => {
     fireEvent.change(screen.getByTestId('email-cadastro'), { target: { value: 'maria@costura.com' } });
     fireEvent.change(screen.getByTestId('senha-cadastro'), { target: { value: 'segredo12' } });
     fireEvent.click(screen.getByTestId('consentimento'));
+    await capturarFotoResponsavel();
     fireEvent.click(screen.getByTestId('criar-conta'));
 
     await waitFor(() => expect(cadastrarFornecedor).toHaveBeenCalled());

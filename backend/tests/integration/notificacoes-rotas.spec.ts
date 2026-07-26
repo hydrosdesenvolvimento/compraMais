@@ -73,4 +73,28 @@ describe('Rotas de notificações (fornecedor — HTTP)', () => {
     expect(r.statusCode).toBe(200);
     expect((await app.inject({ method: 'GET', url: '/notificacoes', headers: forn() })).json().naoLidas).toBe(0);
   });
+
+  it('ocultar remove do histórico padrão; incluirOcultas traz de volta; reexibir restaura', async () => {
+    const lista = (await app.inject({ method: 'GET', url: '/notificacoes', headers: forn() })).json();
+    const total = lista.itens.length as number;
+    const alvo = lista.itens[0].id as string;
+    expect(lista.itens[0].oculta).toBe(false);
+
+    // De outra empresa → 404 (não vaza).
+    const outra = comoPapel('titular', { userId: 'intruso', empresaId: 'empresa-alheia' });
+    expect((await app.inject({ method: 'POST', url: `/notificacoes/${alvo}/ocultar`, headers: outra })).statusCode).toBe(404);
+
+    // Ocultar (dono) → some da listagem padrão, mas aparece com incluirOcultas=true (oculta:true).
+    expect((await app.inject({ method: 'POST', url: `/notificacoes/${alvo}/ocultar`, headers: forn() })).statusCode).toBe(204);
+    const padrao = (await app.inject({ method: 'GET', url: '/notificacoes', headers: forn() })).json();
+    expect(padrao.itens.map((n: { id: string }) => n.id)).not.toContain(alvo);
+    expect(padrao.itens).toHaveLength(total - 1);
+    const comOcultas = (await app.inject({ method: 'GET', url: '/notificacoes?incluirOcultas=true', headers: forn() })).json();
+    expect(comOcultas.itens.find((n: { id: string }) => n.id === alvo)).toMatchObject({ oculta: true });
+
+    // Reexibir → volta à listagem padrão.
+    expect((await app.inject({ method: 'POST', url: `/notificacoes/${alvo}/reexibir`, headers: forn() })).statusCode).toBe(204);
+    const restaurada = (await app.inject({ method: 'GET', url: '/notificacoes', headers: forn() })).json();
+    expect(restaurada.itens.map((n: { id: string }) => n.id)).toContain(alvo);
+  });
 });

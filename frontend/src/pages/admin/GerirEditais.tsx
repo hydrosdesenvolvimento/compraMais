@@ -84,8 +84,8 @@ export function GerirEditais() {
   }, [secretariasLista]);
 
   const criar = useMutation({
-    mutationFn: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string }) =>
-      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo }),
+    mutationFn: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string; provaDeVida: boolean }) =>
+      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo, exigeProvaDeVida: v.provaDeVida }),
     // Recém-criado nasce em rascunho: abre direto o gerenciador de itens para o gestor cadastrá-los.
     onSuccess: (res) => { setCriando(false); void invalidar(); setItensId(res.editalId); },
   });
@@ -99,8 +99,8 @@ export function GerirEditais() {
     onError: (e) => erro(textoDoErro(e)),
   });
   const editar = useMutation({
-    mutationFn: (v: { id: string; objeto: string; cnae: string; prazo: string }) =>
-      api.editarEdital(v.id, { objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo || null }),
+    mutationFn: (v: { id: string; objeto: string; cnae: string; prazo: string; provaDeVida: boolean }) =>
+      api.editarEdital(v.id, { objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo || null, exigeProvaDeVida: v.provaDeVida }),
     onSuccess: () => { setEditandoId(null); ok(t('admin.gerirEditais.editadoOk')); void invalidar(); },
     onError: (e) => erro(textoDoErro(e)),
   });
@@ -362,12 +362,12 @@ function ModalDetalhe({ edital, sigla, prazo, rotuloSituacao, onFechar }: {
 function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
   secretarias: CatalogoItemView[];
   salvando: boolean;
-  onSalvar: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string }) => void;
+  onSalvar: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string; provaDeVida: boolean }) => void;
   onFechar: () => void;
 }) {
   const { t } = useTranslation();
   const form = useForm({
-    defaultValues: { objeto: '', secretariaId: '', cnae: '', prazo: '' },
+    defaultValues: { objeto: '', secretariaId: '', cnae: '', prazo: '', provaDeVida: false },
     onSubmit: ({ value }) => onSalvar(value),
   });
   return (
@@ -425,6 +425,16 @@ function ModalNovoEdital({ secretarias, salvando, onSalvar, onFechar }: {
             </Campo>
           )}</form.Field>
 
+          <form.Field name="provaDeVida">{(f) => (
+            <label data-cy="prova-de-vida" style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '6px 0 16px', cursor: 'pointer', fontSize: 13.5, color: 'var(--cinza-700)' }}>
+              <input type="checkbox" data-cy="prova-de-vida-check" checked={f.state.value} onChange={(ev) => f.handleChange(ev.target.checked)} style={{ marginTop: 2 }} />
+              <span>
+                <span style={{ fontWeight: 600, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.provaDeVidaLabel')}</span>
+                <span style={{ display: 'block', color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.provaDeVidaAjuda')}</span>
+              </span>
+            </label>
+          )}</form.Field>
+
           <div data-cy="nota-soft-delete" style={{ display: 'flex', gap: 10, padding: '12px 14px', margin: '4px 0 18px', borderRadius: 10, background: 'var(--azul-50)', color: 'var(--azul-700)', fontSize: 13, lineHeight: 1.5 }}>
             <span aria-hidden>ℹ</span>
             <span>{t('admin.gerirEditais.softDeleteNota')}</span>
@@ -448,7 +458,7 @@ function ModalEditarEdital({ edital, sigla, salvando, onSalvar, onFechar }: {
   edital: EditalGestao;
   sigla: string;
   salvando: boolean;
-  onSalvar: (v: { objeto: string; cnae: string; prazo: string }) => void;
+  onSalvar: (v: { objeto: string; cnae: string; prazo: string; provaDeVida: boolean }) => void;
   onFechar: () => void;
 }) {
   const { t } = useTranslation();
@@ -457,6 +467,7 @@ function ModalEditarEdital({ edital, sigla, salvando, onSalvar, onFechar }: {
       objeto: edital.objeto,
       cnae: [...edital.cnaesAlvo].map(formatarCnae).join(', '),
       prazo: edital.prazoVigencia ? edital.prazoVigencia.slice(0, 10) : '',
+      provaDeVida: edital.exigeProvaDeVida ?? false,
     },
     onSubmit: ({ value }) => onSalvar(value),
   });
@@ -499,6 +510,16 @@ function ModalEditarEdital({ edital, sigla, salvando, onSalvar, onFechar }: {
             <Campo label={t('admin.gerirEditais.prazoLabel')} htmlFor="edital-edit-prazo">
               <input id="edital-edit-prazo" data-cy="prazo" className="input" type="date" value={f.state.value} onChange={(ev) => f.handleChange(ev.target.value)} />
             </Campo>
+          )}</form.Field>
+
+          <form.Field name="provaDeVida">{(f) => (
+            <label data-cy="prova-de-vida" style={{ display: 'flex', gap: 10, alignItems: 'flex-start', margin: '6px 0 16px', cursor: 'pointer', fontSize: 13.5, color: 'var(--cinza-700)' }}>
+              <input type="checkbox" data-cy="prova-de-vida-check" checked={f.state.value} onChange={(ev) => f.handleChange(ev.target.checked)} style={{ marginTop: 2 }} />
+              <span>
+                <span style={{ fontWeight: 600, color: 'var(--azul-900)' }}>{t('admin.gerirEditais.provaDeVidaLabel')}</span>
+                <span style={{ display: 'block', color: 'var(--cinza-500)' }}>{t('admin.gerirEditais.provaDeVidaAjuda')}</span>
+              </span>
+            </label>
           )}</form.Field>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>

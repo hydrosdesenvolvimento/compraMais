@@ -19,7 +19,7 @@ vi.mock('@tanstack/react-router', () => ({
 const DET = (over: Partial<CredenciamentoDetalheView> = {}): CredenciamentoDetalheView => ({
   id: 'c1', editalId: 'e1', estado: 'aceito',
   numeroEdital: 'ED-2026/003', objeto: 'Uniformes de educação infantil', secretariaSigla: 'SEME',
-  capacidadeTeto: 500, itens: [], passoAtual: 4, totalPassos: 4,
+  capacidadeTeto: 500, itens: [], passoAtual: 5, totalPassos: 5, provaVidaStatus: 'aprovada',
   termo: { versao: 'v1', finalidade: 'credenciamento', aceitoEm: '2026-06-14T16:40:00.000Z' },
   criadoEm: '2026-06-10T09:12:00.000Z', atualizadoEm: '2026-06-14T16:40:00.000Z',
   ...over,
@@ -50,7 +50,7 @@ describe('CredenciamentoDetalhe (UC004) — "Visualizar" read-only', () => {
     expect(painel).toHaveTextContent('ED-2026/003');
     expect(painel).toHaveTextContent('Uniformes de educação infantil');
     expect(painel).toHaveTextContent('500 unidades');
-    expect(painel).toHaveTextContent('Etapa 4/4');
+    expect(painel).toHaveTextContent('Etapa 5/5');
   });
 
   it('exibe o Termo de Aceite quando assinado (RN016)', async () => {

@@ -6,6 +6,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { cadastrarFornecedor, consultarCnpj, consultarCep, login, solicitarResetSenha, mascaraCnpj, mascaraCep, soDigitos, type CadastroErro, type DadosCnpj, type EnderecoCep, type EnderecoEstruturado } from '../../lib/br';
 import { salvarSessao } from '../../lib/auth';
 import { destinoAposLogin } from '../../lib/guardas';
+import { CapturaFacial } from '../../design-system/components';
+import { api } from '../../lib/api';
 
 /**
  * AuthPanel — cartão de acesso do AuthLayout (mockup Compra Mais). Abas Entrar / Criar conta.
@@ -73,6 +75,10 @@ export function AuthPanel() {
   const [verSenha, setVerSenha] = useState(false);
   const [verSenhaCad, setVerSenhaCad] = useState(false);
   const [consentido, setConsentido] = useState(false);
+  // Foto de reconhecimento do responsável (obrigatória, UC007): referência da prova de vida. É enviada
+  // logo após o auto-login (já autenticado) e segue para a análise da CPL como documento.
+  const [fotoRef, setFotoRef] = useState<string | null>(null);
+  const [consentBio, setConsentBio] = useState(false); // consentimento específico do dado biométrico (LGPD art. 11)
   const [manter, setManter] = useState(true);
   const [mei, setMei] = useState(false); // autodeclaração MEI (a Receita subclassifica MEI como ME)
 
@@ -101,7 +107,7 @@ export function AuthPanel() {
   const cadastroMut = useMutation({
     mutationFn: async (v: { cnpj: string; cep: string; numero: string; complemento: string; nomeFantasia: string; telefone: string; email: string; senha: string }) => {
       const endereco = montarEndereco(dados, cepMut.data ?? null, v);
-      await cadastrarFornecedor({
+      const cad = await cadastrarFornecedor({
         cnpjRaw: v.cnpj,
         contato: { nomeFantasia: v.nomeFantasia || undefined, telefone: v.telefone || undefined, endereco },
         consentimento: { finalidade: 'credenciamento', versaoTermo: 'v1' },
@@ -110,9 +116,17 @@ export function AuthPanel() {
         nome: dados?.razaoSocial,
         porteDeclarado: mei ? 'MEI' : undefined,
       });
-      return login(v.email, v.senha);
+      const r = await login(v.email, v.senha);
+      // Sessão salva ANTES de enviar a foto (a rota de biometria exige o Bearer). Falha no envio da
+      // foto é NÃO-FATAL: a conta já existe e o responsável pode reenviar em Minha Conta.
+      salvarSessao({ token: r.token, usuario: r.usuario });
+      if (fotoRef) {
+        const fid = (cad as { fornecedorId?: string })?.fornecedorId;
+        if (fid) { try { await api.enrolarFotoResponsavel(fid, fotoRef); } catch { /* reenviar em Minha Conta */ } }
+      }
+      return r;
     },
-    onSuccess: (r) => { salvarSessao({ token: r.token, usuario: r.usuario }); void navigate({ to: '/inicio' }); },
+    onSuccess: () => { void navigate({ to: '/inicio' }); },
   });
 
   const loginMut = useMutation({
@@ -135,7 +149,7 @@ export function AuthPanel() {
       </div>
 
       {aba === 'criar' ? (
-        <form onSubmit={(e) => { e.preventDefault(); if (dados && consentido) cadastroMut.mutate(cadastro.state.values); }}>
+        <form onSubmit={(e) => { e.preventDefault(); if (dados && consentido && fotoRef) cadastroMut.mutate(cadastro.state.values); }}>
           <h2 style={{ fontSize: 21, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{t('auth.signup.title')}</h2>
           <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--cinza-500)', lineHeight: 1.5 }}>{t('auth.signup.subtitle')}</p>
 
@@ -227,6 +241,26 @@ export function AuthPanel() {
                 </div>
               )}</cadastro.Field>
 
+              {/* Foto de reconhecimento do responsável (obrigatória — referência da prova de vida, UC007) */}
+              <div style={{ marginTop: 4 }}>
+                <div style={{ font: '600 13px var(--font-body)', color: 'var(--cinza-700)', marginBottom: 8 }}>{t('auth.signup.foto.label')}</div>
+                {fotoRef ? (
+                  <div data-cy="foto-cadastro-ok" style={{ font: '600 13px var(--font-body)', color: 'var(--sucesso, #067647)' }}>
+                    {t('auth.signup.foto.capturada')}{' '}
+                    <button type="button" data-cy="foto-cadastro-refazer" onClick={() => setFotoRef(null)} style={{ background: 'none', border: 'none', color: 'var(--azul-700)', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}>{t('credenciamento.provaVida.recapturar')}</button>
+                  </div>
+                ) : (
+                  <>
+                    <label data-cy="foto-cadastro-consentimento" style={{ display: 'flex', gap: 8, alignItems: 'flex-start', font: '400 12.5px var(--font-body)', color: 'var(--cinza-700)', cursor: 'pointer', marginBottom: 10 }}>
+                      <input type="checkbox" data-cy="foto-cadastro-consentimento-check" checked={consentBio} onChange={(e) => setConsentBio(e.target.checked)} style={{ marginTop: 2 }} />
+                      <span>{t('credenciamento.provaVida.consentimento')}</span>
+                    </label>
+                    <CapturaFacial onCapturar={setFotoRef} ocupado={!consentBio} cyPrefix="foto-cadastro" />
+                  </>
+                )}
+                <p style={{ margin: '6px 0 14px', fontSize: 12, color: 'var(--cinza-400)' }}>{t('auth.signup.foto.descricao')}</p>
+              </div>
+
               {/* Consentimento LGPD */}
               <button type="button" role="checkbox" aria-checked={consentido} data-cy="consentimento" onClick={() => setConsentido((v) => !v)} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'none', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left', font: '400 13px var(--font-body)', color: 'var(--cinza-700)' }}>
                 <span aria-hidden style={{ flexShrink: 0, width: 18, height: 18, marginTop: 1, borderRadius: 5, border: `2px solid ${consentido ? 'var(--azul-700)' : 'var(--border)'}`, background: consentido ? 'var(--azul-700)' : '#fff', color: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700 }}>{consentido ? '✓' : ''}</span>
@@ -242,7 +276,7 @@ export function AuthPanel() {
           )}
 
           {cadastroMut.isError && <p data-cy="cadastro-erro" style={{ color: 'var(--erro)', margin: '16px 0 0', fontSize: 13 }}>{t(chaveErroCadastro(cadastroMut.error))}</p>}
-          <button data-cy="criar-conta" type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24, padding: 13, fontSize: 15 }} disabled={!dados || !consentido || cadastroMut.isPending}>{cadastroMut.isPending ? t('auth.signup.submitting') : t('auth.signup.submit')}</button>
+          <button data-cy="criar-conta" type="submit" className="btn btn-primary btn-block" style={{ marginTop: 24, padding: 13, fontSize: 15 }} disabled={!dados || !consentido || !fotoRef || cadastroMut.isPending}>{cadastroMut.isPending ? t('auth.signup.submitting') : t('auth.signup.submit')}</button>
           {dados && <p style={{ margin: '12px 0 0', textAlign: 'center', fontSize: 12.5, color: 'var(--cinza-400)' }}><Trans i18nKey="auth.signup.statusNote" components={{ b: <strong style={{ color: 'var(--azul-700)' }} /> }} /></p>}
         </form>
       ) : esqueci ? (

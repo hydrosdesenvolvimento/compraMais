@@ -5,13 +5,23 @@ import { Credenciamento } from './Credenciamento';
 // Alinha o testId do Testing Library ao data-cy do contrato de testes (Cypress).
 configure({ testIdAttribute: 'data-cy' });
 
+// A prova de vida usa SÓ a câmera (sem fallback de upload). jsdom não implementa mídia/canvas, então
+// simulamos getUserMedia + o desenho do frame → data URL.
+Object.defineProperty(globalThis.navigator, 'mediaDevices', {
+  configurable: true,
+  value: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [] }) },
+});
+HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+HTMLCanvasElement.prototype.getContext = vi.fn(() => ({ drawImage: vi.fn() })) as unknown as HTMLCanvasElement['getContext'];
+HTMLCanvasElement.prototype.toDataURL = vi.fn(() => 'data:image/jpeg;base64,AAAA');
+
 // O wizard lê o edital da rota e navega de volta à vitrine — mockamos os hooks de rota.
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
   useParams: () => ({ editalId: 'e1' }),
 }));
 
-// Controla as chamadas de credenciamento (UC004).
+// Controla as chamadas de credenciamento (UC004 + prova de vida UC007).
 const iniciarCredenciamento = vi.fn();
 const aceitarTermo = vi.fn();
 const cancelarCredenciamento = vi.fn();
@@ -21,7 +31,10 @@ const editalItensParaCredenciamento = vi.fn();
 const catalogoListar = vi.fn();
 const documentos = vi.fn();
 const enviarDocumento = vi.fn();
+const provaDeVida = vi.fn();
 vi.mock('../../lib/api', () => ({
+  // HttpError é usado no wizard para mapear o código do erro da prova de vida.
+  HttpError: class HttpError extends Error { codigo?: string },
   api: {
     iniciarCredenciamento: (...a: unknown[]) => iniciarCredenciamento(...a),
     aceitarTermo: (...a: unknown[]) => aceitarTermo(...a),
@@ -32,6 +45,7 @@ vi.mock('../../lib/api', () => ({
     catalogoListar: (...a: unknown[]) => catalogoListar(...a),
     documentos: (...a: unknown[]) => documentos(...a),
     enviarDocumento: (...a: unknown[]) => enviarDocumento(...a),
+    provaDeVida: (...a: unknown[]) => provaDeVida(...a),
   },
 }));
 
@@ -42,79 +56,113 @@ async function declararCapacidade(teto = '500') {
   fireEvent.change(screen.getByTestId('capacidade-item-teto'), { target: { value: teto } });
 }
 
+/** Passo 3 (prova de vida): ativa a câmera (mock) e captura ao vivo → verifica. */
+async function capturarProvaDeVida() {
+  fireEvent.click(await screen.findByTestId('prova-ativar-camera'));
+  fireEvent.click(await screen.findByTestId('prova-capturar'));
+  await waitFor(() => expect(provaDeVida).toHaveBeenCalled());
+}
+async function aprovarProvaDeVida() {
+  await capturarProvaDeVida();
+  await screen.findByTestId('prova-ok');
+}
+
 // O feedback de falha vai para o toast + inline. Espionamos o barramento; a tradução de `codigo`→texto
 // já é coberta por `lib/erros.test.ts`, então aqui `textoDoErro` só devolve a mensagem do erro.
 const emitir = vi.fn();
 vi.mock('../../design-system/components/toast-bus', () => ({ toastBus: { emitir: (t: unknown) => emitir(t) } }));
 vi.mock('../../lib/erros', () => ({ textoDoErro: (e: unknown) => (e as Error).message }));
 
-describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
+describe('Credenciamento — wizard por Termo de Aceite (UC004 + prova de vida UC007)', () => {
   beforeEach(() => {
     iniciarCredenciamento.mockReset().mockResolvedValue({ credenciamentoId: 'c1', estado: 'iniciado' });
     aceitarTermo.mockReset().mockResolvedValue({ estado: 'aceito', status: 'pendente_analise' });
     cancelarCredenciamento.mockReset();
     registrarPassoCredenciamento.mockReset().mockResolvedValue({ passoAtual: 2 });
-    // Sem credenciamento ativo (204 → undefined): o wizard começa do zero, não retoma.
     credenciamentoNoEdital.mockReset().mockResolvedValue(undefined);
-    // Itens do edital para o passo de capacidade (por item, RN005).
-    editalItensParaCredenciamento.mockReset().mockResolvedValue([
-      { itemId: 'i1', numero: 1, nome: 'Cabo de rede CAT6', descricao: null, unidade: 'un', quantidade: 100 },
-      { itemId: 'i2', numero: 2, nome: 'Fardamento', descricao: null, unidade: 'un', quantidade: 40 },
-    ]);
-    // Passo 2 data-driven: catálogo de tipos (RF022) × documentos do fornecedor. Dois tipos que o
-    // fornecedor ainda não tem → ambos "Necessário enviar" (renderiza as dropzones `upload-doc`).
+    editalItensParaCredenciamento.mockReset().mockResolvedValue({
+      exigeProvaDeVida: true, // estes testes exercitam o passo de prova de vida → edital que a exige
+      itens: [
+        { itemId: 'i1', numero: 1, nome: 'Cabo de rede CAT6', descricao: null, unidade: 'un', quantidade: 100 },
+        { itemId: 'i2', numero: 2, nome: 'Fardamento', descricao: null, unidade: 'un', quantidade: 40 },
+      ],
+    });
     catalogoListar.mockReset().mockResolvedValue([
       { id: 't1', nome: 'Cartão CNPJ', exigeValidade: false },
       { id: 't2', nome: 'Certidão Negativa de Débitos Estaduais', exigeValidade: true },
     ]);
     documentos.mockReset().mockResolvedValue([]);
     enviarDocumento.mockReset().mockResolvedValue({ documentoId: 'd1', situacao: 'vigente' });
+    provaDeVida.mockReset().mockResolvedValue({ status: 'aprovada', score: 1 });
     emitir.mockReset();
   });
 
-  it('não expõe a etapa de prova de vida (UC007 é R2, fora do MVP)', () => {
+  it('expõe a etapa de prova de vida entre Documentos e Termo (UC007)', async () => {
     render(<Credenciamento />);
-    expect(screen.queryByTestId('prova-de-vida')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('pular')).not.toBeInTheDocument();
+    await declararCapacidade('500');
+    fireEvent.click(screen.getByTestId('avancar'));
+    await screen.findAllByTestId('upload-doc');
+    // Documentos → Prova de Vida (não pula direto para o Termo).
+    fireEvent.click(screen.getByTestId('avancar'));
+    expect(await screen.findByTestId('prova-de-vida')).toBeInTheDocument();
+    expect(screen.queryByTestId('termo-aceite')).not.toBeInTheDocument();
+    // Sem verificação aprovada, o Termo fica bloqueado (o gate real é do backend).
+    expect(screen.getByTestId('avancar')).toBeDisabled();
   });
 
-  it('percorre capacidade → documentos → Termo de Aceite → Pendente de Análise', async () => {
+  it('percorre capacidade → documentos → prova de vida → Termo → Pendente de Análise', async () => {
     render(<Credenciamento />);
 
-    // Passo 1: capacidade (teto, RN005)
     await declararCapacidade('500');
     fireEvent.click(screen.getByTestId('avancar'));
     expect((await screen.findAllByTestId('upload-doc')).length).toBeGreaterThan(0);
     expect(iniciarCredenciamento).toHaveBeenCalledWith('e1', [{ itemId: 'i1', capacidadeTeto: 500 }]);
-    // Entrou no Documentos → reporta o passo (Etapa 2/N) para "Meus Credenciamentos".
-    expect(registrarPassoCredenciamento).toHaveBeenCalledWith('c1', 2);
+    expect(registrarPassoCredenciamento).toHaveBeenCalledWith('c1', 2); // entrou no Documentos
 
-    // Passo 2: documentos → Termo
+    // Documentos → Prova de Vida
+    fireEvent.click(screen.getByTestId('avancar'));
+    await screen.findByTestId('prova-de-vida');
+    expect(registrarPassoCredenciamento).toHaveBeenCalledWith('c1', 3); // entrou na Prova de Vida
+
+    // Prova de vida: captura (fallback) → aprovada → libera o Termo
+    await aprovarProvaDeVida();
+    expect(provaDeVida).toHaveBeenCalledWith('c1', expect.stringContaining('data:'));
     fireEvent.click(screen.getByTestId('avancar'));
     expect(await screen.findByTestId('termo-aceite')).toBeInTheDocument();
-    expect(registrarPassoCredenciamento).toHaveBeenCalledWith('c1', 3); // entrou no Termo (Etapa 3/N)
+    expect(registrarPassoCredenciamento).toHaveBeenCalledWith('c1', 4); // entrou no Termo
 
-    // Passo 3: aceitar o Termo (RN016) → conclui
+    // Termo (RN016) → conclui
     fireEvent.click(screen.getByTestId('aceitar-termo'));
     fireEvent.click(screen.getByTestId('avancar'));
     expect(await screen.findByTestId('status-pendente')).toBeInTheDocument();
     expect(aceitarTermo).toHaveBeenCalledWith('c1', expect.objectContaining({ versaoTermo: 'v1' }));
   });
 
+  it('prova de vida reprovada mantém o Termo bloqueado e mostra a mensagem', async () => {
+    provaDeVida.mockResolvedValueOnce({ status: 'reprovada', score: 0.1 });
+    render(<Credenciamento />);
+    await declararCapacidade('500');
+    fireEvent.click(screen.getByTestId('avancar'));
+    await screen.findAllByTestId('upload-doc');
+    fireEvent.click(screen.getByTestId('avancar'));
+    await screen.findByTestId('prova-de-vida');
+
+    await capturarProvaDeVida();
+    expect(await screen.findByTestId('prova-erro')).toBeInTheDocument();
+    expect(screen.getByTestId('avancar')).toBeDisabled();
+  });
+
   it('Passo 2: envia um documento pendente de verdade (upload cifrado, FR-002)', async () => {
     render(<Credenciamento />);
-
     await declararCapacidade('500');
     fireEvent.click(screen.getByTestId('avancar'));
 
-    // Escolhe o arquivo do primeiro tipo pendente (Cartão CNPJ — sem validade obrigatória) e envia.
     const inputs = await screen.findAllByTestId('upload-doc-input');
     const arquivo = new File(['%PDF-1.4 demo'], 'cartao.pdf', { type: 'application/pdf' });
     fireEvent.change(inputs[0]!, { target: { files: [arquivo] } });
     fireEvent.click((await screen.findAllByTestId('enviar-doc-pendente'))[0]!);
 
     await waitFor(() => expect(enviarDocumento).toHaveBeenCalled());
-    // Empresa do token (fallback demo no ambiente de teste) + tipo/formato reais.
     expect(enviarDocumento).toHaveBeenCalledWith('demo-fornecedor', expect.objectContaining({ tipo: 'Cartão CNPJ', formato: 'pdf' }));
   });
 
@@ -130,7 +178,6 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
     expect(emitir).toHaveBeenCalledWith(
       expect.objectContaining({ tom: 'erro', texto: 'Você já tem um credenciamento ativo neste edital.' }),
     );
-    // Continua no passo 1 (Capacidade) — o erro não deixou avançar para Documentos.
     expect(screen.queryByTestId('upload-doc')).not.toBeInTheDocument();
   });
 
@@ -139,6 +186,9 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004)', () => {
     await declararCapacidade('500');
     fireEvent.click(screen.getByTestId('avancar'));
     await screen.findAllByTestId('upload-doc');
+    fireEvent.click(screen.getByTestId('avancar'));
+    await screen.findByTestId('prova-de-vida');
+    await aprovarProvaDeVida();
     fireEvent.click(screen.getByTestId('avancar'));
     await screen.findByTestId('termo-aceite');
 

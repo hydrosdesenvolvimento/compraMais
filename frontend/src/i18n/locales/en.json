@@ -130,6 +130,11 @@
       "signup": "Create account"
     },
     "signup": {
+      "foto": {
+        "label": "Responsible person's photo (required)",
+        "descricao": "Used as the liveness reference during accreditation. It is reviewed by the CPL.",
+        "capturada": "Photo captured."
+      },
       "title": "Supplier registration",
       "subtitle": "Enter the company's Tax ID (CNPJ). The data is automatically validated with the Federal Revenue Service.",
       "cnpjLabel": "Company Tax ID (CNPJ)",
@@ -721,7 +726,9 @@
       "editar": "Edit",
       "editadoOk": "Edital updated.",
       "editarTitulo": "Edit edital",
-      "editarSub": "Adjust edital {{numero}} (available while it is a draft)."
+      "editarSub": "Adjust edital {{numero}} (available while it is a draft).",
+      "provaDeVidaLabel": "Require liveness check (biometrics)",
+      "provaDeVidaAjuda": "If enabled, the supplier must pass facial verification before signing the Term of Acceptance."
     },
     "contestacoes": {
       "titulo": "CNAE challenges",
@@ -733,6 +740,9 @@
       "recusar": "Reject"
     },
     "auditoria": {
+      "eventos": {
+        "ProvaDeVidaVerificada": "Liveness check verified"
+      },
       "titulo": "Audit — trail",
       "subtitulo": "Query and export of the append-only trail (read-only).",
       "usuarioPlaceholder": "User/actor",
@@ -1201,8 +1211,32 @@
     "passos": {
       "capacidade": "Capacity",
       "documentos": "Documents",
+      "provaVida": "Liveness Check",
       "termo": "Terms of Acceptance",
       "concluido": "Completed"
+    },
+    "provaVida": {
+      "passo": "STEP 3",
+      "titulo": "Liveness check",
+      "descricao": "Confirm it's you: take a live capture of your face to match the registered responsible person's photo.",
+      "instrucao": "Center your face with good lighting and capture.",
+      "consentimento": "I authorize the processing of my facial image for the liveness check, per the Privacy Policy.",
+      "consentimentoObrigatorio": "You must authorize the processing of your facial image.",
+      "iniciarCamera": "Enable camera",
+      "capturar": "Capture and verify",
+      "recapturar": "Retake",
+      "verificando": "Verifying…",
+      "aprovada": "Liveness check approved.",
+      "reprovada": "The face does not match the registered responsible person. Please try again.",
+      "semCamera": "No camera? Upload a photo of your face.",
+      "enviarFoto": "Upload photo",
+      "SemReferenciaBiometrica": "No reference photo on file. Register it in My Account.",
+      "ReferenciaBiometricaNaoAprovada": "Your reference photo is still under review by the CPL. Try again after approval.",
+      "ReconhecimentoFacialIndisponivel": "Verification service unavailable. Please try again shortly.",
+      "rosto_nao_detectado": "No face detected in the image. Frame your face well.",
+      "multiplos_rostos": "More than one face in the image. Appear alone.",
+      "qualidade_baixa": "Low-quality image. Improve lighting and focus.",
+      "erroGenerico": "Could not verify. Please try again."
     },
     "acoes": {
       "continuar": "Continue",
@@ -1453,6 +1487,12 @@
   },
   "minhaConta": {
     "titulo": "My account",
+    "fotoReconhecimento": {
+      "titulo": "Recognition photo",
+      "descricao": "Register or update the responsible person's face photo. It is reviewed by the CPL and used as the liveness reference during accreditation.",
+      "enviada": "Photo submitted for CPL review.",
+      "erro": "Could not upload the photo. Please try again."
+    },
     "subtitulo": "Official company data obtained from the Federal Revenue Service (CNPJ API). Only Trade Name, Address and Phone can be edited.",
     "sync": {
       "titulo": "Sync CNPJ data",
@@ -1740,6 +1780,9 @@
     "vazio": "You have no notifications.",
     "marcarTodas": "Mark all as read",
     "carregando": "Loading…",
-    "naoLida": "Unread"
+    "naoLida": "Unread",
+    "exibirOcultas": "Show hidden notifications",
+    "ocultar": "Hide",
+    "reexibir": "Unhide"
   }
 }

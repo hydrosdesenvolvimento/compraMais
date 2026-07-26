@@ -14,8 +14,8 @@ export function registrarRotasNotificacoes(app: FastifyInstance, deps: { gerir: 
   app.get('/notificacoes', async (req, reply) => {
     const id = exigirPapel(req, reply, PERFIS_FORNECEDOR);
     if (!id) return reply;
-    const { page, size } = req.query as { page?: string; size?: string };
-    const paginacao = { page: page ? Number(page) : undefined, size: size ? Number(size) : undefined };
+    const { page, size, incluirOcultas } = req.query as { page?: string; size?: string; incluirOcultas?: string };
+    const paginacao = { page: page ? Number(page) : undefined, size: size ? Number(size) : undefined, incluirOcultas: incluirOcultas === 'true' };
     return reply.send(await deps.gerir.listar(String(id.empresaId ?? ''), paginacao));
   });
 
@@ -31,6 +31,22 @@ export function registrarRotasNotificacoes(app: FastifyInstance, deps: { gerir: 
     const ator = exigirPapel(req, reply, PERFIS_FORNECEDOR);
     if (!ator) return reply;
     return reply.send(await deps.gerir.marcarTodasLidas(String(ator.empresaId ?? '')));
+  });
+
+  app.post('/notificacoes/:id/ocultar', async (req, reply) => {
+    const ator = exigirPapel(req, reply, PERFIS_FORNECEDOR);
+    if (!ator) return reply;
+    const { id } = req.params as { id: string };
+    try { await deps.gerir.ocultar(id, String(ator.empresaId ?? '')); return reply.code(204).send(); }
+    catch (e) { return falha(reply, e); }
+  });
+
+  app.post('/notificacoes/:id/reexibir', async (req, reply) => {
+    const ator = exigirPapel(req, reply, PERFIS_FORNECEDOR);
+    if (!ator) return reply;
+    const { id } = req.params as { id: string };
+    try { await deps.gerir.reexibir(id, String(ator.empresaId ?? '')); return reply.code(204).send(); }
+    catch (e) { return falha(reply, e); }
   });
 }
 

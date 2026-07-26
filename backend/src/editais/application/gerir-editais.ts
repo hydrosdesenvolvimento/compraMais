@@ -45,7 +45,7 @@ export class GerirEditais {
    * Cria o edital em rascunho já com a numeração oficial do ano corrente (ED-AAAA/NNN). O número é
    * reservado pelo `NumeradorEditais` (atômico) e é imutável: `editar` não o alcança.
    */
-  async criar(input: { secretariaId: string; objeto: string; cnaesAlvo: string[]; prazoVigencia: string }, actor: Actor): Promise<{ editalId: string; numero: string }> {
+  async criar(input: { secretariaId: string; objeto: string; cnaesAlvo: string[]; prazoVigencia: string; exigeProvaDeVida?: boolean }, actor: Actor): Promise<{ editalId: string; numero: string }> {
     await this.cnaes.validar(input.cnaesAlvo);
     const id = randomUUID();
     const ano = new Date(this.now()).getUTCFullYear();
@@ -68,7 +68,7 @@ export class GerirEditais {
    * (FR-014) amplia o público-alvo de um edital JÁ PUBLICADO por aqui. A edição iniciada pela gestão
    * usa `editarComoRascunho`, que aplica a guarda de estado.
    */
-  async editar(editalId: string, campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null }>, actor: Actor): Promise<void> {
+  async editar(editalId: string, campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null; exigeProvaDeVida: boolean }>, actor: Actor): Promise<void> {
     await this.aplicarEdicao(await this.exigir(editalId), campos, actor);
   }
 
@@ -76,13 +76,13 @@ export class GerirEditais {
    * Edição pela gestão (FR-013): só permitida enquanto o edital está em RASCUNHO (não publicado). Um
    * edital publicado precisa ser despublicado antes (e só pode, sem credenciamentos associados).
    */
-  async editarComoRascunho(editalId: string, campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null }>, actor: Actor): Promise<void> {
+  async editarComoRascunho(editalId: string, campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null; exigeProvaDeVida: boolean }>, actor: Actor): Promise<void> {
     const e = await this.exigir(editalId);
     if (e.situacao !== 'rascunho') throw new EditalNaoEditavel(e.situacao);
     await this.aplicarEdicao(e, campos, actor);
   }
 
-  private async aplicarEdicao(e: Edital, campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null }>, actor: Actor): Promise<void> {
+  private async aplicarEdicao(e: Edital, campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null; exigeProvaDeVida: boolean }>, actor: Actor): Promise<void> {
     if (campos.cnaesAlvo) await this.cnaes.validar(campos.cnaesAlvo);
     const editalId = e.id;
     const { diff, ampliouPublico } = e.editar(campos, actor.userId);

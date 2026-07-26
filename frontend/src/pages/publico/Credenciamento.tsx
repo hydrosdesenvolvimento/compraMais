@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { useTranslation, Trans } from 'react-i18next';
-import { Stepper } from '../../design-system/components';
+import { Stepper, CapturaFacial } from '../../design-system/components';
 import { IconeSeta, IconeVoltar, IconeFechar, IconeCheck, IconeUpload, IconeAlerta } from '../../design-system/icons';
-import { api, type DocItem, type CatalogoItemView, type ItemCredenciamentoView } from '../../lib/api';
+import { api, HttpError, type DocItem, type CatalogoItemView, type ItemCredenciamentoView } from '../../lib/api';
 import { TAMANHO_MAX_MB, formatoDe, lerBase64 } from '../../lib/upload';
 import { obterUsuario } from '../../lib/auth';
 import { textoDoErro } from '../../lib/erros';
 import { toastBus } from '../../design-system/components/toast-bus';
 
 /**
- * Wizard de credenciamento em um edital (UC004). Passos: Capacidade (teto declarado, RN005) →
- * Documentos → Termo de Aceite (RN016) → Concluído. A conclusão é por Termo de Aceite; a biometria/
- * "prova de vida" (UC007) está fora do MVP (Release 2, condicional a RIPD).
+ * Wizard de credenciamento em um edital (UC004 + UC007). Passos: Capacidade (teto declarado, RN005) →
+ * Documentos → Prova de Vida (comparação facial ao vivo × foto do responsável cadastrada, UC007) →
+ * Termo de Aceite (RN016) → Concluído. O Termo só libera com a prova de vida aprovada.
  */
 
 const VERSAO_TERMO = 'v1';
@@ -32,9 +32,13 @@ export function Credenciamento() {
   const idioma = i18n.language;
   const navigate = useNavigate();
   const { editalId } = useParams({ strict: false }) as { editalId?: string };
-  const [step, setStep] = useState(0); // 0..3
+  const [step, setStep] = useState(0); // 0..4 (Capacidade, Documentos, Prova de Vida, Termo, Concluído)
+  const [provaAprovada, setProvaAprovada] = useState(false);
   // Capacidade POR ITEM (RN005): itens do edital + teto declarado por item selecionado (itemId → texto).
   const [itensEdital, setItensEdital] = useState<ItemCredenciamentoView[]>([]);
+  // Política do edital (definida no cadastro): se este edital exige prova de vida (UC007). Quando não
+  // exige, o wizard pula o passo de Prova de Vida e o Termo é assinado direto (o backend não bloqueia).
+  const [exigeProvaDeVida, setExigeProvaDeVida] = useState(false);
   const [capItens, setCapItens] = useState<Record<string, string>>({});
   const [credId, setCredId] = useState<string | null>(null);
   const [aceito, setAceito] = useState(false);
@@ -57,12 +61,15 @@ export function Credenciamento() {
         if (!vivo || !atual) return;
         setCredId(atual.id);
         if (atual.estado === 'aceito') {
-          setStep(3);
+          setProvaAprovada(true);
+          setStep(4);
         } else {
           // Reidrata a seleção de itens declarada (capacidade por item, RN005).
           setCapItens(Object.fromEntries(atual.itens.map((i) => [i.itemId, String(i.capacidadeTeto)])));
-          // passoAtual 1..3 (Capacidade→Termo) → step 0..2; nunca abre no Concluído para um `iniciado`.
-          setStep(Math.min(2, Math.max(0, atual.passoAtual - 1)));
+          // Prova de vida já aprovada num acesso anterior mantém o gate satisfeito ao retomar.
+          if (atual.provaVidaStatus === 'aprovada' || atual.provaVidaStatus === 'manual') setProvaAprovada(true);
+          // passoAtual 1..4 (Capacidade→Termo) → step 0..3; nunca abre no Concluído para um `iniciado`.
+          setStep(Math.min(3, Math.max(0, atual.passoAtual - 1)));
           toastBus.emitir({ tom: 'info', texto: t('credenciamento.retomado') });
         }
       } catch { /* segue no fluxo novo — o iniciar ainda valida no backend */ }
@@ -76,27 +83,33 @@ export function Credenciamento() {
   useEffect(() => {
     if (!editalId) return;
     let vivo = true;
-    void api.editalItensParaCredenciamento(editalId).then((its) => { if (vivo) setItensEdital(its); }).catch(() => {});
+    void api.editalItensParaCredenciamento(editalId).then((r) => { if (vivo) { setItensEdital(r.itens); setExigeProvaDeVida(r.exigeProvaDeVida); } }).catch(() => {});
     return () => { vivo = false; };
   }, [editalId]);
 
   // Empresa do token (AD-20): mesma do credenciamento criado no Passo 1. Base dos documentos (Passo 2).
   const fornecedorId = obterUsuario()?.empresaId ?? DEMO_FORNECEDOR_ID;
 
-  const PASSOS = [
+  const PASSOS_LABELS = [
     t('credenciamento.passos.capacidade'),
     t('credenciamento.passos.documentos'),
+    t('credenciamento.passos.provaVida'),
     t('credenciamento.passos.termo'),
     t('credenciamento.passos.concluido'),
   ];
+  // Sequência de passos por índice fixo (Capacidade=0, Documentos=1, ProvaVida=2, Termo=3, Concluído=4).
+  // Quando o edital NÃO exige prova de vida, o passo 2 é removido da navegação e do stepper.
+  const SEQ = exigeProvaDeVida ? [0, 1, 2, 3, 4] : [0, 1, 3, 4];
+  const PASSOS = SEQ.map((i) => PASSOS_LABELS[i]);
+  const stepDisplay = Math.max(0, SEQ.indexOf(step));
 
-  const isSucesso = step === 3;
+  const isSucesso = step === 4;
   const showFooter = !isSucesso;
   const showBack = step > 0;
 
   const nextLabel = enviando
     ? t('credenciamento.acoes.enviando')
-    : step === 2 ? t('credenciamento.acoes.enviar') : t('credenciamento.acoes.continuar');
+    : step === 3 ? t('credenciamento.acoes.enviar') : t('credenciamento.acoes.continuar');
 
   // Itens selecionados com teto válido (inteiro > 0) — base do envio e da validação do passo.
   const itensSelecionados = Object.entries(capItens)
@@ -106,14 +119,15 @@ export function Credenciamento() {
   const podeAvancar = enviando
     ? false
     : step === 0 ? capValida
-    : step === 2 ? aceito
+    : step === 2 ? provaAprovada // Prova de Vida: só avança ao Termo com a verificação aprovada
+    : step === 3 ? aceito
     : true;
 
   // Reporta ao backend o passo do wizard (UC004) para "Meus Credenciamentos" mostrar "Etapa n/N" e o
   // "Continuar" retomar de onde parou. `step` (0..3) → passo do domínio (step+1). Melhor-esforço: só a
   // partir do Documentos (passo do Concluído vem do aceite) e nunca trava a navegação se a rede falhar.
   const reportarPasso = (novoStep: number, id: string | null = credId) => {
-    if (!id || novoStep < 0 || novoStep >= 3) return;
+    if (!id || novoStep < 0 || novoStep >= 4) return; // o passo Concluído (5) vem do aceite, não daqui
     void api.registrarPassoCredenciamento(id, novoStep + 1).catch(() => {});
   };
 
@@ -144,21 +158,23 @@ export function Credenciamento() {
       finally { setEnviando(false); }
       return;
     }
-    // Passo 2 → 3: assina o Termo de Aceite (RN016) → fornecedor Pendente de Análise.
-    if (step === 2) {
+    // Passo 3 → 4: assina o Termo de Aceite (RN016) → fornecedor Pendente de Análise. O backend só
+    // aceita com a prova de vida aprovada (gate UC007); o passo 2 do wizard já a exige para chegar aqui.
+    if (step === 3) {
       if (!credId) { mostrarErro(t('credenciamento.erroGenerico')); return; }
       setEnviando(true);
       try {
         await api.aceitarTermo(credId, { versaoTermo: VERSAO_TERMO, finalidade: t('credenciamento.termo.finalidade') });
-        setStep(3);
+        setStep(4);
       } catch (e) { mostrarErro(textoDoErro(e)); }
       finally { setEnviando(false); }
       return;
     }
-    setStep((s) => { const n = Math.min(3, s + 1); reportarPasso(n); return n; });
+    // Avança para o PRÓXIMO passo da sequência vigente (pula Prova de Vida quando o edital não a exige).
+    setStep((s) => { const n = SEQ[Math.min(SEQ.length - 1, SEQ.indexOf(s) + 1)]; reportarPasso(n); return n; });
   }
 
-  const wPrev = () => { setErro(null); setStep((s) => { const n = Math.max(0, s - 1); reportarPasso(n); return n; }); };
+  const wPrev = () => { setErro(null); setStep((s) => { const n = SEQ[Math.max(0, SEQ.indexOf(s) - 1)]; reportarPasso(n); return n; }); };
 
   async function cancelWizard() {
     if (credId) { try { await api.cancelarCredenciamento(credId); } catch { /* segue para a vitrine mesmo assim */ } }
@@ -206,15 +222,16 @@ export function Credenciamento() {
       </div>
 
       {/* Stepper */}
-      <Stepper passos={PASSOS} ativo={step} />
+      <Stepper passos={PASSOS} ativo={stepDisplay} />
 
       {/* Card principal */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ padding: '28px 30px 26px' }}>
           {step === 0 && <PassoCapacidade itens={itensEdital} capItens={capItens} setCapItens={setCapItens} idioma={idioma} />}
           {step === 1 && <PassoDocumentos fornecedorId={fornecedorId} />}
-          {step === 2 && <PassoTermo aceito={aceito} setAceito={setAceito} />}
-          {step === 3 && <PassoSucesso credId={credId} onPainel={() => void navigate({ to: '/inicio' })} />}
+          {step === 2 && <PassoProvaDeVida credId={credId} aprovada={provaAprovada} setAprovada={setProvaAprovada} />}
+          {step === 3 && <PassoTermo aceito={aceito} setAceito={setAceito} />}
+          {step === 4 && <PassoSucesso credId={credId} onPainel={() => void navigate({ to: '/inicio' })} />}
         </div>
 
         {erro && (
@@ -602,8 +619,8 @@ function UploadPendente({ fornecedorId, tipo, onEnviado }: { fornecedorId: strin
       await api.enviarDocumento(fornecedorId, { tipo: tipo.nome ?? '', formato, conteudo, dataValidade: validade || null });
       toastBus.emitir({ tom: 'ok', texto: t('credenciamento.documentos.enviadoSucesso', { tipo: tipo.nome }) });
       onEnviado();
-    } catch {
-      setErro(t('credenciamento.documentos.erroEnviar'));
+    } catch (e) {
+      setErro(textoDoErro(e));
       setEnviando(false);
     }
   };
@@ -660,6 +677,67 @@ function UploadPendente({ fornecedorId, tipo, onEnviado }: { fornecedorId: strin
 }
 
 /* ---------- Passo 3: Termo de Aceite (RN016) ---------- */
+/**
+ * Passo 3 do wizard (UC007): captura ao vivo comparada 1:1 com a foto do responsável cadastrada
+ * (referência aprovada pela CPL). Aprovada → libera o Termo (o gate real está no backend). Falha de
+ * captura/serviço vira mensagem específica, mapeada do `codigo` do backend; nada aqui conclui nada.
+ */
+function PassoProvaDeVida({ credId, aprovada, setAprovada }: { credId: string | null; aprovada: boolean; setAprovada: (v: boolean) => void }) {
+  const { t } = useTranslation();
+  const [verificando, setVerificando] = useState(false);
+  const [msg, setMsg] = useState<{ tom: 'ok' | 'erro'; texto: string } | null>(null);
+
+  async function verificar(imagem: string) {
+    if (!credId) { setMsg({ tom: 'erro', texto: t('credenciamento.provaVida.erroGenerico') }); return; }
+    setVerificando(true);
+    setMsg(null);
+    try {
+      const r = await api.provaDeVida(credId, imagem);
+      if (r.status === 'aprovada' || r.status === 'manual') {
+        setAprovada(true);
+        setMsg({ tom: 'ok', texto: t('credenciamento.provaVida.aprovada') });
+      } else {
+        setAprovada(false);
+        setMsg({ tom: 'erro', texto: t('credenciamento.provaVida.reprovada') });
+      }
+    } catch (e) {
+      setAprovada(false);
+      const codigo = e instanceof HttpError ? e.codigo : undefined;
+      setMsg({ tom: 'erro', texto: t(`credenciamento.provaVida.${codigo}`, { defaultValue: textoDoErro(e) }) });
+    } finally {
+      setVerificando(false);
+    }
+  }
+
+  return (
+    <div data-cy="prova-de-vida">
+      <div style={{ font: '800 11px var(--font-body)', letterSpacing: '.08em', color: 'var(--azul-700, #1d4ed8)' }}>
+        {t('credenciamento.provaVida.passo')}
+      </div>
+      <h2 style={{ margin: '6px 0', font: '800 20px var(--font-head)', color: 'var(--cinza-900)' }}>
+        {t('credenciamento.provaVida.titulo')}
+      </h2>
+      <p style={{ margin: '0 0 4px', color: 'var(--cinza-600)', font: '500 14px var(--font-body)' }}>
+        {t('credenciamento.provaVida.descricao')}
+      </p>
+      <p style={{ margin: '0 0 16px', color: 'var(--cinza-500)', font: '500 13px var(--font-body)' }}>
+        {t('credenciamento.provaVida.instrucao')}
+      </p>
+
+      <CapturaFacial onCapturar={verificar} ocupado={verificando} cyPrefix="prova" permitirUpload={false} />
+
+      {(msg || aprovada) && (
+        <div
+          data-cy={(msg?.tom ?? 'ok') === 'ok' && (aprovada || msg?.tom === 'ok') ? 'prova-ok' : 'prova-erro'}
+          style={{ marginTop: 14, color: (msg?.tom ?? 'ok') === 'erro' ? 'var(--erro, #B42318)' : 'var(--sucesso, #067647)', font: '600 13.5px var(--font-body)' }}
+        >
+          {msg?.texto ?? t('credenciamento.provaVida.aprovada')}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PassoTermo({ aceito, setAceito }: { aceito: boolean; setAceito: (v: boolean) => void }) {
   const { t } = useTranslation();
   return (
@@ -765,8 +843,8 @@ function PassoSucesso({ credId, onPainel }: { credId: string | null; onPainel: (
     try {
       const { blob, nome } = await api.comprovanteCredenciamento(credId);
       salvarArquivo(blob, nome);
-    } catch {
-      toastBus.emitir({ tom: 'erro', texto: t('credenciamento.enviado.baixarPdfErro') });
+    } catch (e) {
+      toastBus.emitir({ tom: 'erro', texto: textoDoErro(e) });
     } finally {
       setBaixando(false);
     }

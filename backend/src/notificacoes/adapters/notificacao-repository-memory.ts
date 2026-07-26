@@ -16,6 +16,7 @@ export class NotificacaoRepositoryMemory implements NotificacaoRepository {
   async listarDoFornecedor(fornecedorId: string, filtro?: FiltroNotificacoes): Promise<Notificacao[]> {
     const todas = [...this.map.values()]
       .filter((n) => n.fornecedorId === fornecedorId)
+      .filter((n) => filtro?.incluirOcultas || !n.oculta) // padrão: só as visíveis (não ocultas)
       .sort((a, b) => b.estado().criadoEm.localeCompare(a.estado().criadoEm)); // mais recentes primeiro
     const page = Math.max(1, filtro?.page ?? 1);
     const size = Math.max(1, filtro?.size ?? 20);
@@ -41,4 +42,7 @@ export class NotificacaoRepositoryMemory implements NotificacaoRepository {
     }
     return n;
   }
+
+  async ocultar(id: string, agoraIso: string): Promise<void> { this.map.get(id)?.ocultar(agoraIso); }
+  async reexibir(id: string): Promise<void> { this.map.get(id)?.reexibir(); }
 }

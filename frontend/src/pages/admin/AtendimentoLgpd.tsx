@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, HttpError } from '../../lib/api';
+import { textoDoErro } from '../../lib/erros';
 import { Botao } from '../../design-system/components';
 
 /**
@@ -26,20 +27,20 @@ export function AtendimentoLgpd() {
     meta: { semToast: true }, // esta tela já dá feedback inline — evita toast duplicado
     mutationFn: ({ id, r }: { id: string; r: string }) => api.atenderSolicitacao(id, r || t('adminLgpd.atendidaPadrao')),
     onSuccess: () => ok(t('adminLgpd.feedback.atendida')),
-    onError: () => setFeedback({ tom: 'erro', texto: t('adminLgpd.feedback.erro') }),
+    onError: (e) => setFeedback({ tom: 'erro', texto: textoDoErro(e) }),
   });
   const recusar = useMutation({
     meta: { semToast: true }, // idem: feedback inline
     mutationFn: ({ id, m }: { id: string; m: string }) => api.recusarSolicitacao(id, m),
     onSuccess: () => ok(t('adminLgpd.feedback.recusada')),
-    onError: () => setFeedback({ tom: 'erro', texto: t('adminLgpd.feedback.erro') }),
+    onError: (e) => setFeedback({ tom: 'erro', texto: textoDoErro(e) }),
   });
   const descartar = useMutation({
     meta: { semToast: true }, // idem: trata 409 (retido) inline com mensagem específica
     mutationFn: (id: string) => api.descartarSolicitacao(id, new Date().toISOString()),
     onSuccess: () => ok(t('adminLgpd.feedback.descartada')),
     // 409 = retido pela política de retenção legal (FR-008).
-    onError: (e) => setFeedback({ tom: 'erro', texto: e instanceof HttpError && e.status === 409 ? t('adminLgpd.feedback.retido') : t('adminLgpd.feedback.erro') }),
+    onError: (e) => setFeedback({ tom: 'erro', texto: e instanceof HttpError && e.status === 409 ? t('adminLgpd.feedback.retido') : textoDoErro(e) }),
   });
   const ocupado = atender.isPending || recusar.isPending || descartar.isPending;
 

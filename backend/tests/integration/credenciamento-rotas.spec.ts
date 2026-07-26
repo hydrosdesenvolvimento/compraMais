@@ -45,10 +45,13 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect(cad.statusCode).toBe(201);
     empresaId = cad.json().fornecedorId as string;
 
-    // Prova de vida (UC007): cadastra a referência biométrica do responsável (onboarding, D4). Com o
-    // mock, o template é determinístico por conteúdo → verificar depois com a MESMA foto aprova.
+    // Prova de vida (UC007): a foto de referência é enviada como documento "Foto do Responsável" e a
+    // CPL a aprova (a prova de vida exige a referência aprovada). Mock → mesma foto casa na verificação.
     const bio = await app.inject({ method: 'POST', url: `/fornecedores/${empresaId}/biometria`, headers: forn(), payload: { imagem: FOTO_TITULAR } });
     expect(bio.statusCode).toBe(201);
+    const fotoDocId = bio.json().documentoId as string;
+    const aprovaFoto = await app.inject({ method: 'POST', url: `/documentos/${fotoDocId}/covalidar`, headers: comoPapel('cpl', { userId: 'cpl1' }), payload: { resultado: 'aprovado', empresaId } });
+    expect(aprovaFoto.statusCode).toBe(200);
 
     editalCompativel = await criarEPublicar(['1412601']);
     editalIncompativel = await criarEPublicar(['9999999']);
@@ -57,16 +60,16 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
 
   afterAll(async () => { await app.close(); });
 
-  async function criar(cnaesAlvo: string[]): Promise<string> {
+  async function criar(cnaesAlvo: string[], exigeProvaDeVida = false): Promise<string> {
     const r = await app.inject({
       method: 'POST', url: '/editais', headers: gestor,
-      payload: { secretariaId: 's1', objeto: 'merenda', cnaesAlvo, quantitativos: 100, prazoVigencia: '2099-12-31' },
+      payload: { secretariaId: 's1', objeto: 'merenda', cnaesAlvo, quantitativos: 100, prazoVigencia: '2099-12-31', exigeProvaDeVida },
     });
     expect(r.statusCode).toBe(201);
     return r.json().editalId as string;
   }
-  async function criarEPublicar(cnaesAlvo: string[]): Promise<string> {
-    const id = await criar(cnaesAlvo);
+  async function criarEPublicar(cnaesAlvo: string[], exigeProvaDeVida = false): Promise<string> {
+    const id = await criar(cnaesAlvo, exigeProvaDeVida);
     const pub = await app.inject({ method: 'POST', url: `/editais/${id}/publicar`, headers: gestor });
     expect(pub.statusCode).toBe(200);
     return id;
@@ -109,7 +112,9 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
   });
 
   it('fluxo feliz: iniciar → aceitar Termo → fornecedor Pendente de Análise + trilha (RN016)', async () => {
-    const ini = await iniciar(editalCompativel, 500);
+    // Edital que EXIGE prova de vida (UC007): prova aprovada libera o Termo (gate condicional).
+    const editalProva = await criarEPublicar(['1412601'], true);
+    const ini = await iniciar(editalProva, 500);
     expect(ini.statusCode).toBe(201);
     const credId = ini.json().credenciamentoId as string;
     expect(ini.json().estado).toBe('iniciado');
@@ -117,6 +122,11 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     const prova = await provarVida(credId);
     expect(prova.statusCode).toBe(200);
     expect(prova.json()).toMatchObject({ status: 'aprovada' });
+
+    // Trilha imutável (UC012): a tentativa de prova de vida é auditada (veredito, sem template).
+    const trilhaProva = await app.inject({ method: 'GET', url: '/auditoria?evento=ProvaDeVidaVerificada', headers: comoPapel('auditor') });
+    expect(trilhaProva.statusCode).toBe(200);
+    expect((trilhaProva.json() as { evento: string }[]).some((r) => r.evento === 'ProvaDeVidaVerificada')).toBe(true);
 
     const aceite = await app.inject({
       method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(),
@@ -132,7 +142,7 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
   });
 
   it('aceitar o Termo sem prova de vida aprovada → 409 (gate UC007)', async () => {
-    const edital = await criarEPublicar(['1412601']);
+    const edital = await criarEPublicar(['1412601'], true); // edital exige prova de vida
     const credId = (await iniciar(edital, 300)).json().credenciamentoId as string;
     const r = await app.inject({ method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(), payload: { versaoTermo: 'v1', finalidade: 'credenciamento' } });
     expect(r.statusCode).toBe(409);
@@ -140,7 +150,7 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
   });
 
   it('prova de vida com rosto diferente da referência → reprovada (não libera o Termo)', async () => {
-    const edital = await criarEPublicar(['1412601']);
+    const edital = await criarEPublicar(['1412601'], true); // edital exige prova de vida
     const credId = (await iniciar(edital, 300)).json().credenciamentoId as string;
     const prova = await provarVida(credId, FOTO_OUTRA);
     expect(prova.statusCode).toBe(200);

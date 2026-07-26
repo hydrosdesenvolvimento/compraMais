@@ -226,6 +226,7 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
       objeto: 'Merenda escolar',
       cnaesAlvo: ['1091101'],
       prazoVigencia: '2026-12-31',
+      exigeProvaDeVida: false, // checkbox de prova de vida desmarcado por padrão (opt-in)
     });
   });
 

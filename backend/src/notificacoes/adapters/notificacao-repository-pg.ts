@@ -13,10 +13,10 @@ export class NotificacaoRepositoryPg implements NotificacaoRepository {
   async salvar(n: Notificacao): Promise<void> {
     const s = n.estado();
     await this.pool.query(
-      `INSERT INTO notificacoes (id, fornecedor_id, tipo, payload, referencia, criado_em, lida_em)
-       VALUES ($1,$2,$3,$4::jsonb,$5,$6,$7)
+      `INSERT INTO notificacoes (id, fornecedor_id, tipo, payload, referencia, criado_em, lida_em, oculta_em)
+       VALUES ($1,$2,$3,$4::jsonb,$5,$6,$7,$8)
        ON CONFLICT (tipo, COALESCE(referencia, ''), fornecedor_id) DO NOTHING`,
-      [s.id, s.fornecedorId, s.tipo, JSON.stringify(s.payload), s.referencia, s.criadoEm, s.lidaEm],
+      [s.id, s.fornecedorId, s.tipo, JSON.stringify(s.payload), s.referencia, s.criadoEm, s.lidaEm, s.ocultaEm],
     );
   }
 
@@ -39,8 +39,10 @@ export class NotificacaoRepositoryPg implements NotificacaoRepository {
   async listarDoFornecedor(fornecedorId: string, filtro?: FiltroNotificacoes): Promise<Notificacao[]> {
     const size = Math.max(1, filtro?.size ?? 20);
     const offset = (Math.max(1, filtro?.page ?? 1) - 1) * size;
+    // Padrão: só as visíveis (oculta_em IS NULL). `incluirOcultas` traz também as ocultas (para reexibir).
+    const where = filtro?.incluirOcultas ? 'fornecedor_id = $1' : 'fornecedor_id = $1 AND oculta_em IS NULL';
     const r = await this.pool.query(
-      'SELECT * FROM notificacoes WHERE fornecedor_id = $1 ORDER BY criado_em DESC LIMIT $2 OFFSET $3',
+      `SELECT * FROM notificacoes WHERE ${where} ORDER BY criado_em DESC LIMIT $2 OFFSET $3`,
       [fornecedorId, size, offset],
     );
     return (r.rows as Record<string, unknown>[]).map(mapear);
@@ -67,6 +69,14 @@ export class NotificacaoRepositoryPg implements NotificacaoRepository {
     );
     return r.rowCount ?? 0;
   }
+
+  async ocultar(id: string, agoraIso: string): Promise<void> {
+    await this.pool.query('UPDATE notificacoes SET oculta_em = $2 WHERE id = $1 AND oculta_em IS NULL', [id, agoraIso]);
+  }
+
+  async reexibir(id: string): Promise<void> {
+    await this.pool.query('UPDATE notificacoes SET oculta_em = NULL WHERE id = $1', [id]);
+  }
 }
 
 function mapear(row: Record<string, unknown>): Notificacao {
@@ -78,6 +88,7 @@ function mapear(row: Record<string, unknown>): Notificacao {
     referencia: row.referencia == null ? null : String(row.referencia),
     criadoEm: iso(row.criado_em),
     lidaEm: row.lida_em == null ? null : iso(row.lida_em),
+    ocultaEm: row.oculta_em == null ? null : iso(row.oculta_em),
   });
 }
 function iso(v: unknown): string { return v instanceof Date ? v.toISOString() : String(v); }

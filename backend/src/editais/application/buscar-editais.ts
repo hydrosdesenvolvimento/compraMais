@@ -2,7 +2,7 @@ import type { Edital } from '../domain/edital.js';
 import type { EditalRepository, EditalProbe, PaginacaoReq } from './listar-editais-compativeis.js';
 
 /** Read model de um edital na busca de gestão (número/quantitativo/prazo alimentam a tela "Operação · Editais"). */
-export interface EditalView { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: readonly string[]; prazoVigencia: string | null; qtdItens: number }
+export interface EditalView { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: readonly string[]; prazoVigencia: string | null; exigeProvaDeVida: boolean; qtdItens: number }
 
 /** Página de resultados: itens da página corrente + total do filtro (pager) + eco de page/size aplicados. */
 export interface PaginaEditais { items: EditalView[]; total: number; page: number; size: number }
@@ -42,5 +42,5 @@ export class BuscarEditais {
 }
 
 function paraView(e: Edital): EditalView {
-  return { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, cnaesAlvo: e.cnaesAlvo, prazoVigencia: e.prazoVigencia, qtdItens: 0 };
+  return { id: e.id, numero: e.numero, objeto: e.objeto, secretariaId: e.secretariaId, situacao: e.situacao, cnaesAlvo: e.cnaesAlvo, prazoVigencia: e.prazoVigencia, exigeProvaDeVida: e.exigeProvaDeVida, qtdItens: 0 };
 }

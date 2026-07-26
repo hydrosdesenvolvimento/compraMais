@@ -16,14 +16,14 @@ export class EditalRepositoryPg implements EditalRepository {
     // `numero` é imutável: entra no INSERT e fica FORA do DO UPDATE (edição não renumera o edital).
     await this.pool.query(
       `INSERT INTO editais
-         (id, numero, secretaria_id, objeto, cnaes_alvo, prazo_vigencia, situacao, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+         (id, numero, secretaria_id, objeto, cnaes_alvo, prazo_vigencia, situacao, exige_prova_de_vida, register_date, update_date, last_user_update)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
        ON CONFLICT (id) DO UPDATE SET
          secretaria_id = $3, objeto = $4, cnaes_alvo = $5, prazo_vigencia = $6,
-         situacao = $7, update_date = $9, last_user_update = $10`,
+         situacao = $7, exige_prova_de_vida = $8, update_date = $10, last_user_update = $11`,
       [
         s.meta.id, s.numero, s.secretariaId, s.objeto, JSON.stringify(s.cnaesAlvo),
-        s.prazoVigencia, s.situacao, s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate,
+        s.prazoVigencia, s.situacao, s.exigeProvaDeVida, s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate,
       ],
     );
   }
@@ -87,6 +87,7 @@ function mapear(row: Record<string, unknown>): Edital {
     cnaesAlvo: (row.cnaes_alvo as string[]) ?? [], // jsonb já vem parseado pelo driver pg
     prazoVigencia: row.prazo_vigencia == null ? null : String(row.prazo_vigencia),
     situacao: row.situacao as SituacaoEdital,
+    exigeProvaDeVida: row.exige_prova_de_vida === true,
   });
 }
 

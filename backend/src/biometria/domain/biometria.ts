@@ -9,10 +9,18 @@ import type { MotivoFalhaExtracao, Template } from '../../shared/acl/facial/reco
  * (ver spec/docs/plano-prova-de-vida-credenciamento.md §2). O template é um embedding ArcFace.
  */
 
+/**
+ * Tipo de documento reservado para a foto do responsável (referência da prova de vida). A foto é
+ * enviada como DOCUMENTO e passa pela análise da CPL (covalidação, UC006) como qualquer outro — a
+ * prova de vida só vale com a referência APROVADA. O nome espelha a entrada do catálogo baseline.
+ */
+export const TIPO_DOC_FOTO_RESPONSAVEL = 'Foto do Responsável';
+
 /** Referência biométrica persistida, uma por fornecedor. O template vai CIFRADO no adaptador PG (AD-19). */
 export interface ReferenciaBiometrica {
   readonly fornecedorId: string;
   readonly usuarioId: string; // responsável que forneceu a referência (titular/procurador)
+  readonly documentoId: string; // documento "Foto do Responsável" (covalidável); vincula a referência à análise da CPL
   readonly template: Template;
   readonly criadoEm: string; // ISO-8601
   readonly atualizadoEm: string; // ISO-8601
@@ -33,6 +41,14 @@ export class FalhaCapturaFacial extends Error {
   constructor(readonly motivo: MotivoFalhaExtracao) {
     super(`Face capture failed: ${motivo}`);
     this.name = 'FalhaCapturaFacial';
+  }
+}
+
+/** A foto de referência ainda não foi APROVADA pela CPL (pendente/reprovada) → prova de vida bloqueada. */
+export class ReferenciaBiometricaNaoAprovada extends Error {
+  constructor() {
+    super('Biometric reference photo has not been approved by the CPL yet.');
+    this.name = 'ReferenciaBiometricaNaoAprovada';
   }
 }
 

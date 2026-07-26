@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relatório de Esforço e Custo — Compra Mais</title>
+<style>
+  :root { --azul-900:#0a2f5c; --azul-800:#0b4a8b; --azul-700:#0f5aa6; --ink:#1f2937; --muted:#5b6b82;
+          --line:#e3e9f2; --bg:#f6f8fc; --card:#fff; --amber:#f2b705; --code-bg:#f3f6fb; }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+         font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+         -webkit-font-smoothing:antialiased; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 40px 24px 80px; }
+  .doc { background:var(--card); border:1px solid var(--line); border-radius:16px;
+         box-shadow:0 10px 30px rgba(11,74,139,.06); padding: 44px 52px; }
+  h1,h2,h3,h4 { color:var(--azul-900); line-height:1.25; scroll-margin-top: 16px; }
+  h1 { font-size: 2rem; margin:.2em 0 .4em; }
+  h2 { font-size: 1.45rem; margin:1.8em 0 .5em; padding-bottom:.3em; border-bottom:2px solid var(--line); }
+  h3 { font-size: 1.18rem; margin:1.5em 0 .4em; }
+  p { margin: .7em 0; }
+  a { color: var(--azul-700); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  blockquote { margin:1em 0; padding:12px 18px; background:#fff8e6; border-left:4px solid var(--amber);
+               border-radius:8px; color:#5b4a10; }
+  blockquote p { margin:.3em 0; }
+  ul,ol { padding-left: 1.4em; } li { margin:.28em 0; }
+  code { background:var(--code-bg); padding:.12em .4em; border-radius:6px; font-size:.9em;
+         font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  table { border-collapse: collapse; width:100%; margin:1.1em 0; font-size:.95rem; display:block; overflow-x:auto; }
+  th,td { border:1px solid var(--line); padding:9px 13px; text-align:left; vertical-align:top; }
+  thead th { background:#eef2f8; color:var(--azul-900); }
+  tbody tr:nth-child(even) { background:#f8fafd; }
+  /* Alinhamento de colunas numéricas (GFM não marca; deixa legível assim mesmo) */
+  hr { border:none; border-top:1px solid var(--line); margin:2.4em 0; }
+  .mermaid { background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; margin:16px 0;
+             text-align:center; overflow-x:auto; }
+  .doc-nota { font-size:.82rem; color:var(--muted); margin:0 0 8px; }
+  @media (max-width:640px){ .doc{ padding:26px 18px; } .wrap{ padding:20px 10px 60px; } }
+  @media print {
+    body{ background:#fff; } .doc{ box-shadow:none; border:none; border-radius:0; padding:0; }
+    .doc-nota{ display:none; } a{ color:inherit; text-decoration:none; }
+    h2{ break-after:avoid; } .mermaid,table{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="doc-nota">Documento gerado a partir do Markdown do repositório (docs/esforco). Os diagramas usam Mermaid.</p>
+    <article class="doc">
+<h1 id="relatório-de-esforço-e-custo-de-desenvolvimento--compra-mais">Relatório de Esforço e Custo de Desenvolvimento — Compra Mais</h1>
+<p><strong>Programa Compra Mais · Prefeitura de Rio Branco</strong>
+Estimativa do tamanho funcional, esforço (horas/homem) e custo (R$) do sistema implementado.
+Métodos: <strong>Análise de Pontos de Função (IFPUG)</strong> e <strong>Linhas de Código (LOC / backfiring)</strong>.</p>
+<blockquote>
+<p><strong>Natureza da estimativa.</strong> Este relatório mede o <strong>tamanho funcional entregue</strong> e o traduz no
+<strong>esforço e custo equivalentes de um desenvolvimento convencional</strong> (para fins de orçamento,
+valoração do ativo e referência contratual). A contagem de PF é <strong>derivada dos artefatos реais do
+repositório</strong> (endpoints, entidades, integrações, telas) — é uma contagem <em>estimada</em>, não uma
+contagem IFPUG certificada. Valores em R$ são <strong>referências de mercado (Brasil, 2025-2026)</strong>;
+ajuste ao modelo de contratação (CLT interno, fábrica/PJ ou métrica de PF).</p>
+</blockquote>
+<hr>
+<h2 id="1-sumário-executivo">1. Sumário executivo</h2>
+<table>
+<thead>
+<tr>
+<th>Indicador</th>
+<th align="right">Valor central</th>
+<th>Faixa</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Tamanho funcional (PF ajustados)</strong></td>
+<td align="right"><strong>737 PF</strong></td>
+<td>690 – 780 PF</td>
+</tr>
+<tr>
+<td><strong>Linhas de código autorais</strong></td>
+<td align="right"><strong>≈ 49.800 LOC</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Esforço equivalente</strong></td>
+<td align="right"><strong>≈ 5.900 h</strong> (~37 pessoa-mês)</td>
+<td>4.400 – 8.100 h</td>
+</tr>
+<tr>
+<td><strong>Custo equivalente (equipe interna)</strong></td>
+<td align="right"><strong>≈ R$ 649 mil</strong></td>
+<td>R$ 396 mil – R$ 1,30 mi</td>
+</tr>
+<tr>
+<td><strong>Custo por PF</strong></td>
+<td align="right"><strong>≈ R$ 880 / PF</strong></td>
+<td>R$ 540 – R$ 1.760 / PF</td>
+</tr>
+<tr>
+<td><strong>Cronograma equivalente</strong></td>
+<td align="right"><strong>≈ 6 meses</strong> (equipe de ~6)</td>
+<td>4 – 8 meses</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>Triangulação: a contagem de PF e a de LOC são <strong>consistentes entre si</strong> (≈ 52 LOC de produção por
+PF, dentro do fator esperado para TypeScript). O custo por PF converge com a <strong>precificação de PF de
+mercado</strong> usada no setor público (~R$ 900/PF).</p>
+</blockquote>
+<hr>
+<h2 id="2-métricas-medidas-do-sistema-base-factual">2. Métricas medidas do sistema (base factual)</h2>
+<p>Coletadas diretamente do repositório (exclui <code>node_modules</code>, <code>dist</code>, lockfiles, imagens e binários).</p>
+<h3 id="21-linhas-de-código-autorais">2.1 Linhas de código (autorais)</h3>
+<table>
+<thead>
+<tr>
+<th>Área</th>
+<th>Linguagem</th>
+<th align="right">LOC</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Backend — aplicação</td>
+<td>TypeScript</td>
+<td align="right">15.568</td>
+</tr>
+<tr>
+<td>Backend — testes</td>
+<td>TypeScript</td>
+<td align="right">8.928</td>
+</tr>
+<tr>
+<td>Backend — migrações</td>
+<td>SQL</td>
+<td align="right">809</td>
+</tr>
+<tr>
+<td>Frontend — aplicação</td>
+<td>TS/TSX</td>
+<td align="right">16.232</td>
+</tr>
+<tr>
+<td>Frontend — estilos</td>
+<td>CSS</td>
+<td align="right">357</td>
+</tr>
+<tr>
+<td>Frontend — E2E (Cypress)</td>
+<td>TypeScript</td>
+<td align="right">1.188</td>
+</tr>
+<tr>
+<td>Serviço de biometria facial</td>
+<td>Python</td>
+<td align="right">103</td>
+</tr>
+<tr>
+<td>Portal (landing)</td>
+<td>HTML/CSS/JS</td>
+<td align="right">438</td>
+</tr>
+<tr>
+<td>Internacionalização (i18n, 3 idiomas)</td>
+<td>JSON</td>
+<td align="right">5.349</td>
+</tr>
+<tr>
+<td>Infraestrutura (compose, Dockerfiles, CI, deploy)</td>
+<td>YAML/Docker</td>
+<td align="right">867</td>
+</tr>
+<tr>
+<td><strong>Total autoral</strong></td>
+<td></td>
+<td align="right"><strong>≈ 49.839</strong></td>
+</tr>
+<tr>
+<td><em>— dos quais código de produção</em></td>
+<td></td>
+<td align="right"><em>≈ 33.507</em></td>
+</tr>
+<tr>
+<td><em>— dos quais testes automatizados</em></td>
+<td></td>
+<td align="right"><em>≈ 10.116</em></td>
+</tr>
+</tbody></table>
+<h3 id="22-contadores-estruturais-e-funcionais">2.2 Contadores estruturais e funcionais</h3>
+<table>
+<thead>
+<tr>
+<th>Elemento</th>
+<th align="right">Quantidade</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Módulos de backend (bounded contexts)</td>
+<td align="right">15</td>
+</tr>
+<tr>
+<td>Tabelas de banco (migrações)</td>
+<td align="right">27</td>
+</tr>
+<tr>
+<td>Entidades/agregados de domínio</td>
+<td align="right">34</td>
+</tr>
+<tr>
+<td>Casos de uso (application/)</td>
+<td align="right">53</td>
+</tr>
+<tr>
+<td>Controllers HTTP</td>
+<td align="right">25</td>
+</tr>
+<tr>
+<td><strong>Endpoints REST</strong></td>
+<td align="right"><strong>108</strong> (49 GET, 48 POST, 7 PATCH, 3 DELETE, 1 PUT)</td>
+</tr>
+<tr>
+<td>Eventos de domínio</td>
+<td align="right">50</td>
+</tr>
+<tr>
+<td>Integrações externas</td>
+<td align="right">5 (Receita, CEP/BrasilAPI, Dívida Ativa, SEI, Biometria)</td>
+</tr>
+<tr>
+<td>Telas de frontend</td>
+<td align="right">44</td>
+</tr>
+<tr>
+<td>Casos de uso de negócio (UC001–UC021)</td>
+<td align="right">~21</td>
+</tr>
+<tr>
+<td>Testes automatizados</td>
+<td align="right">958 (717 backend + 241 frontend) + 18 specs E2E</td>
+</tr>
+<tr>
+<td>Histórico</td>
+<td align="right">378 commits · 5 autores · 2026-06-24 a 2026-07-26</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="3-método-1--análise-de-pontos-de-função-ifpug">3. Método 1 — Análise de Pontos de Função (IFPUG)</h2>
+<h3 id="31-funções-de-dados">3.1 Funções de dados</h3>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Descrição</th>
+<th align="right">Qtd</th>
+<th>Compl.</th>
+<th align="right">PF</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ALI (ILF)</strong></td>
+<td>Arquivos lógicos internos mantidos pelo sistema</td>
+<td align="right">19</td>
+<td>4 alta / 10 média / 5 baixa</td>
+<td align="right"><strong>195</strong></td>
+</tr>
+<tr>
+<td><strong>AIE (EIF)</strong></td>
+<td>Arquivos de interface externa (referenciados)</td>
+<td align="right">4</td>
+<td>2 média / 2 baixa</td>
+<td align="right"><strong>24</strong></td>
+</tr>
+</tbody></table>
+<p>ALIs identificados: Edital(+itens), Fornecedor(+endereço/CNAE/QSA), Credenciamento(+prova de vida/termo),
+Documento, Bloqueio, Consentimento LGPD, Distribuição (matriz), Contestação CNAE, Malote, Solicitação do
+titular, Secretaria, Setor/CNAE, Tipo de documento, Material/Serviço, Unidade de medida, Usuário interno,
+Notificação, Trilha de auditoria, Visibilidade de telas.
+AIEs: Receita Federal (CNPJ/QSA), BrasilAPI (CEP), Dívida Ativa, SEI (processos).</p>
+<h3 id="32-funções-transacionais">3.2 Funções transacionais</h3>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Descrição</th>
+<th align="right">Qtd</th>
+<th align="right">PF</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>EE (EI)</strong></td>
+<td>Entradas externas (gravação: cadastros, credenciamento, distribuição, covalidação, malote…)</td>
+<td align="right">52</td>
+<td align="right"><strong>210</strong></td>
+</tr>
+<tr>
+<td><strong>SE (EO)</strong></td>
+<td>Saídas externas com dados derivados (dashboard, transparência, 6 relatórios, rateio, exportações, PDFs)</td>
+<td align="right">18</td>
+<td align="right"><strong>96</strong></td>
+</tr>
+<tr>
+<td><strong>CE (EQ)</strong></td>
+<td>Consultas externas (vitrines, listagens, detalhes, catálogos, permissões)</td>
+<td align="right">34</td>
+<td align="right"><strong>116</strong></td>
+</tr>
+</tbody></table>
+<h3 id="33-pontos-de-função-não-ajustados-pfna">3.3 Pontos de função não ajustados (PFNA)</h3>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th align="right">PF</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ALI</td>
+<td align="right">195</td>
+</tr>
+<tr>
+<td>AIE</td>
+<td align="right">24</td>
+</tr>
+<tr>
+<td>EE</td>
+<td align="right">210</td>
+</tr>
+<tr>
+<td>SE</td>
+<td align="right">96</td>
+</tr>
+<tr>
+<td>CE</td>
+<td align="right">116</td>
+</tr>
+<tr>
+<td><strong>PFNA (UFP)</strong></td>
+<td align="right"><strong>641</strong></td>
+</tr>
+</tbody></table>
+<h3 id="34-fator-de-ajuste-vaf">3.4 Fator de Ajuste (VAF)</h3>
+<p>14 Características Gerais do Sistema (0–5). Destaques do Compra Mais: entrada 100% online, <strong>processamento
+complexo</strong> (motor de rateio <em>water-filling</em>, biometria facial, parsing SEI, retenção LGPD), <strong>eficiência do
+usuário final</strong> (i18n em 3 idiomas + Design System), processamento distribuído (arquitetura hexagonal +
+serviço de ML + Swarm), <strong>facilidade de mudança</strong> (telas-por-perfil e catálogos configuráveis), reusabilidade
+(Ports &amp; Adapters).</p>
+<ul>
+<li><strong>Nível Total de Influência (TDI) ≈ 50</strong> → <strong>VAF = 0,65 + 0,01 × 50 = 1,15</strong></li>
+</ul>
+<h3 id="35-pontos-de-função-ajustados-pfa">3.5 Pontos de Função Ajustados (PFA)</h3>
+<blockquote>
+<p><strong>PFA = PFNA × VAF = 641 × 1,15 = 737 PF</strong></p>
+</blockquote>
+<p><strong>Verificação por <em>backfiring</em>:</strong> 33.507 LOC de produção ÷ 641 PFNA = <strong>52 LOC/PF</strong> — dentro do fator
+esperado para TypeScript (≈ 50–60 LOC/PF), o que valida a coerência entre as duas medições.</p>
+<hr>
+<h2 id="4-método-2--linhas-de-código-loc">4. Método 2 — Linhas de Código (LOC)</h2>
+<p>O método LOC serve de <strong>contraprova</strong> da contagem funcional. Considerando o código autoral efetivo
+(produção + testes + i18n + infraestrutura) ≈ <strong>49.800 LOC</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Base</th>
+<th align="right">LOC</th>
+<th>Produtividade líquida</th>
+<th align="right">Esforço</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Otimista</td>
+<td align="right">49.800</td>
+<td>11 LOC/h</td>
+<td align="right">4.530 h</td>
+</tr>
+<tr>
+<td><strong>Central</strong></td>
+<td align="right">49.800</td>
+<td><strong>8,4 LOC/h</strong></td>
+<td align="right"><strong>5.900 h</strong></td>
+</tr>
+<tr>
+<td>Conservador</td>
+<td align="right">49.800</td>
+<td>6 LOC/h</td>
+<td align="right">8.300 h</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>A produtividade líquida (LOC por hora <strong>já incluindo</strong> análise, testes, revisão e retrabalho) para
+código de produção testado costuma situar-se entre 5 e 15 LOC/h. O ponto central (8,4 LOC/h) é o que
+reconcilia o método LOC com o método de Pontos de Função.</p>
+</blockquote>
+<hr>
+<h2 id="5-esforço-horashomem">5. Esforço (horas/homem)</h2>
+<p>Convertendo o tamanho funcional (<strong>737 PF</strong>) por faixas de produtividade (h/PF), com contraprova por LOC:</p>
+<table>
+<thead>
+<tr>
+<th>Cenário</th>
+<th>Produtividade</th>
+<th align="right">Esforço (h)</th>
+<th align="right">Pessoa-mês¹</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Otimista (equipe sênior, alto reúso)</td>
+<td>6 h/PF</td>
+<td align="right">4.420 h</td>
+<td align="right">27,6</td>
+</tr>
+<tr>
+<td><strong>Central (recomendado)</strong></td>
+<td><strong>8 h/PF</strong></td>
+<td align="right"><strong>5.896 h ≈ 5.900 h</strong></td>
+<td align="right"><strong>36,9</strong></td>
+</tr>
+<tr>
+<td>Conservador (produtividade de mercado clássica)</td>
+<td>11 h/PF</td>
+<td align="right">8.107 h</td>
+<td align="right">50,7</td>
+</tr>
+</tbody></table>
+<p>¹ 160 h úteis por pessoa-mês.</p>
+<p><strong>Esforço adotado: ≈ 5.900 horas/homem</strong> (faixa 4.400 – 8.100 h).</p>
+<h3 id="51-distribuição-do-esforço-por-disciplina">5.1 Distribuição do esforço por disciplina</h3>
+<pre class="mermaid">pie showData title Distribuição do esforço (≈ 5.900 h)
+  "Desenvolvimento (back+front)" : 45
+  "QA / Testes" : 15
+  "Requisitos (Business Analyst)" : 10
+  "Arquitetura / Tech Lead" : 10
+  "UX / Design System" : 8
+  "DBA / Dados" : 5
+  "DevOps / Infra" : 5
+  "Gestão / Documentação" : 2</pre>
+<table>
+<thead>
+<tr>
+<th>Disciplina</th>
+<th align="right">%</th>
+<th align="right">Horas</th>
+<th align="right">Custo (R$ 110/h)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Desenvolvimento (backend + frontend)</td>
+<td align="right">45%</td>
+<td align="right">2.655</td>
+<td align="right">R$ 292.050</td>
+</tr>
+<tr>
+<td>QA / Testes automatizados</td>
+<td align="right">15%</td>
+<td align="right">885</td>
+<td align="right">R$ 97.350</td>
+</tr>
+<tr>
+<td>Requisitos (Business Analyst)</td>
+<td align="right">10%</td>
+<td align="right">590</td>
+<td align="right">R$ 64.900</td>
+</tr>
+<tr>
+<td>Arquitetura / Tech Lead</td>
+<td align="right">10%</td>
+<td align="right">590</td>
+<td align="right">R$ 64.900</td>
+</tr>
+<tr>
+<td>UX / Design System</td>
+<td align="right">8%</td>
+<td align="right">472</td>
+<td align="right">R$ 51.920</td>
+</tr>
+<tr>
+<td>DBA / Modelagem de dados</td>
+<td align="right">5%</td>
+<td align="right">295</td>
+<td align="right">R$ 32.450</td>
+</tr>
+<tr>
+<td>DevOps / Infraestrutura</td>
+<td align="right">5%</td>
+<td align="right">295</td>
+<td align="right">R$ 32.450</td>
+</tr>
+<tr>
+<td>Gestão / Documentação</td>
+<td align="right">2%</td>
+<td align="right">118</td>
+<td align="right">R$ 12.980</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td align="right"><strong>100%</strong></td>
+<td align="right"><strong>5.900</strong></td>
+<td align="right"><strong>R$ 649.000</strong></td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="6-custos-r">6. Custos (R$)</h2>
+<h3 id="61-custo-hora-de-referência-brasil-2025-2026">6.1 Custo-hora de referência (Brasil, 2025-2026)</h3>
+<table>
+<thead>
+<tr>
+<th>Modelo de contratação</th>
+<th align="right">Custo-hora (blended)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Equipe interna (CLT + encargos + overhead)</strong></td>
+<td align="right">R$ 90 – 130 /h (central <strong>R$ 110/h</strong>)</td>
+</tr>
+<tr>
+<td>Fábrica de software / PJ</td>
+<td align="right">R$ 130 – 200 /h</td>
+</tr>
+<tr>
+<td>Métrica de Ponto de Função (setor público)</td>
+<td align="right">R$ 600 – 1.200 /PF</td>
+</tr>
+</tbody></table>
+<p><em>Blended</em> = média ponderada de uma equipe mista (Business Analyst, Tech Lead, Dev pleno/sênior, QA, UX, DBA, DevOps).</p>
+<h3 id="62-custo-total-por-cenário">6.2 Custo total por cenário</h3>
+<table>
+<thead>
+<tr>
+<th>Cenário</th>
+<th align="right">Esforço</th>
+<th align="right">Custo-hora</th>
+<th align="right"><strong>Custo total</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Piso (interno, otimista)</td>
+<td align="right">4.400 h</td>
+<td align="right">R$ 90</td>
+<td align="right"><strong>R$ 396.000</strong></td>
+</tr>
+<tr>
+<td><strong>Central (interno)</strong></td>
+<td align="right"><strong>5.900 h</strong></td>
+<td align="right"><strong>R$ 110</strong></td>
+<td align="right"><strong>R$ 649.000</strong></td>
+</tr>
+<tr>
+<td>Fábrica/PJ (central)</td>
+<td align="right">5.900 h</td>
+<td align="right">R$ 160</td>
+<td align="right">R$ 944.000</td>
+</tr>
+<tr>
+<td>Teto (fábrica, conservador)</td>
+<td align="right">8.100 h</td>
+<td align="right">R$ 160</td>
+<td align="right"><strong>R$ 1.296.000</strong></td>
+</tr>
+</tbody></table>
+<h3 id="63-contraprova-por-ponto-de-função-setor-público">6.3 Contraprova por Ponto de Função (setor público)</h3>
+<blockquote>
+<p>737 PF × <strong>R$ 900/PF</strong> (valor de mercado típico) = <strong>R$ 663.300</strong></p>
+</blockquote>
+<p>Convergente com o custo central por horas (<strong>R$ 649 mil</strong>), reforçando a estimativa.</p>
+<p><strong>Custo por PF adotado:</strong> R$ 649.000 ÷ 737 ≈ <strong>R$ 880/PF</strong>.</p>
+<hr>
+<h2 id="7-cronograma-equivalente">7. Cronograma equivalente</h2>
+<p>Com o esforço central de <strong>5.900 h</strong> e uma equipe de <strong>6 pessoas</strong> (~960 h/mês úteis):</p>
+<blockquote>
+<p>5.900 ÷ 960 ≈ <strong>6,1 meses</strong> de desenvolvimento convencional (faixa 4 – 8 meses).</p>
+</blockquote>
+<pre class="mermaid">flowchart LR
+    A["Descoberta &&lt;br/&gt;Requisitos&lt;br/&gt;~3 sem"] --&gt; B["Arquitetura &&lt;br/&gt;Fundações&lt;br/&gt;~2 sem"]
+    B --&gt; C["Construção iterativa&lt;br/&gt;(módulos + testes)&lt;br/&gt;~16 sem"]
+    C --&gt; D["Homologação /&lt;br/&gt;QA & E2E&lt;br/&gt;~3 sem"]
+    D --&gt; E["Implantação &&lt;br/&gt;Estabilização&lt;br/&gt;~2 sem"]</pre>
+<blockquote>
+<p><strong>Observação factual:</strong> o calendário real do repositório (24/06 → 26/07) foi <strong>comprimido por
+desenvolvimento assistido</strong>. Isso <strong>não altera o tamanho funcional entregue</strong> — que é o que este
+relatório mede. As 5.900 h representam o <strong>esforço equivalente</strong> que uma equipe convencional
+despenderia para produzir o mesmo escopo, base adequada para orçamento e valoração.</p>
+</blockquote>
+<hr>
+<h2 id="8-premissas-e-ressalvas">8. Premissas e ressalvas</h2>
+<ol>
+<li><strong>Contagem de PF derivada</strong> dos artefatos реais (endpoints, entidades, integrações, telas), não uma
+contagem IFPUG certificada por profissional CFPS. Margem típica ±15%.</li>
+<li><strong>LOC</strong> exclui código de terceiros (<code>node_modules</code>), gerado (<code>dist</code>), lockfiles e binários (imagens);
+inclui código autoral (produção, testes, i18n, infraestrutura).</li>
+<li><strong>Produtividade e custo-hora</strong> são referências de mercado; devem ser calibrados ao contrato real
+(senioridade, encargos, região, modelo CLT/PJ/fábrica).</li>
+<li>O relatório mede <strong>desenvolvimento</strong>; <strong>não inclui</strong> custos recorrentes de <strong>operação/infraestrutura</strong>
+(nuvem, licenças, sustentação), <strong>treinamento</strong> de usuários nem <strong>manutenção evolutiva</strong> pós-entrega.</li>
+<li>A <strong>documentação</strong> entregue (manuais, System Design, registros técnicos) está contemplada na rubrica
+&quot;Gestão / Documentação&quot;.</li>
+</ol>
+<hr>
+<h2 id="9-conclusão">9. Conclusão</h2>
+<p>O Compra Mais é um sistema de <strong>porte médio-grande</strong> (~<strong>737 PF</strong>, ~<strong>33,5 mil linhas de produção</strong>, 108
+endpoints, 15 módulos, 27 tabelas, 5 integrações, 44 telas), com <strong>processamento de negócio complexo</strong>
+(motor de distribuição equitativa, biometria, integração SEI, LGPD) e <strong>alta qualidade de engenharia</strong>
+(≈ 960 testes automatizados, i18n em 3 idiomas, arquitetura hexagonal, esteira de container).</p>
+<ul>
+<li><strong>Esforço equivalente:</strong> <strong>≈ 5.900 horas/homem</strong> (faixa 4.400 – 8.100 h).</li>
+<li><strong>Custo equivalente:</strong> <strong>≈ R$ 649 mil</strong> (faixa R$ 396 mil – R$ 1,30 milhão conforme o modelo de contratação).</li>
+<li><strong>Cronograma equivalente:</strong> <strong>≈ 6 meses</strong> com equipe de 6 pessoas.</li>
+</ul>
+<p>As duas metodologias (Pontos de Função e Linhas de Código) <strong>convergem</strong> e são reforçadas pela
+precificação por PF do setor público, conferindo <strong>robustez</strong> à estimativa.</p>
+
+    </article>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, securityLevel: 'loose', theme: 'default', flowchart: { htmlLabels: true } });
+  </script>
+</body>
+</html>

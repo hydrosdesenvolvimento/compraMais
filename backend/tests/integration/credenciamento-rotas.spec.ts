@@ -121,6 +121,11 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect(prova.statusCode).toBe(200);
     expect(prova.json()).toMatchObject({ status: 'aprovada' });
 
+    // Trilha imutável (UC012): a tentativa de prova de vida é auditada (veredito, sem template).
+    const trilhaProva = await app.inject({ method: 'GET', url: '/auditoria?evento=ProvaDeVidaVerificada', headers: comoPapel('auditor') });
+    expect(trilhaProva.statusCode).toBe(200);
+    expect((trilhaProva.json() as { evento: string }[]).some((r) => r.evento === 'ProvaDeVidaVerificada')).toBe(true);
+
     const aceite = await app.inject({
       method: 'POST', url: `/credenciamentos/${credId}/termo`, headers: forn(),
       payload: { versaoTermo: 'v1', finalidade: 'credenciamento' },

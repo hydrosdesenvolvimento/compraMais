@@ -193,7 +193,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     'FornecedorCadastrado', 'FornecedorSincronizado', 'PerfilEditado',
     'ProcuradorConvidado', 'ProcuradorRemovido',
     'DocumentoAprovado', 'DocumentoReprovado', 'FornecedorCredenciado', 'FornecedorEmCorrecao',
-    'CredenciamentoIniciado', 'TermoAceito', 'CredenciamentoCancelado',
+    'CredenciamentoIniciado', 'TermoAceito', 'CredenciamentoCancelado', 'ProvaDeVidaVerificada',
     'InadimplenciaVerificada', 'BloqueioAplicado', 'BloqueioLiberado',
     'EditalCriado', 'EditalPublicado', 'EditalEncerrado', 'EditalDespublicado', 'EditalEditado',
     'PublicoAlvoAmpliado', 'ContestacaoCnaeAberta', 'ContestacaoCnaeAcatada', 'ContestacaoCnaeRecusada',
@@ -419,7 +419,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   const enrolarFotoResponsavel = new EnrolarFotoResponsavel(docs, facial, biometriaRepo);
   const referenciaAprovada = { aprovada: async (documentoId: string) => (await docRepo.porId(documentoId))?.status === 'aprovado' };
   const verificarProvaDeVida = new VerificarProvaDeVida(biometriaRepo, facial, referenciaAprovada, config.face.limiar);
-  const provaDeVidaNoCredenciamento = new RegistrarProvaDeVidaNoCredenciamento(credRepo, verificarProvaDeVida);
+  const provaDeVidaNoCredenciamento = new RegistrarProvaDeVidaNoCredenciamento(credRepo, verificarProvaDeVida, bus);
   registrarRotasBiometria(app, { enrolar: enrolarFotoResponsavel });
 
   registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento, comprovante: gerarComprovanteCredenciamento, provaVida: provaDeVidaNoCredenciamento });

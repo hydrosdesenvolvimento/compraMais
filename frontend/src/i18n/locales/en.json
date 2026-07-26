@@ -728,7 +728,7 @@
       "editarTitulo": "Edit edital",
       "editarSub": "Adjust edital {{numero}} (available while it is a draft).",
       "provaDeVidaLabel": "Require liveness check (biometrics)",
-      "provaDeVidaAjuda": "If enabled, the supplier must pass facial verification before signing the Term of Acceptance (UC007)."
+      "provaDeVidaAjuda": "If enabled, the supplier must pass facial verification before signing the Term of Acceptance."
     },
     "contestacoes": {
       "titulo": "CNAE challenges",

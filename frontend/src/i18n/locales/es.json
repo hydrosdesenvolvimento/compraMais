@@ -1475,6 +1475,12 @@
   },
   "minhaConta": {
     "titulo": "Mi cuenta",
+    "fotoReconhecimento": {
+      "titulo": "Foto de reconocimiento",
+      "descricao": "Registra o actualiza la foto del rostro del responsable. La CPL la revisa y se usa como referencia de la prueba de vida en la acreditación.",
+      "enviada": "Foto enviada para revisión de la CPL.",
+      "erro": "No se pudo subir la foto. Inténtalo de nuevo."
+    },
     "subtitulo": "Datos oficiales de la empresa obtenidos de la Receita Federal (API del CNPJ). Solo se pueden editar el Nombre Comercial, la Dirección y el Teléfono.",
     "sync": {
       "titulo": "Sincronizar datos del CNPJ",

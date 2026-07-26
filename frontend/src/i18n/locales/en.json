@@ -1475,6 +1475,12 @@
   },
   "minhaConta": {
     "titulo": "My account",
+    "fotoReconhecimento": {
+      "titulo": "Recognition photo",
+      "descricao": "Register or update the responsible person's face photo. It is reviewed by the CPL and used as the liveness reference during accreditation.",
+      "enviada": "Photo submitted for CPL review.",
+      "erro": "Could not upload the photo. Please try again."
+    },
     "subtitulo": "Official company data obtained from the Federal Revenue Service (CNPJ API). Only Trade Name, Address and Phone can be edited.",
     "sync": {
       "titulo": "Sync CNPJ data",

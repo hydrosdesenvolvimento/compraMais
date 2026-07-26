@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useTranslation, Trans } from 'react-i18next';
 import { useForm } from '@tanstack/react-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Card, Pill, Botao, Campo } from '../../design-system/components';
+import { Card, Pill, Botao, Campo, CapturaFacial } from '../../design-system/components';
 import { IconeSync, IconeCadeado, IconeCheck } from '../../design-system/icons';
 import { mascaraCep, consultarCep } from '../../lib/br';
-import { api, type EnderecoView } from '../../lib/api';
+import { api, HttpError, type EnderecoView } from '../../lib/api';
 import { atualizarUsuarioSessao } from '../../lib/auth';
 import { SecaoLabel, CampoOficial, FotoResponsavel, TrocaSenhaForm } from '../conta-perfil';
 
@@ -117,6 +117,9 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync, onSincronizad
       {/* Dados do responsável / foto / senha */}
       <ResponsavelCard fantasia={fornecedor.razaoSocial} />
 
+      {/* Foto de reconhecimento facial (referência da prova de vida, UC007) */}
+      <FotoReconhecimentoCard fornecedorId={fornecedorId} />
+
       {/* Empresa: identidade + dados oficiais (somente leitura) + editáveis */}
       <Card>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '2px 0 22px', borderBottom: '1px solid var(--divider)', flexWrap: 'wrap' }}>
@@ -148,6 +151,42 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync, onSincronizad
         </div>
       </Card>
     </div>
+  );
+}
+
+/**
+ * Cartão "Foto de reconhecimento" (UC007): o responsável cadastra/atualiza a foto de referência da
+ * prova de vida. A foto é enviada como documento "Foto do Responsável" e analisada pela CPL — só passa
+ * a valer na prova de vida quando aprovada. Reusa `CapturaFacial` (webcam + fallback de upload).
+ */
+function FotoReconhecimentoCard({ fornecedorId }: { fornecedorId: string }) {
+  const { t } = useTranslation();
+  const [msg, setMsg] = useState<{ tom: 'ok' | 'erro'; texto: string } | null>(null);
+  const mut = useMutation({
+    mutationFn: (imagem: string) => api.enrolarFotoResponsavel(fornecedorId, imagem),
+    onSuccess: () => setMsg({ tom: 'ok', texto: t('minhaConta.fotoReconhecimento.enviada') }),
+    onError: (e) => {
+      const codigo = e instanceof HttpError ? e.codigo : undefined;
+      setMsg({ tom: 'erro', texto: t(`credenciamento.provaVida.${codigo}`, { defaultValue: t('minhaConta.fotoReconhecimento.erro') }) });
+    },
+  });
+
+  return (
+    <Card>
+      <div data-cy="foto-reconhecimento" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div style={{ font: '700 15px var(--font-body)', color: 'var(--azul-900)' }}>{t('minhaConta.fotoReconhecimento.titulo')}</div>
+        <p style={{ margin: 0, fontSize: 13.5, color: 'var(--cinza-500)' }}>{t('minhaConta.fotoReconhecimento.descricao')}</p>
+        <CapturaFacial onCapturar={(img) => { setMsg(null); mut.mutate(img); }} ocupado={mut.isPending} cyPrefix="foto-ref" />
+        {msg && (
+          <div
+            data-cy={msg.tom === 'ok' ? 'foto-ref-ok' : 'foto-ref-erro'}
+            style={{ color: msg.tom === 'ok' ? 'var(--sucesso, #067647)' : 'var(--erro, #B42318)', font: '600 13px var(--font-body)' }}
+          >
+            {msg.texto}
+          </div>
+        )}
+      </div>
+    </Card>
   );
 }
 

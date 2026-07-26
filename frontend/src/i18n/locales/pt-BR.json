@@ -1475,6 +1475,12 @@
   },
   "minhaConta": {
     "titulo": "Minha conta",
+    "fotoReconhecimento": {
+      "titulo": "Foto de reconhecimento",
+      "descricao": "Cadastre ou atualize a foto do rosto do responsável. Ela é analisada pela CPL e usada como referência da prova de vida no credenciamento.",
+      "enviada": "Foto enviada para análise da CPL.",
+      "erro": "Não foi possível enviar a foto. Tente novamente."
+    },
     "subtitulo": "Dados oficiais da empresa obtidos pela Receita Federal (API do CNPJ). Apenas Nome Fantasia, Endereço e Telefone podem ser editados.",
     "sync": {
       "titulo": "Sincronizar dados do CNPJ",

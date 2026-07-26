@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Card } from '../../design-system/components';
 import { api, HttpError } from '../../lib/api';
+import { textoDoErro } from '../../lib/erros';
 import { obterUsuario } from '../../lib/auth';
 import { Procuradores } from './Procuradores';
 
@@ -28,7 +29,7 @@ export function ProcuradoresConectada() {
     meta: { semToast: true }, // erro do convite é exibido inline — evita toast duplicado
     mutationFn: (identificador: string) => api.convidarProcurador(fornecedorId as string, identificador),
     onSuccess: () => { setErroConvite(null); void qc.invalidateQueries({ queryKey: ['procuradores', fornecedorId] }); },
-    onError: () => setErroConvite(t('procuradores.convite.erro')),
+    onError: (e) => setErroConvite(textoDoErro(e)),
   });
 
   const remover = useMutation({

@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation, Trans } from 'react-i18next';
 import { api, type DocItem, type CatalogoItemView } from '../../lib/api';
 import { MIME, TAMANHO_MAX_MB, formatoDe, lerBase64 } from '../../lib/upload';
+import { textoDoErro } from '../../lib/erros';
 import { Pill, Botao, BotaoIcone } from '../../design-system/components';
 import { toastBus } from '../../design-system/components/toast-bus';
 import { IconeDocumentos, IconeUpload, IconeDownload, IconeOlho, IconeAlerta, IconeSync, IconeFechar } from '../../design-system/icons';
@@ -74,7 +75,7 @@ export function Documentos({ fornecedorId }: { fornecedorId: string }) {
   const baixar = useMutation({
     mutationFn: (doc: DocItem) => api.baixarConteudo(doc.id),
     onSuccess: (c, doc) => baixarDataUrl(`data:${MIME[c.formato]};base64,${c.conteudo}`, `${doc.tipo}.${c.formato}`),
-    onError: () => toastBus.emitir({ tom: 'erro', texto: t('documentos.erroBaixar') }),
+    onError: (e) => toastBus.emitir({ tom: 'erro', texto: textoDoErro(e) }),
   });
 
   const fmtData = (iso: string | null): string =>

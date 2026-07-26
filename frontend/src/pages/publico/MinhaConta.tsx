@@ -6,6 +6,7 @@ import { Card, Pill, Botao, Campo, CapturaFacial } from '../../design-system/com
 import { IconeSync, IconeCadeado, IconeCheck } from '../../design-system/icons';
 import { mascaraCep, consultarCep } from '../../lib/br';
 import { api, HttpError, type EnderecoView } from '../../lib/api';
+import { textoDoErro } from '../../lib/erros';
 import { atualizarUsuarioSessao } from '../../lib/auth';
 import { SecaoLabel, CampoOficial, FotoResponsavel, TrocaSenhaForm } from '../conta-perfil';
 
@@ -168,7 +169,7 @@ function FotoReconhecimentoCard({ fornecedorId }: { fornecedorId: string }) {
     onSuccess: () => setMsg({ tom: 'ok', texto: t('minhaConta.fotoReconhecimento.enviada') }),
     onError: (e) => {
       const codigo = e instanceof HttpError ? e.codigo : undefined;
-      setMsg({ tom: 'erro', texto: t(`credenciamento.provaVida.${codigo}`, { defaultValue: t('minhaConta.fotoReconhecimento.erro') }) });
+      setMsg({ tom: 'erro', texto: t(`credenciamento.provaVida.${codigo}`, { defaultValue: textoDoErro(e) }) });
     },
   });
 

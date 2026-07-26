@@ -1781,8 +1781,8 @@
     "marcarTodas": "Marcar todas como leídas",
     "carregando": "Cargando…",
     "naoLida": "No leída",
-    "ocultarLidas": "Ocultar leídas",
-    "mostrarLidas": "Mostrar las leídas",
-    "todasLidasOcultas": "Todas las notificaciones están leídas y ocultas."
+    "exibirOcultas": "Mostrar notificaciones ocultas",
+    "ocultar": "Ocultar",
+    "reexibir": "Volver a mostrar"
   }
 }

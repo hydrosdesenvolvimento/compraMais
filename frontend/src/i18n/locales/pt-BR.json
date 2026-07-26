@@ -1781,8 +1781,8 @@
     "marcarTodas": "Marcar todas como lidas",
     "carregando": "Carregando…",
     "naoLida": "Não lida",
-    "ocultarLidas": "Ocultar lidas",
-    "mostrarLidas": "Mostrar as lidas",
-    "todasLidasOcultas": "Todas as notificações estão lidas e ocultas."
+    "exibirOcultas": "Exibir notificações ocultas",
+    "ocultar": "Ocultar",
+    "reexibir": "Reexibir"
   }
 }

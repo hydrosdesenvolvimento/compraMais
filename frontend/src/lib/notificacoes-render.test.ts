@@ -15,7 +15,7 @@ const t = ((chave: string, vals?: Record<string, unknown>) => {
 const siglaDe = (id: string) => (id === 's1' ? 'SEME' : id);
 
 function nota(over: Partial<NotificacaoView> & Pick<NotificacaoView, 'tipo'>): NotificacaoView {
-  return { id: 'n1', payload: {}, referencia: null, criadoEm: '2026-07-20T00:00:00Z', lida: false, ...over };
+  return { id: 'n1', payload: {}, referencia: null, criadoEm: '2026-07-20T00:00:00Z', lida: false, oculta: false, ...over };
 }
 
 describe('renderNotificacao (tipo + payload → texto localizado + link)', () => {

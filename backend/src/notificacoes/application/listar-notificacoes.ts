@@ -9,6 +9,7 @@ export interface NotificacaoView {
   referencia: string | null;
   criadoEm: string;
   lida: boolean;
+  oculta: boolean;
 }
 
 export interface PaginaNotificacoes {
@@ -40,7 +41,7 @@ export class GerirNotificacoes {
     ]);
     const itens: NotificacaoView[] = notas.map((n) => {
       const s = n.estado();
-      return { id: s.id, tipo: s.tipo, payload: s.payload, referencia: s.referencia, criadoEm: s.criadoEm, lida: n.lida };
+      return { id: s.id, tipo: s.tipo, payload: s.payload, referencia: s.referencia, criadoEm: s.criadoEm, lida: n.lida, oculta: n.oculta };
     });
     return { itens, total, naoLidas };
   }
@@ -49,6 +50,20 @@ export class GerirNotificacoes {
     const n = await this.repo.porId(id);
     if (!n || n.fornecedorId !== fornecedorId) throw new NotificacaoNaoEncontrada();
     await this.repo.marcarLida(id, this.now());
+  }
+
+  /** Oculta uma notificação do histórico (só o dono; 404 caso contrário). Reversível via `reexibir`. */
+  async ocultar(id: string, fornecedorId: string): Promise<void> {
+    const n = await this.repo.porId(id);
+    if (!n || n.fornecedorId !== fornecedorId) throw new NotificacaoNaoEncontrada();
+    await this.repo.ocultar(id, this.now());
+  }
+
+  /** Reexibe uma notificação oculta (só o dono; 404 caso contrário). */
+  async reexibir(id: string, fornecedorId: string): Promise<void> {
+    const n = await this.repo.porId(id);
+    if (!n || n.fornecedorId !== fornecedorId) throw new NotificacaoNaoEncontrada();
+    await this.repo.reexibir(id);
   }
 
   async marcarTodasLidas(fornecedorId: string): Promise<{ atualizadas: number }> {

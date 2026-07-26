@@ -14,6 +14,7 @@ export interface NotificacaoState {
   referencia: string | null; // id de contexto (editalId/documentoId) — base do link e da idempotência
   criadoEm: string; // ISO-8601
   lidaEm: string | null; // null = não lida
+  ocultaEm: string | null; // null = visível; preenchido = oculta do histórico (reexibível)
 }
 
 export class Notificacao {
@@ -26,7 +27,7 @@ export class Notificacao {
     return new Notificacao({
       id: input.id, fornecedorId: input.fornecedorId, tipo: input.tipo,
       payload: input.payload ?? {}, referencia: input.referencia ?? null,
-      criadoEm: input.agoraIso ?? new Date().toISOString(), lidaEm: null,
+      criadoEm: input.agoraIso ?? new Date().toISOString(), lidaEm: null, ocultaEm: null,
     });
   }
 
@@ -40,10 +41,21 @@ export class Notificacao {
   get fornecedorId(): string { return this.s.fornecedorId; }
   get tipo(): TipoNotificacao { return this.s.tipo; }
   get lida(): boolean { return this.s.lidaEm !== null; }
+  get oculta(): boolean { return this.s.ocultaEm !== null; }
 
   /** Idempotente: marcar lida duas vezes preserva o primeiro timestamp. */
   marcarLida(agoraIso: string = new Date().toISOString()): void {
     if (this.s.lidaEm === null) this.s.lidaEm = agoraIso;
+  }
+
+  /** Oculta a notificação do histórico (reexibível). Idempotente. */
+  ocultar(agoraIso: string = new Date().toISOString()): void {
+    if (this.s.ocultaEm === null) this.s.ocultaEm = agoraIso;
+  }
+
+  /** Reexibe (desfaz o ocultar). Idempotente. */
+  reexibir(): void {
+    this.s.ocultaEm = null;
   }
 
   /** Chave natural (tipo + referência + fornecedor) — dedupe de reprocessamento de evento. */

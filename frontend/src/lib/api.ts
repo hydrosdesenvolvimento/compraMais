@@ -202,7 +202,7 @@ export interface Transparencia {
  */
 /** Notificação persistida do fornecedor (event-sourced). Dado estruturado; o texto é localizado no front. */
 export type TipoNotificacao = 'credenciado' | 'em_correcao' | 'distribuicao' | 'edital_compativel';
-export interface NotificacaoView { id: string; tipo: TipoNotificacao; payload: Record<string, unknown>; referencia: string | null; criadoEm: string; lida: boolean }
+export interface NotificacaoView { id: string; tipo: TipoNotificacao; payload: Record<string, unknown>; referencia: string | null; criadoEm: string; lida: boolean; oculta: boolean }
 export interface PaginaNotificacoesView { itens: NotificacaoView[]; total: number; naoLidas: number }
 
 /** Cota/teto do fornecedor em UM item do edital (Fase 3). */
@@ -354,9 +354,11 @@ export const api = {
   // UC008 — Demandas distribuídas: o rateio que o Motor atribuiu ao fornecedor (empresa vem do token).
   demandasDistribuidas: () => get<DemandaDistribuidaView[]>('/distribuicao/minhas'),
   // Notificações persistidas do fornecedor (histórico + lidas/não-lidas).
-  notificacoes: (page = 1, size = 20) => get<PaginaNotificacoesView>(`/notificacoes?page=${page}&size=${size}`),
+  notificacoes: (page = 1, size = 20, incluirOcultas = false) => get<PaginaNotificacoesView>(`/notificacoes?page=${page}&size=${size}${incluirOcultas ? '&incluirOcultas=true' : ''}`),
   marcarNotificacaoLida: (id: string) => send<void>(`/notificacoes/${id}/ler`, 'POST'),
   marcarNotificacoesLidas: () => send<{ atualizadas: number }>('/notificacoes/ler-todas', 'POST'),
+  ocultarNotificacao: (id: string) => send<void>(`/notificacoes/${id}/ocultar`, 'POST'),
+  reexibirNotificacao: (id: string) => send<void>(`/notificacoes/${id}/reexibir`, 'POST'),
   documentos: (fid: string) => get<DocItem[]>(`/fornecedores/${fid}/documentos`),
   // FR-007 — envio de documento comprobatório. `conteudo` são os bytes do arquivo em base64 (o
   // backend cifra em repouso — AD-19). `formato` ∈ pdf|jpg|png; `dataValidade` opcional (ISO).

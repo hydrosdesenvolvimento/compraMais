@@ -1781,8 +1781,8 @@
     "marcarTodas": "Mark all as read",
     "carregando": "Loading…",
     "naoLida": "Unread",
-    "ocultarLidas": "Hide read",
-    "mostrarLidas": "Show read",
-    "todasLidasOcultas": "All notifications are read and hidden."
+    "exibirOcultas": "Show hidden notifications",
+    "ocultar": "Hide",
+    "reexibir": "Unhide"
   }
 }

@@ -105,7 +105,7 @@ documentos válidos → receba sua cota de fornecimento.</p>
     A["1 · Autocadastro&lt;br/&gt;(CNPJ + e-mail + senha)"] --&gt; B["2 · Login"]
     B --&gt; C["3 · Início&lt;br/&gt;(painel com alertas)"]
     C --&gt; D["4 · Vitrine de Editais&lt;br/&gt;(compatíveis com seu CNAE)"]
-    D --&gt; E["5 · Credenciamento&lt;br/&gt;capacidade → documentos → prova de vida → termo"]
+    D --&gt; E["5 · Credenciamento&lt;br/&gt;capacidade → documentos → (prova de vida) → termo"]
     E --&gt; F["6 · Documentos&lt;br/&gt;(manter válidos)"]
     F --&gt; G["7 · Meus Credenciamentos&lt;br/&gt;(acompanhar análise)"]
     G --&gt; H{"Aprovado&lt;br/&gt;e apto?"}
@@ -198,18 +198,24 @@ enquadramento.</p>
 </blockquote>
 <hr>
 <h2 id="7-etapa-5--credenciar-se-em-um-edital">7. Etapa 5 — Credenciar-se em um edital</h2>
-<p>O <strong>credenciamento</strong> é um <strong>assistente guiado em 4 passos</strong>, sempre visível no topo da tela:
-<strong>Capacidade → Documentos → Termo de Aceite → Concluído</strong>.</p>
+<p>O <strong>credenciamento</strong> é um <strong>assistente guiado</strong>, sempre visível no topo da tela:
+<strong>Capacidade → Documentos → (Prova de vida) → Termo de Aceite → Concluído</strong>.</p>
+<blockquote>
+<p><strong>O passo de Prova de vida é opcional e depende do edital.</strong> A Prefeitura define, no cadastro de cada
+edital, se aquele credenciamento <strong>exige prova de vida</strong> (verificação facial). Quando <strong>não exige</strong>,
+esse passo <strong>não aparece</strong> e você segue direto dos <strong>Documentos</strong> para o <strong>Termo de Aceite</strong>.</p>
+</blockquote>
 <pre class="mermaid">stateDiagram-v2
     [*] --&gt; Capacidade
     Capacidade --&gt; Documentos: declarou o teto
-    Documentos --&gt; ProvaDeVida: documentos válidos
+    Documentos --&gt; ProvaDeVida: se o edital EXIGE prova de vida
+    Documentos --&gt; Termo: se o edital NÃO exige
     ProvaDeVida --&gt; Termo: prova de vida aprovada
     Termo --&gt; Concluido: aceitou o termo
     Concluido --&gt; [*]: Pendente de Análise
     note right of ProvaDeVida
       Verificação facial (UC007):
-      exigida antes de assinar o termo
+      só quando o edital exige
     end note</pre>
 <h3 id="passo-51--declarar-a-capacidade">Passo 5.1 — Declarar a capacidade</h3>
 <p>Selecione <strong>os itens do edital</strong> que a sua empresa quer atender e, para cada um, informe a <strong>quantidade
@@ -238,10 +244,14 @@ ou o que está vencido.</p>
 </ul>
 <p>Para enviar um pendente, use <strong>Selecionar arquivo</strong> (PDF, JPG ou PNG, até 10 MB) e informe a <strong>validade
 do documento</strong>. Depois clique em <strong>Continuar</strong>.</p>
-<h3 id="passo-53--prova-de-vida-verificação-facial">Passo 5.3 — Prova de vida (verificação facial)</h3>
-<p>Antes de assinar o Termo, o sistema pede a <strong>prova de vida</strong> (verificação facial) do responsável — uma
-checagem de segurança que confirma que é uma pessoa real concluindo o credenciamento. <strong>O Termo só pode
-ser aceito após a prova de vida ser aprovada.</strong></p>
+<h3 id="passo-53--prova-de-vida-somente-quando-o-edital-exige">Passo 5.3 — Prova de vida (somente quando o edital exige)</h3>
+<p><strong>Alguns editais</strong> exigem uma <strong>prova de vida</strong> (verificação facial) do responsável antes do Termo — uma
+checagem de segurança que confirma que é uma pessoa real concluindo o credenciamento. <strong>Quando o edital
+exige, o Termo só pode ser aceito após a prova de vida ser aprovada.</strong></p>
+<blockquote>
+<p>Se o edital <strong>não</strong> exige prova de vida, este passo <strong>não aparece</strong> no assistente e você vai direto do
+passo <strong>Documentos</strong> para o <strong>Termo de Aceite</strong>. Você percebe pela barra de passos no topo da tela.</p>
+</blockquote>
 <h3 id="passo-54--termo-de-aceite">Passo 5.4 — Termo de Aceite</h3>
 <p>No último passo, você assina o <strong>Termo de Aceite</strong>. Ele declara que as informações e documentos são
 verdadeiros e que você concorda com as condições do edital (Lei Complementar 123 e regras do Compra
@@ -346,7 +356,7 @@ prestação de contas do Compra Mais à sociedade.</p>
 </tr>
 <tr>
 <td><strong>Credenciamento</strong></td>
-<td>O processo de <strong>se habilitar</strong> em um edital (capacidade + documentos + prova de vida + termo).</td>
+<td>O processo de <strong>se habilitar</strong> em um edital (capacidade + documentos + termo; <strong>prova de vida quando o edital exige</strong>).</td>
 </tr>
 <tr>
 <td><strong>Capacidade / Teto</strong></td>
@@ -370,7 +380,7 @@ prestação de contas do Compra Mais à sociedade.</p>
 </tr>
 <tr>
 <td><strong>Prova de vida</strong></td>
-<td>Verificação <strong>facial</strong> do responsável, exigida antes de assinar o Termo.</td>
+<td>Verificação <strong>facial</strong> do responsável, exigida <strong>por alguns editais</strong> antes de assinar o Termo (definido no cadastro do edital).</td>
 </tr>
 <tr>
 <td><strong>Termo de Aceite</strong></td>
@@ -390,8 +400,9 @@ A vitrine mostra só editais <strong>compatíveis com o seu CNAE</strong> e <str
 venceu, editais que o exigem ficam <strong>bloqueados</strong> até você regularizar — verifique os alertas no
 <strong>Início</strong> e na tela <strong>Documentos</strong>.</p>
 <p><strong>Não consegui concluir o credenciamento no Termo.</strong>
-O <strong>Termo de Aceite</strong> só é liberado após a <strong>prova de vida</strong> ser aprovada e os documentos obrigatórios
-estarem válidos. Confira os passos anteriores do assistente.</p>
+Verifique se os documentos obrigatórios estão válidos. <strong>Se este edital exigir prova de vida</strong>, o Termo
+só é liberado após a verificação facial ser aprovada — o passo aparece no assistente entre Documentos e
+Termo. Se o edital não exige, o passo não aparece e o Termo fica disponível direto após os Documentos.</p>
 <p><strong>Enviei um documento em outro edital. Preciso enviar de novo?</strong>
 Não. Documentos <strong>válidos</strong> são <strong>reaproveitados automaticamente</strong>. Você só anexa o que falta ou o que
 venceu.</p>

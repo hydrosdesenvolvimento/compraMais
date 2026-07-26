@@ -198,7 +198,7 @@ estimado</em> em editais em andamento e <em>Documentos pendentes</em> aguardando
 <p><img src="imagens-admin/03-editais.png" alt="Gestão de Editais"></p>
 <p>Passo a passo para publicar um edital:</p>
 <pre class="mermaid">flowchart LR
-    A["Novo edital&lt;br/&gt;secretaria + objeto + CNAEs + vigência"] --&gt; B["Adicionar itens&lt;br/&gt;unidade · quantidade · preço-teto"]
+    A["Novo edital&lt;br/&gt;secretaria + objeto + CNAEs + vigência&lt;br/&gt;+ exige prova de vida?"] --&gt; B["Adicionar itens&lt;br/&gt;unidade · quantidade · preço-teto"]
     B --&gt; C["Publicar"]
     C --&gt; D["Aparece na vitrine&lt;br/&gt;dos fornecedores compatíveis"]
     D --&gt; E["Encerrar&lt;br/&gt;(quando concluído)"]</pre>
@@ -206,6 +206,11 @@ estimado</em> em editais em andamento e <em>Documentos pendentes</em> aguardando
 <li><strong>CNAEs-alvo</strong> definem quais empresas verão o edital (compatibilidade por ramo).</li>
 <li><strong>Itens</strong> só são editáveis enquanto o edital está em <strong>rascunho</strong>.</li>
 <li><strong>Vigência</strong> (prazo) controla o encerramento; o edital pode ser <strong>despublicado</strong>/ <strong>encerrado</strong>.</li>
+<li><strong>Exigir prova de vida (biometria):</strong> no cadastro do edital há a opção <strong>&quot;Exigir prova de vida
+(biometria)&quot;</strong>. Quando <strong>marcada</strong>, o credenciamento naquele edital só conclui o Termo de Aceite após
+o fornecedor <strong>aprovar a verificação facial</strong> (UC007); quando <strong>desmarcada</strong> (padrão), o passo de prova
+de vida <strong>não</strong> é exigido e o fornecedor assina o Termo direto. A opção é editável enquanto o edital
+está em <strong>rascunho</strong>.</li>
 </ul>
 <hr>
 <h2 id="6-credenciamento-em-edital">6. Credenciamento em Edital</h2>

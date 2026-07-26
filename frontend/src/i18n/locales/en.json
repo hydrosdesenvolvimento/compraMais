@@ -1201,8 +1201,30 @@
     "passos": {
       "capacidade": "Capacity",
       "documentos": "Documents",
+      "provaVida": "Liveness Check",
       "termo": "Terms of Acceptance",
       "concluido": "Completed"
+    },
+    "provaVida": {
+      "passo": "STEP 3",
+      "titulo": "Liveness check",
+      "descricao": "Confirm it's you: take a live capture of your face to match the registered responsible person's photo.",
+      "instrucao": "Center your face with good lighting and capture.",
+      "iniciarCamera": "Enable camera",
+      "capturar": "Capture and verify",
+      "recapturar": "Retake",
+      "verificando": "Verifying…",
+      "aprovada": "Liveness check approved.",
+      "reprovada": "The face does not match the registered responsible person. Please try again.",
+      "semCamera": "No camera? Upload a photo of your face.",
+      "enviarFoto": "Upload photo",
+      "SemReferenciaBiometrica": "No reference photo on file. Register it in My Account.",
+      "ReferenciaBiometricaNaoAprovada": "Your reference photo is still under review by the CPL. Try again after approval.",
+      "ReconhecimentoFacialIndisponivel": "Verification service unavailable. Please try again shortly.",
+      "rosto_nao_detectado": "No face detected in the image. Frame your face well.",
+      "multiplos_rostos": "More than one face in the image. Appear alone.",
+      "qualidade_baixa": "Low-quality image. Improve lighting and focus.",
+      "erroGenerico": "Could not verify. Please try again."
     },
     "acoes": {
       "continuar": "Continue",

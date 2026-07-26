@@ -174,6 +174,7 @@ export interface CredenciamentoDetalheView {
   id: string; editalId: string; estado: 'iniciado' | 'aceito' | 'cancelado';
   numeroEdital: string | null; objeto: string | null; secretariaSigla: string | null;
   capacidadeTeto: number; itens: CapacidadeItemView[]; passoAtual: number; totalPassos: number;
+  provaVidaStatus: 'aprovada' | 'reprovada' | 'manual' | null; // veredito da prova de vida (UC007)
   termo: TermoAceiteView | null; criadoEm: string; atualizadoEm: string;
 }
 export interface DocPendente { id: string; tipo: string; status: 'pendente' | 'aprovado' | 'reprovado'; enviadoEm: string }
@@ -413,6 +414,14 @@ export const api = {
   // não há. O wizard consulta na entrada para reidratar o passo salvo em vez de recriar (evita o 409
   // CredenciamentoDuplicado ao reentrar num edital já iniciado).
   credenciamentoNoEdital: (editalId: string) => get<CredenciamentoDetalheView | undefined>(`/editais/${editalId}/credenciamentos/meu`),
+  // UC007 — prova de vida: envia a captura ao vivo (data URL/base64) e recebe o veredito. 409 quando a
+  // referência ainda não foi aprovada pela CPL; 422 (codigo=motivo) quando a captura não tem rosto etc.
+  provaDeVida: (credId: string, imagem: string) =>
+    send<{ status: 'aprovada' | 'reprovada' | 'manual'; score: number }>(`/credenciamentos/${credId}/prova-de-vida`, 'POST', { imagem }),
+  // UC007 — cadastro da foto de referência do responsável (onboarding/Minha Conta). A foto vira um
+  // documento "Foto do Responsável" que a CPL analisa; devolve o id do documento gerado.
+  enrolarFotoResponsavel: (fid: string, imagem: string) =>
+    send<{ documentoId: string; status: string }>(`/fornecedores/${fid}/biometria`, 'POST', { imagem }),
 
   // Painel admin
   dashboardAdmin: () => get<Funil>('/admin/dashboard'),

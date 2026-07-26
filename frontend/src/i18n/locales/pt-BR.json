@@ -1201,8 +1201,30 @@
     "passos": {
       "capacidade": "Capacidade",
       "documentos": "Documentos",
+      "provaVida": "Prova de Vida",
       "termo": "Termo de Aceite",
       "concluido": "Concluído"
+    },
+    "provaVida": {
+      "passo": "PASSO 3",
+      "titulo": "Prova de vida",
+      "descricao": "Confirme que é você: faça uma captura ao vivo do seu rosto para comparar com a foto do responsável cadastrada.",
+      "instrucao": "Centralize o rosto com boa iluminação e capture.",
+      "iniciarCamera": "Ativar câmera",
+      "capturar": "Capturar e verificar",
+      "recapturar": "Tirar outra",
+      "verificando": "Verificando…",
+      "aprovada": "Prova de vida aprovada.",
+      "reprovada": "O rosto não corresponde ao responsável cadastrado. Tente novamente.",
+      "semCamera": "Sem câmera? Envie uma foto do seu rosto.",
+      "enviarFoto": "Enviar foto",
+      "SemReferenciaBiometrica": "Nenhuma foto de referência cadastrada. Cadastre-a em Minha Conta.",
+      "ReferenciaBiometricaNaoAprovada": "Sua foto de referência ainda está em análise pela CPL. Tente novamente após a aprovação.",
+      "ReconhecimentoFacialIndisponivel": "Serviço de verificação indisponível. Tente novamente em instantes.",
+      "rosto_nao_detectado": "Não detectamos um rosto na imagem. Enquadre bem o rosto.",
+      "multiplos_rostos": "Há mais de um rosto na imagem. Apareça sozinho.",
+      "qualidade_baixa": "Imagem de baixa qualidade. Melhore a iluminação e o foco.",
+      "erroGenerico": "Não foi possível verificar. Tente novamente."
     },
     "acoes": {
       "continuar": "Continuar",

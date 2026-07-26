@@ -1201,8 +1201,30 @@
     "passos": {
       "capacidade": "Capacidad",
       "documentos": "Documentos",
+      "provaVida": "Prueba de Vida",
       "termo": "Términos de Aceptación",
       "concluido": "Completado"
+    },
+    "provaVida": {
+      "passo": "PASO 3",
+      "titulo": "Prueba de vida",
+      "descricao": "Confirma que eres tú: haz una captura en vivo de tu rostro para compararla con la foto del responsable registrada.",
+      "instrucao": "Centra el rostro con buena iluminación y captura.",
+      "iniciarCamera": "Activar cámara",
+      "capturar": "Capturar y verificar",
+      "recapturar": "Repetir",
+      "verificando": "Verificando…",
+      "aprovada": "Prueba de vida aprobada.",
+      "reprovada": "El rostro no coincide con el responsable registrado. Inténtalo de nuevo.",
+      "semCamera": "¿Sin cámara? Sube una foto de tu rostro.",
+      "enviarFoto": "Subir foto",
+      "SemReferenciaBiometrica": "No hay foto de referencia registrada. Regístrala en Mi Cuenta.",
+      "ReferenciaBiometricaNaoAprovada": "Tu foto de referencia aún está en revisión por la CPL. Inténtalo tras la aprobación.",
+      "ReconhecimentoFacialIndisponivel": "Servicio de verificación no disponible. Inténtalo en unos instantes.",
+      "rosto_nao_detectado": "No detectamos un rostro en la imagen. Encuadra bien el rostro.",
+      "multiplos_rostos": "Hay más de un rostro en la imagen. Aparece solo.",
+      "qualidade_baixa": "Imagen de baja calidad. Mejora la iluminación y el enfoque.",
+      "erroGenerico": "No se pudo verificar. Inténtalo de nuevo."
     },
     "acoes": {
       "continuar": "Continuar",

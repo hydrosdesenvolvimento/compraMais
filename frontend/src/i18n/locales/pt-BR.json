@@ -130,6 +130,11 @@
       "signup": "Criar conta"
     },
     "signup": {
+      "foto": {
+        "label": "Foto do responsável (obrigatória)",
+        "descricao": "Usada como referência da prova de vida no credenciamento. Passa pela análise da CPL.",
+        "capturada": "Foto capturada."
+      },
       "title": "Cadastro de fornecedor",
       "subtitle": "Informe o CNPJ da empresa. Os dados são validados na Receita Federal automaticamente.",
       "cnpjLabel": "CNPJ da empresa",
@@ -733,6 +738,9 @@
       "recusar": "Recusar"
     },
     "auditoria": {
+      "eventos": {
+        "ProvaDeVidaVerificada": "Prova de vida verificada"
+      },
       "titulo": "Auditoria — trilha",
       "subtitulo": "Consulta e exportação da trilha append-only (somente leitura).",
       "usuarioPlaceholder": "Usuário/ator",
@@ -1201,8 +1209,32 @@
     "passos": {
       "capacidade": "Capacidade",
       "documentos": "Documentos",
+      "provaVida": "Prova de Vida",
       "termo": "Termo de Aceite",
       "concluido": "Concluído"
+    },
+    "provaVida": {
+      "passo": "PASSO 3",
+      "titulo": "Prova de vida",
+      "descricao": "Confirme que é você: faça uma captura ao vivo do seu rosto para comparar com a foto do responsável cadastrada.",
+      "instrucao": "Centralize o rosto com boa iluminação e capture.",
+      "consentimento": "Autorizo o tratamento da minha imagem facial para a prova de vida, conforme a Política de Privacidade.",
+      "consentimentoObrigatorio": "É necessário autorizar o tratamento da imagem facial.",
+      "iniciarCamera": "Ativar câmera",
+      "capturar": "Capturar e verificar",
+      "recapturar": "Tirar outra",
+      "verificando": "Verificando…",
+      "aprovada": "Prova de vida aprovada.",
+      "reprovada": "O rosto não corresponde ao responsável cadastrado. Tente novamente.",
+      "semCamera": "Sem câmera? Envie uma foto do seu rosto.",
+      "enviarFoto": "Enviar foto",
+      "SemReferenciaBiometrica": "Nenhuma foto de referência cadastrada. Cadastre-a em Minha Conta.",
+      "ReferenciaBiometricaNaoAprovada": "Sua foto de referência ainda está em análise pela CPL. Tente novamente após a aprovação.",
+      "ReconhecimentoFacialIndisponivel": "Serviço de verificação indisponível. Tente novamente em instantes.",
+      "rosto_nao_detectado": "Não detectamos um rosto na imagem. Enquadre bem o rosto.",
+      "multiplos_rostos": "Há mais de um rosto na imagem. Apareça sozinho.",
+      "qualidade_baixa": "Imagem de baixa qualidade. Melhore a iluminação e o foco.",
+      "erroGenerico": "Não foi possível verificar. Tente novamente."
     },
     "acoes": {
       "continuar": "Continuar",
@@ -1453,6 +1485,12 @@
   },
   "minhaConta": {
     "titulo": "Minha conta",
+    "fotoReconhecimento": {
+      "titulo": "Foto de reconhecimento",
+      "descricao": "Cadastre ou atualize a foto do rosto do responsável. Ela é analisada pela CPL e usada como referência da prova de vida no credenciamento.",
+      "enviada": "Foto enviada para análise da CPL.",
+      "erro": "Não foi possível enviar a foto. Tente novamente."
+    },
     "subtitulo": "Dados oficiais da empresa obtidos pela Receita Federal (API do CNPJ). Apenas Nome Fantasia, Endereço e Telefone podem ser editados.",
     "sync": {
       "titulo": "Sincronizar dados do CNPJ",

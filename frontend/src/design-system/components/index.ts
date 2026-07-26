@@ -11,6 +11,7 @@ export { Card } from './Card';
 export { Avatar } from './Avatar';
 export { Campo } from './Campo';
 export { Stepper } from './Stepper';
+export { CapturaFacial } from './CapturaFacial';
 export { BarraAcessibilidade } from './BarraAcessibilidade';
 export { ToastProvider, useToast } from './Toast';
 export { toastBus } from './toast-bus';

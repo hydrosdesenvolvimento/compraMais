@@ -45,10 +45,13 @@ describe('Rotas de credenciamento (UC004 — HTTP)', () => {
     expect(cad.statusCode).toBe(201);
     empresaId = cad.json().fornecedorId as string;
 
-    // Prova de vida (UC007): cadastra a referência biométrica do responsável (onboarding, D4). Com o
-    // mock, o template é determinístico por conteúdo → verificar depois com a MESMA foto aprova.
+    // Prova de vida (UC007): a foto de referência é enviada como documento "Foto do Responsável" e a
+    // CPL a aprova (a prova de vida exige a referência aprovada). Mock → mesma foto casa na verificação.
     const bio = await app.inject({ method: 'POST', url: `/fornecedores/${empresaId}/biometria`, headers: forn(), payload: { imagem: FOTO_TITULAR } });
     expect(bio.statusCode).toBe(201);
+    const fotoDocId = bio.json().documentoId as string;
+    const aprovaFoto = await app.inject({ method: 'POST', url: `/documentos/${fotoDocId}/covalidar`, headers: comoPapel('cpl', { userId: 'cpl1' }), payload: { resultado: 'aprovado', empresaId } });
+    expect(aprovaFoto.statusCode).toBe(200);
 
     editalCompativel = await criarEPublicar(['1412601']);
     editalIncompativel = await criarEPublicar(['9999999']);

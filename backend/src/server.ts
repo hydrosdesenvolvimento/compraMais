@@ -93,7 +93,7 @@ import { ReconhecimentoFacialHttpGateway } from './shared/acl/facial/reconhecime
 import type { BiometriaRepository } from './biometria/application/biometria-repository.js';
 import { BiometriaRepositoryMemory } from './biometria/adapters/biometria-repository-memory.js';
 import { BiometriaRepositoryPg } from './biometria/adapters/biometria-repository-pg.js';
-import { RegistrarBiometriaReferencia } from './biometria/application/registrar-referencia.js';
+import { EnrolarFotoResponsavel } from './biometria/application/enrolar-foto-responsavel.js';
 import { VerificarProvaDeVida } from './biometria/application/verificar-prova-de-vida.js';
 import { registrarRotasBiometria } from './biometria/adapters/biometria-controller.js';
 import { InMemoryAdapterMetrics } from './shared/observability/metrics.js';
@@ -413,10 +413,14 @@ export async function buildServer(): Promise<FastifyInstance> {
   const biometriaRepo: BiometriaRepository = pool
     ? new BiometriaRepositoryPg(pool, new PiiCipherAesGcm(config.crypto.piiKey))
     : new BiometriaRepositoryMemory();
-  const registrarBiometria = new RegistrarBiometriaReferencia(biometriaRepo, facial);
-  const verificarProvaDeVida = new VerificarProvaDeVida(biometriaRepo, facial, config.face.limiar);
+  // Enrollment: a foto de referência é enviada como DOCUMENTO "Foto do Responsável" (reusa `docs` →
+  // vai à análise da CPL) e dela extraímos o embedding. A prova de vida exige a foto APROVADA pela CPL:
+  // a porta de aprovação consulta o status do documento vinculado à referência.
+  const enrolarFotoResponsavel = new EnrolarFotoResponsavel(docs, facial, biometriaRepo);
+  const referenciaAprovada = { aprovada: async (documentoId: string) => (await docRepo.porId(documentoId))?.status === 'aprovado' };
+  const verificarProvaDeVida = new VerificarProvaDeVida(biometriaRepo, facial, referenciaAprovada, config.face.limiar);
   const provaDeVidaNoCredenciamento = new RegistrarProvaDeVidaNoCredenciamento(credRepo, verificarProvaDeVida);
-  registrarRotasBiometria(app, { registrar: registrarBiometria });
+  registrarRotasBiometria(app, { enrolar: enrolarFotoResponsavel });
 
   registrarRotasCredenciamento(app, { solicitar: solicitarCredenciamento, listar: listarCredenciamentos, detalhar: detalharCredenciamento, comprovante: gerarComprovanteCredenciamento, provaVida: provaDeVidaNoCredenciamento });
 

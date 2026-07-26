@@ -31,10 +31,13 @@ describe('Rotas de Demandas distribuídas (UC008 — HTTP)', () => {
     expect(cad.statusCode).toBe(201);
     empresaId = cad.json().fornecedorId as string;
 
-    // Prova de vida (UC007): referência do responsável no cadastro; a MESMA foto aprova na verificação.
+    // Prova de vida (UC007): foto de referência enviada como documento e APROVADA pela CPL (a mesma
+    // foto aprova na verificação, mock determinístico).
     const foto = Buffer.from('rosto-do-titular-1').toString('base64');
     const bio = await app.inject({ method: 'POST', url: `/fornecedores/${empresaId}/biometria`, headers: fornecedor(), payload: { imagem: foto } });
     expect(bio.statusCode).toBe(201);
+    const aprovaFoto = await app.inject({ method: 'POST', url: `/documentos/${bio.json().documentoId}/covalidar`, headers: comoPapel('cpl', { userId: 'cpl1' }), payload: { resultado: 'aprovado', empresaId } });
+    expect(aprovaFoto.statusCode).toBe(200);
 
     const criado = await criarPublicar(['1412601'], 10);
     editalDistribuido = criado.editalId;

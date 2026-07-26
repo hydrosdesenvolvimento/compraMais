@@ -26,4 +26,7 @@ export const TIPOS_DOCUMENTO_BASELINE: readonly TipoDocumentoBaseline[] = [
   { nome: 'Certidão de Regularidade do FGTS', categoria: 'fiscal', exigeValidade: true, exigeExercicio: false, validadeDias: 90, obrigatorio: true },
   { nome: 'Balanço Patrimonial', categoria: 'contratual', exigeValidade: false, exigeExercicio: true, validadeDias: null, obrigatorio: true },
   { nome: 'Atestado de Capacidade Técnica', categoria: 'contratual', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: false },
+  // Foto do responsável (UC007 · prova de vida): referência biométrica enviada como documento e
+  // covalidada pela CPL como os demais. O nome deve casar com TIPO_DOC_FOTO_RESPONSAVEL (biometria).
+  { nome: 'Foto do Responsável', categoria: 'cadastral', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: true },
 ];

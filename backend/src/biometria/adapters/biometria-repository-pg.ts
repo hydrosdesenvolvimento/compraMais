@@ -15,11 +15,11 @@ export class BiometriaRepositoryPg implements BiometriaRepository {
   async salvarReferencia(ref: ReferenciaBiometrica): Promise<void> {
     const template = this.cipher.encrypt(JSON.stringify(ref.template.vetor));
     await this.pool.query(
-      `INSERT INTO fornecedor_biometria (fornecedor_id, usuario_id, template, modelo, dim, criado_em, atualizado_em)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)
+      `INSERT INTO fornecedor_biometria (fornecedor_id, usuario_id, documento_id, template, modelo, dim, criado_em, atualizado_em)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
        ON CONFLICT (fornecedor_id) DO UPDATE SET
-         usuario_id = $2, template = $3, modelo = $4, dim = $5, atualizado_em = $7`,
-      [ref.fornecedorId, ref.usuarioId, template, ref.template.modelo, ref.template.dim, ref.criadoEm, ref.atualizadoEm],
+         usuario_id = $2, documento_id = $3, template = $4, modelo = $5, dim = $6, atualizado_em = $8`,
+      [ref.fornecedorId, ref.usuarioId, ref.documentoId, template, ref.template.modelo, ref.template.dim, ref.criadoEm, ref.atualizadoEm],
     );
   }
 
@@ -31,6 +31,7 @@ export class BiometriaRepositoryPg implements BiometriaRepository {
     return {
       fornecedorId: String(row.fornecedor_id),
       usuarioId: String(row.usuario_id),
+      documentoId: String(row.documento_id),
       template: { vetor, dim: Number(row.dim), modelo: String(row.modelo) },
       criadoEm: iso(row.criado_em),
       atualizadoEm: iso(row.atualizado_em),

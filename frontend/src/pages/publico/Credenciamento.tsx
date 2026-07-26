@@ -715,7 +715,7 @@ function PassoProvaDeVida({ credId, aprovada, setAprovada }: { credId: string | 
         {t('credenciamento.provaVida.instrucao')}
       </p>
 
-      <CapturaFacial onCapturar={verificar} ocupado={verificando} cyPrefix="prova" />
+      <CapturaFacial onCapturar={verificar} ocupado={verificando} cyPrefix="prova" permitirUpload={false} />
 
       {(msg || aprovada) && (
         <div

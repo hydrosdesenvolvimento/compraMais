@@ -12,10 +12,13 @@ export function CapturaFacial({
   onCapturar,
   ocupado = false,
   cyPrefix = 'captura',
+  permitirUpload = true,
 }: {
   onCapturar: (dataUrl: string) => void;
   ocupado?: boolean;
   cyPrefix?: string;
+  /** Fallback de upload de arquivo. Desligado na prova de vida (liveness exige captura ao vivo). */
+  permitirUpload?: boolean;
 }) {
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -118,22 +121,24 @@ export function CapturaFacial({
         </button>
       )}
 
-      {/* Fallback sem câmera (também o caminho testável): envia uma foto do rosto. */}
-      <label
-        data-cy={`${cyPrefix}-sem-camera`}
-        style={{ font: '600 13px var(--font-body)', color: 'var(--azul-700, #1d4ed8)', cursor: ocupado ? 'default' : 'pointer' }}
-      >
-        {t('credenciamento.provaVida.semCamera')}{' '}
-        <span style={{ textDecoration: 'underline' }}>{t('credenciamento.provaVida.enviarFoto')}</span>
-        <input
-          type="file"
-          accept="image/png,image/jpeg"
-          data-cy={`${cyPrefix}-arquivo`}
-          onChange={escolherArquivo}
-          disabled={ocupado}
-          style={{ display: 'none' }}
-        />
-      </label>
+      {/* Fallback sem câmera (upload). Desligado na prova de vida (liveness exige captura ao vivo). */}
+      {permitirUpload && (
+        <label
+          data-cy={`${cyPrefix}-sem-camera`}
+          style={{ font: '600 13px var(--font-body)', color: 'var(--azul-700, #1d4ed8)', cursor: ocupado ? 'default' : 'pointer' }}
+        >
+          {t('credenciamento.provaVida.semCamera')}{' '}
+          <span style={{ textDecoration: 'underline' }}>{t('credenciamento.provaVida.enviarFoto')}</span>
+          <input
+            type="file"
+            accept="image/png,image/jpeg"
+            data-cy={`${cyPrefix}-arquivo`}
+            onChange={escolherArquivo}
+            disabled={ocupado}
+            style={{ display: 'none' }}
+          />
+        </label>
+      )}
     </div>
   );
 }

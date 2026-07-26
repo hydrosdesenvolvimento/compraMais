@@ -5,6 +5,16 @@ import { Credenciamento } from './Credenciamento';
 // Alinha o testId do Testing Library ao data-cy do contrato de testes (Cypress).
 configure({ testIdAttribute: 'data-cy' });
 
+// A prova de vida usa SÓ a câmera (sem fallback de upload). jsdom não implementa mídia/canvas, então
+// simulamos getUserMedia + o desenho do frame → data URL.
+Object.defineProperty(globalThis.navigator, 'mediaDevices', {
+  configurable: true,
+  value: { getUserMedia: vi.fn().mockResolvedValue({ getTracks: () => [] }) },
+});
+HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+HTMLCanvasElement.prototype.getContext = vi.fn(() => ({ drawImage: vi.fn() })) as unknown as HTMLCanvasElement['getContext'];
+HTMLCanvasElement.prototype.toDataURL = vi.fn(() => 'data:image/jpeg;base64,AAAA');
+
 // O wizard lê o edital da rota e navega de volta à vitrine — mockamos os hooks de rota.
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
@@ -46,12 +56,14 @@ async function declararCapacidade(teto = '500') {
   fireEvent.change(screen.getByTestId('capacidade-item-teto'), { target: { value: teto } });
 }
 
-/** Passo 3 (prova de vida): usa o fallback de upload (sem câmera em jsdom) para capturar e aprovar. */
-async function aprovarProvaDeVida() {
-  const input = await screen.findByTestId('prova-arquivo');
-  const rosto = new File(['rosto'], 'rosto.jpg', { type: 'image/jpeg' });
-  fireEvent.change(input, { target: { files: [rosto] } });
+/** Passo 3 (prova de vida): ativa a câmera (mock) e captura ao vivo → verifica. */
+async function capturarProvaDeVida() {
+  fireEvent.click(await screen.findByTestId('prova-ativar-camera'));
+  fireEvent.click(await screen.findByTestId('prova-capturar'));
   await waitFor(() => expect(provaDeVida).toHaveBeenCalled());
+}
+async function aprovarProvaDeVida() {
+  await capturarProvaDeVida();
   await screen.findByTestId('prova-ok');
 }
 
@@ -132,8 +144,7 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004 + prova de vida U
     fireEvent.click(screen.getByTestId('avancar'));
     await screen.findByTestId('prova-de-vida');
 
-    const input = await screen.findByTestId('prova-arquivo');
-    fireEvent.change(input, { target: { files: [new File(['x'], 'x.jpg', { type: 'image/jpeg' })] } });
+    await capturarProvaDeVida();
     expect(await screen.findByTestId('prova-erro')).toBeInTheDocument();
     expect(screen.getByTestId('avancar')).toBeDisabled();
   });

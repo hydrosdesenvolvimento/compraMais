@@ -416,7 +416,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   // Enrollment: a foto de referência é enviada como DOCUMENTO "Foto do Responsável" (reusa `docs` →
   // vai à análise da CPL) e dela extraímos o embedding. A prova de vida exige a foto APROVADA pela CPL:
   // a porta de aprovação consulta o status do documento vinculado à referência.
-  const enrolarFotoResponsavel = new EnrolarFotoResponsavel(docs, facial, biometriaRepo);
+  const enrolarFotoResponsavel = new EnrolarFotoResponsavel(docs, facial, biometriaRepo, consentimentosRepo);
   const referenciaAprovada = { aprovada: async (documentoId: string) => (await docRepo.porId(documentoId))?.status === 'aprovado' };
   const verificarProvaDeVida = new VerificarProvaDeVida(biometriaRepo, facial, referenciaAprovada, config.face.limiar);
   const provaDeVidaNoCredenciamento = new RegistrarProvaDeVidaNoCredenciamento(credRepo, verificarProvaDeVida, bus);

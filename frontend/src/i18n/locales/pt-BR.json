@@ -738,6 +738,9 @@
       "recusar": "Recusar"
     },
     "auditoria": {
+      "eventos": {
+        "ProvaDeVidaVerificada": "Prova de vida verificada"
+      },
       "titulo": "Auditoria — trilha",
       "subtitulo": "Consulta e exportação da trilha append-only (somente leitura).",
       "usuarioPlaceholder": "Usuário/ator",

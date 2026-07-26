@@ -738,6 +738,9 @@
       "recusar": "Rechazar"
     },
     "auditoria": {
+      "eventos": {
+        "ProvaDeVidaVerificada": "Prueba de vida verificada"
+      },
       "titulo": "Auditoría — traza",
       "subtitulo": "Consulta y exportación de la traza append-only (solo lectura).",
       "usuarioPlaceholder": "Usuario/actor",

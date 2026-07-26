@@ -98,7 +98,7 @@ export function ConsultaAuditoria() {
                   ) : '—'}
                 </td>
                 <td>{r.papel ? t(`common.papel.${r.papel}`, { defaultValue: r.papel }) : '—'}</td>
-                <td>{r.evento}</td>
+                <td>{t(`admin.auditoria.eventos.${r.evento}`, { defaultValue: r.evento })}</td>
                 <td>{r.ip ?? '—'}</td>
               </tr>
             ))}

@@ -738,6 +738,9 @@
       "recusar": "Reject"
     },
     "auditoria": {
+      "eventos": {
+        "ProvaDeVidaVerificada": "Liveness check verified"
+      },
       "titulo": "Audit — trail",
       "subtitulo": "Query and export of the append-only trail (read-only).",
       "usuarioPlaceholder": "User/actor",

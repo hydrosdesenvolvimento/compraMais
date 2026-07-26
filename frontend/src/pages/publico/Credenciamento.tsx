@@ -610,8 +610,8 @@ function UploadPendente({ fornecedorId, tipo, onEnviado }: { fornecedorId: strin
       await api.enviarDocumento(fornecedorId, { tipo: tipo.nome ?? '', formato, conteudo, dataValidade: validade || null });
       toastBus.emitir({ tom: 'ok', texto: t('credenciamento.documentos.enviadoSucesso', { tipo: tipo.nome }) });
       onEnviado();
-    } catch {
-      setErro(t('credenciamento.documentos.erroEnviar'));
+    } catch (e) {
+      setErro(textoDoErro(e));
       setEnviando(false);
     }
   };
@@ -694,7 +694,7 @@ function PassoProvaDeVida({ credId, aprovada, setAprovada }: { credId: string | 
     } catch (e) {
       setAprovada(false);
       const codigo = e instanceof HttpError ? e.codigo : undefined;
-      setMsg({ tom: 'erro', texto: t(`credenciamento.provaVida.${codigo}`, { defaultValue: t('credenciamento.provaVida.erroGenerico') }) });
+      setMsg({ tom: 'erro', texto: t(`credenciamento.provaVida.${codigo}`, { defaultValue: textoDoErro(e) }) });
     } finally {
       setVerificando(false);
     }
@@ -834,8 +834,8 @@ function PassoSucesso({ credId, onPainel }: { credId: string | null; onPainel: (
     try {
       const { blob, nome } = await api.comprovanteCredenciamento(credId);
       salvarArquivo(blob, nome);
-    } catch {
-      toastBus.emitir({ tom: 'erro', texto: t('credenciamento.enviado.baixarPdfErro') });
+    } catch (e) {
+      toastBus.emitir({ tom: 'erro', texto: textoDoErro(e) });
     } finally {
       setBaixando(false);
     }

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type AnaliseDocItem } from '../../lib/api';
 import { mascaraCnpj } from '../../lib/br';
+import { textoDoErro } from '../../lib/erros';
 import { toastBus } from '../../design-system/components';
 
 /**
@@ -33,7 +34,7 @@ export function AnaliseDocumental() {
       setMotivo('');
       void qc.invalidateQueries({ queryKey: ['fila-analise'] });
     },
-    onError: () => toastBus.emitir({ tom: 'erro', texto: t('admin.analiseDocumental.toastErro') }),
+    onError: (e) => toastBus.emitir({ tom: 'erro', texto: textoDoErro(e) }),
   });
 
   return (

@@ -728,7 +728,7 @@
       "editarTitulo": "Editar edicto",
       "editarSub": "Ajuste el edicto {{numero}} (disponible mientras es un borrador).",
       "provaDeVidaLabel": "Exigir prueba de vida (biometría)",
-      "provaDeVidaAjuda": "Si se marca, el proveedor debe aprobar la verificación facial antes de firmar el Término de Aceptación (UC007)."
+      "provaDeVidaAjuda": "Si se marca, el proveedor debe aprobar la verificación facial antes de firmar el Término de Aceptación."
     },
     "contestacoes": {
       "titulo": "Impugnaciones de CNAE",

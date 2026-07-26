@@ -72,8 +72,9 @@ export function ShellFornecedor({ menu }: { menu: ItemMenu[] }) {
   const notificacoes = useMemo<Notificacao[]>(() => {
     // Alertas ao vivo (só documentos — o "edital compatível" agora é notificação persistida).
     const alertas = construirNotificacoesFornecedor(documentos.data ?? [], [], secretariasLista, t, i18n.language);
-    // Persistidas → itens clicáveis (id/href/lida) via render localizado.
-    const persistidas: Notificacao[] = (notif.data?.itens ?? []).map((n) => {
+    // Persistidas → itens clicáveis (id/href/lida) via render localizado. O SINO exibe apenas as NÃO
+    // LIDAS (as já lidas ficam no histórico completo, em "Ver todas as notificações").
+    const persistidas: Notificacao[] = (notif.data?.itens ?? []).filter((n) => !n.lida).map((n) => {
       const r = renderNotificacao(n, t, siglaDe);
       return { id: n.id, tom: r.tom, titulo: r.titulo, texto: r.texto, href: r.href ?? undefined, lida: n.lida };
     });

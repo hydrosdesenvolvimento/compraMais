@@ -57,7 +57,7 @@ flowchart TD
     A["1 · Autocadastro<br/>(CNPJ + e-mail + senha)"] --> B["2 · Login"]
     B --> C["3 · Início<br/>(painel com alertas)"]
     C --> D["4 · Vitrine de Editais<br/>(compatíveis com seu CNAE)"]
-    D --> E["5 · Credenciamento<br/>capacidade → documentos → prova de vida → termo"]
+    D --> E["5 · Credenciamento<br/>capacidade → documentos → (prova de vida) → termo"]
     E --> F["6 · Documentos<br/>(manter válidos)"]
     F --> G["7 · Meus Credenciamentos<br/>(acompanhar análise)"]
     G --> H{"Aprovado<br/>e apto?"}
@@ -180,20 +180,25 @@ Pontos importantes:
 
 ## 7. Etapa 5 — Credenciar-se em um edital
 
-O **credenciamento** é um **assistente guiado em 4 passos**, sempre visível no topo da tela:
-**Capacidade → Documentos → Termo de Aceite → Concluído**.
+O **credenciamento** é um **assistente guiado**, sempre visível no topo da tela:
+**Capacidade → Documentos → (Prova de vida) → Termo de Aceite → Concluído**.
+
+> **O passo de Prova de vida é opcional e depende do edital.** A Prefeitura define, no cadastro de cada
+> edital, se aquele credenciamento **exige prova de vida** (verificação facial). Quando **não exige**,
+> esse passo **não aparece** e você segue direto dos **Documentos** para o **Termo de Aceite**.
 
 ```mermaid
 stateDiagram-v2
     [*] --> Capacidade
     Capacidade --> Documentos: declarou o teto
-    Documentos --> ProvaDeVida: documentos válidos
+    Documentos --> ProvaDeVida: se o edital EXIGE prova de vida
+    Documentos --> Termo: se o edital NÃO exige
     ProvaDeVida --> Termo: prova de vida aprovada
     Termo --> Concluido: aceitou o termo
     Concluido --> [*]: Pendente de Análise
     note right of ProvaDeVida
       Verificação facial (UC007):
-      exigida antes de assinar o termo
+      só quando o edital exige
     end note
 ```
 
@@ -230,11 +235,14 @@ Os status possíveis:
 Para enviar um pendente, use **Selecionar arquivo** (PDF, JPG ou PNG, até 10 MB) e informe a **validade
 do documento**. Depois clique em **Continuar**.
 
-### Passo 5.3 — Prova de vida (verificação facial)
+### Passo 5.3 — Prova de vida (somente quando o edital exige)
 
-Antes de assinar o Termo, o sistema pede a **prova de vida** (verificação facial) do responsável — uma
-checagem de segurança que confirma que é uma pessoa real concluindo o credenciamento. **O Termo só pode
-ser aceito após a prova de vida ser aprovada.**
+**Alguns editais** exigem uma **prova de vida** (verificação facial) do responsável antes do Termo — uma
+checagem de segurança que confirma que é uma pessoa real concluindo o credenciamento. **Quando o edital
+exige, o Termo só pode ser aceito após a prova de vida ser aprovada.**
+
+> Se o edital **não** exige prova de vida, este passo **não aparece** no assistente e você vai direto do
+> passo **Documentos** para o **Termo de Aceite**. Você percebe pela barra de passos no topo da tela.
 
 ### Passo 5.4 — Termo de Aceite
 
@@ -371,13 +379,13 @@ prestação de contas do Compra Mais à sociedade.
 |---|---|
 | **CNAE** | Código que identifica o **ramo de atividade** da empresa. Define quais editais são compatíveis com você. |
 | **Edital** | Uma **demanda** de compra de uma secretaria. No Compra Mais, **1 edital = 1 demanda**. |
-| **Credenciamento** | O processo de **se habilitar** em um edital (capacidade + documentos + prova de vida + termo). |
+| **Credenciamento** | O processo de **se habilitar** em um edital (capacidade + documentos + termo; **prova de vida quando o edital exige**). |
 | **Capacidade / Teto** | A **quantidade máxima** que você declara conseguir entregar de um item. Limita a sua cota no rateio. |
 | **Rateio / Distribuição** | A divisão **igualitária** da demanda entre os fornecedores aptos, respeitando o teto de cada um. |
 | **Apto** | Fornecedor com credenciamento **aprovado**, que entra no rateio. |
 | **Cota** | A **quantidade** que coube à sua empresa em uma distribuição — o seu fornecimento. |
 | **Cadastro de Reserva** | Fila que recebe o **saldo não atendido** e os retardatários, acionada em uma 2ª demanda. |
-| **Prova de vida** | Verificação **facial** do responsável, exigida antes de assinar o Termo. |
+| **Prova de vida** | Verificação **facial** do responsável, exigida **por alguns editais** antes de assinar o Termo (definido no cadastro do edital). |
 | **Termo de Aceite** | Declaração final que **conclui** o credenciamento e é registrada na auditoria. |
 | **Titular / Procurador** | O **titular** representa a empresa; **procuradores** são autorizados por ele a operar no portal. |
 
@@ -394,8 +402,9 @@ venceu, editais que o exigem ficam **bloqueados** até você regularizar — ver
 **Início** e na tela **Documentos**.
 
 **Não consegui concluir o credenciamento no Termo.**
-O **Termo de Aceite** só é liberado após a **prova de vida** ser aprovada e os documentos obrigatórios
-estarem válidos. Confira os passos anteriores do assistente.
+Verifique se os documentos obrigatórios estão válidos. **Se este edital exigir prova de vida**, o Termo
+só é liberado após a verificação facial ser aprovada — o passo aparece no assistente entre Documentos e
+Termo. Se o edital não exige, o passo não aparece e o Termo fica disponível direto após os Documentos.
 
 **Enviei um documento em outro edital. Preciso enviar de novo?**
 Não. Documentos **válidos** são **reaproveitados automaticamente**. Você só anexa o que falta ou o que

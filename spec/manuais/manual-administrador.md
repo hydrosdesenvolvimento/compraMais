@@ -143,7 +143,7 @@ Passo a passo para publicar um edital:
 
 ```mermaid
 flowchart LR
-    A["Novo edital<br/>secretaria + objeto + CNAEs + vigência"] --> B["Adicionar itens<br/>unidade · quantidade · preço-teto"]
+    A["Novo edital<br/>secretaria + objeto + CNAEs + vigência<br/>+ exige prova de vida?"] --> B["Adicionar itens<br/>unidade · quantidade · preço-teto"]
     B --> C["Publicar"]
     C --> D["Aparece na vitrine<br/>dos fornecedores compatíveis"]
     D --> E["Encerrar<br/>(quando concluído)"]
@@ -152,6 +152,11 @@ flowchart LR
 - **CNAEs-alvo** definem quais empresas verão o edital (compatibilidade por ramo).
 - **Itens** só são editáveis enquanto o edital está em **rascunho**.
 - **Vigência** (prazo) controla o encerramento; o edital pode ser **despublicado**/ **encerrado**.
+- **Exigir prova de vida (biometria):** no cadastro do edital há a opção **"Exigir prova de vida
+  (biometria)"**. Quando **marcada**, o credenciamento naquele edital só conclui o Termo de Aceite após
+  o fornecedor **aprovar a verificação facial** (UC007); quando **desmarcada** (padrão), o passo de prova
+  de vida **não** é exigido e o fornecedor assina o Termo direto. A opção é editável enquanto o edital
+  está em **rascunho**.
 
 ---
 

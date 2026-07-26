@@ -337,8 +337,18 @@ distribuição**.
 
 ![Notificações](imagens/11-notificacoes.png)
 
-> Notificações **não lidas** aparecem destacadas e no contador do sino. Clique para abrir o item
-> relacionado (o edital, o documento ou o credenciamento).
+**No sino (topo da tela):** aparecem apenas as **não lidas** (mais os alertas ao vivo, como um
+documento a vencer), com o **contador** do que falta ver. Clique numa notificação para abrir o item
+relacionado (o edital, o documento ou o credenciamento) — ela é marcada como **lida**. Use **"Ver
+todas as notificações"** para ir ao histórico completo.
+
+**Na página de Notificações (histórico):**
+
+- As **não lidas** ficam destacadas; **"Marcar todas como lidas"** zera o contador.
+- Cada notificação **já lida** pode ser **ocultada** individualmente (botão **Ocultar**) — ela sai da
+  lista para reduzir a bagunça, **sem ser apagada**.
+- Marque **"Exibir notificações ocultas"** para revê-las; cada oculta traz o botão **Reexibir** para
+  trazê-la de volta ao histórico.
 
 ---
 

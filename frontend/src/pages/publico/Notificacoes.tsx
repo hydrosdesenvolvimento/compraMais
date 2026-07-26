@@ -1,4 +1,4 @@
-import { useMemo, type CSSProperties } from 'react';
+import { useMemo, useState, type CSSProperties } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
@@ -33,8 +33,12 @@ export function Notificacoes() {
   const siglaDe = (id: string): string => { const s = secretariasLista.find((x) => x.id === id); return s?.sigla ?? s?.nome ?? id; };
   const fmt = (iso: string) => new Date(iso).toLocaleDateString(i18n.language, { day: '2-digit', month: '2-digit', year: 'numeric' });
 
+  const [ocultarLidas, setOcultarLidas] = useState(false);
   const itens = useMemo(() => data?.itens ?? [], [data]);
   const naoLidas = data?.naoLidas ?? 0;
+  const temLidas = useMemo(() => itens.some((n) => n.lida), [itens]);
+  // Lista aplicando o toggle: ocultando as já lidas, sobram apenas as não lidas.
+  const itensVisiveis = useMemo(() => (ocultarLidas ? itens.filter((n) => !n.lida) : itens), [itens, ocultarLidas]);
   // Alertas ao vivo (documento a vencer/vencido) — derivados do estado atual, sem histórico/lida.
   // Espelham o sino; ficam acima do histórico persistido para a página não "não listar" o que o sino mostra.
   const alertas = useMemo(
@@ -56,11 +60,19 @@ export function Notificacoes() {
           <h1 className="page-title">{t('notificacoes.titulo')}</h1>
           <p className="page-sub">{t('notificacoes.subtitulo')}</p>
         </div>
-        {naoLidas > 0 && (
-          <Botao data-cy="marcar-todas" variante="secundario" onClick={() => marcarTodas.mutate()} disabled={marcarTodas.isPending}>
-            {t('notificacoes.marcarTodas')}
-          </Botao>
-        )}
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          {temLidas && (
+            <label data-cy="toggle-ocultar-lidas" style={{ display: 'inline-flex', gap: 7, alignItems: 'center', fontSize: 13.5, color: 'var(--cinza-700)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              <input type="checkbox" data-cy="ocultar-lidas-check" checked={ocultarLidas} onChange={(e) => setOcultarLidas(e.target.checked)} />
+              {t('notificacoes.ocultarLidas')}
+            </label>
+          )}
+          {naoLidas > 0 && (
+            <Botao data-cy="marcar-todas" variante="secundario" onClick={() => marcarTodas.mutate()} disabled={marcarTodas.isPending}>
+              {t('notificacoes.marcarTodas')}
+            </Botao>
+          )}
+        </div>
       </div>
 
       {alertas.length > 0 && (
@@ -83,9 +95,16 @@ export function Notificacoes() {
         <p data-cy="carregando" className="page-sub">{t('notificacoes.carregando')}</p>
       ) : itens.length === 0 ? (
         alertas.length === 0 && <div data-cy="vazio" className="card" style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>{t('notificacoes.vazio')}</div>
+      ) : itensVisiveis.length === 0 ? (
+        <div data-cy="lidas-ocultas" className="card" style={{ padding: '40px 24px', textAlign: 'center', color: 'var(--cinza-500)' }}>
+          {t('notificacoes.todasLidasOcultas')}{' '}
+          <button type="button" data-cy="mostrar-lidas" onClick={() => setOcultarLidas(false)} style={{ border: 'none', background: 'none', padding: 0, color: 'var(--azul-700)', font: 'inherit', cursor: 'pointer', textDecoration: 'underline' }}>
+            {t('notificacoes.mostrarLidas')}
+          </button>
+        </div>
       ) : (
         <div style={{ display: 'grid', gap: 10 }}>
-          {itens.map((n) => {
+          {itensVisiveis.map((n) => {
             const r = renderNotificacao(n, t, siglaDe);
             return (
               <button key={n.id} type="button" data-cy="notificacao" data-tipo={n.tipo} data-lida={n.lida}

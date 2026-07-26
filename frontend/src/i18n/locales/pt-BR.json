@@ -130,6 +130,11 @@
       "signup": "Criar conta"
     },
     "signup": {
+      "foto": {
+        "label": "Foto do responsável (obrigatória)",
+        "descricao": "Usada como referência da prova de vida no credenciamento. Passa pela análise da CPL.",
+        "capturada": "Foto capturada."
+      },
       "title": "Cadastro de fornecedor",
       "subtitle": "Informe o CNPJ da empresa. Os dados são validados na Receita Federal automaticamente.",
       "cnpjLabel": "CNPJ da empresa",

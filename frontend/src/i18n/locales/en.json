@@ -130,6 +130,11 @@
       "signup": "Create account"
     },
     "signup": {
+      "foto": {
+        "label": "Responsible person's photo (required)",
+        "descricao": "Used as the liveness reference during accreditation. It is reviewed by the CPL.",
+        "capturada": "Photo captured."
+      },
       "title": "Supplier registration",
       "subtitle": "Enter the company's Tax ID (CNPJ). The data is automatically validated with the Federal Revenue Service.",
       "cnpjLabel": "Company Tax ID (CNPJ)",

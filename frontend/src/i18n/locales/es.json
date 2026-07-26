@@ -130,6 +130,11 @@
       "signup": "Crear cuenta"
     },
     "signup": {
+      "foto": {
+        "label": "Foto del responsable (obligatoria)",
+        "descricao": "Se usa como referencia de la prueba de vida en la acreditación. La revisa la CPL.",
+        "capturada": "Foto capturada."
+      },
       "title": "Registro de proveedor",
       "subtitle": "Ingrese el CNPJ de la empresa. Los datos se validan automáticamente en la Receita Federal.",
       "cnpjLabel": "CNPJ de la empresa",

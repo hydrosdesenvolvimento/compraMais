@@ -36,6 +36,9 @@ export function Credenciamento() {
   const [provaAprovada, setProvaAprovada] = useState(false);
   // Capacidade POR ITEM (RN005): itens do edital + teto declarado por item selecionado (itemId → texto).
   const [itensEdital, setItensEdital] = useState<ItemCredenciamentoView[]>([]);
+  // Política do edital (definida no cadastro): se este edital exige prova de vida (UC007). Quando não
+  // exige, o wizard pula o passo de Prova de Vida e o Termo é assinado direto (o backend não bloqueia).
+  const [exigeProvaDeVida, setExigeProvaDeVida] = useState(false);
   const [capItens, setCapItens] = useState<Record<string, string>>({});
   const [credId, setCredId] = useState<string | null>(null);
   const [aceito, setAceito] = useState(false);
@@ -80,20 +83,25 @@ export function Credenciamento() {
   useEffect(() => {
     if (!editalId) return;
     let vivo = true;
-    void api.editalItensParaCredenciamento(editalId).then((its) => { if (vivo) setItensEdital(its); }).catch(() => {});
+    void api.editalItensParaCredenciamento(editalId).then((r) => { if (vivo) { setItensEdital(r.itens); setExigeProvaDeVida(r.exigeProvaDeVida); } }).catch(() => {});
     return () => { vivo = false; };
   }, [editalId]);
 
   // Empresa do token (AD-20): mesma do credenciamento criado no Passo 1. Base dos documentos (Passo 2).
   const fornecedorId = obterUsuario()?.empresaId ?? DEMO_FORNECEDOR_ID;
 
-  const PASSOS = [
+  const PASSOS_LABELS = [
     t('credenciamento.passos.capacidade'),
     t('credenciamento.passos.documentos'),
     t('credenciamento.passos.provaVida'),
     t('credenciamento.passos.termo'),
     t('credenciamento.passos.concluido'),
   ];
+  // Sequência de passos por índice fixo (Capacidade=0, Documentos=1, ProvaVida=2, Termo=3, Concluído=4).
+  // Quando o edital NÃO exige prova de vida, o passo 2 é removido da navegação e do stepper.
+  const SEQ = exigeProvaDeVida ? [0, 1, 2, 3, 4] : [0, 1, 3, 4];
+  const PASSOS = SEQ.map((i) => PASSOS_LABELS[i]);
+  const stepDisplay = Math.max(0, SEQ.indexOf(step));
 
   const isSucesso = step === 4;
   const showFooter = !isSucesso;
@@ -162,10 +170,11 @@ export function Credenciamento() {
       finally { setEnviando(false); }
       return;
     }
-    setStep((s) => { const n = Math.min(4, s + 1); reportarPasso(n); return n; });
+    // Avança para o PRÓXIMO passo da sequência vigente (pula Prova de Vida quando o edital não a exige).
+    setStep((s) => { const n = SEQ[Math.min(SEQ.length - 1, SEQ.indexOf(s) + 1)]; reportarPasso(n); return n; });
   }
 
-  const wPrev = () => { setErro(null); setStep((s) => { const n = Math.max(0, s - 1); reportarPasso(n); return n; }); };
+  const wPrev = () => { setErro(null); setStep((s) => { const n = SEQ[Math.max(0, SEQ.indexOf(s) - 1)]; reportarPasso(n); return n; }); };
 
   async function cancelWizard() {
     if (credId) { try { await api.cancelarCredenciamento(credId); } catch { /* segue para a vitrine mesmo assim */ } }
@@ -213,7 +222,7 @@ export function Credenciamento() {
       </div>
 
       {/* Stepper */}
-      <Stepper passos={PASSOS} ativo={step} />
+      <Stepper passos={PASSOS} ativo={stepDisplay} />
 
       {/* Card principal */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>

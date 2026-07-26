@@ -13,6 +13,7 @@ export interface EditalState {
   cnaesAlvo: string[];
   prazoVigencia: string | null;
   situacao: SituacaoEdital;
+  exigeProvaDeVida: boolean; // se o credenciamento neste edital exige prova de vida (biometria, UC007)
 }
 
 /**
@@ -33,6 +34,7 @@ export class Edital extends EntidadeBase {
     private _cnaesAlvo: string[], // CNAE subclasse 7 dígitos (D2)
     private _prazoVigencia: string | null,
     private _situacao: SituacaoEdital,
+    private _exigeProvaDeVida: boolean,
   ) {
     super(meta);
   }
@@ -40,7 +42,7 @@ export class Edital extends EntidadeBase {
   static criar(input: {
     id: string; numero: string; secretariaId: string; objeto: string;
     cnaesAlvo?: string[]; subclassesExigidas?: string[]; // alias legado aceito
-    prazoVigencia?: string | null; userName?: string;
+    prazoVigencia?: string | null; exigeProvaDeVida?: boolean; userName?: string;
   }): Edital {
     if (!input.secretariaId) throw new EditalSemSecretaria();
     const cnaes = input.cnaesAlvo ?? input.subclassesExigidas ?? [];
@@ -49,6 +51,7 @@ export class Edital extends EntidadeBase {
       exigirNumeroEdital(input.numero),
       input.secretariaId, input.objeto, [...cnaes],
       input.prazoVigencia ?? null, 'rascunho',
+      input.exigeProvaDeVida ?? false,
     );
   }
 
@@ -56,7 +59,7 @@ export class Edital extends EntidadeBase {
   static deEstado(s: EditalState): Edital {
     return new Edital(
       s.meta, exigirNumeroEdital(s.numero), s.secretariaId, s.objeto, [...s.cnaesAlvo],
-      s.prazoVigencia, s.situacao,
+      s.prazoVigencia, s.situacao, s.exigeProvaDeVida ?? false,
     );
   }
 
@@ -66,7 +69,7 @@ export class Edital extends EntidadeBase {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
       numero: this.numero,
       secretariaId: this.secretariaId, objeto: this._objeto, cnaesAlvo: [...this._cnaesAlvo],
-      prazoVigencia: this._prazoVigencia, situacao: this._situacao,
+      prazoVigencia: this._prazoVigencia, situacao: this._situacao, exigeProvaDeVida: this._exigeProvaDeVida,
     };
   }
 
@@ -76,6 +79,8 @@ export class Edital extends EntidadeBase {
   get subclassesExigidas(): readonly string[] { return this._cnaesAlvo; }
   get prazoVigencia(): string | null { return this._prazoVigencia; }
   get situacao(): SituacaoEdital { return this._situacao; }
+  /** Política do edital: o credenciamento aqui exige prova de vida (biometria, UC007)? Definido no cadastro. */
+  get exigeProvaDeVida(): boolean { return this._exigeProvaDeVida; }
 
   /** Completude obrigatória para publicar (FR-004). A demanda deixou de ser campo do edital (vive nos
    *  itens), então não entra mais aqui; exigir ≥1 item para publicar é decisão do fluxo item-cêntrico. */
@@ -116,7 +121,7 @@ export class Edital extends EntidadeBase {
    * `ampliouPublico` = adicionou CNAE alvo (FR-014 — vitrine reavaliada, prazo mantido).
    */
   editar(
-    campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null }>,
+    campos: Partial<{ objeto: string; cnaesAlvo: string[]; prazoVigencia: string | null; exigeProvaDeVida: boolean }>,
     userName: string,
   ): { diff: CampoDiff[]; ampliouPublico: boolean } {
     const diff: CampoDiff[] = [];
@@ -137,6 +142,10 @@ export class Edital extends EntidadeBase {
     if (campos.prazoVigencia !== undefined && campos.prazoVigencia !== this._prazoVigencia) {
       diff.push({ campo: 'prazoVigencia', antes: this._prazoVigencia, depois: campos.prazoVigencia });
       this._prazoVigencia = campos.prazoVigencia;
+    }
+    if (campos.exigeProvaDeVida !== undefined && campos.exigeProvaDeVida !== this._exigeProvaDeVida) {
+      diff.push({ campo: 'exigeProvaDeVida', antes: this._exigeProvaDeVida, depois: campos.exigeProvaDeVida });
+      this._exigeProvaDeVida = campos.exigeProvaDeVida;
     }
     if (diff.length) this.marcarAtualizacao(userName);
     return { diff, ampliouPublico };

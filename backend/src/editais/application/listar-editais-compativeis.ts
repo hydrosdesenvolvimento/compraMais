@@ -46,6 +46,12 @@ export class ListarEditaisCompativeis {
     return e;
   }
 
+  /** Leitura direta do edital por id (SEM checar compatibilidade) — usada por guardas do credenciamento
+   *  que já validaram compatibilidade no início (ex.: política de prova de vida no aceite do termo). */
+  async porId(editalId: string): Promise<Edital | null> {
+    return this.editais.porId(editalId);
+  }
+
   private async fornecedor(id: string): Promise<Fornecedor> {
     const f = await this.fornecedores.porId(id);
     if (!f) throw new Error('Supplier not found');

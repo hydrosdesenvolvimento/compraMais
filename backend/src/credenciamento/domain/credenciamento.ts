@@ -173,12 +173,13 @@ export class Credenciamento extends EntidadeBase {
 
   /**
    * Passo 4 do UC004: assina o Termo de Aceite (RN016) → conclui o credenciamento em `aceito`.
-   * GATE (UC007): exige prova de vida aprovada (ou liberada manual) — o rosto do responsável tem de
-   * ter batido com a referência do cadastro antes de assinar.
+   * GATE (UC007) CONDICIONAL: quando o EDITAL exige prova de vida (`exigeProvaDeVida`, definido no
+   * cadastro), o rosto do responsável tem de ter batido com a referência antes de assinar; caso
+   * contrário, o Termo é assinado direto (a prova de vida é opcional por edital).
    */
-  aceitarTermo(dados: { versao: string; finalidade: string }, userName = 'sistema', agoraIso: string = new Date().toISOString()): void {
+  aceitarTermo(dados: { versao: string; finalidade: string }, userName = 'sistema', agoraIso: string = new Date().toISOString(), exigeProvaDeVida = false): void {
     if (this._estado !== 'iniciado') throw new TransicaoCredenciamentoInvalida(this._estado, 'aceito');
-    if (!this.provaVidaAprovada) throw new ProvaDeVidaPendente();
+    if (exigeProvaDeVida && !this.provaVidaAprovada) throw new ProvaDeVidaPendente();
     if (!dados.versao?.trim() || !dados.finalidade?.trim()) throw new TermoIncompleto();
     this._termo = { versao: dados.versao, finalidade: dados.finalidade, aceitoEm: agoraIso };
     this._estado = 'aceito';

@@ -25,8 +25,12 @@ export function registrarRotasItensEdital(app: FastifyInstance, deps: { gerir: G
   app.get('/editais/:id/itens/para-credenciamento', async (req, reply) => {
     if (!exigirPapel(req, reply, PERFIS_FORNECEDOR)) return reply;
     const { id } = req.params as { id: string };
-    const itens = await deps.gerir.listar(id);
-    return reply.send(itens.map((it) => ({ itemId: it.id, numero: it.numero, nome: it.nome, descricao: it.descricao, unidade: it.unidade, quantidade: it.quantidade })));
+    const [itens, exigeProvaDeVida] = await Promise.all([deps.gerir.listar(id), deps.gerir.exigeProvaDeVida(id)]);
+    // Envelope: além dos itens (capacidade), a POLÍTICA do edital para o wizard exibir/pular a prova de vida (UC007).
+    return reply.send({
+      exigeProvaDeVida,
+      itens: itens.map((it) => ({ itemId: it.id, numero: it.numero, nome: it.nome, descricao: it.descricao, unidade: it.unidade, quantidade: it.quantidade })),
+    });
   });
 
   app.post('/editais/:id/itens', async (req, reply) => {

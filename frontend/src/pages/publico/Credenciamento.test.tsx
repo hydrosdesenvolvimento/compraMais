@@ -80,10 +80,13 @@ describe('Credenciamento — wizard por Termo de Aceite (UC004 + prova de vida U
     cancelarCredenciamento.mockReset();
     registrarPassoCredenciamento.mockReset().mockResolvedValue({ passoAtual: 2 });
     credenciamentoNoEdital.mockReset().mockResolvedValue(undefined);
-    editalItensParaCredenciamento.mockReset().mockResolvedValue([
-      { itemId: 'i1', numero: 1, nome: 'Cabo de rede CAT6', descricao: null, unidade: 'un', quantidade: 100 },
-      { itemId: 'i2', numero: 2, nome: 'Fardamento', descricao: null, unidade: 'un', quantidade: 40 },
-    ]);
+    editalItensParaCredenciamento.mockReset().mockResolvedValue({
+      exigeProvaDeVida: true, // estes testes exercitam o passo de prova de vida → edital que a exige
+      itens: [
+        { itemId: 'i1', numero: 1, nome: 'Cabo de rede CAT6', descricao: null, unidade: 'un', quantidade: 100 },
+        { itemId: 'i2', numero: 2, nome: 'Fardamento', descricao: null, unidade: 'un', quantidade: 40 },
+      ],
+    });
     catalogoListar.mockReset().mockResolvedValue([
       { id: 't1', nome: 'Cartão CNPJ', exigeValidade: false },
       { id: 't2', nome: 'Certidão Negativa de Débitos Estaduais', exigeValidade: true },

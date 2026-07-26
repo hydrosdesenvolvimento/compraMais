@@ -726,7 +726,9 @@
       "editar": "Editar",
       "editadoOk": "Edital atualizado.",
       "editarTitulo": "Editar edital",
-      "editarSub": "Ajuste os dados do edital {{numero}} (disponível enquanto está em rascunho)."
+      "editarSub": "Ajuste os dados do edital {{numero}} (disponível enquanto está em rascunho).",
+      "provaDeVidaLabel": "Exigir prova de vida (biometria)",
+      "provaDeVidaAjuda": "Se marcado, o fornecedor precisa aprovar a verificação facial antes de assinar o Termo de Aceite (UC007)."
     },
     "contestacoes": {
       "titulo": "Contestações de CNAE",

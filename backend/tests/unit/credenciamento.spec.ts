@@ -116,17 +116,24 @@ describe('Credenciamento (domínio — UC004 + prova de vida UC007)', () => {
 
   // --- Prova de vida (UC007) ---
 
-  it('bloqueia o Termo sem prova de vida aprovada (gate UC007)', () => {
+  it('quando o edital EXIGE prova de vida, bloqueia o Termo sem ela (gate UC007)', () => {
     const c = Credenciamento.iniciar(base);
-    expect(() => c.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' })).toThrow(ProvaDeVidaPendente);
+    // 4º arg = exigeProvaDeVida (política do edital, definida no cadastro).
+    expect(() => c.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' }, undefined, undefined, true)).toThrow(ProvaDeVidaPendente);
     expect(c.situacao).toBe('iniciado');
   });
 
-  it('prova de vida reprovada NÃO libera o Termo', () => {
+  it('quando o edital EXIGE prova de vida, prova reprovada NÃO libera o Termo', () => {
     const c = Credenciamento.iniciar(base);
     c.registrarProvaDeVida({ status: 'reprovada', score: 0.1, modelo: 'mock-arcface' }, 'f1');
     expect(c.provaVidaAprovada).toBe(false);
-    expect(() => c.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' })).toThrow(ProvaDeVidaPendente);
+    expect(() => c.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' }, undefined, undefined, true)).toThrow(ProvaDeVidaPendente);
+  });
+
+  it('quando o edital NÃO exige prova de vida (padrão), aceita o Termo sem ela', () => {
+    const c = Credenciamento.iniciar(base);
+    c.aceitarTermo({ versao: 'v1', finalidade: 'credenciamento' }); // exigeProvaDeVida = false (default)
+    expect(c.situacao).toBe('aceito');
   });
 
   it('registra o veredito e acumula tentativas', () => {

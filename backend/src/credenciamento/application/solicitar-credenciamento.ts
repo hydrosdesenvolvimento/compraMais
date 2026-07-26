@@ -85,7 +85,10 @@ export class SolicitarCredenciamento {
     if (!cred) throw new CredenciamentoNaoEncontrado();
 
     const agora = this.now();
-    cred.aceitarTermo({ versao: dados.versaoTermo, finalidade: dados.finalidade }, actor.userId, agora);
+    // A prova de vida (UC007) só é exigida quando o EDITAL a exige (definido no cadastro). Lê a política
+    // vigente do edital (sem re-checar compatibilidade — já validada no início) e a repassa à guarda.
+    const edital = await this.vitrine.porId(cred.editalId);
+    cred.aceitarTermo({ versao: dados.versaoTermo, finalidade: dados.finalidade }, actor.userId, agora, edital?.exigeProvaDeVida ?? false);
 
     const fornecedor = await this.fornecedores.porId(cred.fornecedorId);
     if (!fornecedor) throw new FornecedorNaoEncontrado();

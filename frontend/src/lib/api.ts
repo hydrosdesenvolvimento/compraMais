@@ -79,7 +79,7 @@ export async function baixarArquivo(url: string): Promise<{ blob: Blob; nome: st
 
 // --- Tipos de leitura ---
 export interface EditalItem { id: string; numero: string; objeto: string; secretariaId: string; prazoVigencia: string | null }
-export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null; qtdItens?: number }
+export interface EditalGestao { id: string; numero: string; objeto: string; secretariaId: string; situacao: string; cnaesAlvo: string[]; prazoVigencia: string | null; exigeProvaDeVida?: boolean; qtdItens?: number }
 /** Página da busca de gestão de editais (`GET /gestao/editais`): itens + total do filtro para o pager. */
 export interface PaginaEditais { items: EditalGestao[]; total: number; page: number; size: number }
 /** Filtros da tela de gestão de editais; todos opcionais (QBE). `texto` casa parcial em número/objeto. */
@@ -399,7 +399,7 @@ export const api = {
   // Credenciamento por item (RN005): declara um teto por item selecionado do edital.
   iniciarCredenciamento: (editalId: string, itens: CapacidadeItemView[]) => send<{ credenciamentoId: string; estado: string }>(`/editais/${editalId}/credenciamentos`, 'POST', { itens }),
   // Itens do edital para o passo de capacidade (fornecedor; sem preço-teto interno).
-  editalItensParaCredenciamento: (editalId: string) => get<ItemCredenciamentoView[]>(`/editais/${editalId}/itens/para-credenciamento`),
+  editalItensParaCredenciamento: (editalId: string) => get<{ exigeProvaDeVida: boolean; itens: ItemCredenciamentoView[] }>(`/editais/${editalId}/itens/para-credenciamento`),
   aceitarTermo: (credId: string, body: { versaoTermo: string; finalidade: string }) => send<{ estado: string; status: string }>(`/credenciamentos/${credId}/termo`, 'POST', body),
   cancelarCredenciamento: (credId: string) => send<{ estado: string }>(`/credenciamentos/${credId}/cancelar`, 'POST'),
   // O wizard reporta o passo em que o fornecedor está (UC004) para "Meus Credenciamentos" mostrar
@@ -477,7 +477,7 @@ export const api = {
   criarEdital: (body: unknown) => send<{ editalId: string; numero: string; situacao: string }>('/editais', 'POST', body),
   publicarEdital: (id: string) => send(`/editais/${id}/publicar`, 'POST'),
   despublicarEdital: (id: string) => send<{ situacao: string }>(`/editais/${id}/despublicar`, 'POST'),
-  editarEdital: (id: string, body: { objeto?: string; cnaesAlvo?: string[]; prazoVigencia?: string | null }) => send<{ ok: boolean }>(`/editais/${id}`, 'PATCH', body),
+  editarEdital: (id: string, body: { objeto?: string; cnaesAlvo?: string[]; prazoVigencia?: string | null; exigeProvaDeVida?: boolean }) => send<{ ok: boolean }>(`/editais/${id}`, 'PATCH', body),
   encerrarEdital: (id: string) => send(`/editais/${id}/encerrar`, 'POST'),
   // Itens do edital (a partir do catálogo de materiais e serviços, sem lotes). Só editáveis em rascunho.
   editalItens: (id: string) => get<ItemEditalView[]>(`/editais/${id}/itens`),

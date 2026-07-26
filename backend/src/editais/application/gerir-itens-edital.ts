@@ -123,6 +123,12 @@ export class GerirItensEdital {
     }));
   }
 
+  /** Política de prova de vida do edital (UC007) — usada pelo wizard de credenciamento para exibir/exigir
+   *  o passo de prova de vida. Edital inexistente → false (não bloqueia). */
+  async exigeProvaDeVida(editalId: string): Promise<boolean> {
+    return (await this.editais.porId(editalId))?.exigeProvaDeVida ?? false;
+  }
+
   async remover(editalId: string, itemId: string, actor: Actor): Promise<void> {
     const edital = await this.editais.porId(editalId);
     if (!edital) throw new EditalNaoEncontradoItens();

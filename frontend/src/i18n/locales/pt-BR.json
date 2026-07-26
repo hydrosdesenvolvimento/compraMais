@@ -1215,6 +1215,8 @@
       "titulo": "Prova de vida",
       "descricao": "Confirme que é você: faça uma captura ao vivo do seu rosto para comparar com a foto do responsável cadastrada.",
       "instrucao": "Centralize o rosto com boa iluminação e capture.",
+      "consentimento": "Autorizo o tratamento da minha imagem facial para a prova de vida, conforme a Política de Privacidade.",
+      "consentimentoObrigatorio": "É necessário autorizar o tratamento da imagem facial.",
       "iniciarCamera": "Ativar câmera",
       "capturar": "Capturar e verificar",
       "recapturar": "Tirar outra",

@@ -38,9 +38,11 @@ function renderTela() {
   return render(<QueryClientProvider client={qc}><AuthPanel /></QueryClientProvider>);
 }
 
-/** Captura a foto obrigatória do responsável (UC007) pelo fallback de upload (sem câmera em jsdom). */
+/** Consente o tratamento biométrico (LGPD) e captura a foto obrigatória pelo fallback de upload. */
 async function capturarFotoResponsavel() {
+  fireEvent.click(screen.getByTestId('foto-cadastro-consentimento-check'));
   const input = await screen.findByTestId('foto-cadastro-arquivo');
+  await waitFor(() => expect(input).not.toBeDisabled());
   fireEvent.change(input, { target: { files: [new File(['rosto'], 'rosto.jpg', { type: 'image/jpeg' })] } });
   await waitFor(() => expect(screen.getByTestId('foto-cadastro-ok')).toBeInTheDocument());
 }

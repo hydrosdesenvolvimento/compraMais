@@ -162,6 +162,7 @@ export function MinhaConta({ fornecedor, fornecedorId, ultimaSync, onSincronizad
 function FotoReconhecimentoCard({ fornecedorId }: { fornecedorId: string }) {
   const { t } = useTranslation();
   const [msg, setMsg] = useState<{ tom: 'ok' | 'erro'; texto: string } | null>(null);
+  const [consentBio, setConsentBio] = useState(false);
   const mut = useMutation({
     mutationFn: (imagem: string) => api.enrolarFotoResponsavel(fornecedorId, imagem),
     onSuccess: () => setMsg({ tom: 'ok', texto: t('minhaConta.fotoReconhecimento.enviada') }),
@@ -176,7 +177,11 @@ function FotoReconhecimentoCard({ fornecedorId }: { fornecedorId: string }) {
       <div data-cy="foto-reconhecimento" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div style={{ font: '700 15px var(--font-body)', color: 'var(--azul-900)' }}>{t('minhaConta.fotoReconhecimento.titulo')}</div>
         <p style={{ margin: 0, fontSize: 13.5, color: 'var(--cinza-500)' }}>{t('minhaConta.fotoReconhecimento.descricao')}</p>
-        <CapturaFacial onCapturar={(img) => { setMsg(null); mut.mutate(img); }} ocupado={mut.isPending} cyPrefix="foto-ref" />
+        <label data-cy="foto-ref-consentimento" style={{ display: 'flex', gap: 8, alignItems: 'flex-start', font: '400 13px var(--font-body)', color: 'var(--cinza-700)', cursor: 'pointer' }}>
+          <input type="checkbox" data-cy="foto-ref-consentimento-check" checked={consentBio} onChange={(e) => setConsentBio(e.target.checked)} style={{ marginTop: 2 }} />
+          <span>{t('credenciamento.provaVida.consentimento')}</span>
+        </label>
+        <CapturaFacial onCapturar={(img) => { setMsg(null); mut.mutate(img); }} ocupado={!consentBio || mut.isPending} cyPrefix="foto-ref" />
         {msg && (
           <div
             data-cy={msg.tom === 'ok' ? 'foto-ref-ok' : 'foto-ref-erro'}

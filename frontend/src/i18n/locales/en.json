@@ -1215,6 +1215,8 @@
       "titulo": "Liveness check",
       "descricao": "Confirm it's you: take a live capture of your face to match the registered responsible person's photo.",
       "instrucao": "Center your face with good lighting and capture.",
+      "consentimento": "I authorize the processing of my facial image for the liveness check, per the Privacy Policy.",
+      "consentimentoObrigatorio": "You must authorize the processing of your facial image.",
       "iniciarCamera": "Enable camera",
       "capturar": "Capture and verify",
       "recapturar": "Retake",

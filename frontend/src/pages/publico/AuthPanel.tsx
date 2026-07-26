@@ -78,6 +78,7 @@ export function AuthPanel() {
   // Foto de reconhecimento do responsável (obrigatória, UC007): referência da prova de vida. É enviada
   // logo após o auto-login (já autenticado) e segue para a análise da CPL como documento.
   const [fotoRef, setFotoRef] = useState<string | null>(null);
+  const [consentBio, setConsentBio] = useState(false); // consentimento específico do dado biométrico (LGPD art. 11)
   const [manter, setManter] = useState(true);
   const [mei, setMei] = useState(false); // autodeclaração MEI (a Receita subclassifica MEI como ME)
 
@@ -249,7 +250,13 @@ export function AuthPanel() {
                     <button type="button" data-cy="foto-cadastro-refazer" onClick={() => setFotoRef(null)} style={{ background: 'none', border: 'none', color: 'var(--azul-700)', textDecoration: 'underline', cursor: 'pointer', font: 'inherit' }}>{t('credenciamento.provaVida.recapturar')}</button>
                   </div>
                 ) : (
-                  <CapturaFacial onCapturar={setFotoRef} cyPrefix="foto-cadastro" />
+                  <>
+                    <label data-cy="foto-cadastro-consentimento" style={{ display: 'flex', gap: 8, alignItems: 'flex-start', font: '400 12.5px var(--font-body)', color: 'var(--cinza-700)', cursor: 'pointer', marginBottom: 10 }}>
+                      <input type="checkbox" data-cy="foto-cadastro-consentimento-check" checked={consentBio} onChange={(e) => setConsentBio(e.target.checked)} style={{ marginTop: 2 }} />
+                      <span>{t('credenciamento.provaVida.consentimento')}</span>
+                    </label>
+                    <CapturaFacial onCapturar={setFotoRef} ocupado={!consentBio} cyPrefix="foto-cadastro" />
+                  </>
                 )}
                 <p style={{ margin: '6px 0 14px', fontSize: 12, color: 'var(--cinza-400)' }}>{t('auth.signup.foto.descricao')}</p>
               </div>

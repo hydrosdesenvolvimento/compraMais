@@ -45,5 +45,16 @@ function demoSeed(): Map<string, DadosCnpj> {
       socios: [{ nome: 'Marcos Albuquerque', qualificacao: 'Sócio-Administrador', documento: '***550179**' }],
       endereco: { logradouro: 'Rua Benjamin Constant', numero: '100', complemento: '', bairro: 'Centro', cidade: 'Rio Branco', uf: 'AC', cep: '69900062' },
     }],
+    // Segunda empresa: existe para o fluxo "cadastro MANUAL pelo Painel Admin → re-sincronizar"
+    // (RF019). Com uma única entrada na semente, todo CNPJ cadastrado manualmente caía em
+    // `indisponivel` e a sincronização nunca chegava a aplicar nada — o defeito de endereço ficava
+    // invisível em dev. Este CNPJ nasce fora do autocadastro, livre para o cadastro administrativo.
+    ['44.555.666/0001-81', {
+      razaoSocial: 'Marcenaria Xapuri Móveis Ltda',
+      porte: 'EPP',
+      cnaes: [{ codigoSubclasse: '3101200', tipo: 'principal' }],
+      situacaoCadastral: 'ativa',
+      endereco: { logradouro: 'Av. Ceará', numero: '1200', complemento: '', bairro: 'Bosque', cidade: 'Rio Branco', uf: 'AC', cep: '69900500' },
+    }],
   ]);
 }

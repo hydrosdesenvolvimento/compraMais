@@ -124,6 +124,59 @@ describe('Rotas /admin/fornecedores (Painel Admin — HTTP)', () => {
     expect(itens.find((i) => i.id === novoId)).toMatchObject({ cnpj: '22.333.444/0001-81' });
   });
 
+  /**
+   * O defeito relatado, ponta a ponta: cadastro MANUAL (sem endereço) + sincronização com a Receita
+   * deve trazer logradouro, número, bairro, município, estado e CEP (RF019). Antes, `reSincronizar`
+   * descartava o endereço devolvido pelo gateway e o fornecedor seguia sem endereço.
+   */
+  it('fornecedor manual sem endereço recebe o endereço oficial ao sincronizar (RF019)', async () => {
+    const criar = await app.inject({
+      method: 'POST', url: '/admin/fornecedores', headers: admin,
+      payload: { cnpj: '44.555.666/0001-81', razaoSocial: 'Marcenaria Xapuri Móveis', porte: 'ME', cnaePrincipal: '3101-2/00' },
+    });
+    expect(criar.statusCode).toBe(201);
+    const id = criar.json().fornecedorId as string;
+
+    const antes = await app.inject({ method: 'GET', url: `/admin/fornecedores/${id}`, headers: admin });
+    expect(antes.json().endereco).toBeUndefined();
+
+    const sync = await app.inject({ method: 'POST', url: `/admin/fornecedores/${id}/sincronizar`, headers: admin });
+    expect(sync.statusCode).toBe(200);
+    expect(sync.json()).toMatchObject({ status: 'sucesso' });
+
+    const depois = await app.inject({ method: 'GET', url: `/admin/fornecedores/${id}`, headers: admin });
+    expect(depois.json().endereco).toMatchObject({
+      logradouro: 'Av. Ceará', numero: '1200', bairro: 'Bosque',
+      cidade: 'Rio Branco', uf: 'AC', cep: '69900500',
+    });
+  });
+
+  it('POST aceita endereço no cadastro manual e a sincronização não sobrescreve o informado', async () => {
+    const proprio = { logradouro: 'Travessa Central', numero: '77', complemento: 'Fundos', bairro: 'Aeroporto', cidade: 'Rio Branco', uf: 'AC', cep: '69911000' };
+    const criar = await app.inject({
+      method: 'POST', url: '/admin/fornecedores', headers: admin,
+      payload: { cnpj: '66.777.888/0001-81', razaoSocial: 'Serralheria Acre', porte: 'ME', cnaePrincipal: '2512-8/00', endereco: proprio },
+    });
+    expect(criar.statusCode).toBe(201);
+    const id = criar.json().fornecedorId as string;
+
+    const detalhe = await app.inject({ method: 'GET', url: `/admin/fornecedores/${id}`, headers: admin });
+    expect(detalhe.json().endereco).toMatchObject(proprio);
+  });
+
+  it('POST com endereço todo em branco não grava endereço vazio (a mescla da sync depende disso)', async () => {
+    const criar = await app.inject({
+      method: 'POST', url: '/admin/fornecedores', headers: admin,
+      payload: {
+        cnpj: '77.888.999/0001-81', razaoSocial: 'Vidraçaria Norte', porte: 'ME', cnaePrincipal: '2312-5/00',
+        endereco: { logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '', cep: '' },
+      },
+    });
+    expect(criar.statusCode).toBe(201);
+    const detalhe = await app.inject({ method: 'GET', url: `/admin/fornecedores/${criar.json().fornecedorId}`, headers: admin });
+    expect(detalhe.json().endereco).toBeUndefined();
+  });
+
   it('POST com CNPJ já cadastrado → 409; CNPJ inválido → 422; campos faltando → 422', async () => {
     const dup = await app.inject({ method: 'POST', url: '/admin/fornecedores', headers: admin, payload: { cnpj: '11.222.333/0001-81', razaoSocial: 'Dup', porte: 'ME', cnaePrincipal: '1412-6/01' } });
     expect(dup.statusCode).toBe(409);

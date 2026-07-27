@@ -2,6 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type EnderecoView } from '../../lib/api';
+import { consultarCep, mascaraCep, soDigitos } from '../../lib/br';
 import { PORTES, rotuloPorte } from '../../lib/portes';
 import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeFechar, IconeInfo } from '../../design-system/icons';
@@ -17,7 +18,12 @@ export type ModoModal = 'criar' | 'ver' | 'editar';
 const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 };
 const card: CSSProperties = { background: '#fff', borderRadius: 16, width: 'min(680px, 100%)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,.25)' };
 const rotulo: CSSProperties = { font: '600 13px var(--font-body)', color: 'var(--azul-900)', marginBottom: 6, display: 'block' };
-const CNPJ_VAZIO = { cnpj: '', razaoSocial: '', porte: '', cnaePrincipal: '' };
+const CNPJ_VAZIO = {
+  cnpj: '', razaoSocial: '', porte: '', cnaePrincipal: '',
+  // Endereço (RF019) no cadastro manual: sem ele o fornecedor nascia sem endereço e só ganhava um
+  // pela sincronização com a Receita. Todos opcionais — o backend descarta o objeto todo em branco.
+  cep: '', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', uf: '',
+};
 
 /**
  * Modal único de fornecedor — o mesmo para CRIAR, VER e EDITAR (Painel Admin), fiel ao protótipo.
@@ -59,18 +65,50 @@ export function ModalFornecedor({ modo, id, onFechar, onMudou }: { modo: ModoMod
   );
 }
 
-/** Formulário de cadastro manual (fiel ao protótipo: CNPJ, Razão social, Porte, CNAE principal). */
+/**
+ * Formulário de cadastro manual: CNPJ, Razão social, Porte, CNAE principal e **Endereço** (RF019,
+ * opcional, com autofill por CEP como no autocadastro público). O endereço entrou aqui junto com a
+ * correção da sincronização: sem campo no formulário, todo fornecedor manual nascia sem endereço.
+ */
 function CorpoCriar({ onFechar, onMudou }: { onFechar: () => void; onMudou: () => void }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
   const [form, setForm] = useState(CNPJ_VAZIO);
+  const cepMut = useMutation({ mutationFn: (cep: string) => consultarCep(cep) });
 
   const criar = useMutation({
-    mutationFn: () => api.fornecedorAdminCriar(form),
+    mutationFn: () => {
+      const { cnpj, razaoSocial, porte, cnaePrincipal, cep, logradouro, numero, complemento, bairro, cidade, uf } = form;
+      const endereco = { logradouro, numero, complemento, bairro, cidade, uf, cep: soDigitos(cep) };
+      // Só envia `endereco` quando há algo preenchido — objeto em branco confundiria a mescla da
+      // re-sincronização, que preenche apenas os campos vazios (o backend também descarta, por via das dúvidas).
+      const temEndereco = Object.values(endereco).some((v) => v.trim() !== '');
+      return api.fornecedorAdminCriar({ cnpj, razaoSocial, porte, cnaePrincipal, ...(temEndereco ? { endereco } : {}) });
+    },
     onSuccess: () => { void qc.invalidateQueries({ queryKey: ['fornecedores-admin'] }); onMudou(); onFechar(); },
   });
 
   const set = (campo: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm({ ...form, [campo]: e.target.value });
+
+  /** Autofill por CEP (mesmo endpoint do autocadastro). Silencioso: CEP não encontrado só não preenche. */
+  function aoDigitarCep(e: React.ChangeEvent<HTMLInputElement>): void {
+    const mascarado = mascaraCep(e.target.value);
+    setForm((f) => ({ ...f, cep: mascarado }));
+    if (soDigitos(mascarado).length !== 8) return;
+    cepMut.mutate(mascarado, {
+      onSuccess: (end) => {
+        if (!end) return;
+        // Não sobrescreve o que o operador já digitou — mesma regra da mescla no backend.
+        setForm((f) => ({
+          ...f,
+          logradouro: f.logradouro || end.rua,
+          bairro: f.bairro || end.bairro,
+          cidade: f.cidade || end.cidade,
+          uf: f.uf || end.estado,
+        }));
+      },
+    });
+  }
 
   return (
     <form data-cy="form-criar" onSubmit={(e) => { e.preventDefault(); criar.mutate(); }} style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
@@ -96,6 +134,46 @@ function CorpoCriar({ onFechar, onMudou }: { onFechar: () => void; onMudou: () =
             <input className="input" data-cy="campo-cnae-principal" required placeholder="0000-0/00" value={form.cnaePrincipal} onChange={set('cnaePrincipal')} style={{ width: '100%' }} />
           </label>
         </div>
+
+        <fieldset style={{ border: 0, padding: 0, margin: 0, display: 'grid', gap: 18 }}>
+          <legend style={{ ...rotulo, marginBottom: 0, padding: 0 }}>
+            {t('admin.fornecedores.modal.enderecoTitulo')}
+            <span style={{ font: '400 12.5px var(--font-body)', color: 'var(--cinza-500)', marginLeft: 8 }}>
+              {t('admin.fornecedores.modal.enderecoAjuda')}
+            </span>
+          </legend>
+          <div className="cm-form-grid">
+            <label>
+              <span style={rotulo}>{t('admin.fornecedores.endereco.cep')}</span>
+              <input className="input" data-cy="campo-cep" inputMode="numeric" placeholder="00000-000" value={form.cep} onChange={aoDigitarCep} style={{ width: '100%' }} />
+            </label>
+            <label>
+              <span style={rotulo}>{t('admin.fornecedores.endereco.logradouro')}</span>
+              <input className="input" data-cy="campo-logradouro" value={form.logradouro} onChange={set('logradouro')} style={{ width: '100%' }} />
+            </label>
+            <label>
+              <span style={rotulo}>{t('admin.fornecedores.endereco.numero')}</span>
+              <input className="input" data-cy="campo-numero" value={form.numero} onChange={set('numero')} style={{ width: '100%' }} />
+            </label>
+            <label>
+              <span style={rotulo}>{t('admin.fornecedores.endereco.complemento')}</span>
+              <input className="input" data-cy="campo-complemento" value={form.complemento} onChange={set('complemento')} style={{ width: '100%' }} />
+            </label>
+            <label>
+              <span style={rotulo}>{t('admin.fornecedores.endereco.bairro')}</span>
+              <input className="input" data-cy="campo-bairro" value={form.bairro} onChange={set('bairro')} style={{ width: '100%' }} />
+            </label>
+            <label>
+              <span style={rotulo}>{t('admin.fornecedores.endereco.cidade')}</span>
+              <input className="input" data-cy="campo-cidade" value={form.cidade} onChange={set('cidade')} style={{ width: '100%' }} />
+            </label>
+            <label>
+              <span style={rotulo}>{t('admin.fornecedores.endereco.uf')}</span>
+              <input className="input" data-cy="campo-uf" maxLength={2} value={form.uf} onChange={set('uf')} style={{ width: '100%', textTransform: 'uppercase' }} />
+            </label>
+          </div>
+        </fieldset>
+
         <BannerHistorico />
         {criar.isError && <p role="alert" data-cy="erro-criar" style={{ margin: 0, fontSize: 13, color: 'var(--erro)' }}>{t('admin.fornecedores.modal.erroCriar')}</p>}
       </div>

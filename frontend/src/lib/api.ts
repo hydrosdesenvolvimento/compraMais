@@ -442,7 +442,9 @@ export const api = {
     const qs = p.toString();
     return get<PaginaFornecedoresView>(`/admin/fornecedores${qs ? `?${qs}` : ''}`);
   },
-  fornecedorAdminCriar: (body: { cnpj: string; razaoSocial: string; porte: string; cnaePrincipal: string; nomeFantasia?: string; telefone?: string }) =>
+  // `endereco` (RF019) é opcional: quando omitido, o fornecedor manual nasce sem endereço e o recebe
+  // na primeira re-sincronização com a Receita (que preenche só os campos vazios).
+  fornecedorAdminCriar: (body: { cnpj: string; razaoSocial: string; porte: string; cnaePrincipal: string; nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) =>
     send<{ fornecedorId: string; origem: string; status: string }>('/admin/fornecedores', 'POST', body),
   fornecedorAdminDetalhe: (id: string) => get<FornecedorPerfil>(`/admin/fornecedores/${id}`),
   fornecedorAdminEditarContato: (id: string, patch: { nomeFantasia?: string; telefone?: string; endereco?: EnderecoView }) =>

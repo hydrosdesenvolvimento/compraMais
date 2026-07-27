@@ -12,9 +12,16 @@ import type { ReceitaGateway, ResultadoProveniente, DadosCnpj } from '../../src/
 const CNPJ = '11.222.333/0001-81';
 const TS_NOVO = '2026-07-06T09:00:00Z';
 
+/** Endereço oficial devolvido pela Receita nos casos que exercitam RF019. */
+const END_RECEITA = {
+  logradouro: 'Rua Benjamin Constant', numero: '100', complemento: '',
+  bairro: 'Centro', cidade: 'Rio Branco', uf: 'AC', cep: '69900062',
+} as const;
+
 function receitaFake(
   frescor: ResultadoProveniente<DadosCnpj>['frescor'],
   situacao: SituacaoCadastral = 'ativa',
+  endereco?: DadosCnpj['endereco'],
 ): ReceitaGateway {
   return {
     async consultarCnpj() {
@@ -23,6 +30,7 @@ function receitaFake(
           razaoSocial: 'Confecções Vale do Acre Ltda (atualizada)', porte: 'EPP',
           cnaes: [{ codigoSubclasse: '4721102', tipo: 'principal' }],
           situacaoCadastral: situacao,
+          ...(endereco ? { endereco } : {}),
         }
         : null;
       return { valor, fonte: 'Receita', timestamp: TS_NOVO, frescor };
@@ -94,6 +102,95 @@ describe('GerirConta.reSincronizar (UC018 — integração, adaptadores em memó
 
   it('fornecedor inexistente → FornecedorNaoEncontrado (borda mapeia 404, nunca 500)', async () => {
     await expect(novo(receitaFake('verificado')).reSincronizar('nao-existe', actor)).rejects.toBeInstanceOf(FornecedorNaoEncontrado);
+  });
+
+  /**
+   * RF019 — o endereço oficial vinha da Receita e era DESCARTADO pelo caso de uso: um fornecedor
+   * cadastrado manualmente (sem endereço) continuava sem endereço depois de sincronizar. A política
+   * é preencher CAMPO A CAMPO o que estiver vazio e nunca sobrescrever o que já foi informado
+   * (endereço é editável — RN009 —, e o da Receita é o fiscal, que pode diferir do de correspondência).
+   */
+  describe('endereço oficial na re-sincronização (RF019)', () => {
+    /** Substitui o fornecedor semeado por um sem endereço nenhum (cenário do cadastro manual). */
+    async function semEndereco(): Promise<void> {
+      await repo.salvar(Fornecedor.cadastrar({
+        id: 'f2', cnpj: Cnpj.criar('04.252.011/0001-10'), razaoSocial: 'Manual Ltda', porte: 'ME',
+        cnaes: [{ codigoSubclasse: '1412601', tipo: 'principal', ativo: true }],
+        situacao: 'ativa', origem: 'manual', contato: { nomeFantasia: 'Manual' },
+      }));
+    }
+
+    it('fornecedor manual sem endereço recebe o endereço completo da Receita', async () => {
+      await semEndereco();
+      await novo(receitaFake('verificado', 'ativa', END_RECEITA)).reSincronizar('f2', actor);
+      const f = await repo.porId('f2');
+      expect(f?.contato.endereco).toMatchObject({
+        logradouro: 'Rua Benjamin Constant', numero: '100', bairro: 'Centro',
+        cidade: 'Rio Branco', uf: 'AC', cep: '69900062',
+      });
+    });
+
+    it('preenche só os campos vazios e preserva os que o operador já informou', async () => {
+      await semEndereco();
+      const f0 = await repo.porId('f2');
+      // Operador preencheu parcialmente: número próprio e complemento; o resto em branco.
+      f0!.editarContato({ endereco: { logradouro: '', numero: '250', complemento: 'Sala 3', bairro: '', cidade: '', uf: '', cep: '' } });
+      await repo.salvar(f0!);
+
+      await novo(receitaFake('verificado', 'ativa', END_RECEITA)).reSincronizar('f2', actor);
+      const f = await repo.porId('f2');
+      expect(f?.contato.endereco).toMatchObject({
+        logradouro: 'Rua Benjamin Constant', // vazio → veio da Receita
+        numero: '250',                        // preenchido → preservado
+        complemento: 'Sala 3',                // preenchido → preservado (Receita manda vazio)
+        bairro: 'Centro', cidade: 'Rio Branco', uf: 'AC', cep: '69900062',
+      });
+    });
+
+    it('endereço já completo não é tocado — sincronizar não apaga o de correspondência', async () => {
+      await semEndereco();
+      const proprio = { logradouro: 'Av. Ceará', numero: '1200', complemento: 'Sala 3', bairro: 'Bosque', cidade: 'Rio Branco', uf: 'AC', cep: '69900500' };
+      const f0 = await repo.porId('f2');
+      f0!.editarContato({ endereco: proprio });
+      await repo.salvar(f0!);
+
+      await novo(receitaFake('verificado', 'ativa', END_RECEITA)).reSincronizar('f2', actor);
+      const f = await repo.porId('f2');
+      expect(f?.contato.endereco).toEqual(proprio);
+    });
+
+    it('preserva latitude/longitude já geocodificadas (a Receita não as fornece)', async () => {
+      await semEndereco();
+      const f0 = await repo.porId('f2');
+      f0!.editarContato({ endereco: { logradouro: '', numero: '', bairro: '', cidade: '', uf: '', cep: '', latitude: -9.97, longitude: -67.8 } });
+      await repo.salvar(f0!);
+
+      await novo(receitaFake('verificado', 'ativa', END_RECEITA)).reSincronizar('f2', actor);
+      const f = await repo.porId('f2');
+      expect(f?.contato.endereco).toMatchObject({ logradouro: 'Rua Benjamin Constant', latitude: -9.97, longitude: -67.8 });
+    });
+
+    it('Receita sem endereço: o cadastro segue sem endereço, sem quebrar a sincronização', async () => {
+      await semEndereco();
+      const out = await novo(receitaFake('verificado')).reSincronizar('f2', actor);
+      expect(out.status).toBe('sucesso');
+      expect((await repo.porId('f2'))?.contato.endereco).toBeUndefined();
+    });
+
+    it('audita "endereco" em camposAtualizados apenas quando o endereço realmente mudou', async () => {
+      await semEndereco();
+      const campos = async (r: ReceitaGateway, id: string): Promise<string[]> => {
+        const bus = new InMemoryEventBus();
+        let out: string[] = [];
+        bus.subscribe('FornecedorSincronizado', async (e) => { out = (e.payload as { camposAtualizados: string[] }).camposAtualizados; });
+        await new GerirConta(repo, r, bus).reSincronizar(id, actor);
+        return out;
+      };
+
+      expect(await campos(receitaFake('verificado', 'ativa', END_RECEITA), 'f2')).toContain('endereco');
+      // Segunda passada: o endereço já está completo, nada muda → não consta da trilha.
+      expect(await campos(receitaFake('verificado', 'ativa', END_RECEITA), 'f2')).not.toContain('endereco');
+    });
   });
 
   describe('obterPerfil (UC018 passo 1 — "Minha conta")', () => {

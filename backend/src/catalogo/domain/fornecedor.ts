@@ -152,19 +152,37 @@ export class Fornecedor extends EntidadeBase {
    * RF018 (UC018 passo 3): re-sincronização substitui os campos oficiais a partir da Receita —
    * Razão Social, Porte, CNAEs e **Situação Cadastral** — e registra o novo `timestamp`. A situação
    * é oficial: se voltar não-ativa (baixada/inapta/suspensa), quem chama sinaliza revisão da CPL (UC018 exceção).
+   *
+   * `endereco` (RF019) é opcional e NÃO segue a mesma regra: o endereço é campo editável (RN009) e o
+   * da Receita é o **fiscal**, que pode divergir do de correspondência. Por isso ele é MESCLADO campo a
+   * campo — preenche o que está vazio, preserva o que já foi informado (ver `mesclarEndereco`).
+   *
+   * Devolve os campos efetivamente atualizados, para a trilha de auditoria (AD-18) não afirmar que
+   * mexeu no endereço quando não mexeu.
    */
   aplicarSincronizacao(
-    dados: { razaoSocial: string; porte: Porte; cnaes: Cnae[]; situacao: SituacaoCadastral },
+    dados: { razaoSocial: string; porte: Porte; cnaes: Cnae[]; situacao: SituacaoCadastral; endereco?: Endereco },
     sincronizadoEm?: string,
     userName = 'sistema',
-  ): void {
+  ): string[] {
     this._razaoSocial = dados.razaoSocial;
     this._porte = dados.porte;
     this._cnaes = dados.cnaes;
     this._situacao = dados.situacao;
     this._origem = 'oficial';
     if (sincronizadoEm) this._sincronizadoEm = sincronizadoEm;
+
+    const campos = ['razaoSocial', 'porte', 'cnaes', 'situacao'];
+    if (dados.endereco) {
+      const mesclado = mesclarEndereco(this._contato.endereco, dados.endereco);
+      if (mesclado) {
+        this._contato = { ...this._contato, endereco: mesclado };
+        campos.push('endereco');
+      }
+    }
+
     this.marcarAtualizacao(userName);
+    return campos;
   }
 
   /** UC018 exceção: situação oficial deixou de ser "ativa" → o fornecedor precisa de revisão da CPL. */
@@ -217,6 +235,38 @@ export class Fornecedor extends EntidadeBase {
     this._status = 'em_correcao';
     this.marcarAtualizacao(userName);
   }
+}
+
+/** Campos textuais do endereço passíveis de preenchimento pela Receita (lat/long são geocodificadas). */
+const CAMPOS_ENDERECO = ['logradouro', 'numero', 'complemento', 'bairro', 'cidade', 'uf', 'cep'] as const;
+
+/**
+ * Mescla o endereço oficial da Receita sobre o atual **sem sobrescrever informação existente**
+ * (RF019 + RN009): cada campo em branco recebe o valor oficial; cada campo já preenchido é mantido,
+ * assim como `latitude`/`longitude`, que a Receita não fornece. Devolve `null` quando nada mudaria —
+ * o chamador usa isso para não poluir a trilha nem marcar atualização à toa.
+ *
+ * A regra espelha o autocadastro (`CadastrarFornecedor`), onde "o informado pelo titular tem
+ * precedência sobre o oficial": sincronizar completa lacunas, não substitui a curadoria de ninguém.
+ */
+function mesclarEndereco(atual: Endereco | undefined, oficial: Endereco): Endereco | null {
+  if (!atual) return { ...oficial };
+  const vazio = (v: string | undefined): boolean => (v ?? '').trim() === '';
+  /** Vale o atual sempre que ele tiver conteúdo; só cede à Receita quando está em branco. */
+  const escolher = (a: string | undefined, o: string | undefined): string | undefined =>
+    (vazio(a) && !vazio(o) ? o : a);
+
+  const mesclado: Endereco = {
+    ...atual, // preserva latitude/longitude e qualquer campo fora da lista oficial
+    logradouro: escolher(atual.logradouro, oficial.logradouro) ?? '',
+    numero: escolher(atual.numero, oficial.numero) ?? '',
+    complemento: escolher(atual.complemento, oficial.complemento),
+    bairro: escolher(atual.bairro, oficial.bairro) ?? '',
+    cidade: escolher(atual.cidade, oficial.cidade) ?? '',
+    uf: escolher(atual.uf, oficial.uf) ?? '',
+    cep: escolher(atual.cep, oficial.cep) ?? '',
+  };
+  return CAMPOS_ENDERECO.some((c) => mesclado[c] !== atual[c]) ? mesclado : null;
 }
 
 export class TransicaoStatusInvalida extends Error {

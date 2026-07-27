@@ -28,7 +28,7 @@ configuração da plataforma, governança e auditoria.
 15. [Relatórios](#15-relatórios)
 16. [Catálogos](#16-catálogos)
 17. [Secretarias](#17-secretarias)
-18. [Setores Industriais (CNAE)](#18-setores-industriais-cnae)
+18. [Cadastro de Atividades (CNAE)](#18-cadastro-de-atividades-cnae)
 19. [Tipos de Arquivos](#19-tipos-de-arquivos)
 20. [Usuários internos](#20-usuários-internos)
 21. [Administração de Telas por Perfil](#21-administração-de-telas-por-perfil)
@@ -48,7 +48,7 @@ papéis internos são:
 
 | Perfil | Papel no processo | Telas típicas |
 |---|---|---|
-| **Administrador** | Superusuário da plataforma | Usuários, Secretarias, Setores, Tipos de Arquivos, Auditoria, **Telas por perfil**, Malote, Relatórios |
+| **Administrador** | Superusuário da plataforma | Usuários, Secretarias, Cadastro de Atividades, Tipos de Arquivos, Auditoria, **Telas por perfil**, Malote, Relatórios |
 | **Secretaria / Gestor (SMGA)** | Operação das compras | Dashboard, Fornecedores, Credenciamento, Análise Documental, Distribuição, Reserva, Desistências, Malote, Catálogos, Editais, Contestações, LGPD, Relatórios |
 | **Analista CPL** | Fluxo de editais e habilitação | Gestão de Editais, Credenciamento, Análise Documental |
 | **Auditor** | Fiscalização | Auditoria |
@@ -343,14 +343,14 @@ secretaria; os relatórios e o rateio agrupam por ela.
 
 ---
 
-## 18. Setores Industriais (CNAE)
+## 18. Cadastro de Atividades (CNAE)
 
 *(perfil Administrador)*
 
 Catálogo de **CNAEs** atendidos (código + descrição). É a base da **compatibilidade** entre editais e
 empresas e da rotulação dos segmentos na Transparência.
 
-![Setores Industriais (CNAE)](imagens-admin/16-setores-industriais.png)
+![Cadastro de Atividades (CNAE)](imagens-admin/16-setores-industriais.png)
 
 ---
 
@@ -428,7 +428,7 @@ apagado) e serve à fiscalização e à prestação de contas. Permite **filtrar
 1. Comece pelo **Dashboard** — ele aponta análises pendentes e editais a vencer.
 2. Antes de **distribuir**, garanta que a **Análise Documental** está em dia (só aptos entram no rateio).
 3. **Homologue** a distribuição apenas quando o rateio estiver correto — a matriz vira versão imutável.
-4. Mantenha os **Catálogos**, **Tipos de Arquivos** e **Setores (CNAE)** atualizados: eles alimentam os
+4. Mantenha os **Catálogos**, **Tipos de Arquivos** e o **Cadastro de Atividades (CNAE)** atualizados: eles alimentam os
    editais e a compatibilidade.
 5. Conceda acesso pelo **menor privilégio** necessário em **Usuários** e **Telas por Perfil**.
 6. Em dúvidas de conformidade, consulte a **Auditoria** — nada se perde.

@@ -93,7 +93,8 @@ describe('Manual do Administrador — captura de telas', () => {
   // ---- Configuração (perfil Administrador) ------------------------------- //
   it('14 — Secretarias', () => { abrir('administrador', '/#/admin/secretarias'); shot('14-secretarias'); });
   it('15 — Usuários internos', () => { abrir('administrador', '/#/admin/usuarios'); shot('15-usuarios'); });
-  it('16 — Setores Industriais (CNAE)', () => { abrir('administrador', '/#/admin/setores-industriais'); shot('16-setores-industriais'); });
+  // Rota, chave de tela e nome do print seguem `setores-industriais` de propósito — só o rótulo mudou.
+  it('16 — Cadastro de Atividades (CNAE)', () => { abrir('administrador', '/#/admin/setores-industriais'); shot('16-setores-industriais'); });
   it('17 — Tipos de Arquivos', () => { abrir('administrador', '/#/admin/tipos-arquivos'); shot('17-tipos-arquivos'); });
   it('18 — Auditoria', () => { abrir('administrador', '/#/admin/auditoria'); shotViewport('18-auditoria'); });
   it('19 — Administração de Telas por Perfil', () => { abrir('administrador', '/#/admin/perfis'); shot('19-perfis'); });

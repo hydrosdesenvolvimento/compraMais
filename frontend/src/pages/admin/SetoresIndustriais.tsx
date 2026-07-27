@@ -7,12 +7,19 @@ import { Botao, BotaoIcone } from '../../design-system/components';
 import { IconeLapis, IconePower, IconeFechar, IconeInfo } from '../../design-system/icons';
 
 /**
- * Painel Admin · "Setores Industriais (CNAE)" (RF021). Lista os códigos de atividade econômica aceitos com
+ * Painel Admin · "Cadastro de Atividades (CNAE)" (RF021). Lista os códigos de atividade econômica aceitos com
  * código, descrição, categoria e situação; ações de editar e ativar/inativar (exclusão lógica RN015). Fiel
  * ao protótipo `spec/Prototipo/painel-administrativo.html` (colunas Código · Descrição · Categoria · Situação
  * · Ações). Reusa o CRUD genérico de catálogos (GET/POST/PATCH/POST inativar|reativar `/catalogos/setores-cnae`).
  * Lista inclui inativos (o protótipo mostra ativos e inativos juntos). O código é armazenado como subclasse de
  * 7 dígitos no backend (`exigirCnae`); aqui a máscara `####-#/##` é só de apresentação/entrada.
+ *
+ * Nomenclatura (2026-07-26, decisão do solicitante): o rótulo visível passou de "Setores Industriais" para
+ * **"Cadastro de Atividades"**, nos três idiomas. A troca é só de APRESENTAÇÃO — os identificadores seguem
+ * inalterados de propósito: rota `/admin/setores-industriais`, chave de tela `setoresIndustriais`
+ * (persistida em `permissoes_telas`), slug de catálogo `setores-cnae`, tabela `setores_cnae`, `data-cy` e o
+ * nome deste componente. Renomeá-los exigiria migração de dados e quebraria o contrato de testes sem
+ * nenhum ganho para o usuário.
  */
 const SLUG = 'setores-cnae' as const;
 

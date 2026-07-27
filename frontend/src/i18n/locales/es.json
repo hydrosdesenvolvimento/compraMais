@@ -28,7 +28,7 @@
       "cadastroReserva": "Lista de Reserva",
       "desistencias": "Desistimientos",
       "secretarias": "Secretarías",
-      "setoresIndustriais": "Sectores Industriales",
+      "setoresIndustriais": "Registro de Actividades",
       "tiposArquivos": "Tipos de Archivo",
       "perfis": "Pantallas por perfil",
       "contestacao": "Impugnaciones",
@@ -335,13 +335,13 @@
       "chip": "Desistimiento"
     },
     "setoresIndustriais": {
-      "titulo": "Sectores Industriales (CNAE)",
+      "titulo": "Registro de Actividades (CNAE)",
       "subtitulo": "Códigos de actividad económica aceptados",
-      "novoCadastro": "Nuevo sector",
+      "novoCadastro": "Nueva actividad",
       "carregando": "Cargando…",
-      "erroCarregar": "No se pudieron cargar los sectores. Verifique sus permisos.",
-      "vazioTitulo": "Ningún sector registrado",
-      "vazioDica": "Haga clic en \"Nuevo sector\" para agregar el primero.",
+      "erroCarregar": "No se pudieron cargar las actividades. Verifique sus permisos.",
+      "vazioTitulo": "Ninguna actividad registrada",
+      "vazioDica": "Haga clic en \"Nueva actividad\" para agregar la primera.",
       "semCategoria": "—",
       "fechar": "Cerrar",
       "campos": {
@@ -356,13 +356,13 @@
         "inativo": "Inactivo"
       },
       "acao": {
-        "editar": "Editar sector",
-        "inativar": "Inactivar sector",
-        "reativar": "Reactivar sector"
+        "editar": "Editar actividad",
+        "inativar": "Inactivar actividad",
+        "reativar": "Reactivar actividad"
       },
       "modal": {
-        "tituloCriar": "Nuevo sector industrial",
-        "tituloEditar": "Editar sector industrial",
+        "tituloCriar": "Nueva actividad",
+        "tituloEditar": "Editar actividad",
         "subtitulo": "Complete los campos y guarde",
         "codigoPlaceholder": "0000-0/00",
         "descricaoPlaceholder": "Descripción de la actividad",

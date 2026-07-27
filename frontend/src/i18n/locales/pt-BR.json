@@ -1179,7 +1179,8 @@
     "TipoDocumentoNaoEncontrado": "Tipo de arquivo não encontrado.",
     "TipoDocumentoAtivoNaoExcluivel": "Só tipos inativos podem ser excluídos. Inative primeiro.",
     "TipoDocumentoEmUso": "Há documentos enviados com este tipo — não pode ser excluído.",
-    "TipoDocumentoDeSistema": "Tipo exigido pelo sistema — não pode ser excluído."
+    "TipoDocumentoDeSistema": "Tipo exigido pelo sistema — não pode ser excluído.",
+    "CnaeInvalido": "CNAE inválido: informe a subclasse com 7 dígitos (ex.: 1412601)."
   },
   "contestacao": {
     "semEmpresa": "Nenhuma empresa vinculada à sua conta.",

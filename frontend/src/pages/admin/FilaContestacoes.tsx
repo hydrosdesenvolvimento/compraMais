@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '../../lib/api';
 import { Botao } from '../../design-system/components';
+import { subclassesCnae } from '../../lib/br';
 
 /**
  * Fila de contestações de CNAE de um edital (US2 / Painel Admin). Query da lista; acatar (corrige) e
@@ -17,7 +18,7 @@ export function FilaContestacoes({ editalId }: { editalId: string }) {
 
   const { data: itens = [] } = useQuery({ queryKey: chave, queryFn: () => api.contestacoesDoEdital(editalId) });
   const invalidar = () => qc.invalidateQueries({ queryKey: chave });
-  const acatar = useMutation({ mutationFn: (id: string) => api.acatarContestacao(id, novoCnae.split(',').map((c) => c.trim()).filter(Boolean)), onSuccess: () => { setNovoCnae(''); void invalidar(); } });
+  const acatar = useMutation({ mutationFn: (id: string) => api.acatarContestacao(id, subclassesCnae(novoCnae)), onSuccess: () => { setNovoCnae(''); void invalidar(); } });
   const recusar = useMutation({ mutationFn: (id: string) => api.recusarContestacao(id, motivo), onSuccess: () => { setMotivo(''); void invalidar(); } });
 
   return (

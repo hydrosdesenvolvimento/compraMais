@@ -1179,7 +1179,8 @@
     "TipoDocumentoNaoEncontrado": "File type not found.",
     "TipoDocumentoAtivoNaoExcluivel": "Only inactive types can be deleted. Deactivate it first.",
     "TipoDocumentoEmUso": "There are documents submitted with this type — it cannot be deleted.",
-    "TipoDocumentoDeSistema": "Type required by the system — it cannot be deleted."
+    "TipoDocumentoDeSistema": "Type required by the system — it cannot be deleted.",
+    "CnaeInvalido": "Invalid CNAE: enter the 7-digit subclass (e.g. 1412601)."
   },
   "contestacao": {
     "semEmpresa": "No company linked to your account.",

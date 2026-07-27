@@ -535,6 +535,9 @@ export const api = {
   catalogoReativar: (slug: CatalogoSlug, id: string) => send<{ situacao: string }>(`/catalogos/${slug}/${id}/reativar`, 'POST'),
   // Exclusão física — só materiais e serviços (item inativo e sem vínculo a edital; guardas no backend).
   materialServicoExcluir: (id: string) => send<void>(`/catalogos/materiais-servicos/${id}`, 'DELETE'),
+  // Exclusão física de tipo de arquivo (RF022): só Administrador, item inativo, sem documento enviado
+  // e desde que não seja tipo de sistema. Todas as guardas ficam no backend (409 com `codigo`).
+  tipoArquivoExcluir: (id: string) => send<void>(`/catalogos/tipos-documento/${id}`, 'DELETE'),
 
   // UC021 — Gestão de usuários internos/servidores. Todas exigem papel administrador no token.
   cargos: () => get<CargoOpcao[]>('/admin/cargos'),

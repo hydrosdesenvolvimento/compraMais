@@ -2,9 +2,10 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, type CatalogoItemView } from '../../lib/api';
+import { obterUsuario } from '../../lib/auth';
 import { celula, cabecalho } from '../../design-system/tabela';
-import { Botao, BotaoIcone } from '../../design-system/components';
-import { IconeLapis, IconePower, IconeFechar, IconeInfo } from '../../design-system/icons';
+import { Botao, BotaoIcone, useToast } from '../../design-system/components';
+import { IconeLapis, IconePower, IconeLixeira, IconeFechar, IconeInfo } from '../../design-system/icons';
 
 /**
  * Painel Admin · "Tipos de Arquivos" (RF022 / UC020). Lista os tipos de documento exigidos no
@@ -20,6 +21,15 @@ import { IconeLapis, IconePower, IconeFechar, IconeInfo } from '../../design-sys
  * validação real na covalidação da CPL/UC006). A "Validade" é modelada em três modos mutuamente
  * exclusivos mapeados aos campos do domínio: sem validade, prazo fixo em dias (`validadeDias`, ex.:
  * "90 dias") ou por exercício (`exigeExercicio`, ex.: Balanço).
+ *
+ * Exclusão FÍSICA (2026-07-26, decisão do solicitante): além de inativar, o **Administrador** pode
+ * remover definitivamente um tipo. O botão só aparece para esse perfil — as demais escritas da tela
+ * aceitam também a Secretaria (`smga`), a exclusão não — e só fica **habilitado quando o tipo está
+ * INATIVO**, refletindo na UI a ordem exigida pelo backend (inative, depois exclua) em vez de deixar o
+ * clique virar 409. As guardas continuam sendo do backend (409 com `codigo`): tipo inativo, sem
+ * documento enviado e que não seja tipo de sistema (ex.: "Foto do Responsável", usado pela prova de
+ * vida do UC007) — a UI antecipa a primeira, o servidor decide todas. A inativação lógica (RN015)
+ * continua sendo o caminho padrão.
  */
 const SLUG = 'tipos-documento' as const;
 
@@ -43,7 +53,11 @@ type Modal = { modo: 'criar' } | { modo: 'editar'; item: CatalogoItemView };
 export function TiposArquivos() {
   const { t } = useTranslation();
   const qc = useQueryClient();
+  const { ok } = useToast();
   const [modal, setModal] = useState<Modal | null>(null);
+  // A exclusão é do Administrador (o backend devolve 403 aos demais). Esconder o botão evita oferecer
+  // uma ação que a Secretaria — perfil dono desta tela por padrão — nunca conseguiria concluir.
+  const podeExcluir = obterUsuario()?.papel === 'administrador';
 
   const { data: itens = [], isLoading, isError } = useQuery({
     queryKey: ['tipos-arquivos-admin'],
@@ -54,6 +68,17 @@ export function TiposArquivos() {
   const inativar = useMutation({ mutationFn: (id: string) => api.catalogoInativar(SLUG, id), onSuccess: () => void invalidar() });
   const reativar = useMutation({ mutationFn: (id: string) => api.catalogoReativar(SLUG, id), onSuccess: () => void invalidar() });
   const alternar = (i: CatalogoItemView) => (i.ativo ? inativar : reativar).mutate(i.id);
+
+  // Exclusão física. O erro NÃO é tratado aqui de propósito: o `MutationCache` global (lib/query.ts)
+  // já converte a resposta em toast traduzindo o `codigo` do 409 (tipo ativo, em uso ou de sistema).
+  // Tratar localmente também exigiria `meta: { semToast: true }`, senão o usuário veria dois toasts.
+  const excluir = useMutation({
+    mutationFn: (id: string) => api.tipoArquivoExcluir(id),
+    onSuccess: () => { ok(t('admin.tiposArquivos.excluido')); void invalidar(); },
+  });
+  const confirmarExcluir = (i: CatalogoItemView) => {
+    if (window.confirm(t('admin.tiposArquivos.confirmarExcluir', { nome: i.nome ?? '' }))) excluir.mutate(i.id);
+  };
 
   /** Rótulo da coluna "Validade" a partir dos três modos (exercício > prazo em dias > exige > sem). */
   const rotuloValidade = (i: CatalogoItemView): string => {
@@ -135,6 +160,19 @@ export function TiposArquivos() {
                         <div style={{ display: 'inline-flex', gap: 8, justifyContent: 'flex-end' }}>
                           <BotaoIcone icone={IconeLapis} data-cy="editar" title={t('admin.tiposArquivos.acao.editar')} aria-label={t('admin.tiposArquivos.acao.editar')} onClick={() => setModal({ modo: 'editar', item: s })} />
                           <BotaoIcone icone={IconePower} data-cy="alternar-situacao" title={t(`admin.tiposArquivos.acao.${s.ativo ? 'inativar' : 'reativar'}`)} aria-label={t(`admin.tiposArquivos.acao.${s.ativo ? 'inativar' : 'reativar'}`)} disabled={inativar.isPending || reativar.isPending} onClick={() => alternar(s)} style={{ color: s.ativo ? 'var(--cinza-600, #556)' : 'var(--sucesso)' }} />
+                          {podeExcluir && (
+                            <BotaoIcone
+                              icone={IconeLixeira}
+                              data-cy="excluir"
+                              // Ativo: o botão fica desabilitado e o tooltip diz o que fazer ("inative
+                              // antes de excluir"), em vez de deixar clicar para colher um 409.
+                              title={t(`admin.tiposArquivos.acao.${s.ativo ? 'excluirBloqueado' : 'excluir'}`)}
+                              aria-label={t(`admin.tiposArquivos.acao.${s.ativo ? 'excluirBloqueado' : 'excluir'}`)}
+                              disabled={s.ativo || excluir.isPending}
+                              onClick={() => confirmarExcluir(s)}
+                              style={{ color: 'var(--erro, #c0392b)' }}
+                            />
+                          )}
                         </div>
                       </td>
                     </tr>

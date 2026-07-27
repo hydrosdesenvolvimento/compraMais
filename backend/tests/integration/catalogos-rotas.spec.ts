@@ -130,3 +130,102 @@ describe('Rotas de catálogos base (UC020 — HTTP)', () => {
     expect(r.json()).toMatchObject({ codigo: 'CatalogoDesconhecido' });
   });
 });
+
+/**
+ * RF022 — exclusão FÍSICA de tipo de arquivo (`DELETE /catalogos/tipos-documento/:id`). Gate mais estreito
+ * que o resto do catálogo: as demais escritas aceitam `smga`, a exclusão é só do Administrador.
+ */
+describe('Exclusão de tipos de arquivo (RF022 — HTTP)', () => {
+  let app: FastifyInstance;
+  const admin = comoPapel('administrador', { userId: 'admin1' });
+  const smga = comoPapel('smga', { userId: 'smga1' });
+
+  beforeAll(async () => { app = await buildServer(); });
+  afterAll(async () => { await app.close(); });
+
+  /** Cria um tipo pelo Administrador e devolve o id. */
+  async function criarTipo(nome: string): Promise<string> {
+    const r = await app.inject({
+      method: 'POST', url: '/catalogos/tipos-documento', headers: admin,
+      payload: { nome, formato: 'pdf', categoria: 'cadastral' },
+    });
+    expect(r.statusCode).toBe(201);
+    return (r.json() as { id: string }).id;
+  }
+
+  async function idPorNome(nome: string): Promise<string> {
+    const lista = await app.inject({ method: 'GET', url: '/catalogos/tipos-documento?incluirInativos=true' });
+    const achado = (lista.json() as Array<{ id: string; nome: string }>).find((t) => t.nome === nome);
+    expect(achado, `tipo '${nome}' deveria existir no catálogo`).toBeDefined();
+    return achado!.id;
+  }
+
+  it('anônimo → 401', async () => {
+    const id = await criarTipo('Declaração de Idoneidade');
+    const r = await app.inject({ method: 'DELETE', url: `/catalogos/tipos-documento/${id}` });
+    expect(r.statusCode).toBe(401);
+  });
+
+  it('Secretaria (smga) → 403: exclusão é restrita ao Administrador, ao contrário das demais escritas', async () => {
+    const nome = 'Declaração de Microempresa';
+    const id = await criarTipo(nome);
+    // A smga consegue inativar (escrita comum do catálogo)…
+    const inativar = await app.inject({ method: 'POST', url: `/catalogos/tipos-documento/${id}/inativar`, headers: smga });
+    expect(inativar.statusCode).toBe(200);
+    // …mas não consegue excluir.
+    const r = await app.inject({ method: 'DELETE', url: `/catalogos/tipos-documento/${id}`, headers: smga });
+    expect(r.statusCode).toBe(403);
+    expect(r.json()).toMatchObject({ codigo: 'RBAC' });
+  });
+
+  it('tipo ATIVO → 409 TipoDocumentoAtivoNaoExcluivel', async () => {
+    const id = await criarTipo('Certidão de Falência');
+    const r = await app.inject({ method: 'DELETE', url: `/catalogos/tipos-documento/${id}`, headers: admin });
+    expect(r.statusCode).toBe(409);
+    expect(r.json()).toMatchObject({ codigo: 'TipoDocumentoAtivoNaoExcluivel' });
+  });
+
+  it('Administrador inativa e exclui: 204 e o tipo some até da lista com inativos', async () => {
+    const id = await criarTipo('Certidão de Protesto');
+    const inativar = await app.inject({ method: 'POST', url: `/catalogos/tipos-documento/${id}/inativar`, headers: admin });
+    expect(inativar.statusCode).toBe(200);
+
+    const r = await app.inject({ method: 'DELETE', url: `/catalogos/tipos-documento/${id}`, headers: admin });
+    expect(r.statusCode).toBe(204);
+
+    const todos = await app.inject({ method: 'GET', url: '/catalogos/tipos-documento?incluirInativos=true' });
+    expect((todos.json() as Array<{ id: string }>).some((t) => t.id === id)).toBe(false);
+  });
+
+  it('tipo de sistema (Foto do Responsável, UC007) → 409 TipoDocumentoDeSistema mesmo depois de inativado', async () => {
+    const id = await idPorNome('Foto do Responsável');
+    await app.inject({ method: 'POST', url: `/catalogos/tipos-documento/${id}/inativar`, headers: admin });
+    const r = await app.inject({ method: 'DELETE', url: `/catalogos/tipos-documento/${id}`, headers: admin });
+    expect(r.statusCode).toBe(409);
+    expect(r.json()).toMatchObject({ codigo: 'TipoDocumentoDeSistema' });
+    // Restaura o catálogo para não vazar estado entre casos.
+    await app.inject({ method: 'POST', url: `/catalogos/tipos-documento/${id}/reativar`, headers: admin });
+  });
+
+  it('id inexistente → 404 TipoDocumentoNaoEncontrado', async () => {
+    const r = await app.inject({ method: 'DELETE', url: '/catalogos/tipos-documento/nao-existe', headers: admin });
+    expect(r.statusCode).toBe(404);
+    expect(r.json()).toMatchObject({ codigo: 'TipoDocumentoNaoEncontrado' });
+  });
+
+  it('tipo com documento já enviado → 409 TipoDocumentoEmUso', async () => {
+    const nome = 'Cartão CNPJ'; // do baseline, ativo no bootstrap em memória
+    const envio = await app.inject({
+      method: 'POST', url: '/fornecedores/f-del/documentos',
+      headers: comoPapel('titular', { userId: 'u-del', empresaId: 'f-del' }),
+      payload: { tipo: nome, formato: 'pdf', conteudo: 'ZmFrZQ==' },
+    });
+    expect(envio.statusCode).toBe(201);
+
+    const id = await idPorNome(nome);
+    await app.inject({ method: 'POST', url: `/catalogos/tipos-documento/${id}/inativar`, headers: admin });
+    const r = await app.inject({ method: 'DELETE', url: `/catalogos/tipos-documento/${id}`, headers: admin });
+    expect(r.statusCode).toBe(409);
+    expect(r.json()).toMatchObject({ codigo: 'TipoDocumentoEmUso' });
+  });
+});

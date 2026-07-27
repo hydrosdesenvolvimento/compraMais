@@ -74,6 +74,20 @@ export class DocumentoRepositoryPg implements DocumentoRepository {
     );
     return (r.rows as Record<string, unknown>[]).map(mapear);
   }
+
+  /**
+   * Guarda de exclusão de tipo de arquivo (RF022). `EXISTS` + `LIMIT 1`: para na primeira linha em vez
+   * de contar a tabela inteira. `lower(tipo)` casa com a chave natural do catálogo (índice `lower(nome)`
+   * em `tipos_documento`); não há índice funcional equivalente em `documentos`, mas a consulta só roda
+   * na exclusão de um tipo — evento raro e manual do Administrador.
+   */
+  async usadoPorAlgumDocumento(tipo: string): Promise<boolean> {
+    const r = await this.pool.query(
+      'SELECT 1 FROM documentos WHERE lower(tipo) = lower($1) LIMIT 1',
+      [tipo.trim()],
+    );
+    return (r.rowCount ?? 0) > 0;
+  }
 }
 
 /**

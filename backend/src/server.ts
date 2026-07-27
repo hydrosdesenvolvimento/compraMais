@@ -135,6 +135,7 @@ import { TIPOS_DOCUMENTO_BASELINE } from './catalogos/domain/tipos-documento-bas
 import type { CatalogoRepository } from './catalogos/application/catalogo-repository.js';
 import { registrarRotasCatalogos } from './catalogos/adapters/catalogos-controller.js';
 import { ExcluirMaterialServico } from './catalogos/application/excluir-material-servico.js';
+import { ExcluirTipoDocumento } from './catalogos/application/excluir-tipo-documento.js';
 import { GerirVisibilidadeTelas } from './permissoes/application/gerir-visibilidade.js';
 import { VisibilidadeRepositoryMemory } from './permissoes/adapters/visibilidade-repository-memory.js';
 import { VisibilidadeRepositoryPg } from './permissoes/adapters/visibilidade-repository-pg.js';
@@ -324,7 +325,12 @@ export async function buildServer(): Promise<FastifyInstance> {
   // mesma instância adiante.
   const itensEditalRepo = pool ? new ItemEditalRepositoryPg(pool) : new ItemEditalRepositoryMemory();
   const excluirMaterial = new ExcluirMaterialServico(materiaisRepo, itensEditalRepo, bus);
-  registrarRotasCatalogos(app, { manter: manterCatalogos, excluirMaterial });
+  // Mesma razão para o repositório de documentos: a exclusão física de um tipo de arquivo (RF022) só é
+  // permitida quando NENHUM documento foi enviado com aquele tipo. O módulo de documentos reaproveita
+  // a mesma instância adiante (ver "Documentos + PII" abaixo).
+  const docRepo = pool ? new DocumentoRepositoryPg(pool) : new DocumentoRepositoryMemory();
+  const excluirTipoDocumento = new ExcluirTipoDocumento(tiposDocRepo, docRepo, bus);
+  registrarRotasCatalogos(app, { manter: manterCatalogos, excluirMaterial, excluirTipoDocumento });
 
   // Módulo editais — vitrine filtrada por CNAE (002) + gestão/contestação de editais (003)
   // Persistência: Postgres quando disponível (durável, como `fornecedores`/`contas_acesso`); senão
@@ -367,7 +373,7 @@ export async function buildServer(): Promise<FastifyInstance> {
   // único agregado sem par pg. A cifra é AES-256-GCM sempre (a chave é que muda por ambiente; em
   // produção `loadConfig` exige a real): base64 nunca foi cifra, e manter dois ciphers criaria blob
   // legado indecifrável assim que o conteúdo virasse durável.
-  const docRepo = pool ? new DocumentoRepositoryPg(pool) : new DocumentoRepositoryMemory();
+  // (`docRepo` é instanciado mais acima, junto dos catálogos: a exclusão de tipo de arquivo precisa dele.)
   const storage = pool ? new ObjectStoragePg(pool) : new ObjectStorageMemory();
   const docs = new GerirDocumentos(docRepo, storage, new PiiCipherAesGcm(config.crypto.piiKey), new CatalogoTiposDocumentoRepo(tiposDocRepo));
   registrarRotasDocumentos(app, { docs });

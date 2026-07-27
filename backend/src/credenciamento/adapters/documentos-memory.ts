@@ -23,6 +23,12 @@ export class DocumentoRepositoryMemory implements DocumentoRepository {
     const p = page?.page ?? 1;
     return todos.slice((p - 1) * size, (p - 1) * size + size);
   }
+
+  /** Guarda de exclusão de tipo de arquivo (RF022) — case-insensitive, como o `lower(tipo)` do pg. */
+  async usadoPorAlgumDocumento(tipo: string): Promise<boolean> {
+    const alvo = tipo.trim().toLowerCase();
+    return [...this.map.values()].some((d) => d.tipo.trim().toLowerCase() === alvo);
+  }
 }
 
 export class ObjectStorageMemory implements ObjectStorage {

@@ -1,6 +1,7 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { ManterCatalogos } from '../application/manter-catalogos.js';
 import type { ExcluirMaterialServico } from '../application/excluir-material-servico.js';
+import type { ExcluirTipoDocumento } from '../application/excluir-tipo-documento.js';
 import type { ItemCatalogo, CatalogoStateBase } from '../domain/item-catalogo.js';
 import type { FiltroListagem } from '../application/catalogo-repository.js';
 import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
@@ -44,7 +45,10 @@ const PERFIS_ESCRITA: Record<string, readonly Papel[]> = {
  * `:catalogo` (`secretarias` | `setores-cnae` | `tipos-documento` | `materiais-servicos`) despacha para o
  * CrudCatalogo dono. A listagem é leitura de referência (consumida por editais/upload/lotes).
  */
-export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: ManterCatalogos; excluirMaterial: ExcluirMaterialServico }): void {
+export function registrarRotasCatalogos(
+  app: FastifyInstance,
+  deps: { manter: ManterCatalogos; excluirMaterial: ExcluirMaterialServico; excluirTipoDocumento: ExcluirTipoDocumento },
+): void {
   const catalogos: Record<string, CrudLike> = {
     secretarias: deps.manter.secretarias,
     'setores-cnae': deps.manter.setores,
@@ -112,6 +116,16 @@ export function registrarRotasCatalogos(app: FastifyInstance, deps: { manter: Ma
     try { await deps.excluirMaterial.excluir(id, actor(quem)); return reply.code(204).send(); }
     catch (e) { return falha(reply, e); }
   });
+
+  // Exclusão FÍSICA de tipo de arquivo (RF022). Gate deliberadamente MAIS ESTREITO que o resto do
+  // catálogo: criar/editar/inativar aceitam `smga`, excluir é só do Administrador — a remoção é
+  // irreversível e afeta o que o fornecedor consegue enviar. Guardas no caso de uso.
+  app.delete('/catalogos/tipos-documento/:id', async (req, reply) => {
+    const quem = exigirPapel(req, reply, PERFIS_ESCRITA_PADRAO); if (!quem) return reply;
+    const { id } = req.params as { id: string };
+    try { await deps.excluirTipoDocumento.excluir(id, actor(quem)); return reply.code(204).send(); }
+    catch (e) { return falha(reply, e); }
+  });
 }
 
 /** Achata o snapshot (meta + campos) numa view de leitura estável. */
@@ -130,10 +144,14 @@ function actor(quem: Identidade): Actor { return { userId: quem.userId, empresaI
 /** Mapeia os erros do caso de uso/adaptador para HTTP. */
 function falha(reply: FastifyReply, e: unknown): FastifyReply {
   const n = (e as Error).name;
-  if (n === 'ItemCatalogoNaoEncontrado' || n === 'MaterialNaoEncontrado') return reply.code(404).send({ codigo: n, mensagem: (e as Error).message });
+  if (n === 'ItemCatalogoNaoEncontrado' || n === 'MaterialNaoEncontrado' || n === 'TipoDocumentoNaoEncontrado') return reply.code(404).send({ codigo: n, mensagem: (e as Error).message });
   if (n === 'ChaveDuplicada' || n === 'ChavePgDuplicada') return reply.code(409).send({ codigo: 'ChaveDuplicada', mensagem: (e as Error).message });
-  // Exclusão bloqueada por regra de estado/integridade (ainda ativo, ou vinculado a edital) → 409.
-  if (n === 'MaterialAtivoNaoExcluivel' || n === 'MaterialVinculadoAEdital') return reply.code(409).send({ codigo: n, mensagem: (e as Error).message });
+  // Exclusão bloqueada por regra de estado/integridade (ainda ativo, vinculado a edital, com documento
+  // enviado, ou tipo de sistema) → 409. O `codigo` diz ao frontend qual mensagem exibir.
+  if (n === 'MaterialAtivoNaoExcluivel' || n === 'MaterialVinculadoAEdital'
+    || n === 'TipoDocumentoAtivoNaoExcluivel' || n === 'TipoDocumentoEmUso' || n === 'TipoDocumentoDeSistema') {
+    return reply.code(409).send({ codigo: n, mensagem: (e as Error).message });
+  }
   // CampoObrigatorio, CnaeInvalido, CategoriaInvalida → 422
   return reply.code(422).send({ codigo: n, mensagem: (e as Error).message });
 }

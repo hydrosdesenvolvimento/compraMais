@@ -412,8 +412,12 @@
       "acao": {
         "editar": "Editar tipo",
         "inativar": "Inactivar tipo",
-        "reativar": "Reactivar tipo"
+        "reativar": "Reactivar tipo",
+        "excluir": "Eliminar tipo",
+        "excluirBloqueado": "Inactive el tipo antes de eliminar"
       },
+      "confirmarExcluir": "¿Eliminar definitivamente el tipo \"{{nome}}\"? Esta acción no se puede deshacer.",
+      "excluido": "Tipo de archivo eliminado.",
       "modal": {
         "tituloCriar": "Nuevo tipo de archivo",
         "tituloEditar": "Editar tipo de archivo",
@@ -1164,7 +1168,11 @@
     "MaterialVinculadoAEdital": "El ítem está vinculado a un edicto y no puede eliminarse.",
     "MaterialAtivoNaoExcluivel": "Solo se pueden eliminar ítems inactivos. Inactívelo primero.",
     "EditalComCredenciamentos": "Este edicto tiene credenciamientos asociados y no puede despublicarse.",
-    "EditalNaoEditavel": "El edicto solo puede editarse mientras es un borrador."
+    "EditalNaoEditavel": "El edicto solo puede editarse mientras es un borrador.",
+    "TipoDocumentoNaoEncontrado": "Tipo de archivo no encontrado.",
+    "TipoDocumentoAtivoNaoExcluivel": "Solo se pueden eliminar los tipos inactivos. Inactívelo primero.",
+    "TipoDocumentoEmUso": "Hay documentos enviados con este tipo: no se puede eliminar.",
+    "TipoDocumentoDeSistema": "Tipo requerido por el sistema: no se puede eliminar."
   },
   "contestacao": {
     "semEmpresa": "Ninguna empresa vinculada a su cuenta.",

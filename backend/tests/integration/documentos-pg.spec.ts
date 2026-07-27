@@ -109,6 +109,15 @@ describe.skipIf(!TEM_BANCO)('DocumentoRepositoryPg / ObjectStoragePg — durabil
     expect(pendentes.map((d) => d.id).sort()).toEqual(['fila-1', 'fila-2']);
   });
 
+  it('usadoPorAlgumDocumento casa o tipo pelo nome, ignorando caixa (guarda de exclusão — RF022)', async () => {
+    await repo.salvar(doc('uso-1', { fornecedorId: 'fu', tipo: 'Certidão de Regularidade do FGTS' }));
+
+    expect(await repo.usadoPorAlgumDocumento('Certidão de Regularidade do FGTS')).toBe(true);
+    expect(await repo.usadoPorAlgumDocumento('certidão de regularidade do fgts')).toBe(true); // case-insensitive
+    expect(await repo.usadoPorAlgumDocumento('  Certidão de Regularidade do FGTS  ')).toBe(true); // trim
+    expect(await repo.usadoPorAlgumDocumento('Certidão Municipal')).toBe(false);
+  });
+
   it('o conteúdo cifrado sobrevive e o ponteiro devolvido é `pg://<chave>`', async () => {
     const storage = new ObjectStoragePg(pool);
     const ref = await storage.put('f1/doc-blob', 'CONTEUDO-CIFRADO-XYZ');
@@ -119,7 +128,8 @@ describe.skipIf(!TEM_BANCO)('DocumentoRepositoryPg / ObjectStoragePg — durabil
   });
 
   it('o storage guarda o conteúdo CIFRADO — o texto em claro não vai ao banco (AD-19)', async () => {
-    const g = new GerirDocumentos(repo, new ObjectStoragePg(pool), new PiiCipherDev());
+    // Catálogo stub: aqui o alvo é a cifra em repouso, não a validação do tipo (coberta em documentos.spec).
+    const g = new GerirDocumentos(repo, new ObjectStoragePg(pool), new PiiCipherDev(), { existeAtivo: async () => true });
     const { documentoId } = await g.enviar({
       fornecedorId: 'f-pii', tipo: 'contrato_social', formato: 'pdf', conteudo: 'CPF 123.456.789-00 do sócio',
     });

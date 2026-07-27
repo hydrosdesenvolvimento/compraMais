@@ -5,6 +5,7 @@ import { aplicarMigracoes } from './migracoes.js';
 import { Usuario } from '../identity/usuario.js';
 import { UsuarioRepositoryPg } from '../identity/usuario-repository-pg.js';
 import { seedTiposDocumento } from './seed-tipos-documento.js';
+import { seedSetoresCnae } from './seed-setores-cnae.js';
 
 /**
  * Seed de PRODUÇÃO (idempotente e SEGURO). Diferente de `seed.ts` (DEV/DEMO), NÃO cria usuários com
@@ -12,7 +13,9 @@ import { seedTiposDocumento } from './seed-tipos-documento.js';
  * precisa no primeiro deploy:
  *
  *   1. Catálogo de tipos de documento (RF022) — dado de referência.
- *   2. Um usuário administrador inicial, com credenciais vindas do ambiente/secret.
+ *   2. Catálogo de setores industriais / CNAE (RF021) — as 1.332 subclasses da CNAE 2.3 (IBGE),
+ *      base do "CNAE exigido" do edital e do match do fornecedor (RF003/RN001).
+ *   3. Um usuário administrador inicial, com credenciais vindas do ambiente/secret.
  *
  * As migrações rodam no boot do backend (server.ts); ainda assim as garantimos aqui para permitir
  * rodar o seed contra um banco recém-criado de forma standalone.
@@ -61,6 +64,7 @@ async function seedProd(): Promise<void> {
     if (novas.length) console.log(`[seed:prod] ${novas.length} migration(s) applied.`);
 
     await seedTiposDocumento(pool);
+    await seedSetoresCnae(pool);
 
     const repo = new UsuarioRepositoryPg(pool);
     if (await repo.porEmail(email)) {

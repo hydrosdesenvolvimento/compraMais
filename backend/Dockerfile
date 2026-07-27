@@ -38,6 +38,9 @@ COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node package.json ./
 # Migracoes aplicadas no startup pelo runner (src/shared/db/migracoes.ts).
 COPY --chown=node:node migrations ./migrations
+# Catalogo CNAE (RF021) lido pelo seed:prod (src/shared/db/seed-setores-cnae.ts) — mesmo arquivo que o
+# DBA roda por psql no container do banco. So o .sql entra na imagem (o gerador .mjs roda no host).
+COPY --chown=node:node scripts/seed-cnae-brasil.sql ./scripts/seed-cnae-brasil.sql
 
 USER node
 EXPOSE 3000

@@ -826,7 +826,11 @@
       "situacaoAtivo": "active",
       "excluir": "Delete",
       "excluido": "Item deleted.",
-      "confirmarExcluir": "Permanently delete \"{{nome}}\"? This action cannot be undone."
+      "confirmarExcluir": "Permanently delete \"{{nome}}\"? This action cannot be undone.",
+      "novoCadastro": "New entry",
+      "modalTitulo": "New item — {{catalogo}}",
+      "modalSubtitulo": "Fill in the fields and save",
+      "fechar": "Close"
     },
     "usuarios": {
       "breadcrumb": "Administration · Users",

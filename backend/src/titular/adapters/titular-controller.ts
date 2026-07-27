@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { GerirDireitosTitular, SolicitacaoProbe } from '../application/gerir-direitos.js';
 import type { ConsolidarPendencias } from '../application/consolidar-pendencias.js';
+import type { ExecutarExclusaoFornecedor } from '../application/executar-exclusao-fornecedor.js';
 import type { TipoDireito, StatusSolicitacao } from '../domain/solicitacao-titular.js';
 import type { Identidade, Papel } from '../../shared/identity/identity-provider.js';
 import { exigirAutenticado, exigirPapel } from '../../shared/http/autenticacao.js';
@@ -16,7 +17,10 @@ const PERFIS_DPO: readonly Papel[] = ['administrador', 'dpo'];
  * natureza do isolamento self-service abaixo: antes o ator era AUTODECLARADO — bastava trocar o header
  * para abrir um pedido em nome de outra pessoa ou ler a fila do DPO. Agora é VERIFICADO.
  */
-export function registrarRotasTitular(app: FastifyInstance, deps: { direitos: GerirDireitosTitular; pendencias: ConsolidarPendencias }): void {
+export function registrarRotasTitular(
+  app: FastifyInstance,
+  deps: { direitos: GerirDireitosTitular; pendencias: ConsolidarPendencias; exclusao: ExecutarExclusaoFornecedor },
+): void {
   // Solicitar direito (acesso/correção/exclusão) — somente o próprio titular (não procurador) — FR-002/003/004/005
   app.post('/titular/solicitacoes', async (req, reply) => {
     const quem = exigirAutenticado(req, reply);
@@ -76,6 +80,27 @@ export function registrarRotasTitular(app: FastifyInstance, deps: { direitos: Ge
       const n = (e as Error).name;
       const code = n === 'DescarteRetido' ? 409 : n === 'SolicitacaoNaoEncontrada' ? 404 : 400;
       return reply.code(code).send({ codigo: n, mensagem: (e as Error).message }); // 409 = retido pela política (FR-008)
+    }
+  });
+
+  /**
+   * Executa o direito de eliminação sobre o cadastro do fornecedor (LGPD art. 18, V / UC017). Distinta
+   * de `/atender`, que apenas registra a resposta: aqui o dado é de fato apagado. Só DPO/Administrador,
+   * e só a partir de uma solicitação `exclusao` pendente — não existe caminho de exclusão sem pedido
+   * formal por trás (decisão do solicitante, 2026-07-26).
+   */
+  app.post('/titular/solicitacoes/:id/executar-exclusao', async (req, reply) => {
+    const quem = exigirPapel(req, reply, PERFIS_DPO);
+    if (!quem) return reply;
+    const { id } = req.params as { id: string };
+    try { return reply.send(await deps.exclusao.executar(id, { userId: quem.userId })); }
+    catch (e) {
+      const n = (e as Error).name;
+      // 409 = retenção legal ainda em curso (FR-008) ou pedido já resolvido; 422 = pedido de outro tipo.
+      const code = n === 'SolicitacaoNaoEncontrada' || n === 'TitularSemFornecedor' ? 404
+        : n === 'DescarteRetido' ? 409
+          : n === 'SolicitacaoNaoEhExclusao' ? 422 : 409;
+      return reply.code(code).send({ codigo: n, mensagem: (e as Error).message });
     }
   });
 

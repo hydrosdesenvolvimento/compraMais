@@ -118,6 +118,9 @@ import { ConsolidarPendencias } from './titular/application/consolidar-pendencia
 import { SolicitacaoRepositoryMemory } from './titular/adapters/solicitacao-repository-memory.js';
 import { SolicitacaoRepositoryPg } from './titular/adapters/solicitacao-repository-pg.js';
 import { registrarRotasTitular } from './titular/adapters/titular-controller.js';
+import { ExecutarExclusaoFornecedor } from './titular/application/executar-exclusao-fornecedor.js';
+import { PurgaFornecedorPg, HistoricoFornecedorPg, DiretorioTitularPg } from './titular/adapters/purga-fornecedor-pg.js';
+import { PurgaFornecedorMemory, HistoricoFornecedorMemory, DiretorioTitularMemory } from './titular/adapters/purga-fornecedor-memory.js';
 import { DashboardAdmin, Transparencia } from './paineis/application/paineis.js';
 import { registrarRotasPaineis } from './paineis/adapters/paineis-controller.js';
 import { registrarRotasRelatorios } from './relatorios/adapters/relatorios-controller.js';
@@ -564,7 +567,37 @@ export async function buildServer(): Promise<FastifyInstance> {
     contestacoesCnaePendentes: async (id) => (await contestacaoRepo.pendentesDoFornecedor(id)).map((c) => ({ id: c.id, cnae: c.cnaeContestado })),
     solicitacoesLgpdPendentes: async (id) => (await solicitacoesRepo.buscarPorExemplo({ titularId: id, status: 'pendente' })).map((s) => ({ id: s.id, tipo: s.tipo })),
   });
-  registrarRotasTitular(app, { direitos: direitosTitular, pendencias: consolidar });
+
+  // Execução do direito de eliminação (LGPD art. 18, V / UC017). Até aqui a fila do DPO só REGISTRAVA a
+  // decisão; este caso de uso apaga de fato. Sem histórico de participação, o cadastro sai por completo;
+  // com histórico, o dado pessoal é eliminado e credenciamentos/distribuições/malotes permanecem.
+  //
+  // As sondas de histórico e a purga são compostas aqui (composition root) a partir dos repositórios já
+  // instanciados: o caso de uso não conhece Postgres nem os agregados vizinhos.
+  const historicoFornecedor = pool
+    ? new HistoricoFornecedorPg(pool)
+    : new HistoricoFornecedorMemory([
+      async (id) => (await credRepo.listarPorFornecedor(id)).length > 0,
+      async (id) => (await contestacaoRepo.pendentesDoFornecedor(id)).length > 0,
+      async (id) => (await bloqueios.ativosDe(id)).length > 0,
+      async (id) => (await maloteRepo.buscarPorExemplo({ fornecedorId: id })).length > 0,
+    ]);
+  const purgaFornecedor = pool
+    ? new PurgaFornecedorPg(pool)
+    : new PurgaFornecedorMemory({
+      fornecedores: fornecedores as unknown as { remover(id: string): Promise<void> },
+      documentos: docRepo as unknown as { removerDoFornecedor(id: string, manter: boolean): Promise<number> },
+      contas: contasRepo as unknown as { removerDoFornecedor(id: string): Promise<number> },
+      usuarios: usuarioRepo as unknown as { removerDoFornecedor(id: string): Promise<number> },
+      consentimentos: consentimentosRepo as unknown as { removerDoFornecedor(id: string): Promise<number> },
+      biometria: biometriaRepo as unknown as { removerDoFornecedor(id: string): Promise<boolean> },
+    });
+  const diretorioTitular = pool ? new DiretorioTitularPg(pool) : new DiretorioTitularMemory(usuarioRepo);
+  const executarExclusao = new ExecutarExclusaoFornecedor(
+    solicitacoesRepo, diretorioTitular, fornecedores, historicoFornecedor, purgaFornecedor, bus,
+  );
+
+  registrarRotasTitular(app, { direitos: direitosTitular, pendencias: consolidar, exclusao: executarExclusao });
 
   // Painéis (007 / Épico 9): dashboard admin (funil) + transparência pública. Somente leitura (projeções).
   const paineisFonte = {

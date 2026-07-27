@@ -19,4 +19,11 @@ export class ContaRepositoryMemory implements ContaRepository {
   async listarPorFornecedor(fornecedorId: string): Promise<ContaAcesso[]> {
     return [...this.map.values()].filter((c) => c.fornecedorId === fornecedorId);
   }
+
+  /** Eliminação LGPD (art. 18, V): revoga todas as contas da empresa. Devolve quantas saíram. */
+  async removerDoFornecedor(fornecedorId: string): Promise<number> {
+    const alvos = [...this.map.values()].filter((c) => c.fornecedorId === fornecedorId);
+    for (const c of alvos) this.map.delete(c.id);
+    return alvos.length;
+  }
 }

@@ -15,14 +15,16 @@ export class FornecedorRepositoryPg implements FornecedorRepository {
     const s = f.estado();
     await this.pool.query(
       `INSERT INTO fornecedores
-         (id, cnpj, razao_social, porte, cnaes, situacao, origem, contato, status, sincronizado_em, register_date, update_date, last_user_update)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+         (id, cnpj, razao_social, porte, cnaes, situacao, origem, contato, status, sincronizado_em, register_date, update_date, last_user_update, anonimizado_em)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
        ON CONFLICT (id) DO UPDATE SET
          cnpj = $2, razao_social = $3, porte = $4, cnaes = $5, situacao = $6, origem = $7,
-         contato = $8, status = $9, sincronizado_em = $10, update_date = $12, last_user_update = $13`,
+         contato = $8, status = $9, sincronizado_em = $10, update_date = $12, last_user_update = $13,
+         anonimizado_em = $14`,
       [
         s.meta.id, s.cnpj, s.razaoSocial, s.porte, JSON.stringify(s.cnaes), s.situacao, s.origem,
         JSON.stringify(s.contato), s.status, s.sincronizadoEm, s.meta.registerDate, s.meta.updateDate, s.meta.lastUserUpdate,
+        s.anonimizadoEm ?? null,
       ],
     );
   }
@@ -54,6 +56,7 @@ export class FornecedorRepositoryPg implements FornecedorRepository {
       contato: (row.contato as ContatoEditavel) ?? {},
       status: row.status as StatusCredenciamento,
       sincronizadoEm: row.sincronizado_em ? iso(row.sincronizado_em) : null,
+      anonimizadoEm: row.anonimizado_em ? iso(row.anonimizado_em) : null,
     });
   }
 }

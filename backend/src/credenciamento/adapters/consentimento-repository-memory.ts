@@ -20,4 +20,11 @@ export class ConsentimentoRepositoryMemory implements ConsentimentoRepository {
       .filter((c) => c.fornecedorId === fornecedorId)
       .sort((a, b) => a.concedidoEm.localeCompare(b.concedidoEm));
   }
+
+  /** Eliminação LGPD (art. 18, V). Única exceção ao append-only: o titular pediu para sair. */
+  async removerDoFornecedor(fornecedorId: string): Promise<number> {
+    const alvos = [...this.map.values()].filter((c) => c.fornecedorId === fornecedorId);
+    for (const c of alvos) this.map.delete(c.id);
+    return alvos.length;
+  }
 }

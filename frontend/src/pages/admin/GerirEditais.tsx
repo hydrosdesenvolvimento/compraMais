@@ -6,6 +6,7 @@ import { api, type EditalGestao, type CatalogoItemView, type FiltroEditais, type
 import { celula, cabecalho, Paginacao } from '../../design-system/tabela';
 import { Botao, BotaoIcone, Campo, useToast } from '../../design-system/components';
 import { IconeOlho, IconeFechar, IconeBusca, IconeFiltro, IconeDemandas, IconeLapis, IconeUpload, IconeVoltar, IconeCadeado, IconeMais } from '../../design-system/icons';
+import { subclassesCnae } from '../../lib/br';
 import { textoDoErro } from '../../lib/erros';
 import { consumirBuscaPendente } from '../../lib/busca-global';
 
@@ -25,6 +26,7 @@ function formatarCnae(codigo: string | undefined): string {
   const d = (codigo ?? '').replace(/\D/g, '');
   return d.length === 7 ? `${d.slice(0, 4)}-${d.slice(4, 5)}/${d.slice(5, 7)}` : codigo ?? '—';
 }
+
 
 /** Tom da pill por situação do edital (design system) — publicado=sucesso, rascunho=atenção, encerrado=info. */
 function tomSituacao(situacao: string): { bg: string; fg: string } {
@@ -85,7 +87,7 @@ export function GerirEditais() {
 
   const criar = useMutation({
     mutationFn: (v: { objeto: string; secretariaId: string; cnae: string; prazo: string; provaDeVida: boolean }) =>
-      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo, exigeProvaDeVida: v.provaDeVida }),
+      api.criarEdital({ secretariaId: v.secretariaId, objeto: v.objeto, cnaesAlvo: subclassesCnae(v.cnae), prazoVigencia: v.prazo, exigeProvaDeVida: v.provaDeVida }),
     // Recém-criado nasce em rascunho: abre direto o gerenciador de itens para o gestor cadastrá-los.
     onSuccess: (res) => { setCriando(false); void invalidar(); setItensId(res.editalId); },
   });
@@ -100,7 +102,7 @@ export function GerirEditais() {
   });
   const editar = useMutation({
     mutationFn: (v: { id: string; objeto: string; cnae: string; prazo: string; provaDeVida: boolean }) =>
-      api.editarEdital(v.id, { objeto: v.objeto, cnaesAlvo: v.cnae.split(',').map((c) => c.trim()).filter(Boolean), prazoVigencia: v.prazo || null, exigeProvaDeVida: v.provaDeVida }),
+      api.editarEdital(v.id, { objeto: v.objeto, cnaesAlvo: subclassesCnae(v.cnae), prazoVigencia: v.prazo || null, exigeProvaDeVida: v.provaDeVida }),
     onSuccess: () => { setEditandoId(null); ok(t('admin.gerirEditais.editadoOk')); void invalidar(); },
     onError: (e) => erro(textoDoErro(e)),
   });

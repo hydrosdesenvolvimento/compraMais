@@ -1179,7 +1179,8 @@
     "TipoDocumentoNaoEncontrado": "Tipo de archivo no encontrado.",
     "TipoDocumentoAtivoNaoExcluivel": "Solo se pueden eliminar los tipos inactivos. Inactívelo primero.",
     "TipoDocumentoEmUso": "Hay documentos enviados con este tipo: no se puede eliminar.",
-    "TipoDocumentoDeSistema": "Tipo requerido por el sistema: no se puede eliminar."
+    "TipoDocumentoDeSistema": "Tipo requerido por el sistema: no se puede eliminar.",
+    "CnaeInvalido": "CNAE inválido: informe la subclase con 7 dígitos (ej.: 1412601)."
   },
   "contestacao": {
     "semEmpresa": "Ninguna empresa vinculada a su cuenta.",

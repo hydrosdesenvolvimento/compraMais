@@ -71,6 +71,8 @@ export interface FornecedorState {
   contato: ContatoEditavel;
   status: StatusCredenciamento;
   sincronizadoEm: string | null;
+  /** ISO-8601 de quando o dado pessoal foi eliminado a pedido do titular (LGPD); null = cadastro normal. */
+  anonimizadoEm?: string | null;
 }
 
 /**
@@ -90,6 +92,7 @@ export class Fornecedor extends EntidadeBase {
     private _contato: ContatoEditavel,
     private _status: StatusCredenciamento,
     private _sincronizadoEm: string | null,
+    private _anonimizadoEm: string | null = null,
   ) {
     super(meta);
   }
@@ -119,7 +122,7 @@ export class Fornecedor extends EntidadeBase {
   static deEstado(s: FornecedorState): Fornecedor {
     return new Fornecedor(
       s.meta, Cnpj.criar(s.cnpj), s.razaoSocial, s.porte,
-      s.cnaes, s.situacao, s.origem, s.contato, s.status, s.sincronizadoEm,
+      s.cnaes, s.situacao, s.origem, s.contato, s.status, s.sincronizadoEm, s.anonimizadoEm ?? null,
     );
   }
 
@@ -131,6 +134,9 @@ export class Fornecedor extends EntidadeBase {
   get contato(): Readonly<ContatoEditavel> { return this._contato; }
   get status(): StatusCredenciamento { return this._status; }
   get sincronizadoEm(): string | null { return this._sincronizadoEm; }
+  get anonimizadoEm(): string | null { return this._anonimizadoEm; }
+  /** Dado pessoal já eliminado a pedido do titular — o cadastro não volta a ser editável. */
+  get anonimizado(): boolean { return this._anonimizadoEm !== null; }
 
   /** Snapshot plano para persistência (AD-33). O adaptador grava/lê exatamente este formato. */
   estado(): FornecedorState {
@@ -138,13 +144,32 @@ export class Fornecedor extends EntidadeBase {
       meta: { id: this.id, registerDate: this.registerDate, updateDate: this.updateDate, lastUserUpdate: this.lastUserUpdate },
       cnpj: this.cnpj.valor, razaoSocial: this._razaoSocial, porte: this._porte, cnaes: this._cnaes,
       situacao: this._situacao, origem: this._origem, contato: this._contato,
-      status: this._status, sincronizadoEm: this._sincronizadoEm,
+      status: this._status, sincronizadoEm: this._sincronizadoEm, anonimizadoEm: this._anonimizadoEm,
     };
   }
 
-  /** RN009: só Nome Fantasia, Endereço e Telefone. */
+  /** RN009: só Nome Fantasia, Endereço e Telefone. Bloqueado após a anonimização (LGPD). */
   editarContato(patch: ContatoEditavel, userName = 'sistema'): void {
+    if (this._anonimizadoEm) throw new FornecedorAnonimizado();
     this._contato = { ...this._contato, ...patch };
+    this.marcarAtualizacao(userName);
+  }
+
+  /**
+   * LGPD art. 18, V — elimina o dado pessoal do cadastro **preservando o registro da participação**.
+   *
+   * Zera `contato` (nome fantasia, telefone, endereço) e marca a data da eliminação. **CNPJ e razão
+   * social permanecem** (decisão do solicitante, 2026-07-26): são dados de pessoa jurídica que integram
+   * o ato administrativo publicado — sem eles a Transparência deixaria de dizer quem foi credenciado e a
+   * prestação de contas ficaria cega. A PII de pessoas físicas (titular, procuradores, sócios nos
+   * documentos, biometria) é eliminada FORA do agregado, pelo caso de uso que orquestra a purga.
+   *
+   * Idempotente: repetir não altera a data original — o direito foi exercido uma vez.
+   */
+  anonimizar(quandoIso: string, userName = 'sistema'): void {
+    if (this._anonimizadoEm) return;
+    this._contato = {};
+    this._anonimizadoEm = quandoIso;
     this.marcarAtualizacao(userName);
   }
 
@@ -273,6 +298,13 @@ export class TransicaoStatusInvalida extends Error {
   constructor(de: StatusCredenciamento, para: StatusCredenciamento) {
     super(`Invalid supplier status transition from '${de}' to '${para}'.`);
     this.name = 'TransicaoStatusInvalida';
+  }
+}
+
+export class FornecedorAnonimizado extends Error {
+  constructor() {
+    super('Supplier data was erased at the data subject\'s request (LGPD) and can no longer be edited.');
+    this.name = 'FornecedorAnonimizado';
   }
 }
 

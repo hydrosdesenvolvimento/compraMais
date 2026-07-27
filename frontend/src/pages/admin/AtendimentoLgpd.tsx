@@ -42,7 +42,23 @@ export function AtendimentoLgpd() {
     // 409 = retido pela política de retenção legal (FR-008).
     onError: (e) => setFeedback({ tom: 'erro', texto: e instanceof HttpError && e.status === 409 ? t('adminLgpd.feedback.retido') : textoDoErro(e) }),
   });
-  const ocupado = atender.isPending || recusar.isPending || descartar.isPending;
+  /**
+   * Execução do direito de eliminação (LGPD art. 18, V) — distinta de "atender", que só registra a
+   * resposta: aqui o dado é apagado de fato e não há como desfazer. Daí a confirmação nomeando o que vai
+   * acontecer. O backend decide o desfecho: sem histórico de participação apaga o cadastro; com
+   * histórico anonimiza, preservando credenciamentos, distribuições e malotes.
+   */
+  const excluir = useMutation({
+    meta: { semToast: true }, // idem: 409 (retido / já resolvido) tratado inline
+    mutationFn: (id: string) => api.executarExclusaoLgpd(id),
+    onSuccess: (r) => ok(t(`adminLgpd.feedback.${r.modo === 'excluido' ? 'excluido' : 'anonimizado'}`, { documentos: r.purga.documentos })),
+    onError: (e) => setFeedback({ tom: 'erro', texto: e instanceof HttpError && e.status === 409 ? t('adminLgpd.feedback.retido') : textoDoErro(e) }),
+  });
+  const confirmarExcluir = (id: string) => {
+    if (window.confirm(t('adminLgpd.confirmarExcluir'))) excluir.mutate(id);
+  };
+
+  const ocupado = atender.isPending || recusar.isPending || descartar.isPending || excluir.isPending;
 
   return (
     <div className="stack">
@@ -76,9 +92,14 @@ export function AtendimentoLgpd() {
                 {t('adminLgpd.atender')}
               </Botao>
               {s.tipo === 'exclusao' && (
-                <Botao data-cy="lgpd-descartar" variante="amber" onClick={() => descartar.mutate(s.id)} disabled={ocupado}>
-                  {t('adminLgpd.descartar')}
-                </Botao>
+                <>
+                  <Botao data-cy="lgpd-descartar" variante="amber" onClick={() => descartar.mutate(s.id)} disabled={ocupado}>
+                    {t('adminLgpd.descartar')}
+                  </Botao>
+                  <Botao data-cy="lgpd-excluir" variante="secundario" onClick={() => confirmarExcluir(s.id)} disabled={ocupado} title={t('adminLgpd.excluirAjuda')} style={{ color: 'var(--erro)', borderColor: 'var(--erro)' }}>
+                    {t('adminLgpd.excluir')}
+                  </Botao>
+                </>
               )}
             </div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap', alignItems: 'center' }}>

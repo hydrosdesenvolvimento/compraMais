@@ -23,4 +23,7 @@ export class FornecedorRepositoryMemory implements FornecedorRepository {
   async listar(): Promise<Fornecedor[]> {
     return [...this.porIdMap.values()].sort((a, b) => b.registerDate.localeCompare(a.registerDate));
   }
+
+  /** Exclusão física (LGPD art. 18, V) — só para fornecedor sem histórico. Idempotente. */
+  async remover(id: string): Promise<void> { this.porIdMap.delete(id); }
 }

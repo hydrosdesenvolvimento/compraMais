@@ -516,6 +516,15 @@ export const api = {
   recusarSolicitacao: (id: string, motivo: string) => send<{ status: string }>(`/titular/solicitacoes/${id}/recusar`, 'POST', { motivo }),
   // Exclusão: descarte só após a retenção legal da categoria (FR-008); 409 se ainda retido.
   descartarSolicitacao: (id: string, dataRegistro: string) => send<{ descartado: boolean }>(`/titular/solicitacoes/${id}/descartar`, 'POST', { dataRegistro }),
+  /**
+   * Executa o direito de eliminação (LGPD art. 18, V). Diferente de `atenderSolicitacao`, que só
+   * registra a resposta: aqui o dado é apagado. `modo` diz o desfecho decidido pelo backend —
+   * `excluido` (sem histórico de participação) ou `anonimizado` (com histórico preservado).
+   */
+  executarExclusaoLgpd: (id: string) =>
+    send<{ modo: 'excluido' | 'anonimizado'; fornecedorId: string; purga: { documentos: number; contas: number; usuarios: number; consentimentos: number; biometria: boolean } }>(
+      `/titular/solicitacoes/${id}/executar-exclusao`, 'POST',
+    ),
 
   // UC010 — Malote SEI (CPL/Administrador). Geração assíncrona (202), QBE, exportação idempotente.
   malotesListar: (params: URLSearchParams) => get<MaloteListaView[]>(`/malotes?${params.toString()}`),

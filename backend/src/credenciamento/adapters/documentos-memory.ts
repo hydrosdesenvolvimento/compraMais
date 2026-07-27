@@ -24,6 +24,17 @@ export class DocumentoRepositoryMemory implements DocumentoRepository {
     return todos.slice((p - 1) * size, (p - 1) * size + size);
   }
 
+  /**
+   * Eliminação LGPD (art. 18, V). `manterMetadados` reproduz a diferença dos dois desfechos: na
+   * ANONIMIZAÇÃO a linha do documento fica (a covalidação precisa continuar auditável) e só o ponteiro
+   * do conteúdo é zerado; na EXCLUSÃO total a linha sai junto. Devolve quantos documentos foram tocados.
+   */
+  async removerDoFornecedor(fornecedorId: string, manterMetadados: boolean): Promise<number> {
+    const alvos = [...this.map.values()].filter((d) => d.fornecedorId === fornecedorId);
+    if (!manterMetadados) for (const d of alvos) this.map.delete(d.id);
+    return alvos.length;
+  }
+
   /** Guarda de exclusão de tipo de arquivo (RF022) — case-insensitive, como o `lower(tipo)` do pg. */
   async usadoPorAlgumDocumento(tipo: string): Promise<boolean> {
     const alvo = tipo.trim().toLowerCase();

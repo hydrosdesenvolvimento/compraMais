@@ -11,8 +11,9 @@ import { textoDoErro } from '../../lib/erros';
 
 /**
  * UC020 — Manter Catálogos (Painel Admin). Uma jornada, quatro catálogos: Secretarias (RF020),
- * Setores/CNAE (RF021), Tipos de Documento (RF022) e **Materiais e Serviços** — os itens que a
- * Administração compra/contrata, modelados a partir do projeto de referência `comprac_api`.
+ * Atividades/CNAE (RF021 — rotulado "Atividades (CNAE)"; o slug segue `setores-cnae`), Tipos de
+ * Documento (RF022) e **Materiais e Serviços** — os itens que a Administração compra/contrata,
+ * modelados a partir do projeto de referência `comprac_api`.
  *
  * CRUD com inativação lógica (RN015): o item inativo some da lista padrão (toggle "mostrar inativos")
  * mas pode ser reativado. As escritas dos três catálogos base exigem papel Administrador; as de

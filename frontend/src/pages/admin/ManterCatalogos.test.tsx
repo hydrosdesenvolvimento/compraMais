@@ -47,7 +47,7 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
   });
 
   it('lista os itens e inativar delega ao módulo dono (RN015)', async () => {
-    // Aba default = Setores (CNAE), após a retirada da aba Secretarias.
+    // Aba default = Atividades (CNAE) — slug `setores-cnae` —, após a retirada da aba Secretarias.
     catalogoListar.mockResolvedValue([
       { id: 'c1', ativo: true, situacao: 'ativo', codigo: '1091101', descricao: 'Panificação' },
       { id: 'c2', ativo: false, situacao: 'inativo', codigo: '4711302', descricao: 'Supermercados' },

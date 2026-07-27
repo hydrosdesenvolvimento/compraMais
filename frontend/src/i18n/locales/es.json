@@ -764,9 +764,9 @@
     },
     "catalogos": {
       "titulo": "Catálogos base",
-      "subtitulo": "Mantenga sectores (CNAE), tipos de documento y el catálogo de materiales y servicios. La exclusión es lógica: el ítem inactivado sale de las listas pero conserva sus vínculos.",
+      "subtitulo": "Mantenga actividades (CNAE), tipos de documento y el catálogo de materiales y servicios. La exclusión es lógica: el ítem inactivado sale de las listas pero conserva sus vínculos.",
       "tabs": {
-        "setores": "Sectores (CNAE)",
+        "setores": "Actividades (CNAE)",
         "tiposDoc": "Tipos de documento",
         "materiais": "Materiales y servicios",
         "unidadesMedida": "Unidades de medida"

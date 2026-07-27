@@ -413,7 +413,8 @@
         "editar": "Editar tipo",
         "inativar": "Inativar tipo",
         "reativar": "Reativar tipo",
-        "excluir": "Excluir tipo"
+        "excluir": "Excluir tipo",
+        "excluirBloqueado": "Inative o tipo antes de excluir"
       },
       "confirmarExcluir": "Excluir definitivamente o tipo \"{{nome}}\"? Esta ação não pode ser desfeita.",
       "excluido": "Tipo de arquivo excluído.",

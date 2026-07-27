@@ -24,9 +24,11 @@ import { IconeLapis, IconePower, IconeLixeira, IconeFechar, IconeInfo } from '..
  *
  * Exclusão FÍSICA (2026-07-26, decisão do solicitante): além de inativar, o **Administrador** pode
  * remover definitivamente um tipo. O botão só aparece para esse perfil — as demais escritas da tela
- * aceitam também a Secretaria (`smga`), a exclusão não. As guardas são do backend (409 com `codigo`):
- * o tipo precisa estar inativo, não pode ter documento enviado e não pode ser tipo de sistema
- * (ex.: "Foto do Responsável", usado pela prova de vida do UC007). A inativação lógica (RN015)
+ * aceitam também a Secretaria (`smga`), a exclusão não — e só fica **habilitado quando o tipo está
+ * INATIVO**, refletindo na UI a ordem exigida pelo backend (inative, depois exclua) em vez de deixar o
+ * clique virar 409. As guardas continuam sendo do backend (409 com `codigo`): tipo inativo, sem
+ * documento enviado e que não seja tipo de sistema (ex.: "Foto do Responsável", usado pela prova de
+ * vida do UC007) — a UI antecipa a primeira, o servidor decide todas. A inativação lógica (RN015)
  * continua sendo o caminho padrão.
  */
 const SLUG = 'tipos-documento' as const;
@@ -162,9 +164,11 @@ export function TiposArquivos() {
                             <BotaoIcone
                               icone={IconeLixeira}
                               data-cy="excluir"
-                              title={t('admin.tiposArquivos.acao.excluir')}
-                              aria-label={t('admin.tiposArquivos.acao.excluir')}
-                              disabled={excluir.isPending}
+                              // Ativo: o botão fica desabilitado e o tooltip diz o que fazer ("inative
+                              // antes de excluir"), em vez de deixar clicar para colher um 409.
+                              title={t(`admin.tiposArquivos.acao.${s.ativo ? 'excluirBloqueado' : 'excluir'}`)}
+                              aria-label={t(`admin.tiposArquivos.acao.${s.ativo ? 'excluirBloqueado' : 'excluir'}`)}
+                              disabled={s.ativo || excluir.isPending}
                               onClick={() => confirmarExcluir(s)}
                               style={{ color: 'var(--erro, #c0392b)' }}
                             />

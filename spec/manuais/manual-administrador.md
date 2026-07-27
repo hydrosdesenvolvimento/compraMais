@@ -374,9 +374,14 @@ Cada linha tem três ações: **editar**, **inativar/reativar** e **excluir**.
 | **Excluir** | Remove o tipo **definitivamente**. Não há como desfazer. | Cadastro feito por engano, que nunca chegou a ser usado. |
 
 A **exclusão é exclusiva do Administrador** — os demais perfis (inclusive a Secretaria, que pode criar,
-editar e inativar) não veem o botão. O sistema pede confirmação e recusa a exclusão nestes casos:
+editar e inativar) não veem o botão.
 
-- **o tipo ainda está ativo** — inative primeiro; é o passo que tira o tipo de circulação;
+> **A lixeira só fica habilitada quando o tipo está inativo.** Enquanto o tipo estiver ativo o botão
+> aparece esmaecido, com o aviso *"Inative o tipo antes de excluir"*. A ordem é sempre a mesma:
+> **inativar → excluir**.
+
+Depois de habilitado, o sistema pede confirmação e ainda assim recusa a exclusão nestes casos:
+
 - **já existe documento enviado com esse tipo** — apagá-lo deixaria o histórico do fornecedor apontando
   para um tipo inexistente. Use **inativar**;
 - **é um tipo exigido pelo sistema** (ex.: *Foto do Responsável*, usado pela prova de vida) — pode ser

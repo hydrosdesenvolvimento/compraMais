@@ -413,7 +413,8 @@
         "editar": "Edit type",
         "inativar": "Deactivate type",
         "reativar": "Reactivate type",
-        "excluir": "Delete type"
+        "excluir": "Delete type",
+        "excluirBloqueado": "Deactivate the type before deleting"
       },
       "confirmarExcluir": "Permanently delete the type \"{{nome}}\"? This action cannot be undone.",
       "excluido": "File type deleted.",

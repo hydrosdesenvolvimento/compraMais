@@ -77,8 +77,13 @@ Sem migração: `remover(id)` já existia na porta `CatalogoRepository` e nos do
 | Arquivo | Mudança |
 |---|---|
 | `src/lib/api.ts` | `tipoArquivoExcluir(id)` |
-| `src/pages/admin/TiposArquivos.tsx` | Lixeira por linha (só administrador), `window.confirm`, toast de sucesso |
-| `src/i18n/locales/{pt-BR,en,es}.json` | `acao.excluir`, `confirmarExcluir`, `excluido` + 4 códigos em `erros.*` |
+| `src/pages/admin/TiposArquivos.tsx` | Lixeira por linha (só administrador, **habilitada só em tipo inativo**), `window.confirm`, toast de sucesso |
+| `src/i18n/locales/{pt-BR,en,es}.json` | `acao.excluir`, `acao.excluirBloqueado`, `confirmarExcluir`, `excluido` + 4 códigos em `erros.*` |
+
+A lixeira fica **desabilitada enquanto o tipo estiver ativo**, com o tooltip *"Inative o tipo antes de
+excluir"* (2026-07-26, ajuste do solicitante). É a guarda nº 2 antecipada na UI: em vez de deixar o clique
+virar um `409`, a tela expressa a ordem exigida (inativar → excluir). A guarda do servidor **permanece** —
+a UI orienta, o backend decide; as outras duas (tipo de sistema e tipo em uso) só o servidor conhece.
 
 O erro **não** é tratado localmente: o `MutationCache` global (`lib/query.ts`) já converte a resposta em
 toast traduzindo o `codigo`. Tratar nos dois lugares exigiria `meta: { semToast: true }`, senão o usuário
@@ -103,8 +108,10 @@ tests/integration/excluir-tipo-documento.spec.ts   8 tests   ✓
 tests/integration/catalogos-rotas.spec.ts         17 tests   ✓   (6 novos: 401, 403 smga, 409 ativo,
                                                                    204 + sumiço da lista, 409 sistema,
                                                                    404, 409 em uso)
-src/pages/admin/TiposArquivos.test.tsx            12 tests   ✓   (4 novos: lixeira p/ admin, ausente p/
-                                                                   smga, confirma+chama, cancela)
+src/pages/admin/TiposArquivos.test.tsx            14 tests   ✓   (6 novos: lixeira p/ admin, ausente p/
+                                                                   smga, habilitada só em inativo + tooltip,
+                                                                   clique em ativo é inerte, confirma+chama,
+                                                                   cancela)
 ```
 
 Cobertura adicional:
@@ -117,9 +124,10 @@ Cobertura adicional:
   o CI nunca a executou e a quebra passou despercebida. Corrigido com um stub `{ existeAtivo: async () => true }`.
 - `tests/integration/excluir-tipo-documento.spec.ts` amarra `TIPOS_DOCUMENTO_DE_SISTEMA` a
   `TIPO_DOC_FOTO_RESPONSAVEL` — trava contra drift entre catálogo e biometria.
-- `cypress/e2e/tipos-arquivos-excluir.cy.ts` — **novo**, E2E do fluxo completo (criar → recusa em ativo →
-  inativar → excluir; recusa do tipo de sistema; ausência da lixeira para `smga`). **Execução real pendente
-  do QA Expert** com o stack no ar (`docker compose --profile dev`) — o Cypress não roda no profile `test`.
+- `cypress/e2e/tipos-arquivos-excluir.cy.ts` — **novo**, E2E do fluxo completo (criar → lixeira desabilitada
+  enquanto ativo → inativar → excluir; recusa do tipo de sistema pelo servidor após inativado, com restauro
+  do estado; ausência da lixeira para `smga`). **Execução real pendente do QA Expert** com o stack no ar
+  (`docker compose --profile dev`) — o Cypress não roda no profile `test`.
 
 ## 6. Riscos e pontos de atenção
 

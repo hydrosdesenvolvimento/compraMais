@@ -40,10 +40,10 @@ describe('Tipos de Arquivos — exclusão definitiva (RF022)', () => {
     cy.get('[data-cy=salvar-tipo]').click();
     linhaDoTipo(nome).should('exist');
 
-    // Ativo ainda não pode ser excluído: o backend recusa com 409 e a linha permanece.
-    linhaDoTipo(nome).find('[data-cy=excluir]').click();
-    cy.get('[data-cy=toast][data-tom=erro]').should('be.visible');
-    linhaDoTipo(nome).should('exist');
+    // Ativo ainda não pode ser excluído: a lixeira nasce desabilitada, com o tooltip explicando.
+    linhaDoTipo(nome).find('[data-cy=excluir]')
+      .should('be.disabled')
+      .and('have.attr', 'title', 'Inative o tipo antes de excluir');
 
     // Inativa e então exclui.
     linhaDoTipo(nome).find('[data-cy=alternar-situacao]').click();
@@ -53,14 +53,21 @@ describe('Tipos de Arquivos — exclusão definitiva (RF022)', () => {
     cy.contains('[data-cy=item-tipo] td', new RegExp(`^${nome}$`)).should('not.exist');
   });
 
-  it('tipo de sistema (Foto do Responsável) é recusado e continua na tabela', () => {
+  it('tipo de sistema (Foto do Responsável) é recusado pelo servidor mesmo depois de inativado', () => {
     autenticar(ADMIN);
     cy.visit('/#/admin/tipos-arquivos');
     cy.get('[data-cy=tabela-tipos]').should('be.visible');
 
-    linhaDoTipo(TIPO_DE_SISTEMA).find('[data-cy=excluir]').click();
+    // Inativar habilita a lixeira na UI; a guarda que sobra é a do backend, que é a que importa aqui.
+    linhaDoTipo(TIPO_DE_SISTEMA).find('[data-cy=alternar-situacao]').click();
+    linhaDoTipo(TIPO_DE_SISTEMA).find('[data-cy=status]').should('contain.text', 'Inativo');
+    linhaDoTipo(TIPO_DE_SISTEMA).find('[data-cy=excluir]').should('be.enabled').click();
     cy.get('[data-cy=toast][data-tom=erro]').should('be.visible');
     linhaDoTipo(TIPO_DE_SISTEMA).should('exist');
+
+    // Restaura o catálogo: a prova de vida (UC007) depende deste tipo ATIVO.
+    linhaDoTipo(TIPO_DE_SISTEMA).find('[data-cy=alternar-situacao]').click();
+    linhaDoTipo(TIPO_DE_SISTEMA).find('[data-cy=status]').should('contain.text', 'Ativo');
   });
 
   it('Secretaria (smga) não vê a lixeira, mas continua podendo editar e inativar', () => {

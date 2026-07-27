@@ -189,6 +189,26 @@ describe('TiposArquivos — exclusão definitiva (RF022, só Administrador)', ()
     expect(await screen.findAllByTestId('excluir')).toHaveLength(ITENS.length);
   });
 
+  it('a lixeira só fica habilitada quando o tipo está INATIVO', async () => {
+    renderTela();
+    const botoes = await screen.findAllByTestId('excluir');
+    expect(botoes[0]).toBeDisabled();    // t1 ativo
+    expect(botoes[1]).toBeEnabled();     // t2 inativo
+    expect(botoes[2]).toBeDisabled();    // t3 ativo
+    // O tooltip do desabilitado diz o que fazer, em vez de só travar sem explicação.
+    expect(botoes[0]).toHaveAttribute('title', 'Inative o tipo antes de excluir');
+    expect(botoes[1]).toHaveAttribute('title', 'Excluir tipo');
+  });
+
+  it('clicar na lixeira de um tipo ATIVO não confirma nem chama a API', async () => {
+    const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    renderTela();
+    fireEvent.click((await screen.findAllByTestId('excluir'))[0]); // t1 ativo → desabilitado
+    expect(confirmar).not.toHaveBeenCalled();
+    expect(excluir).not.toHaveBeenCalled();
+    confirmar.mockRestore();
+  });
+
   it('Secretaria (smga) NÃO vê a lixeira — a exclusão é só do Administrador', async () => {
     usuario.mockReturnValue({ papel: 'smga' });
     renderTela();
@@ -208,7 +228,8 @@ describe('TiposArquivos — exclusão definitiva (RF022, só Administrador)', ()
   it('cancelar a confirmação não chama a API', async () => {
     const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(false);
     renderTela();
-    fireEvent.click((await screen.findAllByTestId('excluir'))[0]);
+    fireEvent.click((await screen.findAllByTestId('excluir'))[1]); // t2 (inativo — o único habilitado)
+    expect(confirmar).toHaveBeenCalled();
     expect(excluir).not.toHaveBeenCalled();
     confirmar.mockRestore();
   });

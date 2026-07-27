@@ -826,7 +826,11 @@
       "situacaoAtivo": "ativo",
       "excluir": "Excluir",
       "excluido": "Item excluído.",
-      "confirmarExcluir": "Excluir definitivamente \"{{nome}}\"? Esta ação não pode ser desfeita."
+      "confirmarExcluir": "Excluir definitivamente \"{{nome}}\"? Esta ação não pode ser desfeita.",
+      "novoCadastro": "Novo cadastro",
+      "modalTitulo": "Novo item — {{catalogo}}",
+      "modalSubtitulo": "Preencha os campos e salve",
+      "fechar": "Fechar"
     },
     "usuarios": {
       "breadcrumb": "Administração · Usuários",

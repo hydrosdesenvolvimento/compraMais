@@ -64,12 +64,45 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
     expect(screen.getByTestId('reativar')).toBeInTheDocument();
   });
 
+  /**
+   * O defeito relatado: o formulário inline ficava entre as abas e a tabela, e a listagem caía abaixo da
+   * dobra — o usuário abria "Catálogos" e precisava rolar para ver os itens. Agora a tabela vem primeiro
+   * e o cadastro é um modal.
+   */
+  it('a listagem aparece sem o formulário na frente; o cadastro só abre sob demanda', async () => {
+    catalogoListar.mockResolvedValue([
+      { id: 'c1', ativo: true, situacao: 'ativo', codigo: '1091101', descricao: 'Panificação' },
+    ]);
+    renderTela();
+
+    expect(await screen.findByTestId('tabela-catalogo')).toBeInTheDocument();
+    expect(screen.queryByTestId('form-catalogo')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('modal-catalogo')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('novo-cadastro'));
+    expect(await screen.findByTestId('modal-catalogo')).toBeInTheDocument();
+    expect(screen.getByTestId('form-catalogo')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('fechar-modal'));
+    await waitFor(() => expect(screen.queryByTestId('modal-catalogo')).not.toBeInTheDocument());
+  });
+
+  it('trocar de aba com o modal aberto fecha o cadastro (cada catálogo tem campos próprios)', async () => {
+    renderTela();
+    fireEvent.click(await screen.findByTestId('novo-cadastro'));
+    await screen.findByTestId('modal-catalogo');
+
+    fireEvent.click(screen.getByTestId('tab-tipos-documento'));
+    await waitFor(() => expect(screen.queryByTestId('modal-catalogo')).not.toBeInTheDocument());
+  });
+
   it('cria um item enviando os valores do formulário ao catálogo ativo', async () => {
     catalogoListar.mockResolvedValue([]);
     renderTela();
 
     expect(await screen.findByTestId('vazio')).toBeInTheDocument();
-    fireEvent.change(screen.getByTestId('campo-codigo'), { target: { value: '1091101' } });
+    fireEvent.click(screen.getByTestId('novo-cadastro'));
+    fireEvent.change(await screen.findByTestId('campo-codigo'), { target: { value: '1091101' } });
     fireEvent.change(screen.getByTestId('campo-descricao'), { target: { value: 'Panificação' } });
     fireEvent.submit(screen.getByTestId('form-catalogo'));
 
@@ -81,6 +114,7 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
     renderTela();
 
     fireEvent.click(await screen.findByTestId('tab-unidades-medida'));
+    fireEvent.click(screen.getByTestId('novo-cadastro'));
     fireEvent.change(await screen.findByTestId('campo-simbolo'), { target: { value: 'kg' } });
     fireEvent.change(screen.getByTestId('campo-descricao'), { target: { value: 'Quilograma' } });
     fireEvent.submit(screen.getByTestId('form-catalogo'));
@@ -95,6 +129,7 @@ describe('ManterCatalogos — Painel Admin de catálogos (UC020)', () => {
     renderTela();
 
     fireEvent.click(await screen.findByTestId('tab-tipos-documento'));
+    fireEvent.click(screen.getByTestId('novo-cadastro'));
     expect(await screen.findByTestId('campo-formato')).toBeInTheDocument();
     expect(screen.queryByTestId('campo-codigo')).not.toBeInTheDocument(); // campo de Setores não aparece
   });
@@ -127,14 +162,21 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
     materialServicoExcluir.mockReset().mockResolvedValue(undefined);
   });
 
-  async function abrirAba() {
+  /**
+   * Abre a aba de materiais. `comFormulario` abre também o modal de cadastro — desde 2026-07-26 o
+   * formulário não é mais inline (a listagem ficava abaixo da dobra), então os casos que preenchem
+   * campos precisam abri-lo; os que só olham a tabela, não.
+   */
+  async function abrirAba(comFormulario = true) {
     renderTela();
     fireEvent.click(await screen.findByTestId('tab-materiais-servicos'));
+    if (!comFormulario) return screen.findByTestId('tabela-catalogo');
+    fireEvent.click(screen.getByTestId('novo-cadastro'));
     return screen.findByTestId('campo-nome');
   }
 
   it('lista os itens com número, natureza e unidades — o número não é campo do formulário', async () => {
-    await abrirAba();
+    await abrirAba(false);
 
     // Tabela: cada atributo em sua coluna.
     expect(await screen.findByText('ITM-2026/001')).toBeInTheDocument();
@@ -177,7 +219,7 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
   });
 
   it('busca filtra por número, nome ou especificação', async () => {
-    await abrirAba();
+    await abrirAba(false);
     expect(await screen.findAllByTestId('item-catalogo')).toHaveLength(2);
 
     fireEvent.change(screen.getByTestId('busca'), { target: { value: 'elétrica' } });
@@ -189,7 +231,7 @@ describe('ManterCatalogos — aba Materiais e Serviços', () => {
   });
 
   it('filtro por natureza reduz a lista aos serviços', async () => {
-    await abrirAba();
+    await abrirAba(false);
     expect(await screen.findAllByTestId('item-catalogo')).toHaveLength(2);
 
     fireEvent.change(screen.getByTestId('filtro-tipo'), { target: { value: 'servico' } });

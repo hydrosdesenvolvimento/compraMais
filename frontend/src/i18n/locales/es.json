@@ -826,7 +826,11 @@
       "situacaoAtivo": "activo",
       "excluir": "Eliminar",
       "excluido": "Ítem eliminado.",
-      "confirmarExcluir": "¿Eliminar definitivamente \"{{nome}}\"? Esta acción no se puede deshacer."
+      "confirmarExcluir": "¿Eliminar definitivamente \"{{nome}}\"? Esta acción no se puede deshacer.",
+      "novoCadastro": "Nuevo registro",
+      "modalTitulo": "Nuevo ítem — {{catalogo}}",
+      "modalSubtitulo": "Complete los campos y guarde",
+      "fechar": "Cerrar"
     },
     "usuarios": {
       "breadcrumb": "Administración · Usuarios",

@@ -1,11 +1,11 @@
-import { useMemo, useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { api, type CatalogoSlug, type CatalogoItemView } from '../../lib/api';
-import { Card, Botao, BotaoIcone, useToast } from '../../design-system/components';
+import { Botao, BotaoIcone, useToast } from '../../design-system/components';
 import { celula, cabecalho } from '../../design-system/tabela';
-import { IconePower, IconeLixeira } from '../../design-system/icons';
+import { IconePower, IconeLixeira, IconeFechar } from '../../design-system/icons';
 import { exportarCsv } from '../../lib/exportar';
 import { textoDoErro } from '../../lib/erros';
 
@@ -172,6 +172,7 @@ export function ManterCatalogos() {
   const [incluirInativos, setIncluirInativos] = useState(false);
   const [termo, setTermo] = useState('');
   const [filtro, setFiltro] = useState('');
+  const [modalAberto, setModalAberto] = useState(false);
   const def = CATALOGOS.find((c) => c.slug === slug) ?? CATALOGOS[0];
   const [valores, setValores] = useState<Record<string, unknown>>(() => inicial(CATALOGOS[0]));
 
@@ -197,7 +198,7 @@ export function ManterCatalogos() {
 
   const criar = useMutation({
     mutationFn: (v: Record<string, unknown>) => api.catalogoCriar(slug, paraEnvio(def, v)),
-    onSuccess: () => { setValores(inicial(def)); void invalidar(); },
+    onSuccess: () => { setValores(inicial(def)); setModalAberto(false); void invalidar(); },
   });
   const inativar = useMutation({ mutationFn: (id: string) => api.catalogoInativar(slug, id), onSuccess: () => void invalidar() });
   const reativar = useMutation({ mutationFn: (id: string) => api.catalogoReativar(slug, id), onSuccess: () => void invalidar() });
@@ -230,6 +231,7 @@ export function ManterCatalogos() {
     setValores(inicial(d));
     setTermo('');
     setFiltro('');
+    setModalAberto(false); // cada catálogo tem campos próprios — reabrir é mais claro que remontar
     criar.reset();
   }
 
@@ -242,27 +244,16 @@ export function ManterCatalogos() {
     );
   };
 
-  return (
-    <div className="stack">
-      <div>
-        <h1 className="page-title">{t('admin.catalogos.titulo')}</h1>
-        <p className="page-sub">{t('admin.catalogos.subtitulo')}</p>
-      </div>
-
-      {/* `role="tablist"` exige filhos `role="tab"`, e `aria-selected` só é permitido nesse papel — sem
-          isso o axe acusa aria-required-children + aria-allowed-attr (WCAG 2.1 AA / e-MAG). */}
-      <div role="tablist" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {CATALOGOS.map((c) => (
-          <Botao key={c.slug} data-cy={`tab-${c.slug}`} variante={c.slug === slug ? 'primario' : 'secundario'}
-            role="tab" aria-selected={c.slug === slug} onClick={() => trocarCatalogo(c.slug)}>
-            {t(c.tabKey)}
-          </Botao>
-        ))}
-      </div>
-
-      <Card>
-        <form data-cy="form-catalogo" className="cm-form-grid" style={{ maxWidth: 880 }}
-          onSubmit={(e) => { e.preventDefault(); criar.mutate(valores); }}>
+  /**
+   * O formulário de cadastro fica num MODAL, e não inline entre as abas e a tabela (2026-07-26).
+   * Inline, ele empurrava a listagem para baixo da dobra: o usuário abria "Catálogos" e precisava rolar
+   * para ver os itens — pior na aba de materiais e serviços, cujo formulário é o maior. Além de resolver
+   * isso, alinha a tela ao padrão que as irmãs já usam (Secretarias, Tipos de Arquivos, Cadastro de
+   * Atividades): "+ Novo" no cabeçalho, tabela logo abaixo.
+   */
+  const formulario = (
+    <form data-cy="form-catalogo" className="cm-form-grid" style={{ maxWidth: 880 }}
+      onSubmit={(e) => { e.preventDefault(); criar.mutate(valores); }}>
           {def.campos.map((campo) => (
             campo.tipo === 'checkbox' ? (
               // Booleano é caixa + rótulo na MESMA linha: empilhá-los (como nos demais campos) deixava a
@@ -320,13 +311,36 @@ export function ManterCatalogos() {
               </label>
             )
           ))}
-          {/* Rodapé: o botão não se estica pela linha — largura própria, à esquerda, como nos demais formulários. */}
-          <div className="cm-campo-total" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 4 }}>
-            <Botao data-cy="criar" type="submit" disabled={criar.isPending}>{t('admin.catalogos.criar')}</Botao>
-            {criar.isError && <p data-cy="erro" role="alert" style={{ margin: 0, color: 'var(--erro, #c0392b)' }}>{t('admin.catalogos.erroCriar')}</p>}
-          </div>
-        </form>
-      </Card>
+      {/* Rodapé: o botão não se estica pela linha — largura própria, à esquerda, como nos demais formulários. */}
+      <div className="cm-campo-total" style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 4 }}>
+        <Botao data-cy="criar" type="submit" disabled={criar.isPending}>{t('admin.catalogos.criar')}</Botao>
+        {criar.isError && <p data-cy="erro" role="alert" style={{ margin: 0, color: 'var(--erro, #c0392b)' }}>{t('admin.catalogos.erroCriar')}</p>}
+      </div>
+    </form>
+  );
+
+  return (
+    <div className="stack">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+        <div>
+          <h1 className="page-title">{t('admin.catalogos.titulo')}</h1>
+          <p className="page-sub">{t('admin.catalogos.subtitulo')}</p>
+        </div>
+        <Botao data-cy="novo-cadastro" onClick={() => setModalAberto(true)} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+          <span aria-hidden style={{ fontSize: 16, lineHeight: 1 }}>+</span>{t('admin.catalogos.novoCadastro')}
+        </Botao>
+      </div>
+
+      {/* `role="tablist"` exige filhos `role="tab"`, e `aria-selected` só é permitido nesse papel — sem
+          isso o axe acusa aria-required-children + aria-allowed-attr (WCAG 2.1 AA / e-MAG). */}
+      <div role="tablist" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {CATALOGOS.map((c) => (
+          <Botao key={c.slug} data-cy={`tab-${c.slug}`} variante={c.slug === slug ? 'primario' : 'secundario'}
+            role="tab" aria-selected={c.slug === slug} onClick={() => trocarCatalogo(c.slug)}>
+            {t(c.tabKey)}
+          </Botao>
+        ))}
+      </div>
 
       <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
         {def.busca && (
@@ -421,6 +435,45 @@ export function ManterCatalogos() {
             </table>
           </div>
         )}
+      </div>
+
+      {modalAberto && (
+        <ModalCadastro titulo={t(def.tabKey)} onFechar={() => { setModalAberto(false); criar.reset(); }}>
+          {formulario}
+        </ModalCadastro>
+      )}
+    </div>
+  );
+}
+
+const overlay: CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(15,23,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, zIndex: 1000 };
+const cardModal: CSSProperties = { background: '#fff', borderRadius: 16, width: 'min(920px, 100%)', maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,.25)' };
+
+/**
+ * Casca do cadastro — mesma linguagem dos modais das telas irmãs (cabeçalho com título do catálogo,
+ * fechar no X e no Escape, corpo rolável). O formulário em si continua sendo montado pela definição
+ * declarativa do catálogo ativo; aqui só entra a moldura.
+ */
+function ModalCadastro({ titulo, onFechar, children }: { titulo: string; onFechar: () => void; children: ReactNode }) {
+  const { t } = useTranslation();
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onFechar(); };
+    window.addEventListener('keydown', h);
+    return () => window.removeEventListener('keydown', h);
+  }, [onFechar]);
+
+  const rotulo = t('admin.catalogos.modalTitulo', { catalogo: titulo });
+  return (
+    <div style={overlay} onClick={onFechar} data-cy="modal-overlay">
+      <div style={cardModal} role="dialog" aria-modal="true" aria-label={rotulo} data-cy="modal-catalogo" onClick={(e) => e.stopPropagation()}>
+        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, padding: '20px 24px', borderBottom: '1px solid var(--divider)' }}>
+          <div>
+            <h2 style={{ margin: 0, fontSize: 20, color: 'var(--azul-900)' }}>{rotulo}</h2>
+            <p style={{ margin: '4px 0 0', fontSize: 13.5, color: 'var(--cinza-500)' }}>{t('admin.catalogos.modalSubtitulo')}</p>
+          </div>
+          <BotaoIcone icone={IconeFechar} variante="fechar" onClick={onFechar} data-cy="fechar-modal" aria-label={t('admin.catalogos.fechar')} />
+        </header>
+        <div style={{ padding: 24, overflowY: 'auto' }}>{children}</div>
       </div>
     </div>
   );

@@ -323,6 +323,34 @@ pessoais. O Encarregado **atende**, **recusa** (com motivo) ou **descarta** apó
 > A exclusão só é permitida após o **prazo de retenção legal** da categoria de dado; antes disso o
 > sistema bloqueia o descarte.
 
+### Executar a exclusão dos dados do fornecedor
+
+Em pedidos do tipo **exclusão** existe o botão **Executar exclusão** — diferente de *Atender* e
+*Descartar*, que apenas registram a decisão. Aqui **os dados são apagados de verdade**, e **não há como
+desfazer**. O sistema pede confirmação e decide sozinho entre dois desfechos:
+
+| Situação do fornecedor | O que acontece |
+|---|---|
+| **Nunca participou** — sem credenciamento, distribuição, contestação, bloqueio ou malote | O cadastro é **removido por completo** |
+| **Já participou** | Os **dados pessoais são apagados** e o **histórico é preservado** |
+
+No segundo caso, o que é apagado e o que fica:
+
+- **Apagado:** telefone, endereço e nome fantasia; login e e-mail do titular e dos procuradores; os
+  **arquivos** dos documentos enviados; a referência facial da prova de vida; consentimentos; notificações.
+- **Preservado:** **CNPJ e razão social** (dados da empresa, que constam do ato administrativo
+  publicado), credenciamentos, distribuições, contestações, malotes e a **trilha de auditoria**. Dos
+  documentos permanece o registro de que existiram e foram aprovados ou reprovados — sem o arquivo.
+
+> **Por que o CNPJ não é apagado.** A Administração tem dever de publicidade sobre quem foi credenciado e
+> contratado. Apagar o CNPJ deixaria o edital publicado dizendo que uma empresa venceu sem que o sistema
+> soubesse qual — inviabilizando auditoria e prestação de contas. O que a lei exige eliminar é o dado
+> **pessoal**, e é isso que é eliminado.
+
+Depois de executada, o cadastro fica marcado como anonimizado e **não volta a ser editável**. A
+solicitação é encerrada automaticamente com o resumo do que foi eliminado, que serve de resposta ao
+titular. Se a **retenção legal** ainda estiver em curso, o botão devolve aviso e nada é apagado.
+
 ---
 
 ## 15. Relatórios

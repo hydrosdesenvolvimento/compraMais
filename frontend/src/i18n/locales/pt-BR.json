@@ -28,7 +28,7 @@
       "cadastroReserva": "Cadastro de Reserva",
       "desistencias": "Desistências",
       "secretarias": "Secretarias",
-      "setoresIndustriais": "Setores Industriais",
+      "setoresIndustriais": "Cadastro de Atividades",
       "tiposArquivos": "Tipos de Arquivos",
       "perfis": "Telas por perfil",
       "contestacao": "Contestações",
@@ -335,13 +335,13 @@
       "chip": "Desistência"
     },
     "setoresIndustriais": {
-      "titulo": "Setores Industriais (CNAE)",
+      "titulo": "Cadastro de Atividades (CNAE)",
       "subtitulo": "Códigos de atividade econômica aceitos",
-      "novoCadastro": "Novo setor",
+      "novoCadastro": "Nova atividade",
       "carregando": "Carregando…",
-      "erroCarregar": "Não foi possível carregar os setores. Verifique suas permissões.",
-      "vazioTitulo": "Nenhum setor cadastrado",
-      "vazioDica": "Clique em \"Novo setor\" para adicionar o primeiro.",
+      "erroCarregar": "Não foi possível carregar as atividades. Verifique suas permissões.",
+      "vazioTitulo": "Nenhuma atividade cadastrada",
+      "vazioDica": "Clique em \"Nova atividade\" para adicionar a primeira.",
       "semCategoria": "—",
       "fechar": "Fechar",
       "campos": {
@@ -356,13 +356,13 @@
         "inativo": "Inativo"
       },
       "acao": {
-        "editar": "Editar setor",
-        "inativar": "Inativar setor",
-        "reativar": "Reativar setor"
+        "editar": "Editar atividade",
+        "inativar": "Inativar atividade",
+        "reativar": "Reativar atividade"
       },
       "modal": {
-        "tituloCriar": "Novo setor industrial",
-        "tituloEditar": "Editar setor industrial",
+        "tituloCriar": "Nova atividade",
+        "tituloEditar": "Editar atividade",
         "subtitulo": "Preencha os campos e salve",
         "codigoPlaceholder": "0000-0/00",
         "descricaoPlaceholder": "Descrição da atividade",
@@ -768,9 +768,9 @@
     },
     "catalogos": {
       "titulo": "Catálogos base",
-      "subtitulo": "Mantenha setores (CNAE), tipos de documento e o catálogo de materiais e serviços. A exclusão é lógica: o item inativado sai das listas mas preserva os vínculos.",
+      "subtitulo": "Mantenha atividades (CNAE), tipos de documento e o catálogo de materiais e serviços. A exclusão é lógica: o item inativado sai das listas mas preserva os vínculos.",
       "tabs": {
-        "setores": "Setores (CNAE)",
+        "setores": "Atividades (CNAE)",
         "tiposDoc": "Tipos de documento",
         "materiais": "Materiais e serviços",
         "unidadesMedida": "Unidades de medida"

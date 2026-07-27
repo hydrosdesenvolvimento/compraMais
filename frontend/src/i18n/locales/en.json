@@ -28,7 +28,7 @@
       "cadastroReserva": "Reserve List",
       "desistencias": "Withdrawals",
       "secretarias": "Departments",
-      "setoresIndustriais": "Industrial Sectors",
+      "setoresIndustriais": "Activity Registry",
       "tiposArquivos": "File Types",
       "perfis": "Screens by role",
       "contestacao": "Disputes",
@@ -335,13 +335,13 @@
       "chip": "Withdrawal"
     },
     "setoresIndustriais": {
-      "titulo": "Industrial Sectors (CNAE)",
+      "titulo": "Activity Registry (CNAE)",
       "subtitulo": "Accepted economic activity codes",
-      "novoCadastro": "New sector",
+      "novoCadastro": "New activity",
       "carregando": "Loading…",
-      "erroCarregar": "Could not load the sectors. Check your permissions.",
-      "vazioTitulo": "No sectors registered",
-      "vazioDica": "Click \"New sector\" to add the first one.",
+      "erroCarregar": "Could not load the activities. Check your permissions.",
+      "vazioTitulo": "No activities registered",
+      "vazioDica": "Click \"New activity\" to add the first one.",
       "semCategoria": "—",
       "fechar": "Close",
       "campos": {
@@ -356,13 +356,13 @@
         "inativo": "Inactive"
       },
       "acao": {
-        "editar": "Edit sector",
-        "inativar": "Deactivate sector",
-        "reativar": "Reactivate sector"
+        "editar": "Edit activity",
+        "inativar": "Deactivate activity",
+        "reativar": "Reactivate activity"
       },
       "modal": {
-        "tituloCriar": "New industrial sector",
-        "tituloEditar": "Edit industrial sector",
+        "tituloCriar": "New activity",
+        "tituloEditar": "Edit activity",
         "subtitulo": "Fill in the fields and save",
         "codigoPlaceholder": "0000-0/00",
         "descricaoPlaceholder": "Activity description",
@@ -768,9 +768,9 @@
     },
     "catalogos": {
       "titulo": "Base catalogs",
-      "subtitulo": "Maintain CNAE sectors, document types and the goods and services catalog. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
+      "subtitulo": "Maintain CNAE activities, document types and the goods and services catalog. Deletion is logical: an inactivated item leaves the lists but keeps its links.",
       "tabs": {
-        "setores": "Sectors (CNAE)",
+        "setores": "Activities (CNAE)",
         "tiposDoc": "Document types",
         "materiais": "Goods and services",
         "unidadesMedida": "Units of measure"

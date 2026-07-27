@@ -1701,8 +1701,13 @@
       "recusada": "Solicitud rechazada.",
       "descartada": "Dato descartado (retención cumplida).",
       "retido": "Descarte denegado: dato aún bajo retención legal.",
-      "erro": "No se pudo completar la acción."
-    }
+      "erro": "No se pudo completar la acción.",
+      "excluido": "Registro eliminado: no había historial de participación. {{documentos}} documento(s) borrado(s).",
+      "anonimizado": "Datos personales borrados. El historial de participación se conservó. {{documentos}} documento(s) borrado(s)."
+    },
+    "excluir": "Ejecutar eliminación",
+    "excluirAjuda": "Borra los datos personales del proveedor. Sin historial de participación, el registro se elimina por completo.",
+    "confirmarExcluir": "¿Ejecutar la eliminación de los datos de este titular?\n\nLos datos personales se borrarán definitivamente y NO se puede deshacer. Las acreditaciones, distribuciones y expedientes se conservan, así como el CNPJ y la razón social."
   },
   "demandasDistribuidas": {
     "titulo": "Demandas distribuidas",

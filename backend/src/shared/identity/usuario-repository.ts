@@ -33,6 +33,13 @@ export class UsuarioRepositoryMemory implements UsuarioRepository {
     for (const u of this.map.values()) if (u.login === l) return u;
     return null;
   }
+  /** Eliminação LGPD (art. 18, V): apaga as credenciais de login vinculadas ao fornecedor. */
+  async removerDoFornecedor(fornecedorId: string): Promise<number> {
+    const alvos = [...this.map.values()].filter((u) => u.fornecedorId === fornecedorId);
+    for (const u of alvos) this.map.delete(u.id);
+    return alvos.length;
+  }
+
   async listarInternos(filtro?: { incluirInativos?: boolean }): Promise<Usuario[]> {
     const incluirInativos = filtro?.incluirInativos ?? false;
     return [...this.map.values()]

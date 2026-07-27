@@ -1701,8 +1701,13 @@
       "recusada": "Request rejected.",
       "descartada": "Data disposed of (retention met).",
       "retido": "Disposal denied: data still under legal retention.",
-      "erro": "The action could not be completed."
-    }
+      "erro": "The action could not be completed.",
+      "excluido": "Registration deleted: there was no procurement history. {{documentos}} document(s) erased.",
+      "anonimizado": "Personal data erased. The procurement history was preserved. {{documentos}} document(s) erased."
+    },
+    "excluir": "Execute erasure",
+    "excluirAjuda": "Erases the supplier's personal data. With no procurement history, the registration is removed entirely.",
+    "confirmarExcluir": "Execute the erasure of this data subject's data?\n\nPersonal data will be permanently erased and this CANNOT be undone. Credentialings, allocations and SEI bundles are preserved, as are the CNPJ and corporate name."
   },
   "demandasDistribuidas": {
     "titulo": "Distributed demands",

@@ -131,4 +131,72 @@ describe('Rotas de direitos do titular (UC017 — HTTP)', () => {
     expect(r.statusCode).toBe(200);
     expect((r.json() as Array<{ tipo: string }>).some((p) => p.tipo === 'lgpd')).toBe(true);
   });
+
+  /**
+   * Execução do direito de eliminação (LGPD art. 18, V). Distinta de `/atender`, que só registra a
+   * resposta: aqui o dado é apagado de fato. O cadastro é criado pela rota PÚBLICA de autocadastro, de
+   * modo que titular, conta de acesso e consentimento existam de verdade — o vínculo
+   * `usuarios.fornecedor_id` é o que liga a solicitação ao fornecedor.
+   */
+  describe('POST /titular/solicitacoes/:id/executar-exclusao (UC017)', () => {
+    /**
+     * Autocadastra um fornecedor e devolve o token do titular (dono do pedido LGPD). `manual` cobre os
+     * CNPJs fora da semente do mock da Receita — é o fallback A1 do UC001, não um atalho de teste.
+     */
+    async function cadastrar(cnpj: string, email: string): Promise<{ fornecedorId: string; token: Record<string, string> }> {
+      const r = await app.inject({
+        method: 'POST', url: '/fornecedores',
+        payload: {
+          cnpjRaw: cnpj, contato: { nomeFantasia: 'Alvo', telefone: '(68) 3333-1111' },
+          manual: { razaoSocial: 'Empresa Alvo Ltda', porte: 'ME', cnaes: [{ codigoSubclasse: '1412601', tipo: 'principal' }] },
+          consentimento: { finalidade: 'credenciamento', versaoTermo: 'v1' },
+          titular: { identificador: email }, senha: 'senhaForte123',
+        },
+      });
+      expect(r.statusCode).toBe(201);
+      const fornecedorId = r.json().fornecedorId as string;
+      // O login do titular compartilha o id do usuário; é ele que a solicitação guarda em `titularId`.
+      const login = await app.inject({ method: 'POST', url: '/auth/login', payload: { email, senha: 'senhaForte123' } });
+      expect(login.statusCode).toBe(200);
+      return { fornecedorId, token: { authorization: `Bearer ${login.json().token as string}` } };
+    }
+
+    async function pedirExclusao(token: Record<string, string>): Promise<string> {
+      const r = await app.inject({ method: 'POST', url: '/titular/solicitacoes', headers: token, payload: { tipo: 'exclusao', categoria: 'cadastral' } });
+      expect(r.statusCode).toBe(201);
+      return r.json().solicitacaoId as string;
+    }
+
+    it('sem papel de DPO/Administrador → 403', async () => {
+      const { token } = await cadastrar('11.222.333/0001-81', 'excl-rbac@vale.com');
+      const id = await pedirExclusao(token);
+      const r = await app.inject({ method: 'POST', url: `/titular/solicitacoes/${id}/executar-exclusao`, headers: token });
+      expect(r.statusCode).toBe(403);
+    });
+
+    it('pedido de acesso não dispara eliminação → 422', async () => {
+      const criar = await app.inject({ method: 'POST', url: '/titular/solicitacoes', headers: titular('t-tipo'), payload: { tipo: 'acesso' } });
+      const id = criar.json().solicitacaoId as string;
+      const r = await app.inject({ method: 'POST', url: `/titular/solicitacoes/${id}/executar-exclusao`, headers: dpo });
+      expect(r.statusCode).toBe(422);
+      expect(r.json()).toMatchObject({ codigo: 'SolicitacaoNaoEhExclusao' });
+    });
+
+    it('retenção legal em curso → 409 DescarteRetido (LGPD art. 16, I)', async () => {
+      // Fornecedor recém-cadastrado: dentro do prazo cadastral (730 dias).
+      const { token } = await cadastrar('22.333.444/0001-81', 'excl-retido@vale.com');
+      const id = await pedirExclusao(token);
+      const r = await app.inject({ method: 'POST', url: `/titular/solicitacoes/${id}/executar-exclusao`, headers: dpo });
+      expect(r.statusCode).toBe(409);
+      expect(r.json()).toMatchObject({ codigo: 'DescarteRetido' });
+    });
+
+    it('titular sem fornecedor vinculado → 404', async () => {
+      const criar = await app.inject({ method: 'POST', url: '/titular/solicitacoes', headers: titular('t-sem-forn'), payload: { tipo: 'exclusao' } });
+      const id = criar.json().solicitacaoId as string;
+      const r = await app.inject({ method: 'POST', url: `/titular/solicitacoes/${id}/executar-exclusao`, headers: dpo });
+      expect(r.statusCode).toBe(404);
+      expect(r.json()).toMatchObject({ codigo: 'TitularSemFornecedor' });
+    });
+  });
 });

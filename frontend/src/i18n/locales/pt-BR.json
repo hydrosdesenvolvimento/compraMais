@@ -1701,8 +1701,13 @@
       "recusada": "Solicitação recusada.",
       "descartada": "Dado descartado (retenção cumprida).",
       "retido": "Descarte negado: dado ainda sob retenção legal.",
-      "erro": "Não foi possível concluir a ação."
-    }
+      "erro": "Não foi possível concluir a ação.",
+      "excluido": "Cadastro excluído: não havia histórico de participação. {{documentos}} documento(s) eliminado(s).",
+      "anonimizado": "Dados pessoais eliminados. O histórico de participação foi preservado. {{documentos}} documento(s) eliminado(s)."
+    },
+    "excluir": "Executar exclusão",
+    "excluirAjuda": "Apaga os dados pessoais do fornecedor. Sem histórico de participação, o cadastro é removido por completo.",
+    "confirmarExcluir": "Executar a exclusão dos dados deste titular?\n\nOs dados pessoais serão apagados definitivamente e NÃO há como desfazer. Credenciamentos, distribuições e malotes são preservados, assim como CNPJ e razão social."
   },
   "demandasDistribuidas": {
     "titulo": "Demandas distribuídas",

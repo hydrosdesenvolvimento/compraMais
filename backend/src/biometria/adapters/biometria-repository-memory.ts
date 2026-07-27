@@ -14,6 +14,11 @@ export class BiometriaRepositoryMemory implements BiometriaRepository {
     return r ? this.clonar(r) : null;
   }
 
+  /** Eliminação LGPD (art. 18, V): a referência facial é dado sensível (art. 11) — sai por completo. */
+  async removerDoFornecedor(fornecedorId: string): Promise<boolean> {
+    return this.refs.delete(fornecedorId);
+  }
+
   private clonar(ref: ReferenciaBiometrica): ReferenciaBiometrica {
     return { ...ref, template: { ...ref.template, vetor: [...ref.template.vetor] } };
   }

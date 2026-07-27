@@ -523,11 +523,14 @@
         "cancelar": "Cancelar",
         "salvar": "Salvar",
         "editar": "Editar",
-        "erroCriar": "Não foi possível cadastrar. Verifique o CNPJ e os campos obrigatórios."
+        "erroCriar": "Não foi possível cadastrar. Verifique o CNPJ e os campos obrigatórios.",
+        "enderecoTitulo": "Endereço",
+        "enderecoAjuda": "Opcional — informe o CEP para preencher automaticamente."
       },
       "endereco": {
         "logradouro": "Logradouro",
         "numero": "Número",
+        "complemento": "Complemento",
         "bairro": "Bairro",
         "cidade": "Cidade",
         "uf": "UF",

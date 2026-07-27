@@ -278,6 +278,26 @@ fornecedor.
 
 ![Fornecedores](imagens-admin/02-fornecedores.png)
 
+### Cadastro manual e sincronização com a Receita
+
+**Novo fornecedor** cadastra a empresa manualmente (CNPJ, razão social, porte, CNAE principal e,
+opcionalmente, **endereço** — informe o CEP e os demais campos são preenchidos sozinhos).
+
+No detalhe do fornecedor, **Sincronizar** busca os dados oficiais na Receita Federal e atualiza:
+
+| Dado | O que a sincronização faz |
+|---|---|
+| Razão social, porte, CNAEs, situação cadastral | **Substitui** pelo oficial — são dados da Receita, não editáveis aqui |
+| **Endereço** (logradouro, número, bairro, município, estado, CEP) | **Preenche o que estiver em branco** e **preserva o que já foi informado** |
+| Nome fantasia, telefone | Não são tocados — são dados de contato |
+
+> O endereço da Receita é o **fiscal** da empresa, que nem sempre é o de correspondência. Por isso
+> sincronizar **completa lacunas** em vez de sobrescrever: um endereço ajustado pelo gestor ou pelo
+> próprio fornecedor nunca é perdido. Para trocá-lo, edite o cadastro.
+
+Se a Receita estiver indisponível, nada é alterado e a operação é sinalizada como erro. Se o CNPJ tiver
+deixado de ser **ativo**, os dados são atualizados e o fornecedor é marcado para revisão da CPL.
+
 ---
 
 ## 13. Contestações de CNAE

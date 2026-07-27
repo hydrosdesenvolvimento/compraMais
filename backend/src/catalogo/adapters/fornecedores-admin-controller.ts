@@ -3,7 +3,7 @@ import type { ListarFornecedores, FiltroFornecedores, OrdemFornecedores } from '
 import type { CriarFornecedorAdmin } from '../application/criar-fornecedor-admin.js';
 import type { GerirConta } from '../application/gerir-conta.js';
 import type { Papel } from '../../shared/identity/identity-provider.js';
-import type { SituacaoCadastral, StatusCredenciamento } from '../domain/fornecedor.js';
+import type { Endereco, SituacaoCadastral, StatusCredenciamento } from '../domain/fornecedor.js';
 import { exigirPapel } from '../../shared/http/autenticacao.js';
 
 /**
@@ -47,6 +47,8 @@ export function registrarRotasFornecedoresAdmin(
         cnaePrincipal: String(b.cnaePrincipal ?? ''),
         nomeFantasia: b.nomeFantasia != null ? String(b.nomeFantasia) : undefined,
         telefone: b.telefone != null ? String(b.telefone) : undefined,
+        // Endereço (RF019) é opcional; a normalização/descarte de objeto vazio fica no caso de uso.
+        endereco: b.endereco != null ? (b.endereco as Endereco) : undefined,
       }, { userId: ator.userId });
       return reply.code(201).send(out);
     } catch (e) { return falha(reply, e); }

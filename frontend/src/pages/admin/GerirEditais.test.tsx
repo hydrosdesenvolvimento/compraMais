@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, configure, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GerirEditais } from './GerirEditais';
+import { subclassesCnae } from '../../lib/br';
 import type { EditalGestao, CatalogoItemView, PaginaEditais, FiltroEditais } from '../../lib/api';
 
 // Alinha o testId do Testing Library ao data-cy do contrato de testes (Cypress).
@@ -107,6 +108,46 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     fireEvent.submit(within(modal).getByTestId('form-editar-edital'));
 
     await waitFor(() => expect(editarEdital).toHaveBeenCalledWith('e1', expect.objectContaining({ objeto: 'Fardamento revisado' })));
+  });
+
+  /**
+   * O defeito relatado: editar um edital falhava com `CnaeInvalido` mesmo sem tocar no campo. O modal
+   * pré-preenche o CNAE com a MÁSCARA de apresentação (1412-6/01) e o valor seguia literal para a API,
+   * que exige `^\d{7}$`.
+   *
+   * O caso de edição que já existia não pegava isso: assertava com `objectContaining({ objeto })` e
+   * nunca olhava `cnaesAlvo`. Aqui a asserção é sobre o CNAE, de propósito.
+   */
+  it('editar sem tocar no CNAE envia a subclasse em dígitos, não a máscara exibida', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/014', objeto: 'Fardamento', situacao: 'rascunho', cnaesAlvo: ['1412601'] })]));
+    renderTela();
+    await screen.findByTestId('item-edital');
+
+    fireEvent.click(screen.getByTestId('editar-edital'));
+    const modal = await screen.findByTestId('modal-editar-edital');
+    // O campo mostra a máscara — é o que o usuário vê e não deve precisar corrigir.
+    expect((within(modal).getByTestId('cnae') as HTMLInputElement).value).toBe('1412-6/01');
+
+    fireEvent.submit(within(modal).getByTestId('form-editar-edital'));
+
+    await waitFor(() => expect(editarEdital).toHaveBeenCalledWith('e1', expect.objectContaining({
+      cnaesAlvo: ['1412601'],
+    })));
+  });
+
+  it('editar com vários CNAEs mascarados envia todos em dígitos', async () => {
+    buscarEditaisGestao.mockResolvedValue(pag([edital({ id: 'e1', numero: 'ED-2026/015', situacao: 'rascunho', cnaesAlvo: ['1412601', '4721102'] })]));
+    renderTela();
+    await screen.findByTestId('item-edital');
+
+    fireEvent.click(screen.getByTestId('editar-edital'));
+    const modal = await screen.findByTestId('modal-editar-edital');
+    expect((within(modal).getByTestId('cnae') as HTMLInputElement).value).toBe('1412-6/01, 4721-1/02');
+    fireEvent.submit(within(modal).getByTestId('form-editar-edital'));
+
+    await waitFor(() => expect(editarEdital).toHaveBeenCalledWith('e1', expect.objectContaining({
+      cnaesAlvo: ['1412601', '4721102'],
+    })));
   });
 
   it('lista os editais com número, objeto, sigla da secretaria e CNAE mascarado', async () => {
@@ -265,5 +306,18 @@ describe('GerirEditais — Gestão de Editais (SGMA, /admin/editais)', () => {
     renderTela();
     await screen.findAllByTestId('item-edital');
     expect(screen.queryByTestId('gerir-itens')).not.toBeInTheDocument();
+  });
+});
+
+/** Normalização do campo "CNAE(s) alvo" — a borda entre o que a tela mostra e o que a API aceita. */
+describe('subclassesCnae', () => {
+  it('descarta a máscara e devolve só as subclasses de 7 dígitos', () => {
+    expect(subclassesCnae('1412-6/01')).toEqual(['1412601']);
+    expect(subclassesCnae('1412-6/01, 4721-1/02')).toEqual(['1412601', '4721102']);
+    expect(subclassesCnae('1412601')).toEqual(['1412601']);       // já em dígitos, inalterado
+    expect(subclassesCnae(' 1412601 , 4721102 ')).toEqual(['1412601', '4721102']); // espaços
+    expect(subclassesCnae('')).toEqual([]);
+    expect(subclassesCnae('1412601, , 4721102')).toEqual(['1412601', '4721102']); // vazios somem
+    expect(subclassesCnae('abc')).toEqual([]);                     // sem dígito, nada resta
   });
 });

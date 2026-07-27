@@ -5,6 +5,19 @@
 
 export function soDigitos(v: string): string { return (v ?? '').replace(/\D/g, ''); }
 
+/**
+ * Converte um campo de "CNAE(s)" na lista de subclasses que o backend aceita: separa por vírgula e
+ * **descarta tudo que não for dígito**.
+ *
+ * Existe porque a aplicação EXIBE o CNAE mascarado (`1412-6/01`) e a API exige `^\d{7}$`. Sem
+ * normalizar na saída, o valor que a tela mostrou volta literal e é recusado com `CnaeInvalido` — foi
+ * assim que editar um edital passou a falhar sem que ninguém tocasse no campo. Normalizar aqui mantém a
+ * máscara legível na tela e ainda faz colar um CNAE mascarado simplesmente funcionar.
+ */
+export function subclassesCnae(valor: string): string[] {
+  return (valor ?? '').split(',').map(soDigitos).filter(Boolean);
+}
+
 export function mascaraCpf(v: string): string {
   const d = soDigitos(v).slice(0, 11);
   if (d.length <= 3) return d;

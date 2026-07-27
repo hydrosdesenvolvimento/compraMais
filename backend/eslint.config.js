@@ -19,4 +19,12 @@ export default tseslint.config(
       'prefer-const': ['error', { ignoreReadBeforeAssign: true }],
     },
   },
+  {
+    // Utilitários operacionais de `scripts/` rodam no Node do host (fora do build: `rootDir` é `src`).
+    // Declaramos os globais usados para manter `no-undef` ativo em vez de ignorar a pasta.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      globals: { console: 'readonly', fetch: 'readonly', process: 'readonly', URL: 'readonly' },
+    },
+  },
 );

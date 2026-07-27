@@ -33,6 +33,12 @@ export interface DocumentoRepository {
   listarPendentes(fornecedorId: string): Promise<Documento[]>;
   /** Busca por instância parcial (QBE — FR-015). */
   buscarPorExemplo(probe: DocumentoProbe, page?: PaginacaoReq): Promise<Documento[]>;
+  /**
+   * Existe algum documento enviado com este tipo? Sustenta a guarda de exclusão de tipos de arquivo
+   * (RF022): `documentos.tipo` é texto (sem FK), então a checagem é pelo nome e case-insensitive,
+   * coerente com a chave natural `lower(nome)` do catálogo. Só existência — não carrega os registros.
+   */
+  usadoPorAlgumDocumento(tipo: string): Promise<boolean>;
 }
 
 /** Object storage (S3) atrás de adaptador; guarda conteúdo cifrado e devolve um ponteiro. */

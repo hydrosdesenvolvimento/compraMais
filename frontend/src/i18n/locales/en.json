@@ -412,8 +412,11 @@
       "acao": {
         "editar": "Edit type",
         "inativar": "Deactivate type",
-        "reativar": "Reactivate type"
+        "reativar": "Reactivate type",
+        "excluir": "Delete type"
       },
+      "confirmarExcluir": "Permanently delete the type \"{{nome}}\"? This action cannot be undone.",
+      "excluido": "File type deleted.",
       "modal": {
         "tituloCriar": "New file type",
         "tituloEditar": "Edit file type",
@@ -1164,7 +1167,11 @@
     "MaterialVinculadoAEdital": "Item is linked to an edital and cannot be deleted.",
     "MaterialAtivoNaoExcluivel": "Only inactive items can be deleted. Inactivate it first.",
     "EditalComCredenciamentos": "This edital has associated credenciamentos and cannot be unpublished.",
-    "EditalNaoEditavel": "The edital can only be edited while it is a draft."
+    "EditalNaoEditavel": "The edital can only be edited while it is a draft.",
+    "TipoDocumentoNaoEncontrado": "File type not found.",
+    "TipoDocumentoAtivoNaoExcluivel": "Only inactive types can be deleted. Deactivate it first.",
+    "TipoDocumentoEmUso": "There are documents submitted with this type — it cannot be deleted.",
+    "TipoDocumentoDeSistema": "Type required by the system — it cannot be deleted."
   },
   "contestacao": {
     "semEmpresa": "No company linked to your account.",

@@ -364,6 +364,26 @@ enviar.
 
 ![Tipos de Arquivos](imagens-admin/17-tipos-arquivos.png)
 
+### Inativar ou excluir um tipo
+
+Cada linha tem três ações: **editar**, **inativar/reativar** e **excluir**.
+
+| Ação | O que faz | Quando usar |
+|---|---|---|
+| **Inativar** | O tipo some das listas de seleção, mas continua no sistema e pode ser reativado. Os documentos já enviados com ele seguem intactos. | Regra geral: um documento que deixou de ser exigido. |
+| **Excluir** | Remove o tipo **definitivamente**. Não há como desfazer. | Cadastro feito por engano, que nunca chegou a ser usado. |
+
+A **exclusão é exclusiva do Administrador** — os demais perfis (inclusive a Secretaria, que pode criar,
+editar e inativar) não veem o botão. O sistema pede confirmação e recusa a exclusão nestes casos:
+
+- **o tipo ainda está ativo** — inative primeiro; é o passo que tira o tipo de circulação;
+- **já existe documento enviado com esse tipo** — apagá-lo deixaria o histórico do fornecedor apontando
+  para um tipo inexistente. Use **inativar**;
+- **é um tipo exigido pelo sistema** (ex.: *Foto do Responsável*, usado pela prova de vida) — pode ser
+  editado, mas nunca excluído.
+
+Toda exclusão fica registrada na **Auditoria**, com o autor e a data.
+
 ---
 
 ## 20. Usuários internos

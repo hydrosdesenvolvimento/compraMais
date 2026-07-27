@@ -12,6 +12,7 @@ const criar = vi.fn<(...a: unknown[]) => Promise<{ id: string }>>();
 const editar = vi.fn<(...a: unknown[]) => Promise<{ ok: boolean }>>();
 const inativar = vi.fn<(...a: unknown[]) => Promise<{ situacao: string }>>();
 const reativar = vi.fn<(...a: unknown[]) => Promise<{ situacao: string }>>();
+const excluir = vi.fn<(...a: unknown[]) => Promise<void>>();
 vi.mock('../../lib/api', () => ({
   api: {
     catalogoListar: (slug: string, incluirInativos: boolean) => listar(slug, incluirInativos),
@@ -19,8 +20,13 @@ vi.mock('../../lib/api', () => ({
     catalogoEditar: (slug: string, id: string, body: unknown) => editar(slug, id, body),
     catalogoInativar: (slug: string, id: string) => inativar(slug, id),
     catalogoReativar: (slug: string, id: string) => reativar(slug, id),
+    tipoArquivoExcluir: (id: string) => excluir(id),
   },
 }));
+
+// Perfil da sessão: define se a lixeira aparece (só Administrador exclui — RF022).
+const usuario = vi.fn<() => { papel: string } | null>();
+vi.mock('../../lib/auth', () => ({ obterUsuario: () => usuario() }));
 
 const ITENS: CatalogoItemView[] = [
   { id: 't1', ativo: true, situacao: 'ativo', nome: 'Certidão FGTS', formato: 'pdf', categoria: 'fiscal', exigeValidade: true, validadeDias: 30, obrigatorio: true },
@@ -57,6 +63,8 @@ describe('TiposArquivos — Painel Admin (Tipos de Documento, RF022)', () => {
     editar.mockReset().mockResolvedValue({ ok: true });
     inativar.mockReset().mockResolvedValue({ situacao: 'inativo' });
     reativar.mockReset().mockResolvedValue({ situacao: 'ativo' });
+    excluir.mockReset().mockResolvedValue(undefined);
+    usuario.mockReset().mockReturnValue({ papel: 'administrador' });
   });
 
   it('lista tipos com documento, formato, categoria, validade derivada e status (inclui inativos)', async () => {
@@ -164,5 +172,44 @@ describe('TiposArquivos — Painel Admin (Tipos de Documento, RF022)', () => {
     await waitFor(() => expect(inativar).toHaveBeenCalledWith('tipos-documento', 't1'));
     fireEvent.click(botoes[1]); // t2 inativo → reativar
     await waitFor(() => expect(reativar).toHaveBeenCalledWith('tipos-documento', 't2'));
+  });
+});
+
+describe('TiposArquivos — exclusão definitiva (RF022, só Administrador)', () => {
+  beforeEach(() => {
+    listar.mockReset().mockResolvedValue(ITENS);
+    inativar.mockReset().mockResolvedValue({ situacao: 'inativo' });
+    reativar.mockReset().mockResolvedValue({ situacao: 'ativo' });
+    excluir.mockReset().mockResolvedValue(undefined);
+    usuario.mockReset().mockReturnValue({ papel: 'administrador' });
+  });
+
+  it('Administrador vê a lixeira em cada linha', async () => {
+    renderTela();
+    expect(await screen.findAllByTestId('excluir')).toHaveLength(ITENS.length);
+  });
+
+  it('Secretaria (smga) NÃO vê a lixeira — a exclusão é só do Administrador', async () => {
+    usuario.mockReturnValue({ papel: 'smga' });
+    renderTela();
+    await screen.findAllByTestId('item-tipo');
+    expect(screen.queryAllByTestId('excluir')).toHaveLength(0);
+  });
+
+  it('confirma antes de excluir e chama a API com o id da linha', async () => {
+    const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    renderTela();
+    fireEvent.click((await screen.findAllByTestId('excluir'))[1]); // t2 (inativo)
+    expect(confirmar).toHaveBeenCalled();
+    await waitFor(() => expect(excluir).toHaveBeenCalledWith('t2'));
+    confirmar.mockRestore();
+  });
+
+  it('cancelar a confirmação não chama a API', async () => {
+    const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    renderTela();
+    fireEvent.click((await screen.findAllByTestId('excluir'))[0]);
+    expect(excluir).not.toHaveBeenCalled();
+    confirmar.mockRestore();
   });
 });

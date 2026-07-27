@@ -30,3 +30,15 @@ export const TIPOS_DOCUMENTO_BASELINE: readonly TipoDocumentoBaseline[] = [
   // covalidada pela CPL como os demais. O nome deve casar com TIPO_DOC_FOTO_RESPONSAVEL (biometria).
   { nome: 'Foto do Responsável', categoria: 'cadastral', exigeValidade: false, exigeExercicio: false, validadeDias: null, obrigatorio: true },
 ];
+
+/**
+ * Tipos que o SISTEMA usa pelo nome e que, por isso, não podem ser excluídos fisicamente do catálogo
+ * (RF022 · exclusão do Administrador). Editar e inativar continuam permitidos — a guarda existe só
+ * contra a remoção definitiva, que é irreversível e quebraria o fluxo que depende do nome.
+ *
+ * `Foto do Responsável` é consumido por nome pelo enrollment da prova de vida (UC007,
+ * `TIPO_DOC_FOTO_RESPONSAVEL` em `biometria/domain/biometria.ts`); sem ele o upload da foto falha com
+ * `TipoDocumentoDesconhecido`. A lista vive aqui, e não em `biometria`, para não inverter o boundary
+ * (catálogos não conhecem biometria); um teste amarra as duas pontas contra drift.
+ */
+export const TIPOS_DOCUMENTO_DE_SISTEMA: readonly string[] = ['Foto do Responsável'];

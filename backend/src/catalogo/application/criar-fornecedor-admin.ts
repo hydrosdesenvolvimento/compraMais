@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Cnpj } from '../domain/cnpj.js';
-import { Fornecedor } from '../domain/fornecedor.js';
+import { Fornecedor, type Endereco } from '../domain/fornecedor.js';
 import { FornecedorCadastrado } from '../domain/eventos.js';
 import { CnpjJaCadastrado, type FornecedorRepository } from './fornecedor-repository.js';
 import type { EventBus } from '../../shared/events/event-bus.js';
@@ -12,6 +12,11 @@ export interface CriarFornecedorAdminInput {
   cnaePrincipal: string; // subclasse de 7 dígitos, com ou sem máscara (ex.: "1412-6/01" ou "1412601")
   nomeFantasia?: string;
   telefone?: string;
+  /**
+   * Endereço estruturado (RF019), opcional. Sem ele o fornecedor manual nasce sem endereço e depende
+   * da re-sincronização com a Receita para ganhar um — o que, até esta correção, nunca acontecia.
+   */
+  endereco?: Endereco;
 }
 
 export interface CriarFornecedorAdminResultado {
@@ -66,7 +71,11 @@ export class CriarFornecedorAdmin {
       cnaes: [{ codigoSubclasse: subclasse, tipo: 'principal', ativo: true }],
       situacao: 'ativa',
       origem: 'manual',
-      contato: { nomeFantasia: input.nomeFantasia?.trim() || undefined, telefone: input.telefone?.trim() || undefined },
+      contato: {
+        nomeFantasia: input.nomeFantasia?.trim() || undefined,
+        telefone: input.telefone?.trim() || undefined,
+        endereco: normalizarEndereco(input.endereco),
+      },
       userName: actor.userId,
     });
     await this.fornecedores.salvar(fornecedor);
@@ -78,4 +87,25 @@ export class CriarFornecedorAdmin {
 
     return { fornecedorId: id, origem: 'manual', status: 'requerente' };
   }
+}
+
+/**
+ * Endereço vindo da borda: apara espaços, deixa só dígitos no CEP e descarta o objeto quando TODOS os
+ * campos vierem em branco (o formulário envia a estrutura completa mesmo sem preenchimento). Guardar
+ * um endereço só de strings vazias faria a mescla da sincronização acreditar que já existe endereço.
+ */
+function normalizarEndereco(e?: Endereco): Endereco | undefined {
+  if (!e) return undefined;
+  const limpo: Endereco = {
+    logradouro: (e.logradouro ?? '').trim(),
+    numero: (e.numero ?? '').trim(),
+    complemento: (e.complemento ?? '').trim() || undefined,
+    bairro: (e.bairro ?? '').trim(),
+    cidade: (e.cidade ?? '').trim(),
+    uf: (e.uf ?? '').trim().toUpperCase(),
+    cep: (e.cep ?? '').replace(/\D/g, ''),
+  };
+  const algumPreenchido = [limpo.logradouro, limpo.numero, limpo.complemento, limpo.bairro, limpo.cidade, limpo.uf, limpo.cep]
+    .some((v) => (v ?? '') !== '');
+  return algumPreenchido ? limpo : undefined;
 }

@@ -523,11 +523,14 @@
         "cancelar": "Cancelar",
         "salvar": "Guardar",
         "editar": "Editar",
-        "erroCriar": "No se pudo registrar. Verifique el CNPJ y los campos obligatorios."
+        "erroCriar": "No se pudo registrar. Verifique el CNPJ y los campos obligatorios.",
+        "enderecoTitulo": "Dirección",
+        "enderecoAjuda": "Opcional: informe el código postal para completar automáticamente."
       },
       "endereco": {
         "logradouro": "Dirección",
         "numero": "Número",
+        "complemento": "Complemento",
         "bairro": "Barrio",
         "cidade": "Ciudad",
         "uf": "Estado",

@@ -22,6 +22,12 @@ vi.mock('../../lib/api', () => ({
   },
 }));
 
+// Autofill de CEP do formulário de criação: neutraliza a chamada de rede, mantendo máscaras reais.
+vi.mock('../../lib/br', async (original) => ({
+  ...(await original<typeof import('../../lib/br')>()),
+  consultarCep: vi.fn().mockResolvedValue(null),
+}));
+
 const PAGINA: PaginaFornecedoresView = {
   itens: [
     { id: 'f1', cnpj: '11.222.333/0001-81', razaoSocial: 'Confecções Vale do Acre Ltda', nomeFantasia: 'Vale do Acre', porte: 'ME', cnaePrincipal: '1412601', situacao: 'ativa', status: 'requerente', sincronizadoEm: null },
@@ -91,6 +97,48 @@ describe('Fornecedores — Painel Admin (Gestão de Fornecedores)', () => {
     fireEvent.submit(screen.getByTestId('form-criar'));
 
     await waitFor(() => expect(criar).toHaveBeenCalledWith(expect.objectContaining({ cnpj: '11.222.333/0001-81', razaoSocial: 'Malharia Maria Ltda', porte: 'ME', cnaePrincipal: '1412-6/01' })));
+  });
+
+  /**
+   * RF019 — o cadastro manual passou a aceitar endereço. Sem campo no formulário, todo fornecedor
+   * criado pelo Painel nascia sem endereço e dependia da re-sincronização com a Receita para ganhar um.
+   */
+  describe('endereço no cadastro manual (RF019)', () => {
+    async function abrirCriacao(): Promise<void> {
+      renderTela();
+      await screen.findAllByTestId('item-fornecedor');
+      fireEvent.click(screen.getByTestId('novo-fornecedor'));
+      await screen.findByTestId('modal-fornecedor');
+      fireEvent.change(screen.getByTestId('campo-cnpj'), { target: { value: '11.222.333/0001-81' } });
+      fireEvent.change(screen.getByTestId('campo-razao-social'), { target: { value: 'Malharia Maria Ltda' } });
+      fireEvent.change(screen.getByTestId('campo-porte'), { target: { value: 'ME' } });
+      fireEvent.change(screen.getByTestId('campo-cnae-principal'), { target: { value: '1412-6/01' } });
+    }
+
+    it('envia o endereço preenchido, com o CEP só em dígitos', async () => {
+      await abrirCriacao();
+      fireEvent.change(screen.getByTestId('campo-cep'), { target: { value: '69900-062' } });
+      fireEvent.change(screen.getByTestId('campo-logradouro'), { target: { value: 'Rua Benjamin Constant' } });
+      fireEvent.change(screen.getByTestId('campo-numero'), { target: { value: '100' } });
+      fireEvent.change(screen.getByTestId('campo-bairro'), { target: { value: 'Centro' } });
+      fireEvent.change(screen.getByTestId('campo-cidade'), { target: { value: 'Rio Branco' } });
+      fireEvent.change(screen.getByTestId('campo-uf'), { target: { value: 'AC' } });
+      fireEvent.submit(screen.getByTestId('form-criar'));
+
+      await waitFor(() => expect(criar).toHaveBeenCalledWith(expect.objectContaining({
+        endereco: expect.objectContaining({
+          logradouro: 'Rua Benjamin Constant', numero: '100', bairro: 'Centro',
+          cidade: 'Rio Branco', uf: 'AC', cep: '69900062',
+        }),
+      })));
+    });
+
+    it('endereço em branco NÃO é enviado — objeto vazio confundiria a mescla da sincronização', async () => {
+      await abrirCriacao();
+      fireEvent.submit(screen.getByTestId('form-criar'));
+      await waitFor(() => expect(criar).toHaveBeenCalled());
+      expect(criar.mock.calls[0][0]).not.toHaveProperty('endereco');
+    });
   });
 
   it('o porte é um select com a opção MEI e cadastra como MEI', async () => {

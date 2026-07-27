@@ -523,11 +523,14 @@
         "cancelar": "Cancel",
         "salvar": "Save",
         "editar": "Edit",
-        "erroCriar": "Could not register. Check the tax ID and required fields."
+        "erroCriar": "Could not register. Check the tax ID and required fields.",
+        "enderecoTitulo": "Address",
+        "enderecoAjuda": "Optional — enter the ZIP code to fill in automatically."
       },
       "endereco": {
         "logradouro": "Street",
         "numero": "Number",
+        "complemento": "Address line 2",
         "bairro": "District",
         "cidade": "City",
         "uf": "State",

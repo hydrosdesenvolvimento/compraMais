@@ -106,14 +106,21 @@ export class GerirConta {
       await this.emit(fornecedorId, actor, 'erro', []);
       return { status: 'erro' }; // A1: dados atuais preservados, sem sobrescrever
     }
-    f.aplicarSincronizacao(
-      { razaoSocial: r.valor.razaoSocial, porte: r.valor.porte, cnaes: r.valor.cnaes.map((c) => ({ ...c, ativo: true })), situacao: r.valor.situacaoCadastral },
+    // `endereco` (RF019) segue junto: o gateway já o devolve, e antes ele era descartado aqui — um
+    // fornecedor cadastrado manualmente (sem endereço) continuava sem endereço após sincronizar.
+    // A política de mescla (preenche vazio, preserva o informado) vive no agregado.
+    const campos = f.aplicarSincronizacao(
+      {
+        razaoSocial: r.valor.razaoSocial, porte: r.valor.porte,
+        cnaes: r.valor.cnaes.map((c) => ({ ...c, ativo: true })), situacao: r.valor.situacaoCadastral,
+        ...(r.valor.endereco ? { endereco: { ...r.valor.endereco } } : {}),
+      },
       r.timestamp,
     );
     await this.fornecedores.salvar(f);
     // Exceção UC018: situação oficial não-ativa → sinaliza revisão da CPL (evento auditável).
     const status = f.precisaRevisaoCpl() ? 'revisao' : 'sucesso';
-    await this.emit(fornecedorId, actor, status, ['razaoSocial', 'porte', 'cnaes', 'situacao']);
+    await this.emit(fornecedorId, actor, status, campos);
     return { status, quando: r.timestamp, fonte: r.fonte };
   }
 
